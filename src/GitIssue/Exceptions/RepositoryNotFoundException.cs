@@ -3,12 +3,12 @@
 namespace GitIssue.Exceptions
 {
     /// <summary>
-    /// Exception thrown when an issue repository cannot be found
+    ///     Exception thrown when an issue repository cannot be found
     /// </summary>
     public class RepositoryNotFoundException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryNotFoundException"/> class
+        ///     Initializes a new instance of the <see cref="RepositoryNotFoundException" /> class
         /// </summary>
         /// <param name="message">the exception message</param>
         public RepositoryNotFoundException(string message) : base(message)
@@ -16,7 +16,7 @@ namespace GitIssue.Exceptions
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryNotFoundException"/> class
+        ///     Initializes a new instance of the <see cref="RepositoryNotFoundException" /> class
         /// </summary>
         /// <param name="message">the exception message</param>
         /// <param name="ex">the internal exception</param>

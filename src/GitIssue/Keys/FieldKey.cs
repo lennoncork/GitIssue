@@ -5,7 +5,7 @@ using GitIssue.Converters;
 namespace GitIssue.Keys
 {
     /// <summary>
-    /// The unique key of a issue field
+    ///     The unique key of a issue field
     /// </summary>
     [TypeConverter(typeof(FieldKeyTypeConverter))]
     public struct FieldKey : IEquatable<FieldKey>
@@ -18,19 +18,25 @@ namespace GitIssue.Keys
         }
 
         /// <summary>
-        /// Creates a new field key
+        ///     Creates a new field key
         /// </summary>
         /// <param name="key"></param>
         /// <returns>the new field key</returns>
-        public static FieldKey Create(string key) => new FieldKey(key);
-
-        /// <inheritdoc/>
-        public bool Equals(FieldKey other)
+        public static FieldKey Create(string key)
         {
-            return this.key == other.key;
+            return new FieldKey(key);
         }
 
-        /// <inheritdoc/>
-        public override string ToString() => key;
+        /// <inheritdoc />
+        public bool Equals(FieldKey other)
+        {
+            return key == other.key;
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return key;
+        }
     }
 }

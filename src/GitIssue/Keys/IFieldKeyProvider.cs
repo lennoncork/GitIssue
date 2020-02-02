@@ -1,12 +1,12 @@
 ﻿namespace GitIssue.Keys
 {
     /// <summary>
-    /// Interface for field key provider
+    ///     Interface for field key provider
     /// </summary>
     public interface IFieldKeyProvider
     {
         /// <summary>
-        /// Creates a new key from the specified string
+        ///     Creates a new key from the specified string
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>

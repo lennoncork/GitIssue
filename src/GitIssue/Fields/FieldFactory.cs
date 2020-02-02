@@ -4,17 +4,17 @@ using GitIssue.Keys;
 namespace GitIssue.Fields
 {
     /// <summary>
-    /// Factory class that creates new fields
+    ///     Factory class that creates new fields
     /// </summary>
     public class FieldFactory : IFieldFactory
     {
+        private readonly Func<IField> callback;
+        private readonly FieldInfo info;
         private readonly Issue issue;
         private readonly FieldKey key;
-        private readonly FieldInfo info;
-        private readonly Func<IField> callback;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FieldFactory"/> class
+        ///     Initializes a new instance of the <see cref="FieldFactory" /> class
         /// </summary>
         /// <param name="issue">the issue</param>
         /// <param name="key">the field key</param>
@@ -26,24 +26,18 @@ namespace GitIssue.Fields
             this.key = key;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void WithValue<T>(T value)
         {
-            IField field = this.callback?.Invoke();
-            if (field is ValueField<T> valueField)
-            {
-                valueField.Value = value;
-            }
+            var field = callback?.Invoke();
+            if (field is ValueField<T> valueField) valueField.Value = value;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public void WithArray<T>(T[] values)
         {
-            IField field = this.callback?.Invoke();
-            if (field is ArrayField<T> arrayField)
-            {
-                arrayField.Values = values;
-            }
+            var field = callback?.Invoke();
+            if (field is ArrayField<T> arrayField) arrayField.Values = values;
         }
     }
 }

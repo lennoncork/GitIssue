@@ -1,18 +1,17 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Fields;
-using GitIssue.Issues;
 using GitIssue.Keys;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Json
 {
     /// <summary>
-    /// Field reader for Json
+    ///     Field reader for Json
     /// </summary>
     public class JsonFieldReader : FieldReader
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override bool CanCreateField(FieldInfo info)
         {
             if (IsValueField(info) || IsArrayField(info))
@@ -20,7 +19,7 @@ namespace GitIssue.Json
             return false;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override bool CanReadField(FieldInfo info)
         {
             if (IsValueField(info) || IsArrayField(info))
@@ -28,55 +27,53 @@ namespace GitIssue.Json
             return false;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override IField CreateField<T>(Issue issue, FieldKey key, FieldInfo info)
         {
-            if (IsValueField(info))
-            {
-                return new JsonValueField<T>(key, default(T));
-            }
-            if (IsArrayField(info))
-            {
-                return new JsonArrayField<T>(key, new T[0]);
-            }
+            if (IsValueField(info)) return new JsonValueField<T>(key, default);
+            if (IsArrayField(info)) return new JsonArrayField<T>(key, new T[0]);
             return null;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override async Task<IField> ReadFieldAsync<T>(Issue issue, FieldKey key, FieldInfo info)
         {
             if (issue is IJsonIssue jsonIssue)
             {
-                JObject json = await JsonIssueExtensions.ReadJsonFieldsAsync(jsonIssue.Json);
-                if (json.TryGetValue(key.ToString(), out JToken token))
+                var json = await JsonIssueExtensions.ReadJsonFieldsAsync(jsonIssue.Json);
+                if (json.TryGetValue(key.ToString(), out var token))
                 {
                     if (IsValueField(info) && token is JValue jValue)
-                    {
-                        if (this.TryGetValue(jValue, out T value))
-                        {
+                        if (TryGetValue(jValue, out T value))
                             return new JsonValueField<T>(key, value);
-                        }
-                    }
                     if (IsArrayField(info) && token is JArray jArray)
                     {
-                        T[] values = jArray
+                        var values = jArray
                             .Select(t => t as JValue)
                             .Select(t => t?.Value)
                             .Where(t => t?.GetType() == typeof(T))
-                            .Select(t => (T)t)
+                            .Select(t => (T) t)
                             .ToArray();
 
                         return new JsonArrayField<T>(key, values);
                     }
                 }
-                return this.CreateField<T>(issue, key, info);
+
+                return CreateField<T>(issue, key, info);
             }
+
             return null;
         }
 
-        private static bool IsValueField(FieldInfo info) => info.FieldType.Type == typeof(JsonValueField);
+        private static bool IsValueField(FieldInfo info)
+        {
+            return info.FieldType.Type == typeof(JsonValueField);
+        }
 
-        private static bool IsArrayField(FieldInfo info) => info.FieldType.Type == typeof(JsonArrayField);
+        private static bool IsArrayField(FieldInfo info)
+        {
+            return info.FieldType.Type == typeof(JsonArrayField);
+        }
 
         private bool TryGetValue<T>(JValue jValue, out T value)
         {
@@ -85,7 +82,8 @@ namespace GitIssue.Json
                 value = result;
                 return true;
             }
-            value = default(T);
+
+            value = default;
             return false;
         }
     }

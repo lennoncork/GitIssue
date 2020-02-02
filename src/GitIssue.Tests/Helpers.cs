@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
 
 namespace GitIssue.Tests
 {
     public static class Helpers
     {
-        private static Random random = new Random();
+        private static readonly Random random = new Random();
 
         /// <summary>
-        /// Gets a random unique string, max length 64
+        ///     Gets a random unique string, max length 64
         /// </summary>
         /// <param name="length"></param>
         /// <returns></returns>
@@ -24,98 +22,119 @@ namespace GitIssue.Tests
         }
 
         /// <summary>
-        /// Gets the test directory
+        ///     Gets the test directory
         /// </summary>
         /// <returns></returns>
-        public static string GetTestDirectory() => Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData");
+        public static string GetTestDirectory()
+        {
+            return Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData");
+        }
 
         /// <summary>
-        /// Gets the path of a new temp file, using the default temp directory
+        ///     Gets the path of a new temp file, using the default temp directory
         /// </summary>
         /// <returns></returns>
-        public static string GetTempFile() => GetTempFile(GetTestDirectory());
+        public static string GetTempFile()
+        {
+            return GetTempFile(GetTestDirectory());
+        }
 
         /// <summary>
-        /// Gets the path of a new temp file
+        ///     Gets the path of a new temp file
         /// </summary>
         /// <param name="path">the parent path for the file</param>
         /// <returns></returns>
-        public static string GetTempFile(string path) => Path.Combine(path, $"{GetRandomString()}.txt");
+        public static string GetTempFile(string path)
+        {
+            return Path.Combine(path, $"{GetRandomString()}.txt");
+        }
 
         /// <summary>
-        /// Creates a new Temporary File, using the default temp directory
+        ///     Creates a new Temporary File, using the default temp directory
         /// </summary>
         /// <returns></returns>
-        public static string CreateTempFile() => CreateTempFile(GetTestDirectory());
+        public static string CreateTempFile()
+        {
+            return CreateTempFile(GetTestDirectory());
+        }
 
         /// <summary>
-        /// Creates a new Temporary File
+        ///     Creates a new Temporary File
         /// </summary>
         /// <param name="path">the parent path for the directory</param>
         /// <returns></returns>
         public static string CreateTempFile(string path)
         {
-            string file = GetTempFile(path);
+            var file = GetTempFile(path);
             File.Create(file).Dispose();
             return file;
         }
 
         /// <summary>
-        /// Gets the path of a new temp directory, using the default temp directory
+        ///     Gets the path of a new temp directory, using the default temp directory
         /// </summary>
         /// <returns></returns>
-        public static string GetTempDirectory() => GetTempDirectory(GetTestDirectory());
+        public static string GetTempDirectory()
+        {
+            return GetTempDirectory(GetTestDirectory());
+        }
 
         /// <summary>
-        /// Gets the path of a new temp directory
+        ///     Gets the path of a new temp directory
         /// </summary>
         /// <param name="path">the parent path for the directory</param>
         /// <returns></returns>
-        public static string GetTempDirectory(string path) => Path.Combine(path, GetRandomString());
+        public static string GetTempDirectory(string path)
+        {
+            return Path.Combine(path, GetRandomString());
+        }
 
         /// <summary>
-        /// Creates a new temporary directory, using the default temp directory
+        ///     Creates a new temporary directory, using the default temp directory
         /// </summary>
         /// <returns></returns>
-        public static string CreateTempDirectory() => CreateTempDirectory(GetTestDirectory());
+        public static string CreateTempDirectory()
+        {
+            return CreateTempDirectory(GetTestDirectory());
+        }
 
         /// <summary>
-        /// Creates a new temporary directory
+        ///     Creates a new temporary directory
         /// </summary>
         /// <param name="path">the parent path for the directory</param>
         /// <returns></returns>
         public static string CreateTempDirectory(string path)
         {
-            string directory = GetTempDirectory(path);
+            var directory = GetTempDirectory(path);
             Directory.CreateDirectory(directory);
             return directory;
         }
 
         /// <summary>
-        /// Temporarily sets the current directory
+        ///     Temporarily sets the current directory
         /// </summary>
         public class EnvironmentCurrentDirectory : IDisposable
         {
             private readonly string environment;
 
             /// <summary>
-            /// Creates a new instance of the <see cref="EnvironmentCurrentDirectory"/> class
+            ///     Creates a new instance of the <see cref="EnvironmentCurrentDirectory" /> class
             /// </summary>
             /// <param name="directory"></param>
             public EnvironmentCurrentDirectory(string directory)
             {
                 if (Directory.Exists(directory))
                 {
-                    this.environment = Environment.CurrentDirectory;
+                    environment = Environment.CurrentDirectory;
                     Environment.CurrentDirectory = directory;
                 }
             }
 
-            /// <inheritdoc cref="IDisposable"/>
+            /// <inheritdoc cref="IDisposable" />
             public void Dispose()
             {
-                if(this.environment != null)
-                    Environment.CurrentDirectory = this.environment;
+                if (environment != null)
+                    Environment.CurrentDirectory = environment;
             }
         }
     }

@@ -1,44 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters;
 using System.Threading.Tasks;
-using GitIssue.Exceptions;
 using GitIssue.Fields;
 using GitIssue.Json;
 using GitIssue.Keys;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues
 {
     /// <summary>
-    /// Represents an issue saved to disk
+    ///     Represents an issue saved to disk
     /// </summary>
     public class FileIssue : JsonIssue
     {
         /// <summary>
-        /// Initializes a new instance of a <see cref="FileIssue"/> class
+        ///     Initializes a new instance of a <see cref="FileIssue" /> class
         /// </summary>
         /// <param name="issueRoot"></param>
         public FileIssue(IssueRoot issueRoot) : base(issueRoot)
         {
-           
         }
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="FileIssue"/> class
+        ///     Initializes a new instance of a <see cref="FileIssue" /> class
         /// </summary>
         /// <param name="issueRoot"></param>
         /// <param name="fields"></param>
         public FileIssue(IssueRoot issueRoot, IDictionary<FieldKey, FieldInfo> fields) : base(issueRoot, fields)
         {
-            
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override async Task<bool> SaveAsync()
         {
             // Save the json file
@@ -46,19 +37,17 @@ namespace GitIssue.Issues
 
             // Save each modified field
             foreach (var field in Values)
-            {
-                if (this.modifiedFields.Contains(field.Key))
+                if (modifiedFields.Contains(field.Key))
                 {
                     await field.SaveAsync();
-                    this.modifiedFields.Remove(field.Key);
+                    modifiedFields.Remove(field.Key);
                 }
-            }
 
             return true;
         }
 
         /// <summary>
-        /// Reads an issue from disk
+        ///     Reads an issue from disk
         /// </summary>
         /// <param name="issueRoot">the issue root</param>
         /// <param name="fields">the expected fields</param>
@@ -68,7 +57,7 @@ namespace GitIssue.Issues
             if (Directory.Exists(issueRoot.IssuePath) == false)
                 return null;
 
-            FileIssue issue = new FileIssue(issueRoot, fields);
+            var issue = new FileIssue(issueRoot, fields);
             foreach (var key in fields.Keys)
             {
                 var valueField = await fields[key].ReadFieldAsync(issue, key);
@@ -79,7 +68,7 @@ namespace GitIssue.Issues
         }
 
         /// <summary>
-        /// Deletes an issue and all it's fields from disk. 
+        ///     Deletes an issue and all it's fields from disk.
         /// </summary>
         /// <param name="issueRoot"></param>
         /// <returns></returns>
@@ -87,7 +76,7 @@ namespace GitIssue.Issues
         {
             await JsonIssue.DeleteAsync(issueRoot);
 
-            if(Directory.Exists(issueRoot.IssuePath))
+            if (Directory.Exists(issueRoot.IssuePath))
                 Directory.Delete(issueRoot.IssuePath, true);
         }
     }

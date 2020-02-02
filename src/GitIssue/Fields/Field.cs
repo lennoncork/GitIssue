@@ -1,29 +1,28 @@
 ﻿using System.Threading.Tasks;
 using GitIssue.Keys;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Fields
 {
     /// <summary>
-    /// Abstract field class
+    ///     Abstract field class
     /// </summary>
     public abstract class Field : IField
     {
         /// <summary>
-        /// Creates a new instance of the <see cref="Field"/> class
+        ///     Creates a new instance of the <see cref="Field" /> class
         /// </summary>
         /// <param name="key">the field key</param>
         protected Field(FieldKey key)
         {
-            this.Key = key;
+            Key = key;
         }
 
         /// <summary>
-        /// Gets the key for the field
+        ///     Gets the key for the field
         /// </summary>
         public FieldKey Key { get; protected set; }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public abstract Task<bool> SaveAsync();
     }
 }

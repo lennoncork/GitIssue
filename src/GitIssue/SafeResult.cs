@@ -3,86 +3,75 @@
 namespace GitIssue
 {
     /// <summary>
-    /// Helper class for dealing with tasks
+    ///     Helper class for dealing with tasks
     /// </summary>
     public class SafeResult
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SafeResult"/> class
+        ///     Initializes a new instance of the <see cref="SafeResult" /> class
         /// </summary>
         /// <param name="success">the success of the task</param>
         public SafeResult(bool success = false)
         {
-            this.IsSuccess = success;
+            IsSuccess = success;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SafeResult"/> class
+        ///     Initializes a new instance of the <see cref="SafeResult" /> class
         /// </summary>
         /// <param name="exception">the exception thrown</param>
-        public SafeResult(Exception exception) : this(false)
+        public SafeResult(Exception exception) : this()
         {
-            this.Exception = exception;
+            Exception = exception;
         }
 
         /// <summary>
-        /// Returns true if the command is a success
+        ///     Returns true if the command is a success
         /// </summary>
-        public bool IsSuccess { get; set; } = false;
+        public bool IsSuccess { get; set; }
 
         /// <summary>
-        /// Captures the exception if failed
+        ///     Captures the exception if failed
         /// </summary>
-        public Exception Exception { get; set; } = null;
+        public Exception Exception { get; set; }
 
         /// <summary>
-        /// Returns a successful command
+        ///     Returns a successful command
         /// </summary>
         /// <param name="result">the result of the task</param>
         /// <returns></returns>
-        public static SafeResult Success() => new SafeResult(true);
+        public static SafeResult Success()
+        {
+            return new SafeResult(true);
+        }
 
         /// <summary>
-        /// Returns a failed command
+        ///     Returns a failed command
         /// </summary>
         /// <returns></returns>
-        public static SafeResult Fail() => new SafeResult();
+        public static SafeResult Fail()
+        {
+            return new SafeResult();
+        }
 
         /// <summary>
-        /// Returns a failed command from an exception
+        ///     Returns a failed command from an exception
         /// </summary>
         /// <param name="e"></param>
         /// <returns></returns>
-        public static SafeResult Fail(Exception e) => new SafeResult(e);
+        public static SafeResult Fail(Exception e)
+        {
+            return new SafeResult(e);
+        }
     }
 
     /// <summary>
-    /// Helper class for dealing with tasks
+    ///     Helper class for dealing with tasks
     /// </summary>
     public class SafeResult<T> : SafeResult
     {
         /// <summary>
-        /// Returns a failed command
-        /// </summary>
-        /// <returns></returns>
-        public new static SafeResult<T> Fail() => new SafeResult<T>();
-
-        /// <summary>
-        /// Returns a failed command from an exception
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        public new static SafeResult<T> Fail(Exception e) => new SafeResult<T>(e);
-
-        /// <summary>
-        /// Returns a successful command with a response
-        /// </summary>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static SafeResult<T> Success(T result) => new SafeResult<T>(result);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SafeResult"/> class
+        ///     Initializes a new instance of the <see cref="SafeResult" /> class
         /// </summary>
         /// <param name="exception"></param>
         public SafeResult(Exception exception) : base(exception)
@@ -90,39 +79,69 @@ namespace GitIssue
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SafeResult"/> class
+        ///     Initializes a new instance of the <see cref="SafeResult" /> class
         /// </summary>
         public SafeResult(bool success = false) : base(success)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SafeResult"/> class
+        ///     Initializes a new instance of the <see cref="SafeResult" /> class
         /// </summary>
         /// <param name="result"></param>
         public SafeResult(T result) : base(true)
         {
-            this.Result = result;
+            Result = result;
         }
 
         /// <summary>
-        /// The task result
+        ///     The task result
         /// </summary>
         public T Result { get; set; }
 
         /// <summary>
-        /// Checks it a result was returned from the task
+        ///     Returns a failed command
+        /// </summary>
+        /// <returns></returns>
+        public new static SafeResult<T> Fail()
+        {
+            return new SafeResult<T>();
+        }
+
+        /// <summary>
+        ///     Returns a failed command from an exception
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public new static SafeResult<T> Fail(Exception e)
+        {
+            return new SafeResult<T>(e);
+        }
+
+        /// <summary>
+        ///     Returns a successful command with a response
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static SafeResult<T> Success(T result)
+        {
+            return new SafeResult<T>(result);
+        }
+
+        /// <summary>
+        ///     Checks it a result was returned from the task
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
         public bool HasResult(out T result)
         {
-            if (this.IsSuccess)
+            if (IsSuccess)
             {
-                result = this.Result;
+                result = Result;
                 return true;
             }
-            result = default(T);
+
+            result = default;
             return false;
         }
     }

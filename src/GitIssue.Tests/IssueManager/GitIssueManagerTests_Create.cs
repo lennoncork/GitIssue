@@ -13,8 +13,8 @@ namespace GitIssue.Tests.IssueManager
             [TestCase("New Issue", "This Is A New Issue")]
             public async Task CreatesNewIssue(string title, string description)
             {
-                this.Initialize(this.TestDirectory);
-                var create = await this.Sut
+                Initialize(TestDirectory);
+                var create = await Sut
                     .CreateAsync(title, description)
                     .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
@@ -23,14 +23,20 @@ namespace GitIssue.Tests.IssueManager
             }
 
             [Test]
+            public async Task CreatesCommit()
+            {
+                throw new NotImplementedException();
+            }
+
+            [Test]
             public async Task GeneratesUniqueId()
             {
-                this.Initialize(this.TestDirectory);
-                var create1 = await this.Sut
+                Initialize(TestDirectory);
+                var create1 = await Sut
                     .CreateAsync(nameof(CreatesNewIssue), string.Empty)
                     .WithSafeResultAsync();
                 Assert.IsTrue(create1.IsSuccess);
-                var create2 = await this.Sut
+                var create2 = await Sut
                     .CreateAsync(nameof(CreatesNewIssue), string.Empty)
                     .WithSafeResultAsync();
                 Assert.IsTrue(create2.IsSuccess);
@@ -40,8 +46,8 @@ namespace GitIssue.Tests.IssueManager
             [Test]
             public async Task SetsCreatedDate()
             {
-                this.Initialize(this.TestDirectory);
-                var create = await this.Sut
+                Initialize(TestDirectory);
+                var create = await Sut
                     .CreateAsync(nameof(SetsCreatedDate), string.Empty)
                     .WithSafeResultAsync();
                 Assert.That(create.Result.Created, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
@@ -50,17 +56,11 @@ namespace GitIssue.Tests.IssueManager
             [Test]
             public async Task SetsUpdatedDate()
             {
-                this.Initialize(this.TestDirectory);
-                var create = await this.Sut
+                Initialize(TestDirectory);
+                var create = await Sut
                     .CreateAsync(nameof(SetsUpdatedDate), string.Empty)
                     .WithSafeResultAsync();
                 Assert.That(create.Result.Updated, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
-            }
-
-            [Test]
-            public async Task CreatesCommit()
-            {
-                throw new NotImplementedException();
             }
         }
     }

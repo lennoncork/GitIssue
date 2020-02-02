@@ -4,9 +4,8 @@ namespace GitIssue.Keys
 {
     public interface IIssueKeyProvider
     {
-        bool TryGetKey(string value, out IssueKey key);
-
         IEnumerable<IssueKey> Keys { get; }
+        bool TryGetKey(string value, out IssueKey key);
 
         IssueKey Next();
     }

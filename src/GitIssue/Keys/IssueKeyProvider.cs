@@ -4,13 +4,13 @@ namespace GitIssue.Keys
 {
     public abstract class IssueKeyProvider : IIssueKeyProvider
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public abstract IEnumerable<IssueKey> Keys { get; }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public abstract IssueKey Next();
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public abstract bool TryGetKey(string value, out IssueKey key);
     }
 }

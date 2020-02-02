@@ -14,15 +14,15 @@ namespace GitIssue.Tests.IssueManager
             [Test]
             public async Task ExportsFileToJson()
             {
-                this.Initialize(this.TestDirectory);
-                var issue1 = await this.Sut
+                Initialize(TestDirectory);
+                var issue1 = await Sut
                     .CreateAsync(nameof(ExportsFileToJson))
                     .WithSafeResultAsync();
-                var issue2 = await this.Sut
+                var issue2 = await Sut
                     .CreateAsync(nameof(ExportsFileToJson))
                     .WithSafeResultAsync();
-                string path = Path.Combine(this.TestDirectory, "export.json");
-                await this.Sut.ExportAsJsonAsync(path);
+                var path = Path.Combine(TestDirectory, "export.json");
+                await Sut.ExportAsJsonAsync(path);
                 Assert.That(File.Exists(path), Is.True);
             }
         }

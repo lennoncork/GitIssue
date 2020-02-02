@@ -14,12 +14,12 @@ using FieldInfo = GitIssue.Fields.FieldInfo;
 namespace GitIssue.Issues
 {
     /// <summary>
-    /// Provides an issue field for an array of values persisted to disk
+    ///     Provides an issue field for an array of values persisted to disk
     /// </summary>
     public abstract class FileArrayField
     {
         /// <summary>
-        /// Asynchronously reads the field from disk
+        ///     Asynchronously reads the field from disk
         /// </summary>
         /// <param name="issueRoot">the issue root</param>
         /// <param name="key">the field key</param>
@@ -29,17 +29,18 @@ namespace GitIssue.Issues
         {
             try
             {
-                Type generic = typeof(FileArrayField<>);
-                Type specific = generic.MakeGenericType((Type)info.DataType);
-                MethodInfo read = specific.GetMethod(nameof(ReadAsync), BindingFlags.Public | BindingFlags.Static);
+                var generic = typeof(FileArrayField<>);
+                var specific = generic.MakeGenericType((Type) info.DataType);
+                var read = specific.GetMethod(nameof(ReadAsync), BindingFlags.Public | BindingFlags.Static);
                 if (read != null)
                 {
-                    object[] args = { issueRoot, key, info };
-                    Task task = (Task)read.Invoke(null, args);
+                    object[] args = {issueRoot, key, info};
+                    var task = (Task) read.Invoke(null, args);
                     await task;
                     var result = task.GetType().GetProperty("Result")?.GetValue(task);
                     return result as IField;
                 }
+
                 return null;
             }
             catch (Exception e)
@@ -50,14 +51,14 @@ namespace GitIssue.Issues
     }
 
     /// <summary>
-    /// Provides an issue field for an array of values persisted to disk
+    ///     Provides an issue field for an array of values persisted to disk
     /// </summary>
     public class FileArrayField<T> : ArrayField<T>, IJsonField
     {
         private readonly IssueRoot issueRoot;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileArrayField{T}"/> class
+        ///     Initializes a new instance of the <see cref="FileArrayField{T}" /> class
         /// </summary>
         /// <param name="issueRoot"></param>
         /// <param name="key"></param>
@@ -69,36 +70,43 @@ namespace GitIssue.Issues
         }
 
         /// <summary>
-        /// Gets the directory used to save the fields values
+        ///     Gets the directory used to save the fields values
         /// </summary>
-        public string DirectoryPath => Path.Combine(this.issueRoot.IssuePath, this.Key.ToString());
+        public string DirectoryPath => Path.Combine(issueRoot.IssuePath, Key.ToString());
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override async Task<bool> SaveAsync()
         {
             try
             {
-                if (Directory.Exists(this.DirectoryPath) == false)
-                    Directory.CreateDirectory(this.DirectoryPath);
+                if (Directory.Exists(DirectoryPath) == false)
+                    Directory.CreateDirectory(DirectoryPath);
 
-                int count = 0;
-                foreach (var value in this.Values)
+                var count = 0;
+                foreach (var value in Values)
                 {
-                    string file = Path.Combine(this.DirectoryPath, count.ToString());
-                    await using FileStream stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                    await using StreamWriter writer = new StreamWriter(stream);
+                    var file = Path.Combine(DirectoryPath, count.ToString());
+                    await using var stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
+                    await using var writer = new StreamWriter(stream);
                     await writer.WriteAsync(value.ToString());
                 }
+
                 return true;
             }
             catch (Exception e)
             {
-                throw new ArgumentException($"Failed to save field {this.Key} on issue {this.issueRoot.Key}", e);
+                throw new ArgumentException($"Failed to save field {Key} on issue {issueRoot.Key}", e);
             }
         }
 
+        /// <inheritdoc />
+        public JToken ToJson()
+        {
+            return new JArray(Values);
+        }
+
         /// <summary>
-        /// Asynchronously reads the field from disk
+        ///     Asynchronously reads the field from disk
         /// </summary>
         /// <param name="issueRoot">the issue root</param>
         /// <param name="key">the field key</param>
@@ -108,20 +116,21 @@ namespace GitIssue.Issues
         {
             try
             {
-                string directory = Path.Combine(issueRoot.IssuePath, key.ToString());
+                var directory = Path.Combine(issueRoot.IssuePath, key.ToString());
 
                 if (Directory.Exists(directory) == false)
-                    return new FileArrayField<T>(issueRoot, key, new T[] {});
+                    return new FileArrayField<T>(issueRoot, key, new T[] { });
 
-                List<T> values = new List<T>();
-                foreach (var fieldFile in System.IO.Directory.EnumerateFiles(directory))
+                var values = new List<T>();
+                foreach (var fieldFile in Directory.EnumerateFiles(directory))
                 {
-                    string content = await File.ReadAllTextAsync(fieldFile);
-                    if (TryParse(content, out T result))
+                    var content = await File.ReadAllTextAsync(fieldFile);
+                    if (TryParse(content, out var result))
                     {
                         values.Add(result);
                         continue;
                     }
+
                     throw new SerializationException($"Unable to convert field content to type {typeof(T)}");
                 }
 
@@ -134,24 +143,22 @@ namespace GitIssue.Issues
         }
 
         /// <summary>
-        /// Tries to parse the string input to the output value
+        ///     Tries to parse the string input to the output value
         /// </summary>
         /// <param name="input">the input string</param>
         /// <param name="value">the output value</param>
         /// <returns></returns>
         internal static bool TryParse(string input, out T value)
         {
-            TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
+            var converter = TypeDescriptor.GetConverter(typeof(T));
             if (converter.CanConvertFrom(typeof(string)))
             {
-                value = (T)converter.ConvertFrom(input);
+                value = (T) converter.ConvertFrom(input);
                 return true;
             }
-            value = default(T);
+
+            value = default;
             return false;
         }
-
-        /// <inheritdoc/>
-        public JToken ToJson() => new JArray(this.Values);
     }
 }

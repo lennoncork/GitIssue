@@ -1,7 +1,7 @@
 <Project>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileFullPath)" Link="Properties\$(MSBuildThisFile)"/>
+    <None Include="$(MSBuildThisFileFullPath)" Link="Properties\$(MSBuildThisFile)" />
   </ItemGroup>
-  
+
 </Project>

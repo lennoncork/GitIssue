@@ -1,5 +1,4 @@
-﻿using GitIssue.Fields;
-using GitIssue.Keys;
+﻿using GitIssue.Keys;
 
 namespace GitIssue.Issues
 {

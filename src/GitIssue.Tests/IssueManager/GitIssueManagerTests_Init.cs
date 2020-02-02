@@ -11,26 +11,26 @@ namespace GitIssue.Tests.IssueManager
         public class Init : GitIssueManagerTests
         {
             [Test]
-            public void CreatesIssueFolder()
+            public void CreatesConfigFile()
             {
-                Repository.Init(this.TestDirectory);
-                GitIssue.IssueManager.Init(this.TestDirectory);
-                Assert.That(this.TestDirectory, Is.Not.Empty);
-                Assert.IsTrue(Directory.Exists(this.IssueDirectory));
-                Assert.IsTrue(Directory.Exists(this.GitDirectory));
+                CreatesIssueFolder();
+                Assert.IsTrue(File.Exists(ConfigFile));
             }
 
             [Test]
-            public void CreatesConfigFile()
+            public void CreatesIssueFolder()
             {
-                this.CreatesIssueFolder();
-                Assert.IsTrue(File.Exists(this.ConfigFile));
+                Repository.Init(TestDirectory);
+                GitIssue.IssueManager.Init(TestDirectory);
+                Assert.That(TestDirectory, Is.Not.Empty);
+                Assert.IsTrue(Directory.Exists(IssueDirectory));
+                Assert.IsTrue(Directory.Exists(GitDirectory));
             }
 
             [Test]
             public void FailsIfNotAGitRepository()
             {
-                Assert.Throws<RepositoryNotFoundException>(() => { GitIssue.IssueManager.Init(this.TestDirectory); });
+                Assert.Throws<RepositoryNotFoundException>(() => { GitIssue.IssueManager.Init(TestDirectory); });
             }
         }
     }

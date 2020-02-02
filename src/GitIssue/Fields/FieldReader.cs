@@ -1,30 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using GitIssue.Issues;
-using GitIssue.Json;
 using GitIssue.Keys;
 
 namespace GitIssue.Fields
 {
     /// <summary>
-    /// 
     /// </summary>
     public abstract class FieldReader : IFieldReader
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public abstract bool CanCreateField(FieldInfo info);
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public abstract bool CanReadField(FieldInfo info);
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public IField CreateField(Issue issue, FieldKey key, FieldInfo info)
         {
-            var method = this.GetType().GetMethods()
+            var method = GetType().GetMethods()
                 .Where(m => m.IsPublic)
                 .Where(m => m.Name == nameof(CreateField))
                 .Where(m => m.IsGenericMethodDefinition)
@@ -33,30 +26,30 @@ namespace GitIssue.Fields
 
             if (method != null)
             {
-                object[] args = { issue, key, info };
-                return (IField)method.Invoke(this, args);
+                object[] args = {issue, key, info};
+                return (IField) method.Invoke(this, args);
             }
 
             return null;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public abstract IField CreateField<T>(Issue issue, FieldKey key, FieldInfo info);
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public async Task<IField> ReadFieldAsync(Issue issue, FieldKey key, FieldInfo info)
         {
-            var method = this.GetType().GetMethods()
+            var method = GetType().GetMethods()
                 .Where(m => m.IsPublic)
                 .Where(m => m.Name == nameof(ReadFieldAsync))
                 .Where(m => m.IsGenericMethodDefinition)
                 .Select(m => m.MakeGenericMethod(info.DataType.Type))
                 .FirstOrDefault();
-            
+
             if (method != null)
             {
-                object[] args = { issue, key, info };
-                Task task = (Task)method.Invoke(this, args);
+                object[] args = {issue, key, info};
+                var task = (Task) method.Invoke(this, args);
                 await task;
                 var result = task.GetType().GetProperty("Result")?.GetValue(task);
                 return result as IField;
@@ -65,7 +58,7 @@ namespace GitIssue.Fields
             return null;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public abstract Task<IField> ReadFieldAsync<T>(Issue issue, FieldKey key, FieldInfo info);
     }
 }

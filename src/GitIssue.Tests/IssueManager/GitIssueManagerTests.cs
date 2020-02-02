@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using LibGit2Sharp;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IssueManager
@@ -6,46 +7,40 @@ namespace GitIssue.Tests.IssueManager
     [TestFixture]
     public partial class GitIssueManagerTests
     {
+        [SetUp]
+        public void Setup()
+        {
+            TestDirectory = Helpers.GetTempDirectory();
+            if (Directory.Exists(TestDirectory) == false) Directory.CreateDirectory(TestDirectory);
+        }
+
         protected string TestDirectory;
 
-        protected string GitDirectory => Path.Combine(this.TestDirectory, Paths.GitFolderName);
+        protected string GitDirectory => Path.Combine(TestDirectory, Paths.GitFolderName);
 
-        protected string IssueDirectory => Path.Combine(this.TestDirectory, Paths.IssueRootFolderName);
+        protected string IssueDirectory => Path.Combine(TestDirectory, Paths.IssueRootFolderName);
 
-        protected string ConfigFile => Path.Combine(this.IssueDirectory, Paths.ConfigFileName);
+        protected string ConfigFile => Path.Combine(IssueDirectory, Paths.ConfigFileName);
 
         protected GitIssue.IssueManager Sut;
 
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
-            this.TestDirectory = Helpers.GetTestDirectory();
-            if (Directory.Exists(this.TestDirectory))
-            {
-                Directory.Delete(this.TestDirectory, true);
-            }
-            Directory.CreateDirectory(this.TestDirectory);
-        }
-
-        [SetUp]
-        public void Setup()
-        {
-            this.TestDirectory = Helpers.GetTempDirectory();
-            if (Directory.Exists(this.TestDirectory) == false)
-            {
-                Directory.CreateDirectory(this.TestDirectory);
-            }
+            TestDirectory = Helpers.GetTestDirectory();
+            if (Directory.Exists(TestDirectory)) Directory.Delete(TestDirectory, true);
+            Directory.CreateDirectory(TestDirectory);
         }
 
         public void Initialize(
             string directory,
-            bool initGit = true, 
+            bool initGit = true,
             bool initIssue = true,
             bool initSut = true)
         {
-            if(initGit) LibGit2Sharp.Repository.Init(directory);
-            if(initIssue) GitIssue.IssueManager.Init(directory);
-            if(initSut) this.Sut = new GitIssue.IssueManager(this.TestDirectory);
+            if (initGit) Repository.Init(directory);
+            if (initIssue) GitIssue.IssueManager.Init(directory);
+            if (initSut) Sut = new GitIssue.IssueManager(TestDirectory);
         }
 
         public void Initialize(
@@ -55,9 +50,9 @@ namespace GitIssue.Tests.IssueManager
             bool initIssue = true,
             bool initSut = true)
         {
-            if (initGit) LibGit2Sharp.Repository.Init(directory);
+            if (initGit) Repository.Init(directory);
             if (initIssue) GitIssue.IssueManager.Init(directory, name);
-            if (initSut) this.Sut = new GitIssue.IssueManager(this.TestDirectory, name);
+            if (initSut) Sut = new GitIssue.IssueManager(TestDirectory, name);
         }
     }
 }

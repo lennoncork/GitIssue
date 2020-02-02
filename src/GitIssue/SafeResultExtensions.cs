@@ -1,33 +1,35 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GitIssue
 {
     /// <summary>
-    /// Extension methods for safely getting the result of a task
+    ///     Extension methods for safely getting the result of a task
     /// </summary>
     public static class SafeResultExtensions
     {
         /// <summary>
-        /// Safely returns the result of a task
+        ///     Safely returns the result of a task
         /// </summary>
         /// <param name="task">the task to get the result from</param>
         /// <returns></returns>
-        public static SafeResult WithSafeResult(this Task task) =>
-            Task.Run(task.WithSafeResultAsync).Result;
+        public static SafeResult WithSafeResult(this Task task)
+        {
+            return Task.Run(task.WithSafeResultAsync).Result;
+        }
 
         /// <summary>
-        /// Safely returns the result of a task
+        ///     Safely returns the result of a task
         /// </summary>
         /// <param name="task">the task to get the result from</param>
         /// <returns></returns>
-        public static SafeResult<T> WithSafeResult<T>(this Task<T> task) => 
-            Task.Run(task.WithSafeResultAsync<T>).Result;
+        public static SafeResult<T> WithSafeResult<T>(this Task<T> task)
+        {
+            return Task.Run(task.WithSafeResultAsync).Result;
+        }
 
         /// <summary>
-        /// Safely returns the result of a task
+        ///     Safely returns the result of a task
         /// </summary>
         /// <param name="task">the task to get the result from</param>
         /// <returns></returns>
@@ -45,7 +47,7 @@ namespace GitIssue
         }
 
         /// <summary>
-        /// Safely returns the result of a task
+        ///     Safely returns the result of a task
         /// </summary>
         /// <param name="task">the task to get the result from</param>
         /// <returns></returns>

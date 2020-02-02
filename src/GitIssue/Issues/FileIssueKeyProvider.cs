@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 using GitIssue.Keys;
 
 namespace GitIssue.Issues
@@ -18,20 +16,21 @@ namespace GitIssue.Issues
             this.root = root;
         }
 
-        /// <inheritdoc/>
-        public override IEnumerable<IssueKey> Keys => this.FindAll(this.root.IssuesPath);
+        /// <inheritdoc />
+        public override IEnumerable<IssueKey> Keys => FindAll(root.IssuesPath);
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override IssueKey Next()
         {
-            DateTime created = DateTime.Now;
-            string[] values = {
+            var created = DateTime.Now;
+            string[] values =
+            {
                 created.Year.ToString(),
                 created.Month.ToString(),
                 created.Day.ToString(),
-                this.GetUniqueId(8)
+                GetUniqueId(8)
             };
-            string key = string.Join(Path.DirectorySeparatorChar.ToString(), values);
+            var key = string.Join(Path.DirectorySeparatorChar.ToString(), values);
             return IssueKey.Create(key);
         }
 
@@ -39,8 +38,8 @@ namespace GitIssue.Issues
         {
             using (var sha = new SHA256Managed())
             {
-                byte[] checksum = sha.ComputeHash(Guid.NewGuid().ToByteArray());
-                string key = BitConverter.ToString(checksum)
+                var checksum = sha.ComputeHash(Guid.NewGuid().ToByteArray());
+                var key = BitConverter.ToString(checksum)
                     .Replace("-", "")
                     .ToUpperInvariant()
                     .Substring(0, length);
@@ -50,66 +49,59 @@ namespace GitIssue.Issues
 
         private IEnumerable<IssueKey> FindAll(string directory)
         {
-            List<IssueKey> keys = new List<IssueKey>();
-            
+            var keys = new List<IssueKey>();
+
             if (Directory.Exists(root.IssuesPath) == false)
                 return keys;
 
-            foreach (DirectoryInfo year in Directory.EnumerateDirectories(root.IssuesPath)
+            foreach (var year in Directory.EnumerateDirectories(root.IssuesPath)
+                .Select(d => new DirectoryInfo(d)))
+            foreach (var month in Directory.EnumerateDirectories(year.FullName)
+                .Select(d => new DirectoryInfo(d)))
+            foreach (var day in Directory.EnumerateDirectories(month.FullName)
+                .Select(d => new DirectoryInfo(d)))
+            foreach (var id in Directory.EnumerateDirectories(day.FullName)
                 .Select(d => new DirectoryInfo(d)))
             {
-                foreach (DirectoryInfo month in Directory.EnumerateDirectories(year.FullName)
-                    .Select(d => new DirectoryInfo(d)))
-                {
-                    foreach (DirectoryInfo day in Directory.EnumerateDirectories(month.FullName)
-                        .Select(d => new DirectoryInfo(d)))
-                    {
-                        foreach (DirectoryInfo id in Directory.EnumerateDirectories(day.FullName)
-                            .Select(d => new DirectoryInfo(d)))
-                        {
-                            string path = Path.Combine(year.Name, month.Name, day.Name, id.Name);
-                            if (this.TryGetKey(path, out IssueKey key))
-                                keys.Add(key);
-                        }
-                    }
-                }
+                var path = Path.Combine(year.Name, month.Name, day.Name, id.Name);
+                if (TryGetKey(path, out var key))
+                    keys.Add(key);
             }
-            
+
             return keys;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override bool TryGetKey(string value, out IssueKey key)
         {
-            string[] split = this.NormalizePath(value).Split(new []{'/', '\\'});
+            var split = NormalizePath(value).Split('/', '\\');
             if (split.Length == 4)
             {
-                string year = split[0];
-                string month = split[1];
-                string day = split[2];
-                string id = split[3];
+                var year = split[0];
+                var month = split[1];
+                var day = split[2];
+                var id = split[3];
 
-                if (DateTime.TryParse($"{year}/{month}/{day}", out DateTime time))
+                if (DateTime.TryParse($"{year}/{month}/{day}", out var time))
                 {
                     key = IssueKey.Create(value);
                     return true;
                 }
             }
+
             key = IssueKey.None();
             return false;
         }
 
         private string NormalizePath(string path)
         {
-            if (Directory.Exists(Path.Combine(this.root.IssuesPath, path)))
+            if (Directory.Exists(Path.Combine(root.IssuesPath, path)))
                 return path;
 
-            if (this.root.IssuesPath.Contains(Path.GetFullPath(path)))
-            {
-                return this.root.IssuesPath
-                    .Remove(0, this.root.IssuesPath.Length)
-                    .Trim(new[] {'/', '\\'});
-            }
+            if (root.IssuesPath.Contains(Path.GetFullPath(path)))
+                return root.IssuesPath
+                    .Remove(0, root.IssuesPath.Length)
+                    .Trim('/', '\\');
 
             return string.Empty;
         }

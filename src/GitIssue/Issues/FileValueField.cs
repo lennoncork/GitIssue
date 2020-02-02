@@ -1,20 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Json;
 using GitIssue.Keys;
 using Newtonsoft.Json.Linq;
-using FieldInfo = GitIssue.Fields.FieldInfo;
 
 namespace GitIssue.Issues
 {
-    
     /// <summary>
-    /// Provides an issue field for a single value persisted to disk
+    ///     Provides an issue field for a single value persisted to disk
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class FileValueField<T> : ValueField<T>, IJsonField
@@ -22,7 +19,7 @@ namespace GitIssue.Issues
         private readonly IssueRoot issueRoot;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileValueFieldReader"/> class
+        ///     Initializes a new instance of the <see cref="FileValueFieldReader" /> class
         /// </summary>
         /// <param name="issueRoot"></param>
         /// <param name="key"></param>
@@ -34,28 +31,34 @@ namespace GitIssue.Issues
         }
 
         /// <summary>
-        /// Gets the file used to save the fields value
+        ///     Gets the file used to save the fields value
         /// </summary>
-        public string FilePath => Path.Combine(this.issueRoot.IssuePath, this.Key.ToString());
+        public string FilePath => Path.Combine(issueRoot.IssuePath, Key.ToString());
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override async Task<bool> SaveAsync()
         {
             try
             {
-                await using FileStream stream = new FileStream(this.FilePath, FileMode.Create, FileAccess.ReadWrite);
-                await using StreamWriter writer = new StreamWriter(stream);
-                await writer.WriteAsync(this.Value.ToString());
+                await using var stream = new FileStream(FilePath, FileMode.Create, FileAccess.ReadWrite);
+                await using var writer = new StreamWriter(stream);
+                await writer.WriteAsync(Value.ToString());
                 return true;
             }
             catch (Exception e)
             {
-                throw new ArgumentException($"Failed to save field {this.Key} on issue {this.issueRoot.Key}", e);
+                throw new ArgumentException($"Failed to save field {Key} on issue {issueRoot.Key}", e);
             }
         }
 
+        /// <inheritdoc />
+        public JToken ToJson()
+        {
+            return new JValue(Value);
+        }
+
         /// <summary>
-        /// Asynchronously reads the field from disk
+        ///     Asynchronously reads the field from disk
         /// </summary>
         /// <param name="issueRoot">the issue root</param>
         /// <param name="key">the field key</param>
@@ -65,12 +68,9 @@ namespace GitIssue.Issues
         {
             try
             {
-                string fieldFile = Path.Combine(issueRoot.IssuePath, key.ToString());
-                string content = await System.IO.File.ReadAllTextAsync(fieldFile);
-                if (TryParse(content, out T result))
-                {
-                    return new FileValueField<T>(issueRoot, key, result);
-                }
+                var fieldFile = Path.Combine(issueRoot.IssuePath, key.ToString());
+                var content = await File.ReadAllTextAsync(fieldFile);
+                if (TryParse(content, out var result)) return new FileValueField<T>(issueRoot, key, result);
                 throw new SerializationException($"Unable to convert field content to type {typeof(T)}");
             }
             catch (Exception e)
@@ -80,24 +80,22 @@ namespace GitIssue.Issues
         }
 
         /// <summary>
-        /// Tries to parse the string input to the output value
+        ///     Tries to parse the string input to the output value
         /// </summary>
         /// <param name="input">the input string</param>
         /// <param name="value">the output value</param>
         /// <returns></returns>
         internal static bool TryParse(string input, out T value)
         {
-            TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
+            var converter = TypeDescriptor.GetConverter(typeof(T));
             if (converter.CanConvertFrom(typeof(string)))
             {
-                value = (T)converter.ConvertFrom(input);
+                value = (T) converter.ConvertFrom(input);
                 return true;
             }
-            value = default(T);
+
+            value = default;
             return false;
         }
-
-        /// <inheritdoc/>
-        public JToken ToJson() => new JValue(this.Value);
     }
 }

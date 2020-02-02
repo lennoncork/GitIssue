@@ -11,29 +11,29 @@ namespace GitIssue.Tests.IssueManager
         public class Delete : GitIssueManagerTests
         {
             [Test]
-            public async Task FailsIfIssueDoesNotExist()
-            {
-                this.Initialize(this.TestDirectory);
-                var delete = await this.Sut
-                    .DeleteAsync(this.Sut.KeyProvider.Next())
-                    .WithSafeResultAsync();
-                Assert.IsFalse(delete.IsSuccess);
-            }
-
-            [Test]
             public async Task DeletesExistingIssue()
             {
-                this.Initialize(this.TestDirectory);
-                var create = await this.Sut
+                Initialize(TestDirectory);
+                var create = await Sut
                     .CreateAsync(nameof(DeletesExistingIssue), string.Empty)
                     .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
-                Assert.IsTrue(Directory.Exists(Path.Combine(this.IssueDirectory, create.Result.Key.ToString())));
-                var delete = await this.Sut
+                Assert.IsTrue(Directory.Exists(Path.Combine(IssueDirectory, create.Result.Key.ToString())));
+                var delete = await Sut
                     .DeleteAsync(create.Result.Key)
                     .WithSafeResultAsync();
                 Assert.IsTrue(delete.IsSuccess);
-                Assert.IsFalse(Directory.Exists(Path.Combine(this.IssueDirectory, create.Result.Key.ToString())));
+                Assert.IsFalse(Directory.Exists(Path.Combine(IssueDirectory, create.Result.Key.ToString())));
+            }
+
+            [Test]
+            public async Task FailsIfIssueDoesNotExist()
+            {
+                Initialize(TestDirectory);
+                var delete = await Sut
+                    .DeleteAsync(Sut.KeyProvider.Next())
+                    .WithSafeResultAsync();
+                Assert.IsFalse(delete.IsSuccess);
             }
         }
     }

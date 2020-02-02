@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Keys;
 using Newtonsoft.Json.Linq;
@@ -10,26 +6,27 @@ using Newtonsoft.Json.Linq;
 namespace GitIssue.Json
 {
     /// <summary>
-    /// 
     /// </summary>
-    public class JsonValueField { }
+    public class JsonValueField
+    {
+    }
 
     /// <summary>
-    /// Issue field that serialized to json
+    ///     Issue field that serialized to json
     /// </summary>
     /// <typeparam name="T">the fields value type</typeparam>
     public class JsonValueField<T> : ValueField<T>, IJsonField
     {
         /// <summary>
-        /// Initialized a new instance of the <see cref="JsonValueField{T}"/> class
+        ///     Initialized a new instance of the <see cref="JsonValueField{T}" /> class
         /// </summary>
         /// <param name="key">the field key</param>
-        public JsonValueField(FieldKey key) : base(key, default(T))
+        public JsonValueField(FieldKey key) : base(key, default)
         {
         }
 
         /// <summary>
-        /// Initialized a new instance of the <see cref="JsonValueField{T}"/> class
+        ///     Initialized a new instance of the <see cref="JsonValueField{T}" /> class
         /// </summary>
         /// <param name="key">the field key</param>
         /// <param name="value">the field value</param>
@@ -37,10 +34,16 @@ namespace GitIssue.Json
         {
         }
 
-        /// <inheritdoc/>
-        public override Task<bool> SaveAsync() => Task.FromResult(true);
+        /// <inheritdoc />
+        public override Task<bool> SaveAsync()
+        {
+            return Task.FromResult(true);
+        }
 
-        /// <inheritdoc/>
-        public JToken ToJson() => new JValue(this.Value);
+        /// <inheritdoc />
+        public JToken ToJson()
+        {
+            return new JValue(Value);
+        }
     }
 }

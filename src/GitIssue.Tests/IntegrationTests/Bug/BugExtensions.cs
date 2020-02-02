@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using GitIssue.Fields;
-using GitIssue.Keys;
-using LibGit2Sharp;
-using NUnit.Framework;
+﻿using GitIssue.Keys;
 
 namespace GitIssue.Tests.IntegrationTests.Bug
 {
@@ -18,7 +13,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
 
         public static string[] GetFixVersion(this IIssue issue)
         {
-            string[] fixVersion = issue.GetField(Key).AsArray<string>();
+            var fixVersion = issue.GetField(Key).AsArray<string>();
             return fixVersion;
         }
     }
