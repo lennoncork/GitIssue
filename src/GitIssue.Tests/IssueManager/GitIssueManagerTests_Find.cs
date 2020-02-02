@@ -18,7 +18,7 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var create = await this.Sut
                     .CreateAsync(nameof(FindsIssueByKey), string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 var find = this.Sut.Find(i => i.Key == create.Result.Key).ToArray();
                 Assert.That(find.Count(), Is.EqualTo(1));
                 Assert.That(find[0].Key, Is.EqualTo(create.Result.Key));
@@ -31,7 +31,7 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var create = await this.Sut
                     .CreateAsync(title, string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 var find = this.Sut.Find(i => i.Title == title).ToArray();
                 Assert.That(find.Count(), Is.EqualTo(1));
                 Assert.That(find[0].Title, Is.EqualTo(title));

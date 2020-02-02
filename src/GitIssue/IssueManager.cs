@@ -196,16 +196,22 @@ namespace GitIssue
             }
         }
 
-        void IIssueManager.Delete(string id)
+
+        /// <inheritdoc/>
+        public void Delete(string id)
         {
             throw new NotImplementedException();
         }
 
-        void IIssueManager.Delete(IssueKey key)
+
+        /// <inheritdoc/>
+        public void Delete(IssueKey key)
         {
             throw new NotImplementedException();
         }
 
+
+        /// <inheritdoc/>
         public async Task DeleteAsync(string id)
         {
             if (this.KeyProvider.TryGetKey(id, out IssueKey key))
@@ -215,6 +221,8 @@ namespace GitIssue
             this.logger?.Debug($"Failed to get issue key from {id}");
         }
 
+
+        /// <inheritdoc/>
         public async Task DeleteAsync(IssueKey key)
         {
             await FileIssue.DeleteAsync(new IssueRoot(this.Root, key));
@@ -226,14 +234,26 @@ namespace GitIssue
             this.Repository?.Dispose();
         }
 
-        public IIssue Create(string title)
-        {
-            throw new NotImplementedException();
-        }
+        /// <inheritdoc/>
+        public IIssue Create(string title) => 
+            Task.Run(() => this.CreateAsync(title)).Result;
 
-        public IIssue Create(string title, string description)
+        /// <inheritdoc/>
+        public IIssue Create(string title, string description) =>
+            Task.Run(() => this.CreateAsync(title, description)).Result;
+
+        /// <inheritdoc/>
+        public ValueTask DisposeAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                Dispose();
+                return default;
+            }
+            catch (Exception exception)
+            {
+                return new ValueTask(Task.FromException(exception));
+            }
         }
     }
 }

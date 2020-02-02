@@ -103,42 +103,36 @@ namespace GitIssue.Util
 
         public static async Task Create(CreateOptions options)
         {
-            using (IssueManager issues = new IssueManager(options.Path, logger))
-            {
-                await issues.CreateAsync(options.Title);
-            }
+            await using IssueManager issues = new IssueManager(options.Path, logger);
+            await issues.CreateAsync(options.Title);
         }
 
         public static async Task Delete(DeleteOptions options)
         {
-            using (IssueManager issues = new IssueManager(options.Path, logger))
-            {
-                await issues.DeleteAsync(options.Key);
-            }
+            await using IssueManager issues = new IssueManager(options.Path, logger);
+            await issues.DeleteAsync(options.Key);
         }
 
         public static async Task Find(FindOptions options)
         {
-            using (IssueManager issues = new IssueManager(options.Path, logger))
+            await using IssueManager issues = new IssueManager(options.Path, logger);
+            Delegate evaluation;
+            try
             {
-                Delegate evaluation;
-                try
-                {
-                    var parameter = Expression.Parameter(typeof(IIssue), options.Name);
-                    var expression = DynamicExpression.ParseLambda(new[] {parameter}, typeof(bool), options.Linq);
-                    evaluation = expression.Compile();
-                }
-                catch (Exception e)
-                {
-                    logger.Error($"Unable to parse expression {e.Message}", e);
-                    return;
-                }
+                var parameter = Expression.Parameter(typeof(IIssue), options.Name);
+                var expression = DynamicExpression.ParseLambda(new[] {parameter}, typeof(bool), options.Linq);
+                evaluation = expression.Compile();
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Unable to parse expression {e.Message}", e);
+                return;
+            }
 
-                var find = issues.FindAsync(i => (bool)evaluation.DynamicInvoke(i));
-                await foreach (IIssue issue in find)
-                {
-                    Console.WriteLine(issue.Key);
-                }
+            var find = issues.FindAsync(i => (bool)evaluation.DynamicInvoke(i));
+            await foreach (IIssue issue in find)
+            {
+                Console.WriteLine(issue.Key);
             }
         }
     }

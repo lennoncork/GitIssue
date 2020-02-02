@@ -18,7 +18,7 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var create = await this.Sut
                     .CreateAsync(nameof(UpdatesTitle), string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 create.Result.Title = "Updated";
                 await create.Result.SaveAsync();
                 var find = this.Sut.Find(i => i.Key == create.Result.Key).ToArray();
@@ -32,7 +32,7 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var create = await this.Sut
                     .CreateAsync(nameof(SetsUpdateDate), string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 await create.Result.SaveAsync();
                 var find = this.Sut.Find(i => i.Key == create.Result.Key).ToArray();
                 var issue = find[0];

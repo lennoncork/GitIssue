@@ -19,4 +19,8 @@
     <ProjectReference Include="..\GitIssue\GitIssue.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="IntegrationTests\Specification\" />
+  </ItemGroup>
+
 </Project>

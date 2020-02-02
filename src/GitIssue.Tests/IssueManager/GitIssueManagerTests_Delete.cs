@@ -18,7 +18,7 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var delete = await this.Sut
                     .DeleteAsync(this.Sut.KeyProvider.Next())
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 Assert.IsFalse(delete.IsSuccess);
             }
 
@@ -28,12 +28,12 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var create = await this.Sut
                     .CreateAsync(nameof(DeletesExistingIssue), string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
                 Assert.IsTrue(Directory.Exists(Path.Combine(this.IssueDirectory, create.Result.Key.ToString())));
                 var delete = await this.Sut
                     .DeleteAsync(create.Result.Key)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 Assert.IsTrue(delete.IsSuccess);
                 Assert.IsFalse(Directory.Exists(Path.Combine(this.IssueDirectory, create.Result.Key.ToString())));
             }

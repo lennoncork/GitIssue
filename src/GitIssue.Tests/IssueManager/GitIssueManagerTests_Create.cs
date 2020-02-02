@@ -17,7 +17,7 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var create = await this.Sut
                     .CreateAsync(title, description)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
                 Assert.That(create.Result.Title, Is.EqualTo(title));
                 Assert.That(create.Result.Description, Is.EqualTo(description));
@@ -29,11 +29,11 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var create1 = await this.Sut
                     .CreateAsync(nameof(CreatesNewIssue), string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 Assert.IsTrue(create1.IsSuccess);
                 var create2 = await this.Sut
                     .CreateAsync(nameof(CreatesNewIssue), string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 Assert.IsTrue(create2.IsSuccess);
                 Assert.That(create1.Result.Key, Is.Not.EqualTo(create2.Result.Key));
             }
@@ -44,7 +44,7 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var create = await this.Sut
                     .CreateAsync(nameof(SetsCreatedDate), string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 Assert.That(create.Result.Created, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
             }
 
@@ -54,7 +54,7 @@ namespace GitIssue.Tests.GitIssueManager
                 this.Initialize(this.TestDirectory);
                 var create = await this.Sut
                     .CreateAsync(nameof(SetsUpdatedDate), string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 Assert.That(create.Result.Updated, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
             }
 

@@ -8,7 +8,7 @@ namespace GitIssue
     /// <summary>
     /// Interface for the issue manager/repository
     /// </summary>
-    public interface IIssueManager : IDisposable
+    public interface IIssueManager : IAsyncDisposable, IDisposable
     {
         /// <summary>
         /// Gets the working directory

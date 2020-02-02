@@ -38,7 +38,7 @@ namespace GitIssue
         /// <summary>
         /// Returns a successful command
         /// </summary>
-        /// <param name="result"></param>
+        /// <param name="result">the result of the task</param>
         /// <returns></returns>
         public static SafeResult Success() => new SafeResult(true);
 
@@ -109,5 +109,21 @@ namespace GitIssue
         /// The task result
         /// </summary>
         public T Result { get; set; }
+
+        /// <summary>
+        /// Checks it a result was returned from the task
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public bool HasResult(out T result)
+        {
+            if (this.IsSuccess)
+            {
+                result = this.Result;
+                return true;
+            }
+            result = default(T);
+            return false;
+        }
     }
 }

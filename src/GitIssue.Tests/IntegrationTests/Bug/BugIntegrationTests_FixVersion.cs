@@ -22,7 +22,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
                 this.Initialize(this.TestDirectory); 
                 var create = await this.Issues
                     .CreateAsync(nameof(CanBeSetFromString), string.Empty)
-                    .WithSafeResult();
+                    .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
                 var fixVersion = new[] {"Blah"};
                 create.Result.SetFixVersion(fixVersion);
