@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GitIssue.Issues;
 using GitIssue.Json;
+using GitIssue.Keys;
 
 namespace GitIssue.Fields
 {

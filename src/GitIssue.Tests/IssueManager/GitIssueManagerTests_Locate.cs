@@ -1,12 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
-using GitIssue.Exceptions;
-using LibGit2Sharp;
 using NUnit.Framework;
 using RepositoryNotFoundException = GitIssue.Exceptions.RepositoryNotFoundException;
 
-namespace GitIssue.Tests.GitIssueManager
+namespace GitIssue.Tests.IssueManager
 {
     [TestFixture]
     public partial class GitIssueManagerTests

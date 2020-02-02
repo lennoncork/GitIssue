@@ -49,7 +49,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
                 this.GitRepository = new Repository(Repository.Init(directory));
 
             if (initIssue) 
-                this.Issues = IssueManager.Init(new BugConfiguration(), directory);
+                this.Issues = GitIssue.IssueManager.Init(new BugConfiguration(), directory);
         }
     }
 }

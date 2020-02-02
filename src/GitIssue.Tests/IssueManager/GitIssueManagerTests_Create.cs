@@ -1,9 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace GitIssue.Tests.GitIssueManager
+namespace GitIssue.Tests.IssueManager
 {
     [TestFixture]
     public partial class GitIssueManagerTests

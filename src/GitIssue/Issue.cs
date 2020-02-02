@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Keys;
 
 namespace GitIssue
 {

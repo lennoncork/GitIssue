@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using GitIssue.Fields;
+using GitIssue.Keys;
 using LibGit2Sharp;
 using NUnit.Framework;
 

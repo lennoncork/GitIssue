@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GitIssue.Keys;
 using LibGit2Sharp;
 
 namespace GitIssue

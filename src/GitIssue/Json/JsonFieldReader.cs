@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Keys;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Json

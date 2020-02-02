@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using GitIssue.Fields;
+using GitIssue.Keys;
 
 namespace GitIssue
 {

@@ -1,7 +1,7 @@
 ﻿using System;
-using GitIssue.Fields;
+using GitIssue.Keys;
 
-namespace GitIssue.Issues
+namespace GitIssue.Fields
 {
     /// <summary>
     /// Factory class that creates new fields

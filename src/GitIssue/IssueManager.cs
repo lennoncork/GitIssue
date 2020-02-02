@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GitIssue.Issues;
-using GitIssue.Providers;
+using GitIssue.Keys;
 using LibGit2Sharp;
 using Serilog;
 

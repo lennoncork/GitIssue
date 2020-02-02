@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using GitIssue.Exceptions;
 using GitIssue.Fields;
 using GitIssue.Json;
+using GitIssue.Keys;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

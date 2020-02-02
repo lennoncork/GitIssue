@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using GitIssue.Fields;
+using GitIssue.Keys;
 using Newtonsoft.Json;
 
 namespace GitIssue

@@ -1,8 +1,7 @@
 ﻿using System.IO;
-using LibGit2Sharp;
 using NUnit.Framework;
 
-namespace GitIssue.Tests.GitIssueManager
+namespace GitIssue.Tests.IssueManager
 {
     [TestFixture]
     public partial class GitIssueManagerTests
@@ -15,7 +14,7 @@ namespace GitIssue.Tests.GitIssueManager
 
         protected string ConfigFile => Path.Combine(this.IssueDirectory, Paths.ConfigFileName);
 
-        protected IssueManager Sut;
+        protected GitIssue.IssueManager Sut;
 
         [OneTimeSetUp]
         public void OneTimeSetup()
@@ -46,7 +45,7 @@ namespace GitIssue.Tests.GitIssueManager
         {
             if(initGit) LibGit2Sharp.Repository.Init(directory);
             if(initIssue) GitIssue.IssueManager.Init(directory);
-            if(initSut) this.Sut = new IssueManager(this.TestDirectory);
+            if(initSut) this.Sut = new GitIssue.IssueManager(this.TestDirectory);
         }
 
         public void Initialize(
@@ -58,7 +57,7 @@ namespace GitIssue.Tests.GitIssueManager
         {
             if (initGit) LibGit2Sharp.Repository.Init(directory);
             if (initIssue) GitIssue.IssueManager.Init(directory, name);
-            if (initSut) this.Sut = new IssueManager(this.TestDirectory, name);
+            if (initSut) this.Sut = new GitIssue.IssueManager(this.TestDirectory, name);
         }
     }
 }

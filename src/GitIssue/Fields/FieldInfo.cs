@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GitIssue.Exceptions;
 using GitIssue.Issues;
 using GitIssue.Json;
+using GitIssue.Keys;
 using Newtonsoft.Json;
 
 namespace GitIssue.Fields

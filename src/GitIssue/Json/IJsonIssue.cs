@@ -1,7 +1,6 @@
-﻿using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
-namespace GitIssue.Fields
+namespace GitIssue.Json
 {
     /// <summary>
     /// Interface for issues that can be converted to JSON

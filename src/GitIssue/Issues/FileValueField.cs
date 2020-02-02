@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using GitIssue.Fields;
+using GitIssue.Json;
+using GitIssue.Keys;
 using Newtonsoft.Json.Linq;
 using FieldInfo = GitIssue.Fields.FieldInfo;
 
