@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CommandLine;
+using GitIssue.Formatters;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Serilog;
@@ -85,8 +86,9 @@ namespace GitIssue.Util
                 return;
             }
 
+            var formatter = new SimpleFormatter();
             var find = issues.FindAsync(i => issueFilter.Invoke(i));
-            await foreach (var issue in find) Console.WriteLine(issue);
+            await foreach (var issue in find) Console.WriteLine(issue.Format(formatter));
         }
 
         /// <summary>
