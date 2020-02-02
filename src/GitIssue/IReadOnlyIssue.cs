@@ -9,46 +9,45 @@ namespace GitIssue
     /// <summary>
     /// Issue Interface
     /// </summary>
-    public interface IIssue : IReadOnlyIssue
+    public interface IReadOnlyIssue : IReadOnlyDictionary<FieldKey, IField>
     {
+        /// <summary>
+        /// Gets the Issue Key
+        /// </summary>
+        IssueKey Key { get; }
+
         /// <summary>
         /// Gets or sets the issue title
         /// </summary>
-        new string Title { get; set; }
+        string Title { get; }
 
         /// <summary>
         /// Gets or sets the issue description
         /// </summary>
-        new string Description { get; set; }
+        string Description { get; }
 
         /// <summary>
         /// Gets or sets when the issue was created
         /// </summary>
-        new DateTime Created { get; set; }
+        DateTime Created { get; }
 
         /// <summary>
         /// Gets or sets when the issue was last updates
         /// </summary>
-        new DateTime Updated { get; set; }
+        DateTime Updated { get; }
 
         /// <summary>
-        /// Gets a <see cref="IFieldFactory"/> for the provided key
+        /// Gets a <see cref="IFieldProvider"/> for a provided key
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public IFieldFactory SetField([CallerMemberName] string key = null);
+        public IFieldProvider GetField([CallerMemberName] string key = null);
 
         /// <summary>
-        /// Gets a <see cref="IFieldFactory"/> for the provided <see cref="FieldKey"/>
+        /// Gets a <see cref="IFieldProvider"/> for the provided <see cref="FieldKey"/>
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public IFieldFactory SetField(FieldKey key);
-
-        /// <summary>
-        /// Saves the issue
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> SaveAsync();
+        public IFieldProvider GetField(FieldKey key);
     }
 }

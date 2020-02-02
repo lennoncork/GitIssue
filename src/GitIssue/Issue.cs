@@ -97,5 +97,11 @@ namespace GitIssue
 
         /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{this.Key.ToString()} {this.Title}";
+        }
     }
 }

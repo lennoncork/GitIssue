@@ -8,7 +8,8 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Core.Sinks;
 using System.Linq.Expressions;
-using DynamicExpression = System.Linq.Dynamic.DynamicExpression;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace GitIssue.Util
 {
@@ -26,34 +27,37 @@ namespace GitIssue.Util
             public string Path { get; set; } = Environment.CurrentDirectory;
         }
 
-        [Verb(nameof(Command.Init))]
+        [Verb(nameof(Command.Init), HelpText = "Initializes the issue repository")]
         public class InitOptions : Options
         {
 
         }
 
-        [Verb(nameof(Command.Create))]
+        [Verb(nameof(Command.Create), HelpText = "Creates a new issue")]
         public class CreateOptions : Options
         {
             [Value(1, HelpText = "The issue title", Required = true)]
             public string Title { get; set; }
+
+            [Value(1, HelpText = "The issue description", Required = false)]
+            public string Description { get; set; } = "";
         }
 
-        [Verb(nameof(Command.Delete))]
+        [Verb(nameof(Command.Delete), HelpText = "Deletes an existing issue")]
         public class DeleteOptions : Options
         {
             [Value(1, HelpText = "The issue key", Required = true)]
             public string Key { get; set; }
         }
 
-        [Verb(nameof(Command.Find))]
+        [Verb(nameof(Command.Find), HelpText = "Finds an existing issue")]
         public class FindOptions : Options
         {
             [Option("LinqName", HelpText = "The name of the issue in the linq expression", Required = false)]
             public string Name { get; set; } = "i";
 
-            [Value(1, HelpText = "The LINQ expression to use when matching", Required = true)]
-            public string Linq { get; set; }
+            [Value(1, HelpText = "The LINQ expression to use when matching", Required = false)]
+            public string Linq { get; set; } = "i => true";
         }
 
         public static ILogger logger;
@@ -86,6 +90,7 @@ namespace GitIssue.Util
             {
                 try
                 {
+                    Console.WriteLine();
                     await func(value);
                 }
                 catch (Exception e)
@@ -104,7 +109,7 @@ namespace GitIssue.Util
         public static async Task Create(CreateOptions options)
         {
             await using IssueManager issues = new IssueManager(options.Path, logger);
-            await issues.CreateAsync(options.Title);
+            await issues.CreateAsync(options.Title, options.Description);
         }
 
         public static async Task Delete(DeleteOptions options)
@@ -116,23 +121,25 @@ namespace GitIssue.Util
         public static async Task Find(FindOptions options)
         {
             await using IssueManager issues = new IssueManager(options.Path, logger);
-            Delegate evaluation;
+            Func<IIssue, bool> issueFilter;
             try
             {
-                var parameter = Expression.Parameter(typeof(IIssue), options.Name);
-                var expression = DynamicExpression.ParseLambda(new[] {parameter}, typeof(bool), options.Linq);
-                evaluation = expression.Compile();
+                //var parameter = Expression.Parameter(typeof(IIssue), options.Name);
+                //var expression = DynamicExpression.ParseLambda(new[] {parameter}, typeof(bool), options.Linq);
+                //evaluation = expression.Compile();
+                var script = ScriptOptions.Default.AddReferences(typeof(Issue).Assembly);
+                issueFilter = await CSharpScript.EvaluateAsync<Func<IIssue, bool>>(options.Linq, script);
             }
             catch (Exception e)
             {
                 logger.Error($"Unable to parse expression {e.Message}", e);
                 return;
             }
-
-            var find = issues.FindAsync(i => (bool)evaluation.DynamicInvoke(i));
+            
+            var find = issues.FindAsync(i => issueFilter.Invoke(i));
             await foreach (IIssue issue in find)
             {
-                Console.WriteLine(issue.Key);
+                Console.WriteLine(issue);
             }
         }
     }
