@@ -27,11 +27,12 @@ namespace GitIssue.Util
                 with.HelpWriter = Console.Error;
             });
 
-            parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions>(args)
+            parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions, ShowOptions>(args)
                 .WithParsed<InitOptions>(o => ExecAsync(Init, o).Wait())
                 .WithParsed<CreateOptions>(o => ExecAsync(Create, o).Wait())
                 .WithParsed<DeleteOptions>(o => ExecAsync(Delete, o).Wait())
-                .WithParsed<FindOptions>(o => ExecAsync(Find, o).Wait());
+                .WithParsed<FindOptions>(o => ExecAsync(Find, o).Wait())
+                .WithParsed<ShowOptions>(o => ExecAsync(Show, o).Wait());
         }
 
         private static async Task ExecAsync<T>(Func<T, Task> func, T value)
@@ -92,47 +93,20 @@ namespace GitIssue.Util
         }
 
         /// <summary>
-        ///     Command Line Options
+        /// Shows the issue details
         /// </summary>
-        public class Options
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static async Task Show(ShowOptions options)
         {
-            /// <summary>
-            ///     The version type to deserialize
-            /// </summary>
-            [Option("path", Required = false, HelpText = "The working path")]
-            public string Path { get; set; } = Environment.CurrentDirectory;
-        }
-
-        [Verb(nameof(Command.Init), HelpText = "Initializes the issue repository")]
-        public class InitOptions : Options
-        {
-        }
-
-        [Verb(nameof(Command.Create), HelpText = "Creates a new issue")]
-        public class CreateOptions : Options
-        {
-            [Value(1, HelpText = "The issue title", Required = true)]
-            public string Title { get; set; }
-
-            [Value(1, HelpText = "The issue description", Required = false)]
-            public string Description { get; set; } = "";
-        }
-
-        [Verb(nameof(Command.Delete), HelpText = "Deletes an existing issue")]
-        public class DeleteOptions : Options
-        {
-            [Value(1, HelpText = "The issue key", Required = true)]
-            public string Key { get; set; }
-        }
-
-        [Verb(nameof(Command.Find), HelpText = "Finds an existing issue")]
-        public class FindOptions : Options
-        {
-            [Option("LinqName", HelpText = "The name of the issue in the linq expression", Required = false)]
-            public string Name { get; set; } = "i";
-
-            [Value(1, HelpText = "The LINQ expression to use when matching", Required = false)]
-            public string Linq { get; set; } = "i => true";
+            var formatter = new DetailedFormatter();
+            await using var issues = new IssueManager(options.Path, logger);
+            var find = issues.FindAsync(i => i.Key.ToString() == options.Key);
+            await foreach (var issue in find)
+            {
+                Console.WriteLine(issue.Format(formatter));
+                break;
+            }
         }
     }
 }

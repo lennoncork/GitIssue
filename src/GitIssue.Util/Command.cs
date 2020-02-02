@@ -28,6 +28,11 @@
         /// <summary>
         ///     Finds an existing issue
         /// </summary>
-        Find
+        Find,
+
+        /// <summary>
+        /// Shows the details of an issue
+        /// </summary>
+        Show,
     }
 }
