@@ -142,23 +142,5 @@ namespace GitIssue.Issues
             }
         }
 
-        /// <summary>
-        ///     Tries to parse the string input to the output value
-        /// </summary>
-        /// <param name="input">the input string</param>
-        /// <param name="value">the output value</param>
-        /// <returns></returns>
-        internal static bool TryParse(string input, out T value)
-        {
-            var converter = TypeDescriptor.GetConverter(typeof(T));
-            if (converter.CanConvertFrom(typeof(string)))
-            {
-                value = (T) converter.ConvertFrom(input);
-                return true;
-            }
-
-            value = default;
-            return false;
-        }
     }
 }

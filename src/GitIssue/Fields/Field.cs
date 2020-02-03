@@ -23,6 +23,9 @@ namespace GitIssue.Fields
         public FieldKey Key { get; protected set; }
 
         /// <inheritdoc />
+        public abstract Task<bool> UpdateAsync(string input);
+
+        /// <inheritdoc />
         public abstract Task<bool> SaveAsync();
     }
 }

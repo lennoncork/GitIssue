@@ -73,4 +73,29 @@ namespace GitIssue.Util
         [Value(1, HelpText = "The issue key to use", Required = false)]
         public string Key { get; set; } = String.Empty;
     }
+
+    /// <summary>
+    /// Issue Showing Options
+    /// </summary>
+    [Verb(nameof(Command.Edit), HelpText = "Edits fields of an existing issue")]
+    public class EditOptions : Options
+    {
+        /// <summary>
+        /// The issue key to show
+        /// </summary>
+        [Value(1, HelpText = "The issue to edit", Required = true)]
+        public string Key { get; set; } = String.Empty;
+
+        /// <summary>
+        /// The issue key to show
+        /// </summary>
+        [Value(2, HelpText = "The field to edit", Required = true)]
+        public string Field { get; set; } = String.Empty;
+
+        /// <summary>
+        /// The issue key to show
+        /// </summary>
+        [Value(3, HelpText = "The text to update the field with", Required = true)]
+        public string Update { get; set; } = String.Empty;
+    }
 }

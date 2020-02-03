@@ -34,5 +34,10 @@
         /// Shows the details of an issue
         /// </summary>
         Show,
+
+        /// <summary>
+        /// Edits an existing issue
+        /// </summary>
+        Edit,
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CommandLine;
+using GitIssue.Fields;
 using GitIssue.Formatters;
+using GitIssue.Keys;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Serilog;
@@ -27,12 +29,14 @@ namespace GitIssue.Util
                 with.HelpWriter = Console.Error;
             });
 
-            parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions, ShowOptions>(args)
+            parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions, 
+                    ShowOptions, EditOptions>(args)
                 .WithParsed<InitOptions>(o => ExecAsync(Init, o).Wait())
                 .WithParsed<CreateOptions>(o => ExecAsync(Create, o).Wait())
                 .WithParsed<DeleteOptions>(o => ExecAsync(Delete, o).Wait())
                 .WithParsed<FindOptions>(o => ExecAsync(Find, o).Wait())
-                .WithParsed<ShowOptions>(o => ExecAsync(Show, o).Wait());
+                .WithParsed<ShowOptions>(o => ExecAsync(Show, o).Wait())
+                .WithParsed<EditOptions>(o => ExecAsync(Edit, o).Wait());
         }
 
         private static async Task ExecAsync<T>(Func<T, Task> func, T value)
@@ -108,5 +112,34 @@ namespace GitIssue.Util
                 break;
             }
         }
+
+        /// <summary>
+        /// Edits an existing issue
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static async Task Edit(EditOptions options)
+        {
+            var formatter = new DetailedFormatter();
+            await using var issues = new IssueManager(options.Path, logger);
+            var find = issues.FindAsync(i => i.Key.ToString() == options.Key);
+            await foreach (var issue in find)
+            {
+                FieldKey key = FieldKey.Create(options.Field);
+                if (issue.ContainsKey(key))
+                {
+                    if (await issue[key].UpdateAsync(options.Update))
+                    {
+                        issue.Updated = DateTime.Now;
+                        if (await issue.SaveAsync())
+                        {
+                            Console.WriteLine(issue.Format(formatter));
+                        }
+                    }
+                }
+                break;
+            }
+        }
+
     }
 }

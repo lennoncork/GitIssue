@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using GitIssue.Keys;
 
 namespace GitIssue.Fields
@@ -36,6 +38,37 @@ namespace GitIssue.Fields
         ///     The field value
         /// </summary>
         public T Value { get; set; }
+
+
+        /// <inheritdoc />
+        public override Task<bool> UpdateAsync(string input)
+        {
+            if (TryParse(input, out T result))
+            {
+                this.Value = result;
+                return Task.FromResult(true);
+            }
+            return Task.FromResult(false);
+        }
+
+        /// <summary>
+        ///     Tries to parse the string input to the output value
+        /// </summary>
+        /// <param name="input">the input string</param>
+        /// <param name="value">the output value</param>
+        /// <returns></returns>
+        internal static bool TryParse(string input, out T value)
+        {
+            var converter = TypeDescriptor.GetConverter(typeof(T));
+            if (converter.CanConvertFrom(typeof(string)))
+            {
+                value = (T)converter.ConvertFrom(input);
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
 
         /// <inheritdoc />
         public override string ToString()
