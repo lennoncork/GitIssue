@@ -5,10 +5,10 @@ using NUnit.Framework;
 namespace GitIssue.Tests.IssueManager
 {
     [TestFixture]
-    public partial class GitIssueManagerTests
+    public partial class IssueManagerTests
     {
         [TestFixture]
-        public class Create : GitIssueManagerTests
+        public class Create : IssueManagerTests
         {
             [TestCase("New Issue", "This Is A New Issue")]
             public async Task CreatesNewIssue(string title, string description)

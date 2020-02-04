@@ -91,7 +91,7 @@ namespace GitIssue.Util
                 return;
             }
 
-            var formatter = new SimpleFormatter();
+            var formatter = new SimpleFormatter(options.Format);
             var find = issues.FindAsync(i => issueFilter.Invoke(i));
             await foreach (var issue in find) Console.WriteLine(issue.Format(formatter));
         }

@@ -6,10 +6,10 @@ using NUnit.Framework;
 namespace GitIssue.Tests.IssueManager
 {
     [TestFixture]
-    public partial class GitIssueManagerTests
+    public partial class IssueManagerTests
     {
         [TestFixture]
-        public class Constructor : GitIssueManagerTests
+        public class Constructor : IssueManagerTests
         {
             [Test]
             public void FailsIfConfigMissing()

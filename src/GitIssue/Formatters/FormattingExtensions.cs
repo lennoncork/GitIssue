@@ -14,6 +14,13 @@ namespace GitIssue.Formatters
         /// Formats the field using the provided formatter
         /// </summary>
         /// <param name="issue">the issue</param>
+        /// <returns></returns>
+        public static string Format(this IReadOnlyIssue issue) => SimpleFormatter.Default.Format(issue);
+
+        /// <summary>
+        /// Formats the field using the provided formatter
+        /// </summary>
+        /// <param name="issue">the issue</param>
         /// <param name="formatter">the field formatter</param>
         /// <returns></returns>
         public static string Format(this IReadOnlyIssue issue, IIssueFormatter formatter) => formatter.Format(issue);

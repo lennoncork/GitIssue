@@ -6,10 +6,10 @@ using NUnit.Framework;
 namespace GitIssue.Tests.IssueManager
 {
     [TestFixture]
-    public partial class GitIssueManagerTests
+    public partial class IssueManagerTests
     {
         [TestFixture]
-        public class Export : GitIssueManagerTests
+        public class Export : IssueManagerTests
         {
             [Test]
             public async Task ExportsFileToJson()

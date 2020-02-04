@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace GitIssue.Tests.IssueManager
 {
     [TestFixture]
-    public partial class GitIssueManagerTests
+    public partial class SimpleFormatterTests
     {
         [SetUp]
         public void Setup()

@@ -54,11 +54,24 @@ namespace GitIssue.Util
     [Verb(nameof(Command.Find), HelpText = "Finds an existing issue")]
     public class FindOptions : Options
     {
+        /// <summary>
+        /// The name to use for the issue in the LINQ expression
+        /// </summary>
         [Option("LinqName", HelpText = "The name of the issue in the linq expression", Required = false)]
         public string Name { get; set; } = "i";
 
+        /// <summary>
+        /// The format to output
+        /// </summary>
+        [Option("Format", HelpText = "The format to output in", Required = false)]
+        public string Format { get; set; } = "%Key: %Title";
+
+        /// <summary>
+        /// The LINQ expression
+        /// </summary>
         [Value(1, HelpText = "The LINQ expression to use when matching", Required = false)]
         public string Linq { get; set; } = "i => true";
+
     }
 
     /// <summary>

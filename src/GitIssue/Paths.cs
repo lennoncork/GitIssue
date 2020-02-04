@@ -18,6 +18,6 @@
         /// <summary>
         ///     Gets or sets the config folder name
         /// </summary>
-        public static string ConfigFileName { get; set; } = "config";
+        public static string ConfigFileName { get; set; } = "config.json";
     }
 }

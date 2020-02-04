@@ -5,10 +5,10 @@ using NUnit.Framework;
 namespace GitIssue.Tests.IssueManager
 {
     [TestFixture]
-    public partial class GitIssueManagerTests
+    public partial class IssueManagerTests
     {
         [TestFixture]
-        public class Delete : GitIssueManagerTests
+        public class Delete : IssueManagerTests
         {
             [Test]
             public async Task DeletesExistingIssue()

@@ -5,10 +5,10 @@ using NUnit.Framework;
 namespace GitIssue.Tests.IssueManager
 {
     [TestFixture]
-    public partial class GitIssueManagerTests
+    public partial class IssueManagerTests
     {
         [TestFixture]
-        public class Init : GitIssueManagerTests
+        public class Init : IssueManagerTests
         {
             [Test]
             public void CreatesConfigFile()
