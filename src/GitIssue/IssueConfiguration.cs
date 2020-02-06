@@ -25,7 +25,7 @@ namespace GitIssue
                 {FieldKey.Create("Description"), new FieldInfo<string, JsonValueField>    {Required = true}},
                 {FieldKey.Create("Created"),     new FieldInfo<DateTime, JsonValueField>  {Required = true}},
                 {FieldKey.Create("Updated"),     new FieldInfo<DateTime, JsonValueField>  {Required = true}},
-                //{FieldKey.Create("Labels"),     new FieldInfo<Label, JsonValueField>     {Required = true}}
+                {FieldKey.Create("Labels"),      new FieldInfo<Label, JsonArrayField>     {Required = false}}
             };
         }
 

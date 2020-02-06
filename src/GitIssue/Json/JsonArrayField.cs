@@ -36,7 +36,17 @@ namespace GitIssue.Json
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JArray(Values);
+            var array = new JArray();
+            foreach (var value in this.Values)
+            {
+                if (value is IJsonValue jValue)
+                {
+                    array.Add(jValue.ToJson());
+                    continue;
+                }
+                array.Add(new JValue(value));
+            }
+            return array;
         }
     }
 }

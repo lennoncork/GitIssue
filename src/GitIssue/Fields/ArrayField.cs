@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using GitIssue.Keys;
 
@@ -49,10 +51,42 @@ namespace GitIssue.Fields
         /// <inheritdoc />
         public override Task<bool> UpdateAsync(string input)
         {
-            if (TryParse(input, out T result))
+            T result;
+            if (input.StartsWith('+'))
             {
+                if (TryParse(input.TrimStart('+'), out result))
+                {
+                    if (!this.values.Contains(result))
+                        this.values.Add(result);
+                }
                 return Task.FromResult(true);
             }
+
+            if (input.StartsWith('-'))
+            {
+                if (TryParse(input.TrimStart('-'), out result))
+                {
+                    if(this.values.Contains(result))
+                        this.values.Remove(result);
+                }
+                return Task.FromResult(true);
+            }
+
+            if (input.StartsWith('[') && input.EndsWith(']'))
+            {
+                this.values.Clear();
+                string[] values = input.TrimStart('[').TrimEnd(']').Split(',');
+                foreach (var value in values)
+                {
+                    if (TryParse(value.Trim(), out result))
+                    {
+                        if (!this.values.Contains(result))
+                            this.values.Add(result);
+                    }
+                }
+                return Task.FromResult(true);
+            }
+
             return Task.FromResult(false);
         }
 
@@ -72,6 +106,18 @@ namespace GitIssue.Fields
             }
             value = default;
             return false;
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < this.values.Count; i++)
+            {
+                if (i > 0) builder.Append(", ");
+                builder.Append(this.Values[i]);
+            }
+            return builder.ToString();
         }
     }
 }

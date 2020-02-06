@@ -43,6 +43,8 @@ namespace GitIssue.Json
         /// <inheritdoc />
         public JToken ToJson()
         {
+            if (this.Value is IJsonValue value)
+                return value.ToJson();
             return new JValue(Value);
         }
     }
