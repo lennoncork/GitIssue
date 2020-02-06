@@ -104,12 +104,29 @@ namespace GitIssue.Fields
     public class FieldInfo<T> : FieldInfo
     {
         /// <summary>
-        ///     Gets or sets the field type
+        ///     Gets or sets the data type
         /// </summary>
         [JsonProperty]
         public override FieldType DataType
         {
             get => FieldType.Create<T>();
+            set => throw new ArgumentException("Cannot set data type for generic data info");
+        }
+    }
+
+    /// <summary>
+    ///     FieldInfo Class
+    /// </summary>
+    [JsonObject]
+    public class FieldInfo<T1, T2> : FieldInfo<T1>
+    {
+        /// <summary>
+        ///     Gets or sets the field type
+        /// </summary>
+        [JsonProperty]
+        public override FieldType FieldType
+        {
+            get => FieldType.Create<T2>();
             set => throw new ArgumentException("Cannot set data type for generic field info");
         }
     }

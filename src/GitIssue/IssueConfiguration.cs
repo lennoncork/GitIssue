@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using GitIssue.Fields;
+using GitIssue.Json;
 using GitIssue.Keys;
 using Newtonsoft.Json;
 
@@ -18,27 +19,14 @@ namespace GitIssue
         /// </summary>
         public IssueConfiguration()
         {
-            Fields = new Dictionary<FieldKey, FieldInfo>();
-
-            Fields.Add(FieldKey.Create("Title"), new FieldInfo<string>
+            Fields = new Dictionary<FieldKey, FieldInfo>
             {
-                Required = true
-            });
-
-            Fields.Add(FieldKey.Create("Description"), new FieldInfo<string>
-            {
-                Required = true
-            });
-
-            Fields.Add(FieldKey.Create("Created"), new FieldInfo<DateTime>
-            {
-                Required = true
-            });
-
-            Fields.Add(FieldKey.Create("Updated"), new FieldInfo<DateTime>
-            {
-                Required = true
-            });
+                {FieldKey.Create("Title"),       new FieldInfo<string, JsonValueField>    {Required = true}},
+                {FieldKey.Create("Description"), new FieldInfo<string, JsonValueField>    {Required = true}},
+                {FieldKey.Create("Created"),     new FieldInfo<DateTime, JsonValueField>  {Required = true}},
+                {FieldKey.Create("Updated"),     new FieldInfo<DateTime, JsonValueField>  {Required = true}},
+                //{FieldKey.Create("Labels"),     new FieldInfo<Label, JsonValueField>     {Required = true}}
+            };
         }
 
         /// <summary>

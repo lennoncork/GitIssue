@@ -35,7 +35,6 @@ namespace GitIssue.Json
         /// <summary>
         ///     Saves the issue as Json
         /// </summary>
-        /// <param name="issue"></param>
         /// <param name="path"></param>
         /// <returns></returns>
         public static async Task<JObject> ReadJsonFieldsAsync(string path)

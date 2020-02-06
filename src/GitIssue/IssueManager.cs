@@ -52,6 +52,17 @@ namespace GitIssue
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
+        /// <param name="path">the repository path</param>
+        /// <param name="name">the issues directory name</param>
+        /// <param name="logger">the logger</param>
+        public IssueManager(string path, string name, ILogger logger) : this(new Repository(path), path, name)
+        {
+            this.logger = logger;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="IssueManager" /> mass
+        /// </summary>
         /// <param name="repository">the git repository</param>
         /// <param name="path">the path for the repository path</param>
         /// <param name="name">the issues directory name</param>

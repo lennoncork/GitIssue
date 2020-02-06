@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Keys;
 
@@ -12,20 +13,26 @@ namespace GitIssue.Fields
     /// <typeparam name="T"></typeparam>
     public abstract class ArrayField<T> : Field, IEnumerable<T>
     {
+        private List<T> values;
+
         /// <summary>
         ///     Creates a new instance of the <see cref="ArrayField{T}" /> class
         /// </summary>
         /// <param name="key"></param>
-        /// <param name="value"></param>
-        protected ArrayField(FieldKey key, T[] value) : base(key)
+        /// <param name="values"></param>
+        protected ArrayField(FieldKey key, T[] values) : base(key)
         {
-            Values = value;
+            this.values = new List<T>(values);
         }
 
         /// <summary>
         ///     Field values
         /// </summary>
-        public T[] Values { get; set; }
+        public T[] Values
+        {
+            get => this.values.ToArray();
+            set => this.values = new List<T>(value);
+        }
 
         /// <inheritdoc />
         public IEnumerator<T> GetEnumerator()
@@ -63,7 +70,6 @@ namespace GitIssue.Fields
                 value = (T)converter.ConvertFrom(input);
                 return true;
             }
-
             value = default;
             return false;
         }

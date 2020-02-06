@@ -1,26 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using GitIssue.Fields;
 
 namespace GitIssue.Formatters
 {
     /// <summary>
-    /// A simple formatter for showing the issue on a single line
+    /// A detailed formatter showing each field on it's own line
     /// </summary>
-    public class DetailedFormatter : IIssueFormatter
+    public class DetailedFormatter : IIssueFormatter, IFieldFormatter
     {
         /// <inheritdoc />
         public string Format(IReadOnlyIssue issue)
         {
             StringBuilder builder = new StringBuilder();
-            IFieldFormatter formatter = new SimpleFormatter();
             int fieldCount = 0;
             foreach (var kvp in issue)
             {
                 if (fieldCount++ > 0) builder.Append(Environment.NewLine);
-                builder.Append(kvp.Value.Format(formatter));
+                builder.Append(kvp.Value.Format(this));
             }
             return builder.ToString();
         }
+
+        /// <inheritdoc />
+        public string Format(IField field) => $"{field.Key.ToString()}: {field}";
     }
 }

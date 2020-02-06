@@ -23,7 +23,7 @@ namespace GitIssue.Tests.IssueManager
             }
 
             [Test]
-            public async Task CreatesCommit()
+            public Task CreatesCommit()
             {
                 throw new NotImplementedException();
             }

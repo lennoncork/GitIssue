@@ -38,7 +38,6 @@ namespace GitIssue
         /// <summary>
         ///     Returns a successful command
         /// </summary>
-        /// <param name="result">the result of the task</param>
         /// <returns></returns>
         public static SafeResult Success()
         {

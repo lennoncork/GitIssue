@@ -13,11 +13,23 @@ using Newtonsoft.Json.Linq;
 namespace GitIssue.Json
 {
     /// <summary>
+    /// A JSON backed issue type
     /// </summary>
     public class JsonIssue : Issue, IJsonIssue
     {
+        /// <summary>
+        /// The dictionary of fields
+        /// </summary>
         protected readonly Dictionary<FieldKey, IField> fields;
+
+        /// <summary>
+        /// The key provider
+        /// </summary>
         protected readonly FileFieldKeyProvider keyProvider;
+
+        /// <summary>
+        /// The set of modified fields (that need to be saved)
+        /// </summary>
         protected readonly HashSet<FieldKey> modifiedFields;
 
         /// <summary>
@@ -61,16 +73,10 @@ namespace GitIssue.Json
         public override IField this[FieldKey key] => fields[key];
 
         /// <inheritdoc />
-        public override IFieldProvider GetField(string key = null)
-        {
-            return GetField(keyProvider.FromString(key));
-        }
+        public override IFieldProvider GetField(string key = null) => this.GetField(this.keyProvider.FromString(key));
 
         /// <inheritdoc />
-        public override IFieldFactory SetField(string key = null)
-        {
-            return SetField(keyProvider.FromString(key));
-        }
+        public override IFieldFactory SetField(string key = null) => this.SetField(this.keyProvider.FromString(key));
 
         /// <inheritdoc />
         public override IFieldProvider GetField(FieldKey key)

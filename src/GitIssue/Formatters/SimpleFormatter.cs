@@ -22,11 +22,18 @@ namespace GitIssue.Formatters
                 {"Key", issue => issue.Key.ToString()}
             };
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SimpleFormatter"/> class
+        /// </summary>
         public SimpleFormatter() : this("%Key: %Title")
         {
 
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SimpleFormatter"/> class
+        /// </summary>
+        /// <param name="format">the output format</param>
         public SimpleFormatter(string format)
         {
             this.format = format;

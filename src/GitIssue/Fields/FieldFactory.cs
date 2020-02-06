@@ -9,7 +9,6 @@ namespace GitIssue.Fields
     public class FieldFactory : IFieldFactory
     {
         private readonly Func<IField> callback;
-        private readonly FieldInfo info;
         private readonly Issue issue;
         private readonly FieldKey key;
 
@@ -30,7 +29,8 @@ namespace GitIssue.Fields
         public void WithValue<T>(T value)
         {
             var field = callback?.Invoke();
-            if (field is ValueField<T> valueField) valueField.Value = value;
+            if (field is ValueField<T> valueField) 
+                valueField.Value = value;
         }
 
         /// <inheritdoc />

@@ -16,11 +16,6 @@ namespace GitIssue.Util
 
         private static void Main(string[] args)
         {
-            logger = new LoggerConfiguration()
-                .WriteTo.Console()
-                .MinimumLevel.Debug()
-                .CreateLogger();
-
             var parser = new Parser(with =>
             {
                 with.EnableDashDash = true;
@@ -39,6 +34,16 @@ namespace GitIssue.Util
                 .WithParsed<EditOptions>(o => ExecAsync(Edit, o).Wait());
         }
 
+        public static IIssueManager Initialize(Options options)
+        {
+            logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .MinimumLevel.Debug()
+                .CreateLogger();
+
+            return new IssueManager(options.Path, options.Type, logger);
+        }
+
         private static async Task ExecAsync<T>(Func<T, Task> func, T value)
         {
             await Task.Run(async () =>
@@ -55,15 +60,14 @@ namespace GitIssue.Util
             });
         }
 
-        public static Task Init(InitOptions options)
+        public static async Task Init(InitOptions options)
         {
-            IssueManager.Init(options.Path);
-            return Task.CompletedTask;
+            await using var issues = Initialize(options);
         }
 
         public static async Task Create(CreateOptions options)
         {
-            await using var issues = new IssueManager(options.Path, logger);
+            await using var issues = Initialize(options);
             await issues.CreateAsync(options.Title, options.Description);
         }
 
@@ -75,13 +79,10 @@ namespace GitIssue.Util
 
         public static async Task Find(FindOptions options)
         {
-            await using var issues = new IssueManager(options.Path, logger);
+            await using var issues = Initialize(options);
             Func<IIssue, bool> issueFilter;
             try
             {
-                //var parameter = Expression.Parameter(typeof(IIssue), options.Name);
-                //var expression = DynamicExpression.ParseLambda(new[] {parameter}, typeof(bool), options.Linq);
-                //evaluation = expression.Compile();
                 var script = ScriptOptions.Default.AddReferences(typeof(Issue).Assembly);
                 issueFilter = await CSharpScript.EvaluateAsync<Func<IIssue, bool>>(options.Linq, script);
             }
@@ -104,7 +105,7 @@ namespace GitIssue.Util
         public static async Task Show(ShowOptions options)
         {
             var formatter = new DetailedFormatter();
-            await using var issues = new IssueManager(options.Path, logger);
+            await using var issues = Initialize(options);
             var find = issues.FindAsync(i => i.Key.ToString() == options.Key);
             await foreach (var issue in find)
             {
@@ -121,7 +122,7 @@ namespace GitIssue.Util
         public static async Task Edit(EditOptions options)
         {
             var formatter = new DetailedFormatter();
-            await using var issues = new IssueManager(options.Path, logger);
+            await using var issues = Initialize(options);
             var find = issues.FindAsync(i => i.Key.ToString() == options.Key);
             await foreach (var issue in find)
             {

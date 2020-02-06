@@ -5,6 +5,9 @@ using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Json
 {
+    /// <summary>
+    /// Alias class for issue settings
+    /// </summary>
     public class JsonArrayField
     {
     }
