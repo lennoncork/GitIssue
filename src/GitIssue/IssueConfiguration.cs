@@ -21,11 +21,12 @@ namespace GitIssue
         {
             Fields = new Dictionary<FieldKey, FieldInfo>
             {
-                {FieldKey.Create("Title"),       new FieldInfo<string, JsonValueField>    {Required = true}},
-                {FieldKey.Create("Description"), new FieldInfo<string, JsonValueField>    {Required = true}},
-                {FieldKey.Create("Created"),     new FieldInfo<DateTime, JsonValueField>  {Required = true}},
-                {FieldKey.Create("Updated"),     new FieldInfo<DateTime, JsonValueField>  {Required = true}},
-                {FieldKey.Create("Labels"),      new FieldInfo<Label, JsonArrayField>     {Required = false}}
+                {FieldKey.Create("Title"), new FieldInfo<string, JsonValueField>(true)},
+                {FieldKey.Create("Description"), new FieldInfo<string, JsonValueField>(true)},
+                {FieldKey.Create("Created"), new FieldInfo<DateTime, JsonValueField>(true)},
+                {FieldKey.Create("Updated"), new FieldInfo<DateTime, JsonValueField>(true)},
+                {FieldKey.Create("Labels"), new FieldInfo<Label, JsonArrayField>(false)},
+                {FieldKey.Create("Comments"), new FieldInfo<string, JsonArrayField>(false)}
             };
         }
 

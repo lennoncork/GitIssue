@@ -21,7 +21,7 @@ namespace GitIssue.Fields
                 .Where(m => m.IsPublic)
                 .Where(m => m.Name == nameof(CreateField))
                 .Where(m => m.IsGenericMethodDefinition)
-                .Select(m => m.MakeGenericMethod(info.DataType.Type))
+                .Select(m => m.MakeGenericMethod(info.ValueType.Type))
                 .FirstOrDefault();
 
             if (method != null)
@@ -43,7 +43,7 @@ namespace GitIssue.Fields
                 .Where(m => m.IsPublic)
                 .Where(m => m.Name == nameof(ReadFieldAsync))
                 .Where(m => m.IsGenericMethodDefinition)
-                .Select(m => m.MakeGenericMethod(info.DataType.Type))
+                .Select(m => m.MakeGenericMethod(info.ValueType.Type))
                 .FirstOrDefault();
 
             if (method != null)

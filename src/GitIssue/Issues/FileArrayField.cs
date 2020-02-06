@@ -30,7 +30,7 @@ namespace GitIssue.Issues
             try
             {
                 var generic = typeof(FileArrayField<>);
-                var specific = generic.MakeGenericType((Type) info.DataType);
+                var specific = generic.MakeGenericType((Type) info.ValueType);
                 var read = specific.GetMethod(nameof(ReadAsync), BindingFlags.Public | BindingFlags.Static);
                 if (read != null)
                 {

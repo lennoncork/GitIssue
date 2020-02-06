@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Keys;
+using GitIssue.Values;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Json
@@ -50,9 +51,9 @@ namespace GitIssue.Json
                     {
                         var values = jArray
                             .Select(t => t as JValue)
-                            .Select(t => t?.Value)
-                            .Where(t => t?.GetType() == typeof(T))
-                            .Select(t => (T) t)
+                            .Select(t => (s: TryGetValue(t, out T v), r: v))
+                            .Where(t => t.s)
+                            .Select(t => t.r)
                             .ToArray();
 
                         return new JsonArrayField<T>(key, values);
@@ -80,6 +81,12 @@ namespace GitIssue.Json
             if (jValue.Value is T result)
             {
                 value = result;
+                return true;
+            }
+
+            if (ValueExtensions.TryParse(jValue.Value.ToString(), out T converted))
+            {
+                value = converted;
                 return true;
             }
 

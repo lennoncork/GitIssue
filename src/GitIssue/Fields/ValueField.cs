@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using GitIssue.Formatters;
 using GitIssue.Keys;
+using GitIssue.Values;
 
 namespace GitIssue.Fields
 {
@@ -44,18 +45,7 @@ namespace GitIssue.Fields
         /// <param name="input">the input string</param>
         /// <param name="value">the output value</param>
         /// <returns></returns>
-        internal static bool TryParse(string input, out T value)
-        {
-            var converter = TypeDescriptor.GetConverter(typeof(T));
-            if (converter.CanConvertFrom(typeof(string)))
-            {
-                value = (T)converter.ConvertFrom(input);
-                return true;
-            }
-
-            value = default;
-            return false;
-        }
+        internal static bool TryParse(string input, out T value) => ValueExtensions.TryParse<T>(input, out value);
 
         /// <inheritdoc />
         public override string ToString()

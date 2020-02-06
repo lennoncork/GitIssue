@@ -40,6 +40,22 @@ namespace GitIssue.Fields
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        /// </summary>
+        public FieldInfo() : this(false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        /// </summary>
+        /// <param name="required"></param>
+        public FieldInfo(bool required)
+        {
+            this.Required = required;
+        }
+
+        /// <summary>
         ///     Gets or sets if the field is required on a given issue
         /// </summary>
         [JsonProperty]
@@ -53,10 +69,22 @@ namespace GitIssue.Fields
         public virtual FieldType FieldType { get; set; } = FieldType.Create<JsonValueField>();
 
         /// <summary>
-        ///     Gets or sets the data type for the field
+        ///     Gets or sets the metadata for the field
+        /// </summary>
+        [JsonProperty, DefaultValue("")]
+        public virtual string FieldMetadata { get; set; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets the value type for the field
         /// </summary>
         [JsonProperty]
-        public virtual FieldType DataType { get; set; } = FieldType.Create<string>();
+        public virtual FieldType ValueType { get; set; } = FieldType.Create<string>();
+
+        /// <summary>
+        ///     Gets or sets the metadata for the values
+        /// </summary>
+        [JsonProperty, DefaultValue("")]
+        public virtual string ValueMetadata { get; set; } = string.Empty;
 
         /// <summary>
         ///     Determines if the field is valid
@@ -104,10 +132,26 @@ namespace GitIssue.Fields
     public class FieldInfo<T> : FieldInfo
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        /// </summary>
+        public FieldInfo() : this(false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        /// </summary>
+        /// <param name="required"></param>
+        public FieldInfo(bool required): base(required)
+        {
+            this.Required = required;
+        }
+
+        /// <summary>
         ///     Gets or sets the data type
         /// </summary>
         [JsonProperty]
-        public override FieldType DataType
+        public override FieldType ValueType
         {
             get => FieldType.Create<T>();
             set => throw new ArgumentException("Cannot set data type for generic data info");
@@ -120,6 +164,22 @@ namespace GitIssue.Fields
     [JsonObject]
     public class FieldInfo<T1, T2> : FieldInfo<T1>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        /// </summary>
+        public FieldInfo() : this(false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        /// </summary>
+        /// <param name="required"></param>
+        public FieldInfo(bool required): base(required)
+        {
+            this.Required = required;
+        }
+
         /// <summary>
         ///     Gets or sets the field type
         /// </summary>

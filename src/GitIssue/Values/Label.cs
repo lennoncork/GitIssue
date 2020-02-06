@@ -18,6 +18,19 @@ namespace GitIssue.Fields
         private readonly string value;
 
         /// <summary>
+        /// Tries to parse a string to the email address
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="label"></param>
+        /// <returns></returns>
+        public static bool TryParse(string str, out Label label)
+        {
+            label = new Label(str);
+            return true;
+        }
+
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Label"/> struct
         /// </summary>
         /// <param name="value"></param>
