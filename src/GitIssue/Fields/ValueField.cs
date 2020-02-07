@@ -45,7 +45,7 @@ namespace GitIssue.Fields
         /// <param name="input">the input string</param>
         /// <param name="value">the output value</param>
         /// <returns></returns>
-        internal static bool TryParse(string input, out T value) => ValueExtensions.TryParse<T>(input, out value);
+        internal static bool TryParse(string input, out T value) => ValueExtensions.TryParse(input, out value);
 
         /// <inheritdoc />
         public override string ToString()

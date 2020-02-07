@@ -18,6 +18,9 @@ namespace GitIssue.Converters
             if (sourceType == typeof(string))
                 return true;
 
+            if (sourceType == typeof(ValueMetadata))
+                return true;
+
             return base.CanConvertFrom(context, sourceType);
         }
 
@@ -27,6 +30,10 @@ namespace GitIssue.Converters
         {
             if (value is string str)
                 if (this.TryParse(str, out T result))
+                    return result;
+
+            if (value is ValueMetadata valueMetadata)
+                if (this.TryParse(valueMetadata, out T result))
                     return result;
 
             return base.ConvertFrom(context, culture, value);
@@ -50,5 +57,13 @@ namespace GitIssue.Converters
         /// <param name="result">the resulting value</param>
         /// <returns></returns>
         public abstract bool TryParse(string input, out T result);
+
+        /// <summary>
+        /// Tries to parse a value including it's metadata
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public abstract bool TryParse(ValueMetadata input, out T result);
     }
 }

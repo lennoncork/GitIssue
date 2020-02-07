@@ -138,6 +138,10 @@ namespace GitIssue.Util
                         }
                     }
                 }
+                else
+                {
+                    logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
+                }
                 break;
             }
         }

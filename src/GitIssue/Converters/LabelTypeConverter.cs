@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Text;
 using GitIssue.Fields;
+using GitIssue.Values;
 
 namespace GitIssue.Converters
 {
@@ -14,5 +15,8 @@ namespace GitIssue.Converters
     {
         /// <inheritdoc />
         public override bool TryParse(string input, out Label result) => Label.TryParse(input, out result);
+
+        /// <inheritdoc/>
+        public override bool TryParse(ValueMetadata input, out Label result) => TryParse(input.Value, out result);
     }
 }

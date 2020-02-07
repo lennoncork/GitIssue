@@ -12,5 +12,8 @@ namespace GitIssue.Converters
     {
         /// <inheritdoc/>
         public override bool TryParse(string input, out Url result) => Url.TryParse(input, out result);
+
+        /// <inheritdoc/>
+        public override bool TryParse(ValueMetadata input, out Url result) => TryParse(input.Value, out result);
     }
 }

@@ -45,13 +45,14 @@ namespace GitIssue.Json
                 if (json.TryGetValue(key.ToString(), out var token))
                 {
                     if (IsValueField(info) && token is JValue jValue)
-                        if (TryGetValue(jValue, out T value))
+                        if (TryGetValue(jValue, info, out T value))
                             return new JsonValueField<T>(key, value);
+
                     if (IsArrayField(info) && token is JArray jArray)
                     {
                         var values = jArray
                             .Select(t => t as JValue)
-                            .Select(t => (s: TryGetValue(t, out T v), r: v))
+                            .Select(t => (s: TryGetValue(t, info, out T v), r: v))
                             .Where(t => t.s)
                             .Select(t => t.r)
                             .ToArray();
@@ -76,22 +77,11 @@ namespace GitIssue.Json
             return info.FieldType.Type == typeof(JsonArrayField);
         }
 
-        private bool TryGetValue<T>(JValue jValue, out T value)
+        private bool TryGetValue<T>(JValue jValue, FieldInfo info, out T value)
         {
-            if (jValue.Value is T result)
-            {
-                value = result;
-                return true;
-            }
-
-            if (ValueExtensions.TryParse(jValue.Value.ToString(), out T converted))
-            {
-                value = converted;
-                return true;
-            }
-
-            value = default;
-            return false;
+            if(string.IsNullOrEmpty(info.ValueMetadata))
+                return ValueExtensions.TryParse(jValue.Value, out value);
+            return ValueExtensions.TryParse(jValue.Value, out value, info.ValueMetadata);
         }
     }
 }

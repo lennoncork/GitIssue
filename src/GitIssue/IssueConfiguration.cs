@@ -58,7 +58,8 @@ namespace GitIssue
                 using var writer = new StreamWriter(stream);
                 var serializer = JsonSerializer.Create(new JsonSerializerSettings
                 {
-                    Formatting = Formatting.Indented
+                    Formatting = Formatting.Indented,
+                    DefaultValueHandling = DefaultValueHandling.Ignore
                 });
                 serializer.Serialize(writer, this, typeof(T));
             }

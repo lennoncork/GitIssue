@@ -10,28 +10,51 @@ namespace GitIssue.Values
     /// </summary>
     public static class ValueExtensions
     {
-        /// <summary>
-        ///     Tries to parse the string input to the output value
-        /// </summary>
-        /// <param name="input">the input string</param>
-        /// <param name="value">the output value</param>
-        /// <returns></returns>
-        internal static bool TryParse<T>(string input, out T value)
+        internal static bool TryParse<T1, T2>(T1 input, out T2 value)
         {
+            if (input is T2 result)
+            {
+                value = result;
+                return true;
+            }
+
             try
             {
-                var converter = TypeDescriptor.GetConverter(typeof(T));
-                if (converter.CanConvertFrom(typeof(string)))
+                var converter = TypeDescriptor.GetConverter(typeof(T2));
+                if (converter.CanConvertFrom(typeof(T1)))
                 {
-                    value = (T) converter.ConvertFrom(input);
+                    value = (T2)converter.ConvertFrom(input);
                     return true;
                 }
-
+                if (converter.CanConvertFrom(typeof(string)))
+                {
+                    value = (T2)converter.ConvertFrom(input.ToString());
+                    return true;
+                }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // ignored conversion errors
             }
+
+            value = default;
+            return false;
+        }
+
+        internal static bool TryParse<T1, T2>(T1 input, out T2 value, string metadata)
+        {
+            if (input is T2 result)
+            {
+                value = result;
+                return true;
+            }
+
+            if (TryParse(new ValueMetadata(input?.ToString(), metadata), out T2 converted))
+            {
+                value = converted;
+                return true;
+            }
+
             value = default;
             return false;
         }
