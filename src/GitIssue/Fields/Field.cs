@@ -27,5 +27,8 @@ namespace GitIssue.Fields
 
         /// <inheritdoc />
         public abstract Task<bool> SaveAsync();
+
+        /// <inheritdoc />
+        public abstract Task<string> ExportAsync();
     }
 }

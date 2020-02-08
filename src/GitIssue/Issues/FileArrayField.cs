@@ -99,6 +99,11 @@ namespace GitIssue.Issues
             }
         }
 
+        public override Task<string> ExportAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <inheritdoc />
         public JToken ToJson()
         {

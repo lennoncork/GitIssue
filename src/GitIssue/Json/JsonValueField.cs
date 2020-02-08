@@ -41,6 +41,9 @@ namespace GitIssue.Json
         }
 
         /// <inheritdoc />
+        public override Task<string> ExportAsync() => Task.FromResult(this.ToString());
+
+        /// <inheritdoc />
         public JToken ToJson()
         {
             if (this.Value is IJsonValue value)

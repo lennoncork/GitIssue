@@ -21,6 +21,12 @@ namespace GitIssue.Fields
         Task<bool> UpdateAsync(string input);
 
         /// <summary>
+        /// Exports to a string
+        /// </summary>
+        /// <returns></returns>
+        Task<string> ExportAsync();
+
+        /// <summary>
         ///     Saves any additional filed data
         /// </summary>
         /// <returns></returns>

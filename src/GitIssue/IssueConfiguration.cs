@@ -37,6 +37,12 @@ namespace GitIssue
         public Dictionary<FieldKey, FieldInfo> Fields { get; set; }
 
         /// <summary>
+        /// Gets or sets the editor to use
+        /// </summary>
+        [JsonProperty]
+        public string Editor { get; set; } = "joe";
+
+        /// <summary>
         ///     Saves the configuration to a file
         /// </summary>
         /// <param name="file">the configuration file</param>

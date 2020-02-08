@@ -68,7 +68,7 @@ namespace GitIssue.Util
         [Value(2, HelpText = "The field to edit", Required = true)]
         public string Field { get; set; } = String.Empty;
 
-        [Value(3, HelpText = "The text to update the field with", Required = true)]
+        [Value(3, HelpText = "The text to update the field with", Required = false)]
         public string Update { get; set; } = String.Empty;
     }
 

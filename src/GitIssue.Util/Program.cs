@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CommandLine;
+using GitIssue.Editors;
 using GitIssue.Fields;
 using GitIssue.Formatters;
 using GitIssue.Keys;
@@ -129,7 +130,18 @@ namespace GitIssue.Util
                 FieldKey key = FieldKey.Create(options.Field);
                 if (issue.ContainsKey(key))
                 {
-                    if (await issue[key].UpdateAsync(options.Update))
+                    if (string.IsNullOrEmpty(options.Update))
+                    {
+                        var editor = new Editor();
+                        await editor.Open(issue[key]);
+                        issue.Updated = DateTime.Now;
+                        if (await issue.SaveAsync())
+                        {
+                            Console.WriteLine(issue.Format(formatter));
+                        }
+                    }
+
+                    else if (await issue[key].UpdateAsync(options.Update))
                     {
                         issue.Updated = DateTime.Now;
                         if (await issue.SaveAsync())
