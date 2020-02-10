@@ -6,7 +6,7 @@ using GitIssue.Values;
 namespace GitIssue.Converters
 {
     /// <summary>
-    /// Base class for value type converters
+    ///     Base class for value type converters
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class ValueTypeConverter<T> : TypeConverter where T : IValue
@@ -29,11 +29,11 @@ namespace GitIssue.Converters
             CultureInfo culture, object value)
         {
             if (value is string str)
-                if (this.TryParse(str, out T result))
+                if (TryParse(str, out var result))
                     return result;
 
             if (value is ValueMetadata valueMetadata)
-                if (this.TryParse(valueMetadata, out T result))
+                if (TryParse(valueMetadata, out var result))
                     return result;
 
             return base.ConvertFrom(context, culture, value);
@@ -51,7 +51,7 @@ namespace GitIssue.Converters
         }
 
         /// <summary>
-        /// Tries to parse the value
+        ///     Tries to parse the value
         /// </summary>
         /// <param name="input">the input string</param>
         /// <param name="result">the resulting value</param>
@@ -59,7 +59,7 @@ namespace GitIssue.Converters
         public abstract bool TryParse(string input, out T result);
 
         /// <summary>
-        /// Tries to parse a value including it's metadata
+        ///     Tries to parse a value including it's metadata
         /// </summary>
         /// <param name="input"></param>
         /// <param name="result"></param>

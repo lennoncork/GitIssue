@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -146,6 +145,5 @@ namespace GitIssue.Issues
                 throw new ArgumentException($"Failed to read field {key} on issue {issueRoot.Key}", e);
             }
         }
-
     }
 }

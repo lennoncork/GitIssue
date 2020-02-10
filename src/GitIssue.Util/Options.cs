@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using CommandLine;
 
 namespace GitIssue.Util
@@ -49,27 +47,26 @@ namespace GitIssue.Util
 
         [Value(1, HelpText = "The LINQ expression to use when matching", Required = false)]
         public string Linq { get; set; } = "i => true";
-
     }
 
     [Verb(nameof(Command.Show), HelpText = "Shows the details of an issue")]
     public class ShowOptions : Options
     {
         [Value(1, HelpText = "The issue key to use", Required = false)]
-        public string Key { get; set; } = String.Empty;
+        public string Key { get; set; } = string.Empty;
     }
 
     [Verb(nameof(Command.Edit), HelpText = "Edits fields of an existing issue")]
     public class EditOptions : Options
     {
         [Value(1, HelpText = "The issue to edit", Required = true)]
-        public string Key { get; set; } = String.Empty;
+        public string Key { get; set; } = string.Empty;
 
-        [Value(2, HelpText = "The field to edit", Required = true)]
-        public string Field { get; set; } = String.Empty;
+        [Value(2, HelpText = "The field to edit", Required = false)]
+        public string Field { get; set; } = string.Empty;
 
         [Value(3, HelpText = "The text to update the field with", Required = false)]
-        public string Update { get; set; } = String.Empty;
+        public string Update { get; set; } = string.Empty;
     }
 
 #pragma warning restore 1591

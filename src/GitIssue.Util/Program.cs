@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using CommandLine;
 using GitIssue.Editors;
-using GitIssue.Fields;
 using GitIssue.Formatters;
 using GitIssue.Keys;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
@@ -25,7 +24,7 @@ namespace GitIssue.Util
                 with.HelpWriter = Console.Error;
             });
 
-            parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions, 
+            parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
                     ShowOptions, EditOptions>(args)
                 .WithParsed<InitOptions>(o => ExecAsync(Init, o).Wait())
                 .WithParsed<CreateOptions>(o => ExecAsync(Create, o).Wait())
@@ -99,7 +98,7 @@ namespace GitIssue.Util
         }
 
         /// <summary>
-        /// Shows the issue details
+        ///     Shows the issue details
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
@@ -116,7 +115,7 @@ namespace GitIssue.Util
         }
 
         /// <summary>
-        /// Edits an existing issue
+        ///     Edits an existing issue
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
@@ -125,38 +124,58 @@ namespace GitIssue.Util
             var formatter = new DetailedFormatter();
             await using var issues = Initialize(options);
             var find = issues.FindAsync(i => i.Key.ToString() == options.Key);
-            await foreach (var issue in find)
-            {
-                FieldKey key = FieldKey.Create(options.Field);
-                if (issue.ContainsKey(key))
-                {
-                    if (string.IsNullOrEmpty(options.Update))
-                    {
-                        var editor = new Editor();
-                        await editor.Open(issue[key]);
-                        issue.Updated = DateTime.Now;
-                        if (await issue.SaveAsync())
-                        {
-                            Console.WriteLine(issue.Format(formatter));
-                        }
-                    }
 
-                    else if (await issue[key].UpdateAsync(options.Update))
-                    {
-                        issue.Updated = DateTime.Now;
-                        if (await issue.SaveAsync())
-                        {
-                            Console.WriteLine(issue.Format(formatter));
-                        }
-                    }
-                }
-                else
-                {
-                    logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
-                }
+            IIssue issue = null;
+            var updated = false;
+            await foreach (var found in find)
+            {
+                issue = found;
                 break;
             }
-        }
 
+            if (issue == null)
+            {
+                logger.Error($"Issue \"{options.Key}\" not found");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(options.Field))
+            {
+                var editor = new Editor();
+                await editor.Open(issue);
+                updated = true;
+            }
+
+            if (updated)
+            {
+                issue.Updated = DateTime.Now;
+                if (await issue.SaveAsync()) Console.WriteLine(issue.Format(formatter));
+                return;
+            }
+
+            var key = FieldKey.Create(options.Field);
+            if (!issue.ContainsKey(key))
+            {
+                logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(options.Update))
+            {
+                var editor = new Editor();
+                await editor.Open(issue[key]);
+                updated = true;
+            }
+            else if (await issue[key].UpdateAsync(options.Update))
+            {
+                updated = true;
+            }
+
+            if (updated)
+            {
+                issue.Updated = DateTime.Now;
+                if (await issue.SaveAsync()) Console.WriteLine(issue.Format(formatter));
+            }
+        }
     }
 }

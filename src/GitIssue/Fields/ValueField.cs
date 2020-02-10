@@ -1,7 +1,5 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
-using GitIssue.Formatters;
 using GitIssue.Keys;
 using GitIssue.Values;
 
@@ -11,7 +9,7 @@ namespace GitIssue.Fields
     ///     An issue field with a single value
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class ValueField<T> : Field
+    public abstract class ValueField<T> : Field, IValueField<T>
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="ValueField{T}" /> class
@@ -23,19 +21,21 @@ namespace GitIssue.Fields
             Value = value;
         }
 
-        /// <summary>
-        ///     The field value
-        /// </summary>
+        /// <inheritdoc />
+        public Type ValueType => typeof(T);
+
+        /// <inheritdoc />
         public T Value { get; set; }
 
         /// <inheritdoc />
         public override Task<bool> UpdateAsync(string input)
         {
-            if (TryParse(input, out T result))
+            if (TryParse(input, out var result))
             {
-                this.Value = result;
+                Value = result;
                 return Task.FromResult(true);
             }
+
             return Task.FromResult(false);
         }
 
@@ -45,12 +45,15 @@ namespace GitIssue.Fields
         /// <param name="input">the input string</param>
         /// <param name="value">the output value</param>
         /// <returns></returns>
-        internal static bool TryParse(string input, out T value) => ValueExtensions.TryParse(input, out value);
+        internal static bool TryParse(string input, out T value)
+        {
+            return ValueExtensions.TryParse(input, out value);
+        }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.Value.ToString();
+            return Value.ToString();
         }
     }
 }

@@ -14,14 +14,14 @@ namespace GitIssue.Fields
         FieldKey Key { get; }
 
         /// <summary>
-        /// Parses the input and updates the field if successful
+        ///     Parses the input and updates the field if successful
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
         Task<bool> UpdateAsync(string input);
 
         /// <summary>
-        /// Exports to a string
+        ///     Exports to a string
         /// </summary>
         /// <returns></returns>
         Task<string> ExportAsync();

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GitIssue.Keys;
@@ -14,7 +12,7 @@ namespace GitIssue.Fields
     ///     An issue field with an array of values
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class ArrayField<T> : Field, IEnumerable<T>
+    public abstract class ArrayField<T> : Field, IArrayField<T>
     {
         private List<T> values;
 
@@ -28,13 +26,14 @@ namespace GitIssue.Fields
             this.values = new List<T>(values);
         }
 
-        /// <summary>
-        ///     Field values
-        /// </summary>
+        /// <inheritdoc />
+        public Type ValueType => typeof(T);
+
+        /// <inheritdoc />
         public T[] Values
         {
-            get => this.values.ToArray();
-            set => this.values = new List<T>(value);
+            get => values.ToArray();
+            set => values = new List<T>(value);
         }
 
         /// <inheritdoc />
@@ -56,35 +55,27 @@ namespace GitIssue.Fields
             if (input.StartsWith('+'))
             {
                 if (TryParse(input.TrimStart('+'), out result))
-                {
-                    if (!this.values.Contains(result))
-                        this.values.Add(result);
-                }
+                    if (!values.Contains(result))
+                        values.Add(result);
                 return Task.FromResult(true);
             }
 
             if (input.StartsWith('-'))
             {
                 if (TryParse(input.TrimStart('-'), out result))
-                {
-                    if(this.values.Contains(result))
-                        this.values.Remove(result);
-                }
+                    if (values.Contains(result))
+                        values.Remove(result);
                 return Task.FromResult(true);
             }
 
             if (input.StartsWith('[') && input.EndsWith(']'))
             {
                 this.values.Clear();
-                string[] values = input.TrimStart('[').TrimEnd(']').Split(',');
+                var values = input.TrimStart('[').TrimEnd(']').Split(',');
                 foreach (var value in values)
-                {
                     if (TryParse(value.Trim(), out result))
-                    {
                         if (!this.values.Contains(result))
                             this.values.Add(result);
-                    }
-                }
                 return Task.FromResult(true);
             }
 
@@ -97,17 +88,21 @@ namespace GitIssue.Fields
         /// <param name="input">the input string</param>
         /// <param name="value">the output value</param>
         /// <returns></returns>
-        internal static bool TryParse(string input, out T value) => ValueExtensions.TryParse(input, out value);
+        internal static bool TryParse(string input, out T value)
+        {
+            return ValueExtensions.TryParse(input, out value);
+        }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < this.values.Count; i++)
+            var builder = new StringBuilder();
+            for (var i = 0; i < values.Count; i++)
             {
                 if (i > 0) builder.Append(", ");
-                builder.Append(this.Values[i]);
+                builder.Append(Values[i]);
             }
+
             return builder.ToString();
         }
     }

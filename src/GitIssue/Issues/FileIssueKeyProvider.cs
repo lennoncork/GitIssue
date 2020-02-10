@@ -8,14 +8,14 @@ using GitIssue.Keys;
 namespace GitIssue.Issues
 {
     /// <summary>
-    /// The issue key provider
+    ///     The issue key provider
     /// </summary>
     public class FileIssueKeyProvider : IssueKeyProvider
     {
         private readonly RepositoryRoot root;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileIssueKeyProvider"/> class
+        ///     Initializes a new instance of the <see cref="FileIssueKeyProvider" /> class
         /// </summary>
         /// <param name="root"></param>
         public FileIssueKeyProvider(RepositoryRoot root)

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
+﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
 using GitIssue.Converters;
 using GitIssue.Json;
@@ -10,22 +7,25 @@ using Newtonsoft.Json.Linq;
 namespace GitIssue.Values
 {
     /// <summary>
-    /// Version value type
+    ///     Version value type
     /// </summary>
     [TypeConverter(typeof(VersionTypeConverter))]
-    public class Version : IJsonValue
+    public struct Version : IJsonValue
     {
-        private static string regex = @"^[\s]*(\d*).(\d*).(\d*)(\-[\w.]*)?(\+[\w.]*)?[\s]*$";
+        private static readonly string regex = @"^[\s]*(\d*).(\d*).(\d*)(\-[\w.]*)?(\+[\w.]*)?[\s]*$";
 
         /// <summary>
-        /// Tries to pars the semantic version
+        ///     Tries to parse the semantic version
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static Version Parse(string str) => new Version(str);
+        public static Version Parse(string str)
+        {
+            return new Version(str);
+        }
 
         /// <summary>
-        /// Tries to pars the semantic version
+        ///     Tries to parse the semantic version
         /// </summary>
         /// <param name="str"></param>
         /// <param name="version"></param>
@@ -38,69 +38,70 @@ namespace GitIssue.Values
 
         internal Version(string version)
         {
-            if (string.IsNullOrEmpty(version))
+            if (IsMatch(version, regex, out var match) &&
+                match.Groups.Count == 6)
             {
-                this.IsValid = false;
-                return;
+                MajorVersion = int.Parse(match.Groups[1].ToString());
+                MinorVersion = int.Parse(match.Groups[2].ToString());
+                PatchVersion = int.Parse(match.Groups[3].ToString());
+                PreRelease = match.Groups[4].ToString().TrimStart('-');
+                BuildMetadata = match.Groups[5].ToString().TrimStart('+');
+                IsValid = true;
             }
-
-            if (IsMatch(version, regex, out Match match))
+            else
             {
-                if (match.Groups.Count == 6)
-                {
-                    this.MajorVersion = int.Parse(match.Groups[1].ToString());
-                    this.MinorVersion = int.Parse(match.Groups[2].ToString());
-                    this.PatchVersion = int.Parse(match.Groups[3].ToString());
-                    this.PreRelease = match.Groups[4].ToString().TrimStart('-');
-                    this.BuildMetadata = match.Groups[5].ToString().TrimStart('+');
-                    this.IsValid = true;
-                }
+                MajorVersion = 1;
+                MinorVersion = 0;
+                PatchVersion = 0;
+                PreRelease = null;
+                BuildMetadata = null;
+                IsValid = false;
             }
         }
 
         /// <summary>
-        /// Gets the value determining if the version is valid
+        ///     Gets the value determining if the version is valid
         /// </summary>
-        public bool IsValid { get; protected set; } = false;
+        public bool IsValid { get; }
 
         /// <summary>
-        /// The Major Version
+        ///     The Major Version
         /// </summary>
-        public int MajorVersion { get; protected set; } = 0;
+        public int MajorVersion { get; }
 
         /// <summary>
-        /// The Minor Version
+        ///     The Minor Version
         /// </summary>
-        public int MinorVersion { get; protected set; } = 1;
+        public int MinorVersion { get; }
 
         /// <summary>
-        /// The Patch Version
+        ///     The Patch Version
         /// </summary>
-        public int PatchVersion { get; protected set; } = 0;
+        public int PatchVersion { get; }
 
         /// <summary>
-        /// The Pre-Release String
+        ///     The Pre-Release String
         /// </summary>
-        public string PreRelease { get; protected set; } = null;
+        public string PreRelease { get; }
 
         /// <summary>
-        /// The Build Metadata
+        ///     The Build Metadata
         /// </summary>
-        public string BuildMetadata { get; protected set; } = null;
+        public string BuildMetadata { get; }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string ToString()
         {
-            string version = $"{this.MajorVersion}.{this.MinorVersion}.{this.PatchVersion}";
-            if (string.IsNullOrEmpty(this.PreRelease) == false)
-                version += $"-{this.PreRelease}";
-            if (string.IsNullOrEmpty(this.BuildMetadata) == false)
-                version += $"+{this.BuildMetadata}";
+            var version = $"{MajorVersion}.{MinorVersion}.{PatchVersion}";
+            if (string.IsNullOrEmpty(PreRelease) == false)
+                version += $"-{PreRelease}";
+            if (string.IsNullOrEmpty(BuildMetadata) == false)
+                version += $"+{BuildMetadata}";
             return version;
         }
 
         /// <summary>
-        /// Matches a string and patter, returning the Match
+        ///     Matches a string and patter, returning the Match
         /// </summary>
         /// <param name="input">the input string</param>
         /// <param name="pattern">the regex pattern</param>
@@ -108,24 +109,31 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static bool IsMatch(string input, string pattern, out Match match)
         {
-            match = Regex.Match(input, pattern);
-            return match.Success;
+            if (!string.IsNullOrEmpty(input))
+            {
+                match = Regex.Match(input, pattern);
+                return match.Success;
+            }
+
+            match = null;
+            return false;
         }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JValue(this.ToString());
+        public JToken ToJson()
+        {
+            return new JValue(ToString());
+        }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Version version)
-            {
-                return (this.MajorVersion == version.MajorVersion) &&
-                       (this.MinorVersion == version.MinorVersion) &&
-                       (this.PatchVersion == version.PatchVersion) &&
-                       (this.PreRelease == version.PreRelease) &&
-                       (this.BuildMetadata == version.BuildMetadata);
-            }
+                return MajorVersion == version.MajorVersion &&
+                       MinorVersion == version.MinorVersion &&
+                       PatchVersion == version.PatchVersion &&
+                       PreRelease == version.PreRelease &&
+                       BuildMetadata == version.BuildMetadata;
             return false;
         }
     }

@@ -79,7 +79,7 @@ namespace GitIssue.Json
 
         private bool TryGetValue<T>(JValue jValue, FieldInfo info, out T value)
         {
-            if(string.IsNullOrEmpty(info.ValueMetadata))
+            if (string.IsNullOrEmpty(info.ValueMetadata))
                 return ValueExtensions.TryParse(jValue.Value, out value);
             return ValueExtensions.TryParse(jValue.Value, out value, info.ValueMetadata);
         }

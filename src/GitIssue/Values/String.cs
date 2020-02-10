@@ -1,37 +1,30 @@
-﻿using System.ComponentModel;
-using GitIssue.Converters;
-using GitIssue.Json;
+﻿using GitIssue.Json;
 using Newtonsoft.Json.Linq;
 
-namespace GitIssue.Fields
+namespace GitIssue.Values
 {
     /// <summary>
-    ///     A simple label class
+    ///     String value type
     /// </summary>
-    [TypeConverter(typeof(LabelTypeConverter))]
-    public struct Label : IJsonValue
+    public struct String : IJsonValue
     {
         private readonly string value;
 
         /// <summary>
-        ///     Tries to parse the label value
+        ///     Tries to parse the string value
         /// </summary>
         /// <param name="value"></param>
-        /// <param name="label"></param>
+        /// <param name="str"></param>
         /// <returns></returns>
-        public static bool TryParse(string value, out Label label)
+        public static bool TryParse(string value, out String str)
         {
-            label = new Label(value);
+            str = new String(value);
             return true;
         }
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="Label" /> struct
-        /// </summary>
-        /// <param name="value"></param>
-        public Label(string value)
+        internal String(string value)
         {
-            this.value = !string.IsNullOrWhiteSpace(value) ? value.Split()[0].ToLowerInvariant() : null;
+            this.value = value;
         }
 
         /// <inheritdoc />
@@ -49,10 +42,9 @@ namespace GitIssue.Fields
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            if (obj is Label label)
-                if (value == label.value)
+            if (obj is String str)
+                if (str.value == value)
                     return true;
-
             return base.Equals(obj);
         }
 

@@ -37,7 +37,7 @@ namespace GitIssue
         public Dictionary<FieldKey, FieldInfo> Fields { get; set; }
 
         /// <summary>
-        /// Gets or sets the editor to use
+        ///     Gets or sets the editor to use
         /// </summary>
         [JsonProperty]
         public string Editor { get; set; } = "joe";

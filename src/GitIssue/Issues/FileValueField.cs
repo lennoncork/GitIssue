@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -19,7 +18,7 @@ namespace GitIssue.Issues
         private readonly IssueRoot issueRoot;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="FileValueField{T}"/> class
+        ///     Initializes a new instance of the <see cref="FileValueField{T}" /> class
         /// </summary>
         /// <param name="issueRoot"></param>
         /// <param name="key"></param>

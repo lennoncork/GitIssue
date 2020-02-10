@@ -31,13 +31,13 @@
         Find,
 
         /// <summary>
-        /// Shows the details of an issue
+        ///     Shows the details of an issue
         /// </summary>
         Show,
 
         /// <summary>
-        /// Edits an existing issue
+        ///     Edits an existing issue
         /// </summary>
-        Edit,
+        Edit
     }
 }

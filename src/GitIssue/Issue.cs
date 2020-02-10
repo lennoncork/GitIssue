@@ -31,28 +31,28 @@ namespace GitIssue
         /// <inheritdoc />
         public IssueKey Key => Root.Key;
 
-        /// <inheritdoc cref="IIssue"/>
+        /// <inheritdoc cref="IIssue" />
         public string Title
         {
             get => GetField().AsValue<string>();
             set => SetField().WithValue(value);
         }
 
-        /// <inheritdoc cref="IIssue"/>
+        /// <inheritdoc cref="IIssue" />
         public string Description
         {
             get => GetField().AsValue<string>();
             set => SetField().WithValue(value);
         }
 
-        /// <inheritdoc cref="IIssue"/>
+        /// <inheritdoc cref="IIssue" />
         public DateTime Created
         {
             get => GetField().AsValue<DateTime>();
             set => SetField().WithValue(value);
         }
 
-        /// <inheritdoc cref="IIssue"/>
+        /// <inheritdoc cref="IIssue" />
         public DateTime Updated
         {
             get => GetField().AsValue<DateTime>();

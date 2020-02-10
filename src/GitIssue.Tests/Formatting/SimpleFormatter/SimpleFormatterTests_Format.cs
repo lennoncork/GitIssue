@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using GitIssue.Formatters;
 using NUnit.Framework;
 
@@ -18,8 +17,8 @@ namespace GitIssue.Tests.IssueManager
                 var create = await Sut
                     .CreateAsync(nameof(FormatsOutput), string.Empty)
                     .WithSafeResultAsync();
-                string output = create.Result.Format();
-                string expected = $"{create.Result.Key}: {create.Result.Title}";
+                var output = create.Result.Format();
+                var expected = $"{create.Result.Key}: {create.Result.Title}";
                 Assert.That(output, Is.EqualTo(expected));
             }
         }

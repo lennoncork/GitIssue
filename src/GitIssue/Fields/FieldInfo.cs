@@ -18,6 +18,22 @@ namespace GitIssue.Fields
         private static IFieldReader[] readers;
 
         /// <summary>
+        ///     Initializes a new instance of the <see cref="FieldInfo" /> class
+        /// </summary>
+        public FieldInfo() : this(false)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="FieldInfo" /> class
+        /// </summary>
+        /// <param name="required"></param>
+        public FieldInfo(bool required)
+        {
+            Required = required;
+        }
+
+        /// <summary>
         ///     Gets the list of field readers
         /// </summary>
         [JsonIgnore]
@@ -40,22 +56,6 @@ namespace GitIssue.Fields
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FieldInfo"/> class
-        /// </summary>
-        public FieldInfo() : this(false)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FieldInfo"/> class
-        /// </summary>
-        /// <param name="required"></param>
-        public FieldInfo(bool required)
-        {
-            this.Required = required;
-        }
-
-        /// <summary>
         ///     Gets or sets if the field is required on a given issue
         /// </summary>
         [JsonProperty]
@@ -71,7 +71,8 @@ namespace GitIssue.Fields
         /// <summary>
         ///     Gets or sets the metadata for the field
         /// </summary>
-        [JsonProperty, DefaultValue("")]
+        [JsonProperty]
+        [DefaultValue("")]
         public virtual string FieldMetadata { get; set; } = string.Empty;
 
         /// <summary>
@@ -83,7 +84,8 @@ namespace GitIssue.Fields
         /// <summary>
         ///     Gets or sets the metadata for the values
         /// </summary>
-        [JsonProperty, DefaultValue("")]
+        [JsonProperty]
+        [DefaultValue("")]
         public virtual string ValueMetadata { get; set; } = string.Empty;
 
         /// <summary>
@@ -132,19 +134,19 @@ namespace GitIssue.Fields
     public class FieldInfo<T> : FieldInfo
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        ///     Initializes a new instance of the <see cref="FieldInfo" /> class
         /// </summary>
         public FieldInfo() : this(false)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        ///     Initializes a new instance of the <see cref="FieldInfo" /> class
         /// </summary>
         /// <param name="required"></param>
-        public FieldInfo(bool required): base(required)
+        public FieldInfo(bool required) : base(required)
         {
-            this.Required = required;
+            Required = required;
         }
 
         /// <summary>
@@ -165,19 +167,19 @@ namespace GitIssue.Fields
     public class FieldInfo<T1, T2> : FieldInfo<T1>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        ///     Initializes a new instance of the <see cref="FieldInfo" /> class
         /// </summary>
         public FieldInfo() : this(false)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FieldInfo"/> class
+        ///     Initializes a new instance of the <see cref="FieldInfo" /> class
         /// </summary>
         /// <param name="required"></param>
-        public FieldInfo(bool required): base(required)
+        public FieldInfo(bool required) : base(required)
         {
-            this.Required = required;
+            Required = required;
         }
 
         /// <summary>

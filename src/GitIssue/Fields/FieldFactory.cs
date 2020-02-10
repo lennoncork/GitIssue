@@ -29,7 +29,7 @@ namespace GitIssue.Fields
         public void WithValue<T>(T value)
         {
             var field = callback?.Invoke();
-            if (field is ValueField<T> valueField) 
+            if (field is ValueField<T> valueField)
                 valueField.Value = value;
         }
 

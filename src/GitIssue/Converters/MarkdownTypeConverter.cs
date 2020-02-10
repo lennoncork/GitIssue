@@ -1,19 +1,22 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using GitIssue.Fields;
-using GitIssue.Values;
+﻿using GitIssue.Values;
 
 namespace GitIssue.Converters
 {
     /// <summary>
-    /// Converts from a string to a markdown value
+    ///     Converts from a string to a markdown value
     /// </summary>
-    public class MarkdownTypeConverter: ValueTypeConverter<Markdown>
+    public class MarkdownTypeConverter : ValueTypeConverter<Markdown>
     {
-        /// <inheritdoc/>
-        public override bool TryParse(string input, out Markdown result) => Markdown.TryParse(input, out result);
+        /// <inheritdoc />
+        public override bool TryParse(string input, out Markdown result)
+        {
+            return Markdown.TryParse(input, out result);
+        }
 
-        /// <inheritdoc/>
-        public override bool TryParse(ValueMetadata input, out Markdown result) => TryParse(input.Value, out result);
+        /// <inheritdoc />
+        public override bool TryParse(ValueMetadata input, out Markdown result)
+        {
+            return TryParse(input.Value, out result);
+        }
     }
 }

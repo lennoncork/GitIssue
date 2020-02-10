@@ -20,7 +20,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
                     .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
                 var fixVersion = Version.Parse("1.2.3-abs+def");
-                create.Result.SetFixVersion(new [] { fixVersion });
+                create.Result.SetFixVersion(new[] {fixVersion});
                 await create.Result.SaveAsync();
                 var find = Issues.Find(i => i.Key == create.Result.Key).ToArray();
                 var issue = find[0];

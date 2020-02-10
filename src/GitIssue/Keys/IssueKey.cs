@@ -3,14 +3,14 @@
 namespace GitIssue.Keys
 {
     /// <summary>
-    /// Issue key (unique identifier)
+    ///     Issue key (unique identifier)
     /// </summary>
     public struct IssueKey : IEquatable<IssueKey>
     {
         private readonly string key;
 
         /// <summary>
-        /// Initialized a new instance of the key
+        ///     Initialized a new instance of the key
         /// </summary>
         /// <param name="key">the key string</param>
         private IssueKey(string key)
@@ -19,7 +19,7 @@ namespace GitIssue.Keys
         }
 
         /// <summary>
-        /// Creates a new instance of the key
+        ///     Creates a new instance of the key
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
@@ -29,7 +29,7 @@ namespace GitIssue.Keys
         }
 
         /// <summary>
-        /// Creates an empty (none) key
+        ///     Creates an empty (none) key
         /// </summary>
         /// <returns></returns>
         public static IssueKey None()
@@ -38,7 +38,7 @@ namespace GitIssue.Keys
         }
 
         /// <summary>
-        /// Equals comparison operator overload
+        ///     Equals comparison operator overload
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -49,7 +49,7 @@ namespace GitIssue.Keys
         }
 
         /// <summary>
-        /// None Equals comparison operator overload
+        ///     None Equals comparison operator overload
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -59,25 +59,25 @@ namespace GitIssue.Keys
             return !(x == y);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string ToString()
         {
             return key;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return key.GetHashCode();
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return key.Equals(obj);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public bool Equals(IssueKey other)
         {
             return key == other.key;

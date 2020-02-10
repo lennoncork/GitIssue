@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
 using GitIssue.Converters;
 using GitIssue.Json;
 using Newtonsoft.Json.Linq;
@@ -10,34 +6,40 @@ using Newtonsoft.Json.Linq;
 namespace GitIssue.Values
 {
     /// <summary>
-    /// Version value type
+    ///     Version value type
     /// </summary>
     [TypeConverter(typeof(MarkdownTypeConverter))]
-    public class Markdown : IJsonValue
+    public struct Markdown : IJsonValue
     {
-        private readonly string content;
+        private readonly string value;
 
         /// <summary>
-        /// Tries to parse the markdown string
+        ///     Tries to parse the markdown value
         /// </summary>
-        /// <param name="str"></param>
+        /// <param name="value"></param>
         /// <param name="markdown"></param>
         /// <returns></returns>
-        public static bool TryParse(string str, out Markdown markdown)
+        public static bool TryParse(string value, out Markdown markdown)
         {
-            markdown = new Markdown(str);
+            markdown = new Markdown(value);
             return true;
         }
 
-        internal Markdown(string content)
+        internal Markdown(string value)
         {
-            this.content = content;
+            this.value = value;
         }
 
-        /// <inheritdoc/>
-        public override string ToString() => this.content;
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return value;
+        }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JValue(this.ToString());
+        public JToken ToJson()
+        {
+            return new JValue(value);
+        }
     }
 }

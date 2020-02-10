@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 namespace GitIssue.Json
 {
     /// <summary>
-    /// Alias class for issue settings
+    ///     Alias class for issue settings
     /// </summary>
     public class JsonArrayField
     {
@@ -34,21 +34,26 @@ namespace GitIssue.Json
         }
 
         /// <inheritdoc />
-        public override Task<string> ExportAsync() => Task.FromResult(this.ToString());
+        public override Task<string> ExportAsync()
+        {
+            return Task.FromResult(ToString());
+        }
 
         /// <inheritdoc />
         public JToken ToJson()
         {
             var array = new JArray();
-            foreach (var value in this.Values)
+            foreach (var value in Values)
             {
                 if (value is IJsonValue jValue)
                 {
                     array.Add(jValue.ToJson());
                     continue;
                 }
+
                 array.Add(new JValue(value));
             }
+
             return array;
         }
     }

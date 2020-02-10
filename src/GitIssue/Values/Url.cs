@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 using GitIssue.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Values
 {
     /// <summary>
-    /// Version value type
+    ///     Version value type
     /// </summary>
-    public class Url : IJsonValue
+    public struct Url : IJsonValue
     {
-        private readonly Uri uri;
+        private readonly string value;
 
         /// <summary>
-        /// Tries to parse a string to the email address
+        ///     Tries to parse a string to the email address
         /// </summary>
         /// <param name="str"></param>
         /// <param name="url"></param>
@@ -30,24 +27,46 @@ namespace GitIssue.Values
         {
             try
             {
-                this.uri = new Uri(url);
-                this.IsValid = true;
+                value = new Uri(url).ToString();
+                IsValid = true;
             }
             catch (UriFormatException)
             {
-
+                value = null;
+                IsValid = false;
             }
         }
 
         /// <summary>
-        /// Gets the value determining if the version is valid
+        ///     Gets the value determining if the version is valid
         /// </summary>
-        public bool IsValid { get; protected set; } = false;
-
-        /// <inheritdoc/>
-        public override string ToString() => this.uri?.ToString();
+        public bool IsValid { get; }
 
         /// <inheritdoc />
-        public JToken ToJson() => new JValue(this.ToString());
+        public override string ToString()
+        {
+            return value;
+        }
+
+        /// <inheritdoc />
+        public JToken ToJson()
+        {
+            return new JValue(value);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj is Url url)
+                if (value == url.value)
+                    return true;
+            return base.Equals(obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
     }
 }
