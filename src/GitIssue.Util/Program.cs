@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
 using GitIssue.Editors;
@@ -25,13 +27,14 @@ namespace GitIssue.Util
             });
 
             parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
-                    ShowOptions, EditOptions>(args)
+                    ShowOptions, EditOptions, TrackOptions>(args)
                 .WithParsed<InitOptions>(o => ExecAsync(Init, o).Wait())
                 .WithParsed<CreateOptions>(o => ExecAsync(Create, o).Wait())
                 .WithParsed<DeleteOptions>(o => ExecAsync(Delete, o).Wait())
                 .WithParsed<FindOptions>(o => ExecAsync(Find, o).Wait())
                 .WithParsed<ShowOptions>(o => ExecAsync(Show, o).Wait())
-                .WithParsed<EditOptions>(o => ExecAsync(Edit, o).Wait());
+                .WithParsed<EditOptions>(o => ExecAsync(Edit, o).Wait())
+                .WithParsed<TrackOptions>(o => ExecAsync(Track, o).Wait());
         }
 
         public static IIssueManager Initialize(Options options)
@@ -41,7 +44,11 @@ namespace GitIssue.Util
                 .MinimumLevel.Debug()
                 .CreateLogger();
 
-            return new IssueManager(options.Path, options.Type, logger);
+            if (options is KeyOptions keyOptions)
+                keyOptions.Tracked = TrackedIssue
+                    .Read(Path.Combine(options.Path, options.Name, options.Tracking), logger);
+
+            return new IssueManager(options.Path, options.Name, logger);
         }
 
         private static async Task ExecAsync<T>(Func<T, Task> func, T value)
@@ -62,7 +69,7 @@ namespace GitIssue.Util
 
         public static async Task Init(InitOptions options)
         {
-            await using var issues = Initialize(options);
+            await using var issues = IssueManager.Init(options.Path, options.Name);
         }
 
         public static async Task Create(CreateOptions options)
@@ -75,6 +82,25 @@ namespace GitIssue.Util
         {
             await using var issues = new IssueManager(options.Path, logger);
             await issues.DeleteAsync(options.Key);
+        }
+
+        public static async Task Track(TrackOptions options)
+        {
+            await using var issues = Initialize(options);
+            options.Tracked = TrackedIssue.None;
+            if (!string.IsNullOrEmpty(options.Key))
+            {
+                var find = await issues.FindAsync(i => i.Key.ToString() == options.Key)
+                    .FirstOrDefaultAsync();
+
+                if (find != null)
+                {
+                    options.Tracked.Key = find.Key;
+                    options.Tracked.Started = DateTime.Now;
+                }
+            }
+            options.Tracked.Save(Path.Combine(options.Path, options.Name, options.Tracking), logger);
+            Console.WriteLine($"Tacking Issue '{options.Tracked.Key}'");
         }
 
         public static async Task Find(FindOptions options)
@@ -106,12 +132,10 @@ namespace GitIssue.Util
         {
             var formatter = new DetailedFormatter();
             await using var issues = Initialize(options);
-            var find = issues.FindAsync(i => i.Key.ToString() == options.Key);
-            await foreach (var issue in find)
-            {
-                Console.WriteLine(issue.Format(formatter));
-                break;
-            }
+            var issue = await issues
+                .FindAsync(i => i.Key.ToString() == options.Key)
+                .FirstOrDefaultAsync();
+            Console.WriteLine(issue?.Format(formatter));
         }
 
         /// <summary>
@@ -123,15 +147,9 @@ namespace GitIssue.Util
         {
             var formatter = new DetailedFormatter();
             await using var issues = Initialize(options);
-            var find = issues.FindAsync(i => i.Key.ToString() == options.Key);
-
-            IIssue issue = null;
-            var updated = false;
-            await foreach (var found in find)
-            {
-                issue = found;
-                break;
-            }
+            var issue = await issues
+                .FindAsync(i => i.Key.ToString() == options.Key)
+                .FirstOrDefaultAsync();
 
             if (issue == null)
             {
@@ -139,6 +157,7 @@ namespace GitIssue.Util
                 return;
             }
 
+            bool updated = false;
             if (string.IsNullOrEmpty(options.Field))
             {
                 var editor = new Editor();

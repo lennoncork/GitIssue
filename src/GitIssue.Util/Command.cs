@@ -26,6 +26,11 @@
         Delete,
 
         /// <summary>
+        ///     Deletes and existing issue
+        /// </summary>
+        Track,
+
+        /// <summary>
         ///     Finds an existing issue
         /// </summary>
         Find,

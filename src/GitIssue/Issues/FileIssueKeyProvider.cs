@@ -96,7 +96,7 @@ namespace GitIssue.Issues
                 }
             }
 
-            key = IssueKey.None();
+            key = IssueKey.None;
             return false;
         }
 

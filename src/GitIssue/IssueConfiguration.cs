@@ -60,7 +60,7 @@ namespace GitIssue
         {
             try
             {
-                using var stream = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                using var stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
                 using var writer = new StreamWriter(stream);
                 var serializer = JsonSerializer.Create(new JsonSerializerSettings
                 {
@@ -98,8 +98,8 @@ namespace GitIssue
                 using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
                 using var reader = new StreamReader(stream);
                 var serializer = new JsonSerializer();
-                var version = (T) serializer.Deserialize(reader, typeof(T));
-                return version;
+                var configuration = (T) serializer.Deserialize(reader, typeof(T));
+                return configuration;
             }
             catch (Exception ex)
             {
