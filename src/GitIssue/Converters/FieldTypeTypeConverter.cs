@@ -25,14 +25,8 @@ namespace GitIssue.Converters
             CultureInfo culture, object value)
         {
             if (value is string str)
-                try
-                {
-                    var type = Type.GetType(str);
-                    return FieldType.Create(type);
-                }
-                catch (TypeLoadException)
-                {
-                }
+                if (FieldType.TryParse(str, out FieldType type))
+                    return type;
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -43,7 +37,7 @@ namespace GitIssue.Converters
         {
             if (destinationType == typeof(string))
                 if (value is FieldType type)
-                    return type.Type.FullName;
+                    return type.ToString();
             return base.ConvertTo(context, culture, value, destinationType);
         }
     }

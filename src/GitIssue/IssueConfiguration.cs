@@ -4,6 +4,7 @@ using System.IO;
 using GitIssue.Fields;
 using GitIssue.Json;
 using GitIssue.Keys;
+using GitIssue.Values;
 using Newtonsoft.Json;
 
 namespace GitIssue

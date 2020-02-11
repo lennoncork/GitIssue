@@ -27,13 +27,14 @@ namespace GitIssue.Util
             });
 
             parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
-                    ShowOptions, EditOptions, TrackOptions>(args)
+                    ShowOptions, EditOptions, TrackOptions, FieldsOptions>(args)
                 .WithParsed<InitOptions>(o => ExecAsync(Init, o).Wait())
                 .WithParsed<CreateOptions>(o => ExecAsync(Create, o).Wait())
                 .WithParsed<DeleteOptions>(o => ExecAsync(Delete, o).Wait())
                 .WithParsed<FindOptions>(o => ExecAsync(Find, o).Wait())
                 .WithParsed<ShowOptions>(o => ExecAsync(Show, o).Wait())
                 .WithParsed<EditOptions>(o => ExecAsync(Edit, o).Wait())
+                .WithParsed<FieldsOptions>(o => ExecAsync(Fields, o).Wait())
                 .WithParsed<TrackOptions>(o => ExecAsync(Track, o).Wait());
         }
 
@@ -136,6 +137,16 @@ namespace GitIssue.Util
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
             Console.WriteLine(issue?.Format(formatter));
+        }
+
+        public static async Task Fields(FieldsOptions options)
+        {
+            await using var issues = Initialize(options);
+            foreach (var kvp in issues.Configuration.Fields)
+            {
+                string output = $"{kvp.Key}: A '{kvp.Value.FieldType}' field '{kvp.Value.ValueType}' values";
+                Console.WriteLine(output);
+            }
         }
 
         /// <summary>

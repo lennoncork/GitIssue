@@ -43,6 +43,11 @@
         /// <summary>
         ///     Edits an existing issue
         /// </summary>
-        Edit
+        Edit,
+
+        /// <summary>
+        ///     Shows the fields available for use
+        /// </summary>
+        Fields
     }
 }

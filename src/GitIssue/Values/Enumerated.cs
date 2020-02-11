@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using GitIssue.Converters;
 using GitIssue.Json;
-using GitIssue.Values;
 using Newtonsoft.Json.Linq;
 
-namespace GitIssue.Fields
+namespace GitIssue.Values
 {
     /// <summary>
     ///     An enumerated value

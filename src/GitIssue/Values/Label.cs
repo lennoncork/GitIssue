@@ -3,7 +3,7 @@ using GitIssue.Converters;
 using GitIssue.Json;
 using Newtonsoft.Json.Linq;
 
-namespace GitIssue.Fields
+namespace GitIssue.Values
 {
     /// <summary>
     ///     A simple label class

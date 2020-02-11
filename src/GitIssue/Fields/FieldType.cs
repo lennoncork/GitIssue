@@ -23,6 +23,27 @@ namespace GitIssue.Fields
         }
 
         /// <summary>
+        ///     Tries to parse the label value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="fieldType"></param>
+        /// <returns></returns>
+        public static bool TryParse(string value, out FieldType fieldType)
+        {
+            try
+            {
+                var type = Type.GetType(value);
+                fieldType = FieldType.Create(type);
+                return true;
+            }
+            catch (TypeLoadException)
+            {
+                fieldType = default;
+            }
+            return false;
+        }
+
+        /// <summary>
         ///     Creates a new FieldType
         /// </summary>
         /// <param name="type"></param>
@@ -50,5 +71,8 @@ namespace GitIssue.Fields
         {
             return fieldType.Type;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => this.Type.FullName;
     }
 }

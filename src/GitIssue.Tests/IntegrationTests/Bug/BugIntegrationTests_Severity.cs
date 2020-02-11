@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Fields;
+using GitIssue.Values;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IntegrationTests.Bug

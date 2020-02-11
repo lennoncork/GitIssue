@@ -80,6 +80,11 @@ namespace GitIssue.Util
         public string Linq { get; set; } = "i => true";
     }
 
+    [Verb(nameof(Command.Fields), HelpText = "Shows the fields available")]
+    public class FieldsOptions : Options
+    {
+    }
+
     [Verb(nameof(Command.Show), HelpText = "Shows the details of an issue")]
     public class ShowOptions : KeyOptions
     {
