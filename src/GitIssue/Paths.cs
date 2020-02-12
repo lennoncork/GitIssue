@@ -16,8 +16,13 @@
         public static string IssueRootFolderName { get; set; } = ".issues";
 
         /// <summary>
-        ///     Gets or sets the config folder name
+        ///     Gets or sets the config file name
         /// </summary>
         public static string ConfigFileName { get; set; } = "config.json";
+
+        /// <summary>
+        ///     Gets or sets the change log file name
+        /// </summary>
+        public static string ChangeLogFileName { get; set; } = "changes.json";
     }
 }

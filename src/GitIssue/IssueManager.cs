@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
@@ -74,6 +76,7 @@ namespace GitIssue
             Root = RepositoryRoot.Open(WorkingDirectory, FolderName);
             KeyProvider = new FileIssueKeyProvider(Root);
             Configuration = IssueConfiguration.Read(Root.ConfigFile);
+            ChangeLog = ChangeLog.Read(Root.ChangeLog);
         }
 
         /// <summary>
@@ -100,6 +103,56 @@ namespace GitIssue
         public IssueConfiguration Configuration { get; protected set; }
 
         /// <inheritdoc />
+        public ChangeLog ChangeLog { get; protected set; }
+
+        public bool Commit()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> CommitAsync()
+        {
+            if (Repository.Index.IsFullyMerged == false ||
+                Repository.Index.Count != 0)
+            {
+                this.logger.Error("Cannot commit, another commit is in progress");
+                return Task.FromResult(false);
+            }
+
+            var files = Directory.EnumerateFiles(this.Root.IssuesPath, "*.*", SearchOption.AllDirectories);
+            foreach (var file in files)
+            {
+                string relative = Path.GetRelativePath(Root.RootPath, file);
+                Console.WriteLine(relative);
+                Repository.Index.Add(relative);
+                Repository.Index.Write();
+            }
+
+            StringBuilder builder = new StringBuilder();
+            int count = 0;
+            foreach (var changes in this.ChangeLog.Changes)
+            {
+                if (count++ > 0) builder.AppendLine();
+                builder.AppendLine($"Issue: {changes.Key}");
+                foreach (var change in changes.Value)
+                {
+                    builder.AppendLine(change);
+                }
+            }
+
+            if (Repository.Index.Count > 0)
+            {
+                Configuration config = Repository.Config;
+                Signature author = config.BuildSignature(DateTimeOffset.Now);
+                Repository.Commit(builder.ToString(), author, author);
+                this.ChangeLog.Clear();
+                return Task.FromResult(true);
+            }
+
+            return Task.FromResult(false);
+        }
+
+        /// <inheritdoc />
         public IRepository Repository { get; protected set; }
 
         /// <inheritdoc />
@@ -117,6 +170,7 @@ namespace GitIssue
                 Description = description
             };
             await issue.SaveAsync();
+            this.ChangeLog.Add(issue, ChangeType.Create);
             return issue;
         }
 
@@ -175,6 +229,7 @@ namespace GitIssue
         public void Dispose()
         {
             Repository?.Dispose();
+            ChangeLog.Save(Root.ChangeLog);
         }
 
         /// <inheritdoc />

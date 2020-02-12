@@ -103,5 +103,13 @@ namespace GitIssue.Util
         public string Update { get; set; } = string.Empty;
     }
 
+    [Verb(nameof(Command.Commit), HelpText = "Commits the issues")]
+    public class CommitOptions : KeyOptions
+    {
+        
+    }
+
+
+
 #pragma warning restore 1591
 }

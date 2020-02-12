@@ -27,7 +27,7 @@ namespace GitIssue.Util
             });
 
             parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
-                    ShowOptions, EditOptions, TrackOptions, FieldsOptions>(args)
+                    ShowOptions, EditOptions, TrackOptions, FieldsOptions, CommitOptions>(args)
                 .WithParsed<InitOptions>(o => ExecAsync(Init, o).Wait())
                 .WithParsed<CreateOptions>(o => ExecAsync(Create, o).Wait())
                 .WithParsed<DeleteOptions>(o => ExecAsync(Delete, o).Wait())
@@ -35,7 +35,8 @@ namespace GitIssue.Util
                 .WithParsed<ShowOptions>(o => ExecAsync(Show, o).Wait())
                 .WithParsed<EditOptions>(o => ExecAsync(Edit, o).Wait())
                 .WithParsed<FieldsOptions>(o => ExecAsync(Fields, o).Wait())
-                .WithParsed<TrackOptions>(o => ExecAsync(Track, o).Wait());
+                .WithParsed<TrackOptions>(o => ExecAsync(Track, o).Wait())
+                .WithParsed<CommitOptions>(o => ExecAsync(Commit, o).Wait());
         }
 
         public static IIssueManager Initialize(Options options)
@@ -127,11 +128,6 @@ namespace GitIssue.Util
             await foreach (var issue in find) Console.WriteLine(issue.Format(formatter));
         }
 
-        /// <summary>
-        ///     Shows the issue details
-        /// </summary>
-        /// <param name="options"></param>
-        /// <returns></returns>
         public static async Task Show(ShowOptions options)
         {
             var formatter = new DetailedFormatter();
@@ -140,6 +136,12 @@ namespace GitIssue.Util
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
             Console.WriteLine(issue?.Format(formatter));
+        }
+
+        public static async Task Commit(CommitOptions options)
+        {
+            await using var issues = Initialize(options);
+            await issues.CommitAsync();
         }
 
         public static async Task Fields(FieldsOptions options)

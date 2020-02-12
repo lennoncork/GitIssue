@@ -14,6 +14,12 @@ namespace GitIssue.Tests.IssueManager
             if (Directory.Exists(TestDirectory) == false) Directory.CreateDirectory(TestDirectory);
         }
 
+        [TearDown]
+        public void Teardown()
+        {
+            this.Sut?.Dispose();
+        }
+
         protected string TestDirectory;
 
         protected string GitDirectory => Path.Combine(TestDirectory, Paths.GitFolderName);

@@ -29,6 +29,11 @@ namespace GitIssue
         public string ConfigFile => Path.Combine(IssuesPath, Paths.ConfigFileName);
 
         /// <summary>
+        ///     Gets the path to the change log
+        /// </summary>
+        public string ChangeLog => Path.Combine(IssuesPath, Paths.ChangeLogFileName);
+
+        /// <summary>
         ///     Gets the issue configuration
         /// </summary>
         public IssueConfiguration Configuration => IssueConfiguration.Read(ConfigFile);

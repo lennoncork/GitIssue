@@ -21,6 +21,11 @@
         Create,
 
         /// <summary>
+        /// Commits the issues
+        /// </summary>
+        Commit,
+
+        /// <summary>
         ///     Deletes and existing issue
         /// </summary>
         Delete,

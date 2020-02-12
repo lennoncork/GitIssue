@@ -27,6 +27,23 @@ namespace GitIssue
         IssueConfiguration Configuration { get; }
 
         /// <summary>
+        /// Gets the change log for the issues
+        /// </summary>
+        ChangeLog ChangeLog { get; }
+
+        /// <summary>
+        ///     Commits the changes
+        /// </summary>
+        /// <returns></returns>
+        bool Commit();
+
+        /// <summary>
+        ///     Commits the changes
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> CommitAsync();
+
+        /// <summary>
         ///     Creates a new issue
         /// </summary>
         /// <param name="title">the issue title</param>

@@ -64,6 +64,18 @@ namespace GitIssue.Fields
             return !(lhs == rhs);
         }
 
+        /// <summary>
+        ///     Implicit cast to string
+        /// </summary>
+        /// <param name="value"></param>
+        public static implicit operator string(FieldKey value) => value.ToString();
+
+        /// <summary>
+        ///     Implicit cast to FieldKey
+        /// </summary>
+        /// <param name="value"></param>
+        public static implicit operator FieldKey(string value) => FieldKey.Create(value);
+
         /// <inheritdoc />
         public override string ToString()
         {

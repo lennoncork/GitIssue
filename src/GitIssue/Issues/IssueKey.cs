@@ -65,6 +65,18 @@ namespace GitIssue.Issues
             return !(x == y);
         }
 
+        /// <summary>
+        ///     Implicit cast to string
+        /// </summary>
+        /// <param name="value"></param>
+        public static implicit operator string(IssueKey value) => value.ToString();
+
+        /// <summary>
+        ///     Implicit cast to IssueKey
+        /// </summary>
+        /// <param name="value"></param>
+        public static implicit operator IssueKey(string value) => IssueKey.Create(value);
+
         /// <inheritdoc />
         public override string ToString()
         {
