@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using GitIssue.Keys;
+using GitIssue.Issues;
 
 namespace GitIssue.Converters
 {

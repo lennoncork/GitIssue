@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using GitIssue.Converters;
-using GitIssue.Json;
+using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Values
@@ -9,6 +9,7 @@ namespace GitIssue.Values
     ///     Version value type
     /// </summary>
     [TypeConverter(typeof(MarkdownTypeConverter))]
+    [TypeAlias(nameof(Markdown))]
     public struct Markdown : IJsonValue
     {
         private readonly string value;

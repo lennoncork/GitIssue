@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using GitIssue.Keys;
+using GitIssue.Issues;
 
 namespace GitIssue.Fields
 {

@@ -1,48 +1,50 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Text;
-using GitIssue.Keys;
+using GitIssue.Issues;
 using Newtonsoft.Json;
 using Serilog;
-using Serilog.Core;
 
 namespace GitIssue.Util
 {
     /// <summary>
-    /// Tracked issue metadata
+    ///     Tracked issue metadata
     /// </summary>
     [JsonObject]
     public class TrackedIssue
     {
         /// <summary>
-        /// Gets the key of the tracked issue
+        ///     Initializes a new instance of the <see cref="TrackedIssue" /> class
+        /// </summary>
+        public TrackedIssue()
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TrackedIssue" /> class
+        /// </summary>
+        /// <param name="key">the issue key to track</param>
+        public TrackedIssue(IssueKey key)
+        {
+            Key = key;
+            Started = DateTime.Now;
+        }
+
+        /// <summary>
+        ///     Gets the key of the tracked issue
         /// </summary>
         [JsonProperty]
         public IssueKey Key { get; set; } = IssueKey.None;
 
         /// <summary>
-        /// Gets the started date of the tracking
+        ///     Gets the started date of the tracking
         /// </summary>
         [JsonProperty]
         public DateTime Started { get; set; } = DateTime.MinValue;
 
         /// <summary>
-        /// Gets the none tracked issue
+        ///     Gets the none tracked issue
         /// </summary>
         public static TrackedIssue None => new TrackedIssue();
-
-        public TrackedIssue()
-        {
-
-        }
-
-        public TrackedIssue(IssueKey key)
-        {
-            this.Key = key;
-            this.Started = DateTime.Now;
-        }
 
         /// <summary>
         ///     Saves the configuration to a file
@@ -83,7 +85,7 @@ namespace GitIssue.Util
                     using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
                     using var reader = new StreamReader(stream);
                     var serializer = new JsonSerializer();
-                    var tracked = (TrackedIssue)serializer.Deserialize(reader, typeof(TrackedIssue));
+                    var tracked = (TrackedIssue) serializer.Deserialize(reader, typeof(TrackedIssue));
                     return tracked;
                 }
             }
@@ -91,7 +93,8 @@ namespace GitIssue.Util
             {
                 logger.Error($"Unable to deserialize {file} as tracked issue file ", ex);
             }
-            return TrackedIssue.None;
+
+            return None;
         }
     }
 }

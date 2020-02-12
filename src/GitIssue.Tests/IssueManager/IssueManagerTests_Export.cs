@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using GitIssue.Json;
+using GitIssue.Issues.Json;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IssueManager

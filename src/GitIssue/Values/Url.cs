@@ -1,5 +1,5 @@
 ﻿using System;
-using GitIssue.Json;
+using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Values
@@ -7,6 +7,7 @@ namespace GitIssue.Values
     /// <summary>
     ///     Version value type
     /// </summary>
+    [TypeAlias(nameof(Url))]
     public struct Url : IJsonValue
     {
         private readonly string value;

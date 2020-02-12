@@ -1,6 +1,6 @@
 ﻿using System;
 using CommandLine;
-using GitIssue.Keys;
+using GitIssue.Issues;
 
 namespace GitIssue.Util
 {
@@ -18,12 +18,12 @@ namespace GitIssue.Util
         public string Tracking { get; set; } = "tracking.json";
     }
 
-    public class KeyOptions: Options
+    public class KeyOptions : Options
     {
         private string key = string.Empty;
 
         /// <summary>
-        /// Gets or sets the traced issue
+        ///     Gets or sets the traced issue
         /// </summary>
         public TrackedIssue Tracked { get; set; }
 
@@ -32,13 +32,10 @@ namespace GitIssue.Util
         {
             get
             {
-                if (string.IsNullOrEmpty(key))
-                {
-                    return this.Tracked?.Key.ToString() ?? IssueKey.None.ToString();
-                }
+                if (string.IsNullOrEmpty(key)) return Tracked?.Key.ToString() ?? IssueKey.None.ToString();
                 return key;
             }
-            set => this.key = value;
+            set => key = value;
         }
     }
 
@@ -93,6 +90,12 @@ namespace GitIssue.Util
     [Verb(nameof(Command.Edit), HelpText = "Edits fields of an existing issue")]
     public class EditOptions : KeyOptions
     {
+        [Option("editor", HelpText = "The editor to use", Required = false)]
+        public string Editor { get; set; } = "joe";
+
+        [Option("arguments", HelpText = "Any additional arguments to give to the editor", Required = false)]
+        public string Arguments { get; set; } = "-pound_comment -syntax git-commit";
+
         [Value(2, HelpText = "The field to edit", Required = false)]
         public string Field { get; set; } = string.Empty;
 

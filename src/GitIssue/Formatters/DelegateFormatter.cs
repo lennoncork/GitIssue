@@ -1,5 +1,6 @@
 ﻿using System;
 using GitIssue.Fields;
+using GitIssue.Issues;
 
 namespace GitIssue.Formatters
 {

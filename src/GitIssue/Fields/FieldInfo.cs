@@ -3,8 +3,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Exceptions;
-using GitIssue.Json;
-using GitIssue.Keys;
+using GitIssue.Issues;
+using GitIssue.Issues.Json;
+using GitIssue.Values;
 using Newtonsoft.Json;
 
 namespace GitIssue.Fields
@@ -66,7 +67,7 @@ namespace GitIssue.Fields
         ///     Gets or sets the data type for the field
         /// </summary>
         [JsonProperty]
-        public virtual FieldType FieldType { get; set; } = FieldType.Create<JsonValueField>();
+        public virtual TypeValue FieldType { get; set; } = TypeValue.Create<JsonValueField>();
 
         /// <summary>
         ///     Gets or sets the metadata for the field
@@ -79,7 +80,7 @@ namespace GitIssue.Fields
         ///     Gets or sets the value type for the field
         /// </summary>
         [JsonProperty]
-        public virtual FieldType ValueType { get; set; } = FieldType.Create<string>();
+        public virtual TypeValue ValueType { get; set; } = TypeValue.Create<string>();
 
         /// <summary>
         ///     Gets or sets the metadata for the values
@@ -153,9 +154,9 @@ namespace GitIssue.Fields
         ///     Gets or sets the data type
         /// </summary>
         [JsonProperty]
-        public override FieldType ValueType
+        public override TypeValue ValueType
         {
-            get => FieldType.Create<T>();
+            get => TypeValue.Create<T>();
             set => throw new ArgumentException("Cannot set data type for generic data info");
         }
     }
@@ -186,9 +187,9 @@ namespace GitIssue.Fields
         ///     Gets or sets the field type
         /// </summary>
         [JsonProperty]
-        public override FieldType FieldType
+        public override TypeValue FieldType
         {
-            get => FieldType.Create<T2>();
+            get => TypeValue.Create<T2>();
             set => throw new ArgumentException("Cannot set data type for generic field info");
         }
     }

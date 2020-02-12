@@ -1,5 +1,7 @@
 ﻿using System;
-using GitIssue.Keys;
+using GitIssue.Fields.Array;
+using GitIssue.Fields.Value;
+using GitIssue.Issues;
 
 namespace GitIssue.Fields
 {

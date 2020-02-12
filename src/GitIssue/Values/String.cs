@@ -1,4 +1,6 @@
-﻿using GitIssue.Json;
+﻿using System.ComponentModel;
+using GitIssue.Converters;
+using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Values
@@ -6,6 +8,8 @@ namespace GitIssue.Values
     /// <summary>
     ///     String value type
     /// </summary>
+    [TypeConverter(typeof(StringTypeConverter))]
+    [TypeAlias(nameof(String))]
     public struct String : IJsonValue
     {
         private readonly string value;
@@ -37,6 +41,24 @@ namespace GitIssue.Values
         public JToken ToJson()
         {
             return new JValue(value);
+        }
+
+        /// <summary>
+        ///     Implicit cast to string
+        /// </summary>
+        /// <param name="value"></param>
+        public static implicit operator string(String value)
+        {
+            return value.value;
+        }
+
+        /// <summary>
+        ///     Implicit cast to string
+        /// </summary>
+        /// <param name="value"></param>
+        public static implicit operator String(string value)
+        {
+            return new String(value);
         }
 
         /// <inheritdoc />

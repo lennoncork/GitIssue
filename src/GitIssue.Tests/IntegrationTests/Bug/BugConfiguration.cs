@@ -1,6 +1,5 @@
 ﻿using GitIssue.Fields;
-using GitIssue.Json;
-using GitIssue.Keys;
+using GitIssue.Issues.Json;
 using GitIssue.Values;
 
 namespace GitIssue.Tests.IntegrationTests.Bug

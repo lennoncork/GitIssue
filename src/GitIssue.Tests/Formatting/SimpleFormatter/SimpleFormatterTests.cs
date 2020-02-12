@@ -2,7 +2,7 @@
 using LibGit2Sharp;
 using NUnit.Framework;
 
-namespace GitIssue.Tests.IssueManager
+namespace GitIssue.Tests.Formatting.SimpleFormatter
 {
     [TestFixture]
     public partial class SimpleFormatterTests

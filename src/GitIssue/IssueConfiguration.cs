@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using GitIssue.Fields;
-using GitIssue.Json;
-using GitIssue.Keys;
+using GitIssue.Issues.Json;
 using GitIssue.Values;
 using Newtonsoft.Json;
+using DateTime = GitIssue.Values.DateTime;
+using String = GitIssue.Values.String;
 
 namespace GitIssue
 {
@@ -22,12 +23,12 @@ namespace GitIssue
         {
             Fields = new Dictionary<FieldKey, FieldInfo>
             {
-                {FieldKey.Create("Title"), new FieldInfo<string, JsonValueField>(true)},
-                {FieldKey.Create("Description"), new FieldInfo<string, JsonValueField>(true)},
+                {FieldKey.Create("Title"), new FieldInfo<String, JsonValueField>(true)},
+                {FieldKey.Create("Description"), new FieldInfo<String, JsonValueField>(true)},
                 {FieldKey.Create("Created"), new FieldInfo<DateTime, JsonValueField>(true)},
                 {FieldKey.Create("Updated"), new FieldInfo<DateTime, JsonValueField>(true)},
                 {FieldKey.Create("Labels"), new FieldInfo<Label, JsonArrayField>(false)},
-                {FieldKey.Create("Comments"), new FieldInfo<string, JsonArrayField>(false)}
+                {FieldKey.Create("Comments"), new FieldInfo<String, JsonArrayField>(false)}
             };
         }
 
@@ -36,12 +37,6 @@ namespace GitIssue
         /// </summary>
         [JsonProperty]
         public Dictionary<FieldKey, FieldInfo> Fields { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the editor to use
-        /// </summary>
-        [JsonProperty]
-        public string Editor { get; set; } = "joe";
 
         /// <summary>
         ///     Saves the configuration to a file
@@ -92,7 +87,7 @@ namespace GitIssue
         /// <typeparam name="T">the configuration type</typeparam>
         /// <param name="file">the configuration file</param>
         /// <returns>the <see cref="IssueConfiguration" /></returns>
-        public static IssueConfiguration Read<T>(string file) where T : IssueConfiguration
+        public static T Read<T>(string file) where T : IssueConfiguration
         {
             try
             {

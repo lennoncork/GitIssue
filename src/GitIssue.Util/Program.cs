@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
-using GitIssue.Editors;
+using GitIssue.Fields;
 using GitIssue.Formatters;
-using GitIssue.Keys;
+using GitIssue.Issues;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Serilog;
@@ -48,6 +48,8 @@ namespace GitIssue.Util
             if (options is KeyOptions keyOptions)
                 keyOptions.Tracked = TrackedIssue
                     .Read(Path.Combine(options.Path, options.Name, options.Tracking), logger);
+
+            //Configuration configuration = Configuration.Read();
 
             return new IssueManager(options.Path, options.Name, logger);
         }
@@ -100,6 +102,7 @@ namespace GitIssue.Util
                     options.Tracked.Started = DateTime.Now;
                 }
             }
+
             options.Tracked.Save(Path.Combine(options.Path, options.Name, options.Tracking), logger);
             Console.WriteLine($"Tacking Issue '{options.Tracked.Key}'");
         }
@@ -144,7 +147,7 @@ namespace GitIssue.Util
             await using var issues = Initialize(options);
             foreach (var kvp in issues.Configuration.Fields)
             {
-                string output = $"{kvp.Key}: A '{kvp.Value.FieldType}' field '{kvp.Value.ValueType}' values";
+                var output = $"{kvp.Key}: A '{kvp.Value.FieldType}' field '{kvp.Value.ValueType}' values";
                 Console.WriteLine(output);
             }
         }
@@ -168,10 +171,14 @@ namespace GitIssue.Util
                 return;
             }
 
-            bool updated = false;
+            var updated = false;
             if (string.IsNullOrEmpty(options.Field))
             {
-                var editor = new Editor();
+                var editor = new Editor
+                {
+                    Command = options.Editor,
+                    Arguments = options.Arguments
+                };
                 await editor.Open(issue);
                 updated = true;
             }
@@ -192,7 +199,11 @@ namespace GitIssue.Util
 
             if (string.IsNullOrEmpty(options.Update))
             {
-                var editor = new Editor();
+                var editor = new Editor
+                {
+                    Command = options.Editor,
+                    Arguments = options.Arguments
+                };
                 await editor.Open(issue[key]);
                 updated = true;
             }

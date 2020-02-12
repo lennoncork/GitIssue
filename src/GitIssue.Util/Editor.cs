@@ -6,10 +6,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GitIssue.Fields;
-using GitIssue.Keys;
+using GitIssue.Issues;
 
-namespace GitIssue.Editors
+namespace GitIssue.Util
 {
+    /// <summary>
+    ///     Editor class
+    /// </summary>
     public class Editor : IEditor
     {
         private static readonly char CommentChar = '#';
@@ -30,12 +33,12 @@ namespace GitIssue.Editors
         /// <summary>
         ///     Gets or sets the command
         /// </summary>
-        public string Command { get; set; } = "joe";
+        public string Command { get; set; }
 
         /// <summary>
         ///     Gets or sets the arguments
         /// </summary>
-        public string Arguments { get; set; } = "-pound_comment -syntax git-commit";
+        public string Arguments { get; set; }
 
         /// <inheritdoc />
         public async Task Open(IIssue issue)
@@ -151,17 +154,13 @@ namespace GitIssue.Editors
             var result = 0;
             await Task.Run(() =>
             {
-                using var process = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = editor,
-                        Arguments = arguments,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    }
-                };
+                using var process = new Process();
+
+                process.StartInfo.FileName = editor;
+                process.StartInfo.Arguments = arguments;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
 
                 process.Start();
                 process.BeginOutputReadLine();

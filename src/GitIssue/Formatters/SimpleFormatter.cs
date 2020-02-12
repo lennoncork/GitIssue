@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using GitIssue.Fields;
-using GitIssue.Keys;
+using GitIssue.Issues;
 
 namespace GitIssue.Formatters
 {
@@ -62,9 +62,7 @@ namespace GitIssue.Formatters
                 }
 
                 if (issue.TryGetValue(FieldKey.Create(property), out var field))
-                {
                     result = result.Replace(match.Value, field.ToString());
-                }
             }
 
             return result;

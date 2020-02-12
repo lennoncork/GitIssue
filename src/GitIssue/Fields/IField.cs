@@ -1,30 +1,18 @@
 ﻿using System.Threading.Tasks;
-using GitIssue.Keys;
 
 namespace GitIssue.Fields
 {
     /// <summary>
     ///     Field Interface
     /// </summary>
-    public interface IField
+    public interface IField : IReadOnlyField
     {
-        /// <summary>
-        ///     Gets the field's key
-        /// </summary>
-        FieldKey Key { get; }
-
         /// <summary>
         ///     Parses the input and updates the field if successful
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
         Task<bool> UpdateAsync(string input);
-
-        /// <summary>
-        ///     Exports to a string
-        /// </summary>
-        /// <returns></returns>
-        Task<string> ExportAsync();
 
         /// <summary>
         ///     Saves any additional filed data

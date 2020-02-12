@@ -1,5 +1,4 @@
-﻿using GitIssue.Fields;
-using GitIssue.Values;
+﻿using GitIssue.Values;
 
 namespace GitIssue.Converters
 {

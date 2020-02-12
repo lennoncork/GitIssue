@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
 using GitIssue.Fields;
+using GitIssue.Issues;
 
-namespace GitIssue.Editors
+namespace GitIssue.Util
 {
     public interface IEditor
     {

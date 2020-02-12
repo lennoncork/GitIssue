@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using GitIssue.Converters;
-using GitIssue.Json;
+using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Values
@@ -12,6 +12,7 @@ namespace GitIssue.Values
     ///     An enumerated value
     /// </summary>
     [TypeConverter(typeof(EnumTypeConverter))]
+    [TypeAlias(nameof(Enumerated))]
     public struct Enumerated : IJsonValue
     {
         private static readonly string regex = @"^\[(([\w]*)[,\s]*)*]$";
@@ -67,7 +68,7 @@ namespace GitIssue.Values
         public Enumerated(string value, string[] values)
         {
             this.value = value;
-            this.Values = values;
+            Values = values;
         }
 
         /// <summary>

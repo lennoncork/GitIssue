@@ -1,4 +1,6 @@
-﻿namespace GitIssue.Formatters
+﻿using GitIssue.Issues;
+
+namespace GitIssue.Formatters
 {
     /// <summary>
     ///     Field defining an issue formatter

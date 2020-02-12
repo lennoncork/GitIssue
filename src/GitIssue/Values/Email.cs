@@ -1,6 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Net.Mail;
-using GitIssue.Json;
+using GitIssue.Converters;
+using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Values
@@ -8,6 +10,8 @@ namespace GitIssue.Values
     /// <summary>
     ///     Version value type
     /// </summary>
+    [TypeConverter(typeof(EmailTypeConverter))]
+    [TypeAlias(nameof(Email))]
     public struct Email : IJsonValue
     {
         private readonly string value;

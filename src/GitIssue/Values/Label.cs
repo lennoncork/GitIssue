@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using GitIssue.Converters;
-using GitIssue.Json;
+using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Values
@@ -9,6 +9,7 @@ namespace GitIssue.Values
     ///     A simple label class
     /// </summary>
     [TypeConverter(typeof(LabelTypeConverter))]
+    [TypeAlias(nameof(Label))]
     public struct Label : IJsonValue
     {
         private readonly string value;
