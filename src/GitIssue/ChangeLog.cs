@@ -25,12 +25,14 @@ namespace GitIssue
     {
         private bool hasChanged = false;
 
-        private Dictionary<IssueKey, IList<string>> changes = 
-            new Dictionary<IssueKey, IList<string>>();
+        private Dictionary<IssueKey, List<string>> changes = new Dictionary<IssueKey, List<string>>();
 
         /// <inheritdoc/>
-        public IReadOnlyDictionary<IssueKey, string[]> Changes => this.changes
-            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
+        public IReadOnlyDictionary<IssueKey, string[]> Changes
+        {
+            get => this.changes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
+            set => this.changes = value.ToDictionary(kvp => kvp.Key, kvp => new List<string>(kvp.Value));
+        }
 
         /// <inheritdoc/>
         public void Clear()
@@ -38,6 +40,7 @@ namespace GitIssue
             this.hasChanged = true;
             this.changes.Clear();
         }
+
         /// <inheritdoc/>
         public void Add(IIssue issue, ChangeType change) => this.Add(issue, change, String.Empty);
 

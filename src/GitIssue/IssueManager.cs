@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GitIssue.Issues;
@@ -112,8 +113,13 @@ namespace GitIssue
 
         public Task<bool> CommitAsync()
         {
-            if (Repository.Index.IsFullyMerged == false ||
-                Repository.Index.Count != 0)
+            if (Repository.Index.IsFullyMerged == false)
+            {
+                this.logger.Error("Cannot commit, requires merge");
+                return Task.FromResult(false);
+            }
+
+            if (Repository.RetrieveStatus().Staged.Any())
             {
                 this.logger.Error("Cannot commit, another commit is in progress");
                 return Task.FromResult(false);
@@ -139,17 +145,13 @@ namespace GitIssue
                     builder.AppendLine(change);
                 }
             }
+            Console.WriteLine(builder.ToString());
 
-            if (Repository.Index.Count > 0)
-            {
-                Configuration config = Repository.Config;
-                Signature author = config.BuildSignature(DateTimeOffset.Now);
-                Repository.Commit(builder.ToString(), author, author);
-                this.ChangeLog.Clear();
-                return Task.FromResult(true);
-            }
-
-            return Task.FromResult(false);
+            Configuration config = Repository.Config;
+            Signature author = config.BuildSignature(DateTimeOffset.Now);
+            Repository.Commit(builder.ToString(), author, author);
+            this.ChangeLog.Clear();
+            return Task.FromResult(true);
         }
 
         /// <inheritdoc />

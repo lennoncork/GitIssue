@@ -34,7 +34,7 @@ namespace GitIssue
         /// <summary>
         /// Gets the dictionary of changes
         /// </summary>
-        public IReadOnlyDictionary<IssueKey, string[]> Changes { get; }
+        public IReadOnlyDictionary<IssueKey, string[]> Changes { get; set; }
 
     }
 }
