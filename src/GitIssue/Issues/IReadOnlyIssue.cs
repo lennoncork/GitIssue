@@ -40,7 +40,7 @@ namespace GitIssue.Issues
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public IFieldProvider GetField([CallerMemberName] string key = null);
+        public IFieldProvider GetField([CallerMemberName] string? key = null);
 
         /// <summary>
         ///     Gets a <see cref="IFieldProvider" /> for the provided <see cref="FieldKey" />

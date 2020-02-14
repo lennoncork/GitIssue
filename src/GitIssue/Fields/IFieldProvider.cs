@@ -1,4 +1,6 @@
-﻿namespace GitIssue.Fields
+﻿using GitIssue.Values;
+
+namespace GitIssue.Fields
 {
     /// <summary>
     ///     Provides an interface for a provider that extracts values from fields
@@ -10,13 +12,13 @@
         /// </summary>
         /// <typeparam name="T">the value data type</typeparam>
         /// <returns>the field value, or default</returns>
-        T AsValue<T>();
+        T AsValue<T>() where T : IValue;
 
         /// <summary>
         ///     Extracts the value array from the field
         /// </summary>
         /// <typeparam name="T">the value data type</typeparam>
         /// <returns>the array of field values, or null</returns>
-        T[] AsArray<T>();
+        T[] AsArray<T>() where T : IValue;
     }
 }

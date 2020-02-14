@@ -35,7 +35,7 @@ namespace GitIssue.Issues
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public IFieldFactory SetField([CallerMemberName] string key = null);
+        public IFieldFactory SetField([CallerMemberName] string? key = null);
 
         /// <summary>
         ///     Gets a <see cref="IFieldFactory" /> for the provided <see cref="FieldKey" />

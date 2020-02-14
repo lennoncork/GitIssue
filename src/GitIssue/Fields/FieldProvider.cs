@@ -2,6 +2,7 @@
 using GitIssue.Fields.Array;
 using GitIssue.Fields.Value;
 using GitIssue.Issues;
+using GitIssue.Values;
 
 namespace GitIssue.Fields
 {
@@ -10,7 +11,7 @@ namespace GitIssue.Fields
     /// </summary>
     public class FieldProvider : IFieldProvider
     {
-        private readonly Func<IField> callback;
+        private readonly Func<IField?> callback;
         private readonly Issue issue;
         private readonly FieldKey key;
 
@@ -20,7 +21,7 @@ namespace GitIssue.Fields
         /// <param name="issue">the parent issue</param>
         /// <param name="key">the field key</param>
         /// <param name="callback">the callback to invoke to get the field</param>
-        public FieldProvider(Issue issue, FieldKey key, Func<IField> callback)
+        public FieldProvider(Issue issue, FieldKey key, Func<IField?> callback)
         {
             this.issue = issue;
             this.key = key;
@@ -28,17 +29,17 @@ namespace GitIssue.Fields
         }
 
         /// <inheritdoc />
-        public T AsValue<T>()
+        public T AsValue<T>() where T : IValue
         {
             if (callback?.Invoke() is ValueField<T> fileField) return fileField.Value;
-            return default;
+            return default!;
         }
 
         /// <inheritdoc />
-        public T[] AsArray<T>()
+        public T[] AsArray<T>() where T : IValue
         {
             if (callback?.Invoke() is ArrayField<T> fileField) return fileField.Values;
-            return null;
+            return null!;
         }
     }
 }

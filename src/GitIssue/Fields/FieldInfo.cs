@@ -16,7 +16,7 @@ namespace GitIssue.Fields
     [JsonObject]
     public class FieldInfo
     {
-        private static IFieldReader[] readers;
+        private static IFieldReader[]? readers = null;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="FieldInfo" /> class
@@ -42,17 +42,15 @@ namespace GitIssue.Fields
         {
             get
             {
-                if (readers == null)
-                    readers = GetType().Assembly.GetTypes()
-                        .Where(t => t.IsPublic)
-                        .Where(t => t.IsGenericType == false)
-                        .Where(t => t.IsAbstract == false)
-                        .Where(t => typeof(IFieldReader).IsAssignableFrom(t))
-                        .Where(t => t.GetConstructor(Type.EmptyTypes) != null)
-                        .Select(Activator.CreateInstance)
-                        .Cast<IFieldReader>()
-                        .ToArray();
-                return readers;
+                return readers ??= GetType().Assembly.GetTypes()
+                    .Where(t => t.IsPublic)
+                    .Where(t => t.IsGenericType == false)
+                    .Where(t => t.IsAbstract == false)
+                    .Where(t => typeof(IFieldReader).IsAssignableFrom(t))
+                    .Where(t => t.GetConstructor(Type.EmptyTypes) != null)
+                    .Select(Activator.CreateInstance)
+                    .Cast<IFieldReader>()
+                    .ToArray();
             }
         }
 

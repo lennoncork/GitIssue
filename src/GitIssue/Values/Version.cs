@@ -83,12 +83,12 @@ namespace GitIssue.Values
         /// <summary>
         ///     The Pre-Release String
         /// </summary>
-        public string PreRelease { get; }
+        public string? PreRelease { get; }
 
         /// <summary>
         ///     The Build Metadata
         /// </summary>
-        public string BuildMetadata { get; }
+        public string? BuildMetadata { get; }
 
         /// <inheritdoc />
         public override string ToString()
@@ -116,7 +116,7 @@ namespace GitIssue.Values
                 return match.Success;
             }
 
-            match = null;
+            match = null!;
             return false;
         }
 
@@ -137,5 +137,8 @@ namespace GitIssue.Values
                        BuildMetadata == version.BuildMetadata;
             return false;
         }
+
+        /// <inheritdoc />
+        public override int GetHashCode() => this.ToString().GetHashCode();
     }
 }

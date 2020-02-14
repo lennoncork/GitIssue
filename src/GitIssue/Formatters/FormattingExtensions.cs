@@ -24,7 +24,7 @@ namespace GitIssue.Formatters
         /// <param name="issue">the issue</param>
         /// <param name="formatter">the field formatter</param>
         /// <returns></returns>
-        public static string Format(this IReadOnlyIssue issue, IIssueFormatter formatter)
+        public static string? Format(this IReadOnlyIssue issue, IIssueFormatter formatter)
         {
             return formatter.Format(issue);
         }
@@ -35,7 +35,7 @@ namespace GitIssue.Formatters
         /// <param name="field">the issue field</param>
         /// <param name="formatter">the field formatter</param>
         /// <returns></returns>
-        public static string Format(this IField field, IFieldFormatter formatter)
+        public static string? Format(this IField field, IFieldFormatter formatter)
         {
             return formatter.Format(field);
         }

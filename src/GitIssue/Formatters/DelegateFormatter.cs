@@ -9,8 +9,8 @@ namespace GitIssue.Formatters
     /// </summary>
     public class DelegateFormatter : IIssueFormatter, IFieldFormatter
     {
-        private readonly Func<IField, string> fieldFormatter = f => f.ToString();
-        private readonly Func<IReadOnlyIssue, string> issueFormatter = i => i.ToString();
+        private readonly Func<IField, string?> fieldFormatter = f => f.ToString();
+        private readonly Func<IReadOnlyIssue, string?> issueFormatter = i => i.ToString();
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="DelegateFormatter" /> class
@@ -50,15 +50,9 @@ namespace GitIssue.Formatters
         public static DelegateFormatter Default => new DelegateFormatter();
 
         /// <inheritdoc />
-        public string Format(IField field)
-        {
-            return fieldFormatter?.Invoke(field);
-        }
-
+        public string? Format(IField field) => fieldFormatter?.Invoke(field);
+        
         /// <inheritdoc />
-        public string Format(IReadOnlyIssue issue)
-        {
-            return issueFormatter?.Invoke(issue);
-        }
+        public string? Format(IReadOnlyIssue issue) => issueFormatter?.Invoke(issue);
     }
 }

@@ -89,18 +89,14 @@ namespace GitIssue
                 if (IsIssueRoot(current, name, out var issues)) return new RepositoryRoot(current.FullName, name);
                 current = parent;
             }
-
-            return None();
+            return None;
         }
 
         /// <summary>
         ///     The none repository
         /// </summary>
         /// <returns>the repository root</returns>
-        public static RepositoryRoot None()
-        {
-            return new RepositoryRoot(null, null);
-        }
+        public static RepositoryRoot None => new RepositoryRoot(null!, null!);
 
         /// <summary>
         ///     Determines if the directory is an repository root

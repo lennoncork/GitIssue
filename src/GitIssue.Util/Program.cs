@@ -1,20 +1,14 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
-using GitIssue.Fields;
-using GitIssue.Formatters;
-using GitIssue.Issues;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
 using Serilog;
 
 namespace GitIssue.Util
 {
     internal class Program
     {
-        public static ILogger logger;
+        public static ILogger Logger;
 
         private static void Main(string[] args)
         {
@@ -28,34 +22,43 @@ namespace GitIssue.Util
 
             parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
                     ShowOptions, EditOptions, TrackOptions, FieldsOptions, CommitOptions>(args)
-                .WithParsed<InitOptions>(o => ExecAsync(Init, o).Wait())
-                .WithParsed<CreateOptions>(o => ExecAsync(Create, o).Wait())
-                .WithParsed<DeleteOptions>(o => ExecAsync(Delete, o).Wait())
-                .WithParsed<FindOptions>(o => ExecAsync(Find, o).Wait())
-                .WithParsed<ShowOptions>(o => ExecAsync(Show, o).Wait())
-                .WithParsed<EditOptions>(o => ExecAsync(Edit, o).Wait())
-                .WithParsed<FieldsOptions>(o => ExecAsync(Fields, o).Wait())
-                .WithParsed<TrackOptions>(o => ExecAsync(Track, o).Wait())
-                .WithParsed<CommitOptions>(o => ExecAsync(Commit, o).Wait());
+                .WithParsed<InitOptions>(o => ExecAsync<InitCommand, InitOptions>(o).Wait())
+                .WithParsed<CreateOptions>(o => ExecAsync<CreateCommand, CreateOptions>(o).Wait())
+                .WithParsed<DeleteOptions>(o => ExecAsync<DeleteCommand, DeleteOptions>(o).Wait())
+                .WithParsed<FindOptions>(o => ExecAsync<FindCommand, FindOptions>(o).Wait())
+                .WithParsed<ShowOptions>(o => ExecAsync<ShowCommand,ShowOptions>(o).Wait())
+                .WithParsed<EditOptions>(o => ExecAsync<EditCommand, EditOptions>(o).Wait())
+                .WithParsed<FieldsOptions>(o => ExecAsync<FieldsCommand, FieldsOptions>(o).Wait())
+                .WithParsed<TrackOptions>(o => ExecAsync<TrackCommand, TrackOptions>(o).Wait())
+                .WithParsed<CommitOptions>(o => ExecAsync<CommitCommand, CommitOptions>(o).Wait());
         }
 
         public static IIssueManager Initialize(Options options)
         {
-            logger = new LoggerConfiguration()
+            Logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .MinimumLevel.Debug()
                 .CreateLogger();
 
             if (options is KeyOptions keyOptions)
                 keyOptions.Tracked = TrackedIssue
-                    .Read(Path.Combine(options.Path, options.Name, options.Tracking), logger);
+                    .Read(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
 
             //Configuration configuration = Configuration.Read();
 
-            return new IssueManager(options.Path, options.Name, logger);
+            return new IssueManager(options.Path, options.Name, Logger);
+        }
+
+        private static async Task ExecAsync<TC, T>(T value) 
+            where TC : Command<T> 
+            where T : Options
+        {
+            TC command = Activator.CreateInstance<TC>();
+            await ExecAsync(command.Exec, value);
         }
 
         private static async Task ExecAsync<T>(Func<T, Task> func, T value)
+            where T : Options
         {
             await Task.Run(async () =>
             {
@@ -66,159 +69,9 @@ namespace GitIssue.Util
                 }
                 catch (Exception e)
                 {
-                    logger?.Error($"Exception caught when executing command: {e.Message}", e);
+                    Logger?.Error($"Exception caught when executing command: {e.Message}", e);
                 }
             });
-        }
-
-        public static async Task Init(InitOptions options)
-        {
-            await using var issues = IssueManager.Init(options.Path, options.Name);
-        }
-
-        public static async Task Create(CreateOptions options)
-        {
-            await using var issues = Initialize(options);
-            await issues.CreateAsync(options.Title, options.Description);
-        }
-
-        public static async Task Delete(DeleteOptions options)
-        {
-            await using var issues = new IssueManager(options.Path, logger);
-            await issues.DeleteAsync(options.Key);
-        }
-
-        public static async Task Track(TrackOptions options)
-        {
-            await using var issues = Initialize(options);
-            options.Tracked = TrackedIssue.None;
-            if (!string.IsNullOrEmpty(options.Key))
-            {
-                var find = await issues.FindAsync(i => i.Key.ToString() == options.Key)
-                    .FirstOrDefaultAsync();
-
-                if (find != null)
-                {
-                    options.Tracked.Key = find.Key;
-                    options.Tracked.Started = DateTime.Now;
-                }
-            }
-
-            options.Tracked.Save(Path.Combine(options.Path, options.Name, options.Tracking), logger);
-            Console.WriteLine($"Tacking Issue '{options.Tracked.Key}'");
-        }
-
-        public static async Task Find(FindOptions options)
-        {
-            await using var issues = Initialize(options);
-            Func<IIssue, bool> issueFilter;
-            try
-            {
-                var script = ScriptOptions.Default.AddReferences(typeof(Issue).Assembly);
-                issueFilter = await CSharpScript.EvaluateAsync<Func<IIssue, bool>>(options.Linq, script);
-            }
-            catch (Exception e)
-            {
-                logger.Error($"Unable to parse expression {e.Message}", e);
-                return;
-            }
-
-            var formatter = new SimpleFormatter(options.Format);
-            var find = issues.FindAsync(i => issueFilter.Invoke(i));
-            await foreach (var issue in find) Console.WriteLine(issue.Format(formatter));
-        }
-
-        public static async Task Show(ShowOptions options)
-        {
-            var formatter = new DetailedFormatter();
-            await using var issues = Initialize(options);
-            var issue = await issues
-                .FindAsync(i => i.Key.ToString() == options.Key)
-                .FirstOrDefaultAsync();
-            Console.WriteLine(issue?.Format(formatter));
-        }
-
-        public static async Task Commit(CommitOptions options)
-        {
-            await using var issues = Initialize(options);
-            await issues.CommitAsync();
-        }
-
-        public static async Task Fields(FieldsOptions options)
-        {
-            await using var issues = Initialize(options);
-            foreach (var kvp in issues.Configuration.Fields)
-            {
-                var output = $"{kvp.Key}: A '{kvp.Value.FieldType}' field '{kvp.Value.ValueType}' values";
-                Console.WriteLine(output);
-            }
-        }
-
-        /// <summary>
-        ///     Edits an existing issue
-        /// </summary>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public static async Task Edit(EditOptions options)
-        {
-            var formatter = new DetailedFormatter();
-            await using var issues = Initialize(options);
-            var issue = await issues
-                .FindAsync(i => i.Key.ToString() == options.Key)
-                .FirstOrDefaultAsync();
-
-            if (issue == null)
-            {
-                logger.Error($"Issue \"{options.Key}\" not found");
-                return;
-            }
-
-            var updated = false;
-            if (string.IsNullOrEmpty(options.Field))
-            {
-                var editor = new Editor
-                {
-                    Command = options.Editor,
-                    Arguments = options.Arguments
-                };
-                await editor.Open(issue);
-                updated = true;
-            }
-
-            if (updated)
-            {
-                issue.Updated = DateTime.Now;
-                if (await issue.SaveAsync()) Console.WriteLine(issue.Format(formatter));
-                return;
-            }
-
-            var key = FieldKey.Create(options.Field);
-            if (!issue.ContainsKey(key))
-            {
-                logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(options.Update))
-            {
-                var editor = new Editor
-                {
-                    Command = options.Editor,
-                    Arguments = options.Arguments
-                };
-                await editor.Open(issue[key]);
-                updated = true;
-            }
-            else if (await issue[key].UpdateAsync(options.Update))
-            {
-                updated = true;
-            }
-
-            if (updated)
-            {
-                issue.Updated = DateTime.Now;
-                if (await issue.SaveAsync()) Console.WriteLine(issue.Format(formatter));
-            }
         }
     }
 }

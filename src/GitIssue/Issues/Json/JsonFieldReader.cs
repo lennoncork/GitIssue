@@ -30,9 +30,9 @@ namespace GitIssue.Issues.Json
         /// <inheritdoc />
         public override IField CreateField<T>(Issue issue, FieldKey key, FieldInfo info)
         {
-            if (IsValueField(info)) return new JsonValueField<T>(key, default);
+            if (IsValueField(info)) return new JsonValueField<T>(key);
             if (IsArrayField(info)) return new JsonArrayField<T>(key, new T[0]);
-            return null;
+            return null!;
         }
 
         /// <inheritdoc />
@@ -51,7 +51,8 @@ namespace GitIssue.Issues.Json
                     {
                         var values = jArray
                             .Select(t => t as JValue)
-                            .Select(t => (s: TryGetValue(t, info, out T v), r: v))
+                            .Where(t => t != null)
+                            .Select(t => (s: TryGetValue(t!, info, out T v), r: v))
                             .Where(t => t.s)
                             .Select(t => t.r)
                             .ToArray();
@@ -62,8 +63,7 @@ namespace GitIssue.Issues.Json
 
                 return CreateField<T>(issue, key, info);
             }
-
-            return null;
+            return null!;
         }
 
         private static bool IsValueField(FieldInfo info)

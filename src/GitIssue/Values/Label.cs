@@ -32,11 +32,11 @@ namespace GitIssue.Values
         /// <param name="value"></param>
         public Label(string value)
         {
-            this.value = !string.IsNullOrWhiteSpace(value) ? value.Split()[0].ToLowerInvariant() : null;
+            this.value = !string.IsNullOrWhiteSpace(value) ? value.Split()[0].ToLowerInvariant() : string.Empty;
         }
 
         /// <inheritdoc />
-        public override string ToString()
+        public override string? ToString()
         {
             return value;
         }
@@ -58,9 +58,6 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return value.GetHashCode();
-        }
+        public override int GetHashCode() => value.GetHashCode();
     }
 }

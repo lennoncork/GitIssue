@@ -32,7 +32,7 @@ namespace GitIssue.Issues.File
         /// <summary>
         ///     Gets the file used to save the fields value
         /// </summary>
-        public string FilePath => Path.Combine(issueRoot.IssuePath, Key.ToString());
+        public string FilePath => Path.Combine(issueRoot.IssuePath, Key);
 
         /// <inheritdoc />
         public override async Task<bool> SaveAsync()
@@ -41,7 +41,7 @@ namespace GitIssue.Issues.File
             {
                 await using var stream = new FileStream(FilePath, FileMode.Create, FileAccess.ReadWrite);
                 await using var writer = new StreamWriter(stream);
-                await writer.WriteAsync(Value.ToString());
+                await writer.WriteAsync(Value?.ToString());
                 return true;
             }
             catch (Exception e)
@@ -50,6 +50,7 @@ namespace GitIssue.Issues.File
             }
         }
 
+        /// <inheritdoc />
         public override Task<string> ExportAsync()
         {
             throw new NotImplementedException();

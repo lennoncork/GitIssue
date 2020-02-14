@@ -27,10 +27,11 @@ namespace GitIssue.Fields
             if (method != null)
             {
                 object[] args = {issue, key, info};
-                return (IField) method.Invoke(this, args);
+                var field = (IField)method.Invoke(this, args)!;
+                return field;
             }
 
-            return null;
+            return null!;
         }
 
         /// <inheritdoc />
@@ -49,13 +50,13 @@ namespace GitIssue.Fields
             if (method != null)
             {
                 object[] args = {issue, key, info};
-                var task = (Task) method.Invoke(this, args);
+                var task = (Task)method.Invoke(this, args)!;
                 await task;
-                var result = task.GetType().GetProperty("Result")?.GetValue(task);
-                return result as IField;
+                var result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
+                return result;
             }
 
-            return null;
+            return null!;
         }
 
         /// <inheritdoc />

@@ -56,7 +56,7 @@ namespace GitIssue.Values
                 return true;
             }
 
-            values = default;
+            values = default!;
             return false;
         }
 
@@ -101,5 +101,8 @@ namespace GitIssue.Values
                     return true;
             return base.Equals(obj);
         }
+
+        /// <inheritdoc />
+        public override int GetHashCode() => this.value.GetHashCode();
     }
 }

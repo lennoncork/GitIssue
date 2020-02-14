@@ -3,7 +3,7 @@
     /// <summary>
     ///     The GitIssueCommand
     /// </summary>
-    public enum Command
+    public enum CommandType
     {
         /// <summary>
         ///     No command, default
@@ -53,6 +53,16 @@
         /// <summary>
         ///     Shows the fields available for use
         /// </summary>
-        Fields
+        Fields,
+
+        /// <summary>
+        /// Adds a value to an existing field
+        /// </summary>
+        Add,
+
+        /// <summary>
+        /// Removes an existing value from an existing field
+        /// </summary>
+        Remove
     }
 }

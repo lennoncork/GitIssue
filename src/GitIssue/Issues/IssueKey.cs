@@ -90,15 +90,9 @@ namespace GitIssue.Issues
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            return key.Equals(obj);
-        }
+        public override bool Equals(object? obj) => key.Equals(obj);
 
         /// <inheritdoc />
-        public bool Equals(IssueKey other)
-        {
-            return key == other.key;
-        }
+        public bool Equals(IssueKey other) => key == other.key;
     }
 }

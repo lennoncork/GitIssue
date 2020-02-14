@@ -34,7 +34,7 @@ namespace GitIssue.Values
             try
             {
                 var type = GetType(value);
-                fieldType = Create(type);
+                fieldType = type != null ? Create(type) : default!;
                 return true;
             }
             catch (Exception)
@@ -50,7 +50,7 @@ namespace GitIssue.Values
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static Type GetType(string value)
+        public static Type? GetType(string value)
         {
             foreach (var fieldType in TypeAlias.Aliases)
                 if (fieldType.TryParse(value, out var type))
@@ -88,7 +88,7 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public override string ToString()
+        public override string? ToString()
         {
             if (TypeAlias.TryGetAliasAttribute(Type, out var attribute))
                 return attribute.Alias;

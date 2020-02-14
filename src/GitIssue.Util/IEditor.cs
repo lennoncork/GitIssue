@@ -4,6 +4,9 @@ using GitIssue.Issues;
 
 namespace GitIssue.Util
 {
+    /// <summary>
+    /// Editor interface
+    /// </summary>
     public interface IEditor
     {
         /// <summary>

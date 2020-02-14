@@ -10,7 +10,7 @@ namespace GitIssue.Fields
     /// </summary>
     public class FieldFactory : IFieldFactory
     {
-        private readonly Func<IField> callback;
+        private readonly Func<IField?> callback;
         private readonly Issue issue;
         private readonly FieldKey key;
 
@@ -20,7 +20,7 @@ namespace GitIssue.Fields
         /// <param name="issue">the issue</param>
         /// <param name="key">the field key</param>
         /// <param name="callback">the callback to invoke when the new field is created</param>
-        public FieldFactory(Issue issue, FieldKey key, Func<IField> callback)
+        public FieldFactory(Issue issue, FieldKey key, Func<IField?> callback)
         {
             this.callback = callback;
             this.issue = issue;

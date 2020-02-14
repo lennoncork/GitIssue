@@ -34,13 +34,12 @@ namespace GitIssue.Issues.File
                 if (read != null)
                 {
                     object[] args = {issueRoot, key, info};
-                    var task = (Task) read.Invoke(null, args);
+                    var task = (Task)read.Invoke(null, args)!;
                     await task;
-                    var result = task.GetType().GetProperty("Result")?.GetValue(task);
-                    return result as IField;
+                    var result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
+                    return result;
                 }
-
-                return null;
+                return null!;
             }
             catch (Exception e)
             {
@@ -87,7 +86,7 @@ namespace GitIssue.Issues.File
                     var file = Path.Combine(DirectoryPath, count.ToString());
                     await using var stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
                     await using var writer = new StreamWriter(stream);
-                    await writer.WriteAsync(value.ToString());
+                    await writer.WriteAsync(value?.ToString());
                 }
 
                 return true;
@@ -98,6 +97,7 @@ namespace GitIssue.Issues.File
             }
         }
 
+        /// <inheritdoc />
         public override Task<string> ExportAsync()
         {
             throw new NotImplementedException();

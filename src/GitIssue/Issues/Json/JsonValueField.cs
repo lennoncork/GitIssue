@@ -29,7 +29,7 @@ namespace GitIssue.Issues.Json
         ///     Initialized a new instance of the <see cref="JsonValueField{T}" /> class
         /// </summary>
         /// <param name="key">the field key</param>
-        public JsonValueField(FieldKey key) : base(key, default)
+        public JsonValueField(FieldKey key) : base(key, default!)
         {
         }
 

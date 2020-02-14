@@ -38,7 +38,7 @@ namespace GitIssue.Values
             }
             catch (FormatException)
             {
-                value = null;
+                value = string.Empty;
                 IsValid = false;
             }
         }

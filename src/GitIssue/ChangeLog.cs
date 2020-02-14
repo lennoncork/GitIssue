@@ -14,12 +14,9 @@ using Newtonsoft.Json;
 
 namespace GitIssue
 {
-    public enum ChangeType
-    {
-        [Description("Created new issue")]
-        Create,
-    }
-
+    /// <summary>
+    /// Records the changes made by the issue manager
+    /// </summary>
     [JsonObject]
     public class ChangeLog : IChangeLog
     {
@@ -28,10 +25,10 @@ namespace GitIssue
         private Dictionary<IssueKey, List<string>> changes = new Dictionary<IssueKey, List<string>>();
 
         /// <inheritdoc/>
-        public IReadOnlyDictionary<IssueKey, string[]> Changes
+        public Dictionary<IssueKey, List<String>> Changes
         {
-            get => this.changes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
-            set => this.changes = value.ToDictionary(kvp => kvp.Key, kvp => new List<string>(kvp.Value));
+            get => this.changes;
+            set => this.changes = value;
         }
 
         /// <inheritdoc/>
@@ -56,9 +53,9 @@ namespace GitIssue
 
         private static string GetChangeDescription(ChangeType change)
         {
-            DescriptionAttribute attribute = typeof(ChangeType)
+            DescriptionAttribute? attribute = typeof(ChangeType)
                 .GetField(change.ToString())
-                .GetCustomAttribute<DescriptionAttribute>();
+                ?.GetCustomAttribute<DescriptionAttribute>();
             return attribute != null ? attribute.Description : change.ToString();
         }
 
@@ -103,8 +100,8 @@ namespace GitIssue
                 using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
                 using var reader = new StreamReader(stream);
                 var serializer = new JsonSerializer();
-                var configuration = (ChangeLog)serializer.Deserialize(reader, typeof(ChangeLog));
-                return configuration;
+                var configuration = serializer.Deserialize(reader, typeof(ChangeLog)) as ChangeLog;
+                return configuration ?? new ChangeLog();
             }
             catch (Exception ex)
             {

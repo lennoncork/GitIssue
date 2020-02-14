@@ -12,6 +12,6 @@ namespace GitIssue.Formatters
         /// </summary>
         /// <param name="field">the issue field</param>
         /// <returns>a formatted string for the field</returns>
-        string Format(IField field);
+        string? Format(IField field);
     }
 }

@@ -11,6 +11,9 @@ namespace GitIssue.Values
     /// </summary>
     public class TypeAlias : ITypeAlias
     {
+        /// <summary>
+        /// The collection of aliases found
+        /// </summary>
         public static ITypeAlias[] Aliases;
 
         static TypeAlias()
@@ -20,17 +23,20 @@ namespace GitIssue.Values
             aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
                 .Where(IsAlias)
                 .Where(IsParameterless)
-                .Select(t => (ITypeAlias) Activator.CreateInstance(t)));
+                .Select(t => (ITypeAlias)Activator.CreateInstance(t)!)
+                .Where(IsNotNull));
 
             aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
                 .Where(IsFieldType)
                 .Select(FromType)
-                .Where(IsNotNull));
+                .Where(IsNotNull)
+                .Select(t => t!));
 
             aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
                 .Where(IsValueType)
                 .Select(FromType)
-                .Where(IsNotNull));
+                .Where(IsNotNull)
+                .Select(t => t!));
 
             Aliases = aliases.ToArray();
         }
@@ -75,7 +81,7 @@ namespace GitIssue.Values
                 return true;
             }
 
-            type = null;
+            type = null!;
             return false;
         }
 
@@ -88,7 +94,7 @@ namespace GitIssue.Values
                 return true;
             }
 
-            str = null;
+            str = null!;
             return false;
         }
 
@@ -97,9 +103,10 @@ namespace GitIssue.Values
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static TypeAlias FromType(Type type)
+        public static TypeAlias? FromType(Type type)
         {
-            if (TryGetAliasAttribute(type, out var attribute)) return new TypeAlias(type, attribute.Alias);
+            if (TryGetAliasAttribute(type, out var attribute)) 
+                return new TypeAlias(type, attribute.Alias);
             return null;
         }
 
@@ -129,7 +136,7 @@ namespace GitIssue.Values
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public static bool IsNotNull(object obj)
+        public static bool IsNotNull(object? obj)
         {
             return obj != null;
         }
@@ -159,10 +166,7 @@ namespace GitIssue.Values
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static TypeAliasAttribute GetAliasAttribute(Type type)
-        {
-            return type.GetCustomAttribute<TypeAliasAttribute>();
-        }
+        public static TypeAliasAttribute? GetAliasAttribute(Type type) => type.GetCustomAttribute<TypeAliasAttribute>();
 
         /// <summary>
         ///     Tries to get an alias attribute from the type
@@ -172,7 +176,7 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static bool TryGetAliasAttribute(Type type, out TypeAliasAttribute attribute)
         {
-            attribute = GetAliasAttribute(type);
+            attribute = GetAliasAttribute(type)!;
             return attribute != null;
         }
 
@@ -187,7 +191,7 @@ namespace GitIssue.Values
             if (IsAlias(type) && IsParameterless(type))
                 try
                 {
-                    alias = (ITypeAlias) Activator.CreateInstance(type);
+                    alias = (ITypeAlias) Activator.CreateInstance(type)!;
                     return true;
                 }
                 catch (Exception)
@@ -195,7 +199,7 @@ namespace GitIssue.Values
                     // Ignore
                 }
 
-            alias = default;
+            alias = default!;
             return false;
         }
     }

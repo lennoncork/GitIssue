@@ -15,11 +15,18 @@ namespace GitIssue.Issues
     public abstract class Issue : IIssue
     {
         /// <summary>
+        /// The issue manager
+        /// </summary>
+        protected readonly IIssueManager manager;
+
+        /// <summary>
         ///     Creates a new Issue
         /// </summary>
+        /// <param name="manager">the issue manager</param>
         /// <param name="root">the issue root</param>
-        protected Issue(IssueRoot root)
+        protected Issue(IIssueManager manager, IssueRoot root)
         {
+            this.manager = manager;
             Root = root;
         }
 
@@ -60,13 +67,13 @@ namespace GitIssue.Issues
         }
 
         /// <inheritdoc />
-        public abstract IFieldProvider GetField([CallerMemberName] string key = null);
+        public abstract IFieldProvider GetField([CallerMemberName] string? key = null);
 
         /// <inheritdoc />
         public abstract IFieldProvider GetField(FieldKey key);
 
         /// <inheritdoc />
-        public abstract IFieldFactory SetField([CallerMemberName] string key = null);
+        public abstract IFieldFactory SetField([CallerMemberName] string? key = null);
 
         /// <inheritdoc />
         public abstract IFieldFactory SetField(FieldKey key);

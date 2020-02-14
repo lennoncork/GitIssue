@@ -87,14 +87,14 @@ namespace GitIssue
         /// <typeparam name="T">the configuration type</typeparam>
         /// <param name="file">the configuration file</param>
         /// <returns>the <see cref="IssueConfiguration" /></returns>
-        public static T Read<T>(string file) where T : IssueConfiguration
+        public static T Read<T>(string file) where T : IssueConfiguration, new()
         {
             try
             {
                 using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
                 using var reader = new StreamReader(stream);
                 var serializer = new JsonSerializer();
-                var configuration = (T) serializer.Deserialize(reader, typeof(T));
+                var configuration = (T)serializer.Deserialize(reader, typeof(T))!;
                 return configuration;
             }
             catch (Exception ex)

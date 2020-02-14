@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using GitIssue.Values;
+using String = System.String;
 
 namespace GitIssue.Fields.Value
 {
@@ -50,9 +51,6 @@ namespace GitIssue.Fields.Value
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return Value.ToString();
-        }
+        public override string ToString() => Value?.ToString()!;
     }
 }

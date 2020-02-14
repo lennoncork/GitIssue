@@ -16,7 +16,7 @@ namespace GitIssue
     /// </summary>
     public class IssueManager : IIssueManager
     {
-        private readonly ILogger logger;
+        private readonly ILogger? logger;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
@@ -71,6 +71,7 @@ namespace GitIssue
         /// <param name="name">the issues directory name</param>
         public IssueManager(IRepository repository, string path, string name)
         {
+            logger = null;
             Repository = repository;
             WorkingDirectory = path;
             FolderName = name;
@@ -106,22 +107,24 @@ namespace GitIssue
         /// <inheritdoc />
         public ChangeLog ChangeLog { get; protected set; }
 
+        /// <inheritdoc />
         public bool Commit()
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public Task<bool> CommitAsync()
         {
             if (Repository.Index.IsFullyMerged == false)
             {
-                this.logger.Error("Cannot commit, requires merge");
+                this.logger?.Error("Cannot commit, requires merge");
                 return Task.FromResult(false);
             }
 
             if (Repository.RetrieveStatus().Staged.Any())
             {
-                this.logger.Error("Cannot commit, another commit is in progress");
+                this.logger?.Error("Cannot commit, another commit is in progress");
                 return Task.FromResult(false);
             }
 
@@ -129,7 +132,13 @@ namespace GitIssue
             foreach (var file in files)
             {
                 string relative = Path.GetRelativePath(Root.RootPath, file);
-                Console.WriteLine(relative);
+
+                if (Repository.Ignore.IsPathIgnored(relative))
+                    continue;
+
+                if(Path.GetFullPath(relative).Equals(Path.GetFullPath(Root.ChangeLog)))
+                    continue;
+
                 Repository.Index.Add(relative);
                 Repository.Index.Write();
             }
@@ -142,10 +151,9 @@ namespace GitIssue
                 builder.AppendLine($"Issue: {changes.Key}");
                 foreach (var change in changes.Value)
                 {
-                    builder.AppendLine(change);
+                    builder.AppendLine($" - {change}");
                 }
             }
-            Console.WriteLine(builder.ToString());
 
             Configuration config = Repository.Config;
             Signature author = config.BuildSignature(DateTimeOffset.Now);
@@ -166,7 +174,7 @@ namespace GitIssue
         /// <inheritdoc />
         public async Task<IIssue> CreateAsync(string title, string description)
         {
-            Issue issue = new FileIssue(new IssueRoot(Root, KeyProvider.Next()), Configuration.Fields)
+            Issue issue = new FileIssue(this, new IssueRoot(Root, KeyProvider.Next()), Configuration.Fields)
             {
                 Title = title,
                 Description = description
@@ -192,8 +200,8 @@ namespace GitIssue
         {
             foreach (var key in KeyProvider.Keys)
             {
-                var issue = await FileIssue.ReadAsync(new IssueRoot(Root, key), Configuration.Fields);
-                if (predicated.Invoke(issue))
+                var issue = await FileIssue.ReadAsync(this, new IssueRoot(Root, key), Configuration.Fields);
+                if (issue != null && predicated.Invoke(issue))
                     yield return issue;
             }
         }

@@ -33,7 +33,7 @@ namespace GitIssue
         /// <summary>
         ///     Captures the exception if failed
         /// </summary>
-        public Exception Exception { get; set; }
+        public Exception? Exception { get; set; }
 
         /// <summary>
         ///     Returns a successful command
@@ -75,6 +75,7 @@ namespace GitIssue
         /// <param name="exception"></param>
         public SafeResult(Exception exception) : base(exception)
         {
+            this.Result = default!;
         }
 
         /// <summary>
@@ -82,6 +83,7 @@ namespace GitIssue
         /// </summary>
         public SafeResult(bool success = false) : base(success)
         {
+            this.Result = default!;
         }
 
         /// <summary>
@@ -140,7 +142,7 @@ namespace GitIssue
                 return true;
             }
 
-            result = default;
+            result = default!;
             return false;
         }
     }

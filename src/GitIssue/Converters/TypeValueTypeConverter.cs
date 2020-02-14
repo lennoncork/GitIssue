@@ -21,7 +21,7 @@ namespace GitIssue.Converters
         }
 
         /// <inheritdoc />
-        public override object ConvertFrom(ITypeDescriptorContext context,
+        public override object? ConvertFrom(ITypeDescriptorContext context,
             CultureInfo culture, object value)
         {
             if (value is string str)
@@ -32,7 +32,7 @@ namespace GitIssue.Converters
         }
 
         /// <inheritdoc />
-        public override object ConvertTo(ITypeDescriptorContext context,
+        public override object? ConvertTo(ITypeDescriptorContext context,
             CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string))

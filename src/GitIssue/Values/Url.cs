@@ -33,7 +33,7 @@ namespace GitIssue.Values
             }
             catch (UriFormatException)
             {
-                value = null;
+                value = string.Empty;
                 IsValid = false;
             }
         }
@@ -44,10 +44,7 @@ namespace GitIssue.Values
         public bool IsValid { get; }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return value;
-        }
+        public override string ToString() => value;
 
         /// <inheritdoc />
         public JToken ToJson()
@@ -65,9 +62,6 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return value.GetHashCode();
-        }
+        public override int GetHashCode() => value.GetHashCode();
     }
 }

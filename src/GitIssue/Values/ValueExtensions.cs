@@ -27,7 +27,7 @@ namespace GitIssue.Values
 
                 if (converter.CanConvertFrom(typeof(string)))
                 {
-                    value = (T2) converter.ConvertFrom(input.ToString());
+                    value = (T2) converter.ConvertFrom(input?.ToString());
                     return true;
                 }
             }
@@ -36,7 +36,7 @@ namespace GitIssue.Values
                 // ignored conversion errors
             }
 
-            value = default;
+            value = default!;
             return false;
         }
 
@@ -48,13 +48,14 @@ namespace GitIssue.Values
                 return true;
             }
 
-            if (TryParse(new ValueMetadata(input?.ToString(), metadata), out T2 converted))
+            var str = input?.ToString();
+            if (str != null && TryParse(new ValueMetadata(str, metadata), out T2 converted))
             {
                 value = converted;
                 return true;
             }
 
-            value = default;
+            value = default!;
             return false;
         }
     }

@@ -20,7 +20,6 @@ namespace GitIssue
         /// </summary>
         /// <param name="issue"></param>
         /// <param name="change"></param>
-        /// <param name="summary"></param>
         public void Add(IIssue issue, ChangeType change);
 
         /// <summary>
@@ -34,7 +33,7 @@ namespace GitIssue
         /// <summary>
         /// Gets the dictionary of changes
         /// </summary>
-        public IReadOnlyDictionary<IssueKey, string[]> Changes { get; set; }
+        public Dictionary<IssueKey, List<string>> Changes { get; set; }
 
     }
 }

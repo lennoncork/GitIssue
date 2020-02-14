@@ -14,18 +14,22 @@ namespace GitIssue.Issues.File
         /// <summary>
         ///     Initializes a new instance of a <see cref="FileIssue" /> class
         /// </summary>
-        /// <param name="issueRoot"></param>
-        public FileIssue(IssueRoot issueRoot) : base(issueRoot)
+        /// <param name="manager">the issue manager</param>
+        /// <param name="root">the issue root</param>
+        public FileIssue(IIssueManager manager, IssueRoot root) : base(manager, root)
         {
         }
 
         /// <summary>
         ///     Initializes a new instance of a <see cref="FileIssue" /> class
         /// </summary>
-        /// <param name="issueRoot"></param>
-        /// <param name="fields"></param>
-        public FileIssue(IssueRoot issueRoot, IDictionary<FieldKey, FieldInfo> fields) : base(issueRoot, fields)
+        /// <param name="manager">the issue manager</param>
+        /// <param name="root">the issue root</param>
+        /// <param name="fields">the issue manager</param>
+        public FileIssue(IIssueManager manager, IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) : 
+            base(manager, root, fields)
         {
+            
         }
 
         /// <inheritdoc />
@@ -48,15 +52,16 @@ namespace GitIssue.Issues.File
         /// <summary>
         ///     Reads an issue from disk
         /// </summary>
-        /// <param name="issueRoot">the issue root</param>
+        /// <param name="manager">the issue manager</param>
+        /// <param name="root">the issue root</param>
         /// <param name="fields">the expected fields</param>
         /// <returns></returns>
-        public new static async Task<IIssue> ReadAsync(IssueRoot issueRoot, IDictionary<FieldKey, FieldInfo> fields)
+        public new static async Task<IIssue?> ReadAsync(IIssueManager manager, IssueRoot root, IDictionary<FieldKey, FieldInfo> fields)
         {
-            if (Directory.Exists(issueRoot.IssuePath) == false)
+            if (Directory.Exists(root.IssuePath) == false)
                 return null;
 
-            var issue = new FileIssue(issueRoot, fields);
+            var issue = new FileIssue(manager, root, fields);
             foreach (var key in fields.Keys)
             {
                 var valueField = await fields[key].ReadFieldAsync(issue, key);

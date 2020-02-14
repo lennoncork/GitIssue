@@ -22,8 +22,10 @@ namespace GitIssue.Fields
         /// </summary>
         /// <param name="key"></param>
         /// <returns>the new field key</returns>
-        public static FieldKey Create(string key)
+        public static FieldKey Create(string? key)
         {
+            if (string.IsNullOrEmpty(key))
+                return FieldKey.None;
             return new FieldKey(key);
         }
 
