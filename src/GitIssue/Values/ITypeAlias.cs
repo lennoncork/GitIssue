@@ -3,12 +3,12 @@
 namespace GitIssue.Values
 {
     /// <summary>
-    /// Interface for providing an alias (name) for a given type
+    ///     Interface for providing an alias (name) for a given type
     /// </summary>
     public interface ITypeAlias
     {
         /// <summary>
-        /// Tries to parse the alias
+        ///     Tries to parse the alias
         /// </summary>
         /// <param name="alias">the alias to parse</param>
         /// <param name="type">the type that matches the alias</param>
@@ -16,7 +16,7 @@ namespace GitIssue.Values
         public bool TryParse(string alias, out Type type);
 
         /// <summary>
-        /// Tries to parse the type
+        ///     Tries to parse the type
         /// </summary>
         /// <param name="type">the type to parse</param>
         /// <param name="alias">the alias of the type</param>

@@ -139,6 +139,9 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public override int GetHashCode() => this.ToString().GetHashCode();
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
     }
 }

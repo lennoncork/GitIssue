@@ -16,7 +16,7 @@ namespace GitIssue.Fields
     [JsonObject]
     public class FieldInfo
     {
-        private static IFieldReader[]? readers = null;
+        private static IFieldReader[]? readers;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="FieldInfo" /> class

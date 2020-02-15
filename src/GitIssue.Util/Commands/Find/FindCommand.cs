@@ -6,16 +6,19 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Serilog;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands.Find
 {
     /// <summary>
-    /// Fine options
+    ///     Fine options
     /// </summary>
-    public class FindCommand: Command<FindOptions>
+    public class FindCommand : Command<FindOptions>
     {
         private static ILogger Logger => Program.Logger;
 
-        private static IIssueManager Initialize(Options options) => Program.Initialize(options);
+        private static IIssueManager Initialize(Options options)
+        {
+            return Program.Initialize(options);
+        }
 
         /// <inheritdoc />
         public override async Task Exec(FindOptions options)

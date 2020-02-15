@@ -118,47 +118,44 @@ namespace GitIssue
         {
             if (Repository.Index.IsFullyMerged == false)
             {
-                this.logger?.Error("Cannot commit, requires merge");
+                logger?.Error("Cannot commit, requires merge");
                 return Task.FromResult(false);
             }
 
             if (Repository.RetrieveStatus().Staged.Any())
             {
-                this.logger?.Error("Cannot commit, another commit is in progress");
+                logger?.Error("Cannot commit, another commit is in progress");
                 return Task.FromResult(false);
             }
 
-            var files = Directory.EnumerateFiles(this.Root.IssuesPath, "*.*", SearchOption.AllDirectories);
+            var files = Directory.EnumerateFiles(Root.IssuesPath, "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
-                string relative = Path.GetRelativePath(Root.RootPath, file);
+                var relative = Path.GetRelativePath(Root.RootPath, file);
 
                 if (Repository.Ignore.IsPathIgnored(relative))
                     continue;
 
-                if(Path.GetFullPath(relative).Equals(Path.GetFullPath(Root.ChangeLog)))
+                if (Path.GetFullPath(relative).Equals(Path.GetFullPath(Root.ChangeLog)))
                     continue;
 
                 Repository.Index.Add(relative);
                 Repository.Index.Write();
             }
 
-            StringBuilder builder = new StringBuilder();
-            int count = 0;
-            foreach (var changes in this.ChangeLog.Changes)
+            var builder = new StringBuilder();
+            var count = 0;
+            foreach (var changes in ChangeLog.Changes)
             {
                 if (count++ > 0) builder.AppendLine();
                 builder.AppendLine($"Issue: {changes.Key}");
-                foreach (var change in changes.Value)
-                {
-                    builder.AppendLine($" - {change}");
-                }
+                foreach (var change in changes.Value) builder.AppendLine($" - {change}");
             }
 
-            Configuration config = Repository.Config;
-            Signature author = config.BuildSignature(DateTimeOffset.Now);
+            var config = Repository.Config;
+            var author = config.BuildSignature(DateTimeOffset.Now);
             Repository.Commit(builder.ToString(), author, author);
-            this.ChangeLog.Clear();
+            ChangeLog.Clear();
             return Task.FromResult(true);
         }
 
@@ -180,7 +177,7 @@ namespace GitIssue
                 Description = description
             };
             await issue.SaveAsync();
-            this.ChangeLog.Add(issue, ChangeType.Create);
+            ChangeLog.Add(issue, ChangeType.Create);
             return issue;
         }
 

@@ -2,16 +2,19 @@
 using System.Threading.Tasks;
 using Serilog;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands.Fields
 {
     /// <summary>
-    /// Fields command
+    ///     Fields command
     /// </summary>
-    public class FieldsCommand: Command<FieldsOptions>
+    public class FieldsCommand : Command<FieldsOptions>
     {
         private static ILogger Logger => Program.Logger;
 
-        private static IIssueManager Initialize(Options options) => Program.Initialize(options);
+        private static IIssueManager Initialize(Options options)
+        {
+            return Program.Initialize(options);
+        }
 
         /// <inheritdoc />
         public override async Task Exec(FieldsOptions options)

@@ -26,10 +26,9 @@ namespace GitIssue.Issues.File
         /// <param name="manager">the issue manager</param>
         /// <param name="root">the issue root</param>
         /// <param name="fields">the issue manager</param>
-        public FileIssue(IIssueManager manager, IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) : 
+        public FileIssue(IIssueManager manager, IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) :
             base(manager, root, fields)
         {
-            
         }
 
         /// <inheritdoc />
@@ -56,7 +55,8 @@ namespace GitIssue.Issues.File
         /// <param name="root">the issue root</param>
         /// <param name="fields">the expected fields</param>
         /// <returns></returns>
-        public new static async Task<IIssue?> ReadAsync(IIssueManager manager, IssueRoot root, IDictionary<FieldKey, FieldInfo> fields)
+        public new static async Task<IIssue?> ReadAsync(IIssueManager manager, IssueRoot root,
+            IDictionary<FieldKey, FieldInfo> fields)
         {
             if (Directory.Exists(root.IssuePath) == false)
                 return null;

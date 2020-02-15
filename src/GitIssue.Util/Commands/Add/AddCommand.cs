@@ -2,15 +2,16 @@
 using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Fields;
+using GitIssue.Fields.Array;
 using GitIssue.Formatters;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Edit
+namespace GitIssue.Util.Commands.Add
 {
     /// <summary>
     ///     Edit command
     /// </summary>
-    public class EditCommand : Command<EditOptions>
+    public class AddCommand : Command<AddOptions>
     {
         private static ILogger Logger => Program.Logger;
 
@@ -20,10 +21,12 @@ namespace GitIssue.Util.Commands.Edit
         }
 
         /// <inheritdoc />
-        public override async Task Exec(EditOptions options)
+        public override async Task Exec(AddOptions options)
         {
             var formatter = new DetailedFormatter();
+
             await using var issues = Initialize(options);
+
             var issue = await issues
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
@@ -34,22 +37,9 @@ namespace GitIssue.Util.Commands.Edit
                 return;
             }
 
-            var updated = false;
             if (string.IsNullOrEmpty(options.Field))
             {
-                var editor = new Editor
-                {
-                    Command = options.Editor,
-                    Arguments = options.Arguments
-                };
-                await editor.Open(issue);
-                updated = true;
-            }
-
-            if (updated)
-            {
-                issue.Updated = DateTime.Now;
-                if (await issue.SaveAsync()) Console.WriteLine(issue.Format(formatter));
+                Logger.Error($"Field must be supplied to remove a value on \"{issue.Key}\"");
                 return;
             }
 
@@ -60,25 +50,30 @@ namespace GitIssue.Util.Commands.Edit
                 return;
             }
 
-            if (string.IsNullOrEmpty(options.Update))
+            var field = issue[key];
+            if (field is IArrayField arrayField)
             {
-                var editor = new Editor
+                if (arrayField.TryParse(options.Add, out var value))
                 {
-                    Command = options.Editor,
-                    Arguments = options.Arguments
-                };
-                await editor.Open(issue[key]);
-                updated = true;
+                    if (!arrayField.Contains(value))
+                    {
+                        arrayField.Add(value);
+                        await issue.SaveAsync();
+                        Console.WriteLine(formatter.Format(arrayField));
+                    }
+                    else
+                    {
+                        Logger.Error($"Item \"{options.Add}\" already exists on field {options.Field}");
+                    }
+                }
+                else
+                {
+                    Logger.Error($"Item \"{options.Add}\" is not a valid value for field {options.Field}");
+                }
             }
-            else if (await issue[key].UpdateAsync(options.Update))
+            else
             {
-                updated = true;
-            }
-
-            if (updated)
-            {
-                issue.Updated = DateTime.Now;
-                if (await issue.SaveAsync()) Console.WriteLine(issue.Format(formatter));
+                Logger.Error($"Field \"{key}\" is not an array type, cannot remove value");
             }
         }
     }

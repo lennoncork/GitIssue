@@ -17,7 +17,7 @@ namespace GitIssue.Tests.IssueManager
         [TearDown]
         public void Teardown()
         {
-            this.Sut?.Dispose();
+            Sut?.Dispose();
         }
 
         protected string TestDirectory;

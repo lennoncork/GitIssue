@@ -57,7 +57,7 @@ namespace GitIssue.Formatters
                 if (match == null) continue;
 
                 var property = match.Value.TrimStart('%');
-                
+
                 if (formatters.TryGetValue(property, out var formatter))
                 {
                     result = result.Replace(match.Value, formatter.Invoke(issue));

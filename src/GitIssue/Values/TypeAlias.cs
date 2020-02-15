@@ -12,7 +12,7 @@ namespace GitIssue.Values
     public class TypeAlias : ITypeAlias
     {
         /// <summary>
-        /// The collection of aliases found
+        ///     The collection of aliases found
         /// </summary>
         public static ITypeAlias[] Aliases;
 
@@ -23,7 +23,7 @@ namespace GitIssue.Values
             aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
                 .Where(IsAlias)
                 .Where(IsParameterless)
-                .Select(t => (ITypeAlias)Activator.CreateInstance(t)!)
+                .Select(t => (ITypeAlias) Activator.CreateInstance(t)!)
                 .Where(IsNotNull));
 
             aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
@@ -105,7 +105,7 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static TypeAlias? FromType(Type type)
         {
-            if (TryGetAliasAttribute(type, out var attribute)) 
+            if (TryGetAliasAttribute(type, out var attribute))
                 return new TypeAlias(type, attribute.Alias);
             return null;
         }
@@ -166,7 +166,10 @@ namespace GitIssue.Values
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static TypeAliasAttribute? GetAliasAttribute(Type type) => type.GetCustomAttribute<TypeAliasAttribute>();
+        public static TypeAliasAttribute? GetAliasAttribute(Type type)
+        {
+            return type.GetCustomAttribute<TypeAliasAttribute>();
+        }
 
         /// <summary>
         ///     Tries to get an alias attribute from the type

@@ -35,6 +35,39 @@ namespace GitIssue.Fields.Array
             set => values = new List<T>(value);
         }
 
+        bool IList.IsFixedSize => ((IList) values).IsFixedSize;
+
+        /// <inheritdoc />
+        bool IList.IsReadOnly => ((IList) values).IsReadOnly;
+
+        /// <inheritdoc />
+        int ICollection.Count => ((ICollection) values).Count;
+
+        /// <inheritdoc />
+        bool ICollection.IsSynchronized => ((ICollection) values).IsSynchronized;
+
+        /// <inheritdoc />
+        object ICollection.SyncRoot => ((ICollection) values).SyncRoot;
+
+        /// <inheritdoc />
+        public int Count => values.Count;
+
+        bool ICollection<T>.IsReadOnly => ((ICollection<T>) values).IsReadOnly;
+
+        /// <inheritdoc />
+        public T this[int index]
+        {
+            get => values[index];
+            set => values[index] = value;
+        }
+
+        /// <inheritdoc />
+        object? IList.this[int index]
+        {
+            get => ((IList) values)[index];
+            set => ((IList) values)[index] = value;
+        }
+
         /// <inheritdoc />
         public IEnumerator<T> GetEnumerator()
         {
@@ -81,13 +114,111 @@ namespace GitIssue.Fields.Array
             return Task.FromResult(false);
         }
 
-        /// <summary>
-        ///     Tries to parse the string input to the output value
-        /// </summary>
-        /// <param name="input">the input string</param>
-        /// <param name="value">the output value</param>
-        /// <returns></returns>
-        internal static bool TryParse(string input, out T value)
+        /// <inheritdoc />
+        void IList.RemoveAt(int index)
+        {
+            values.RemoveAt(index);
+        }
+
+        /// <inheritdoc />
+        int IList.Add(object? value)
+        {
+            return ((IList) values).Add(value);
+        }
+
+        /// <inheritdoc />
+        void IList.Clear()
+        {
+            values.Clear();
+        }
+
+        /// <inheritdoc />
+        bool IList.Contains(object? value)
+        {
+            return ((IList) values).Contains(value);
+        }
+
+        /// <inheritdoc />
+        int IList.IndexOf(object? value)
+        {
+            return ((IList) values).IndexOf(value);
+        }
+
+        /// <inheritdoc />
+        void IList.Insert(int index, object? value)
+        {
+            ((IList) values).Insert(index, value);
+        }
+
+        void IList.Remove(object? value)
+        {
+            ((IList) values).Remove(value);
+        }
+
+        void ICollection.CopyTo(System.Array array, int index)
+        {
+            ((IList) values).CopyTo(array, index);
+        }
+
+        /// <inheritdoc />
+        public int IndexOf(T item)
+        {
+            return values.IndexOf(item);
+        }
+
+        /// <inheritdoc />
+        public void Insert(int index, T item)
+        {
+            values.Insert(index, item);
+        }
+
+        /// <inheritdoc />
+        public void RemoveAt(int index)
+        {
+            values.RemoveAt(index);
+        }
+
+        /// <inheritdoc />
+        public void Add(T item)
+        {
+            values.Add(item);
+        }
+
+        /// <inheritdoc />
+        public bool Contains(T item)
+        {
+            return values.Contains(item);
+        }
+
+        /// <inheritdoc />
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            values.CopyTo(array, arrayIndex);
+        }
+
+        /// <inheritdoc />
+        public bool Remove(T item)
+        {
+            return values.Remove(item);
+        }
+
+        /// <inheritdoc />
+        public void Clear() => values.Clear();
+
+        /// <inheritdoc />
+        bool IArrayField.TryParse(string input, out object? value)
+        {
+            if (ValueExtensions.TryParse(input, out T result))
+            {
+                value = result;
+                return true;
+            }
+            value = null;
+            return false;
+        }
+
+        /// <inheritdoc />
+        public bool TryParse(string input, out T value)
         {
             return ValueExtensions.TryParse(input, out value);
         }

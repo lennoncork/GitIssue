@@ -4,16 +4,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using Serilog;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands.Track
 {
     /// <summary>
-    /// Track command
+    ///     Track command
     /// </summary>
-    public class TrackCommand: Command<TrackOptions>
+    public class TrackCommand : Command<TrackOptions>
     {
         private static ILogger Logger => Program.Logger;
 
-        private static IIssueManager Initialize(Options options) => Program.Initialize(options);
+        private static IIssueManager Initialize(Options options)
+        {
+            return Program.Initialize(options);
+        }
 
         /// <inheritdoc />
         public override async Task Exec(TrackOptions options)
@@ -35,6 +38,5 @@ namespace GitIssue.Util
             options.Tracked.Save(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
             Console.WriteLine($"Tacking Issue '{options.Tracked.Key}'");
         }
-
     }
 }

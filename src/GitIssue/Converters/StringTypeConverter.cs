@@ -1,4 +1,6 @@
-﻿using GitIssue.Values;
+﻿using System;
+using GitIssue.Values;
+using String = GitIssue.Values.String;
 
 namespace GitIssue.Converters
 {

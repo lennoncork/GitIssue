@@ -1,16 +1,19 @@
 ﻿using System.Threading.Tasks;
 using Serilog;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands.Create
 {
     /// <summary>
-    /// Create Command
+    ///     Create Command
     /// </summary>
-    public class CreateCommand: Command<CreateOptions>
+    public class CreateCommand : Command<CreateOptions>
     {
         private static ILogger Logger => Program.Logger;
 
-        private static IIssueManager Initialize(Options options) => Program.Initialize(options);
+        private static IIssueManager Initialize(Options options)
+        {
+            return Program.Initialize(options);
+        }
 
         /// <inheritdoc />
         public override async Task Exec(CreateOptions options)

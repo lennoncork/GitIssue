@@ -69,13 +69,19 @@ namespace GitIssue.Issues
         ///     Implicit cast to string
         /// </summary>
         /// <param name="value"></param>
-        public static implicit operator string(IssueKey value) => value.ToString();
+        public static implicit operator string(IssueKey value)
+        {
+            return value.ToString();
+        }
 
         /// <summary>
         ///     Implicit cast to IssueKey
         /// </summary>
         /// <param name="value"></param>
-        public static implicit operator IssueKey(string value) => IssueKey.Create(value);
+        public static implicit operator IssueKey(string value)
+        {
+            return Create(value);
+        }
 
         /// <inheritdoc />
         public override string ToString()
@@ -90,9 +96,15 @@ namespace GitIssue.Issues
         }
 
         /// <inheritdoc />
-        public override bool Equals(object? obj) => key.Equals(obj);
+        public override bool Equals(object? obj)
+        {
+            return key.Equals(obj);
+        }
 
         /// <inheritdoc />
-        public bool Equals(IssueKey other) => key == other.key;
+        public bool Equals(IssueKey other)
+        {
+            return key == other.key;
+        }
     }
 }

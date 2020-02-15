@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands
 {
     /// <summary>
     ///     The GitIssueCommand
@@ -8,7 +8,7 @@ namespace GitIssue.Util
     public abstract class Command<T> where T : Options
     {
         /// <summary>
-        /// Executes the command
+        ///     Executes the command
         /// </summary>
         /// <param name="options">the command options</param>
         /// <returns></returns>

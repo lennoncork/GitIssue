@@ -1,4 +1,4 @@
-﻿namespace GitIssue.Util
+﻿namespace GitIssue.Util.Commands
 {
     /// <summary>
     ///     The GitIssueCommand
@@ -21,7 +21,7 @@
         Create,
 
         /// <summary>
-        /// Commits the issues
+        ///     Commits the issues
         /// </summary>
         Commit,
 
@@ -56,12 +56,12 @@
         Fields,
 
         /// <summary>
-        /// Adds a value to an existing field
+        ///     Adds a value to an existing field
         /// </summary>
         Add,
 
         /// <summary>
-        /// Removes an existing value from an existing field
+        ///     Removes an existing value from an existing field
         /// </summary>
         Remove
     }

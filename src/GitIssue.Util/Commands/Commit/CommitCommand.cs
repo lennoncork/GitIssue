@@ -1,16 +1,19 @@
 ﻿using System.Threading.Tasks;
 using Serilog;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands.Commit
 {
     /// <summary>
-    /// Commit command
+    ///     Commit command
     /// </summary>
     public class CommitCommand : Command<CommitOptions>
     {
         private static ILogger Logger => Program.Logger;
 
-        private static IIssueManager Initialize(Options options) => Program.Initialize(options);
+        private static IIssueManager Initialize(Options options)
+        {
+            return Program.Initialize(options);
+        }
 
         /// <inheritdoc />
         public override async Task Exec(CommitOptions options)
@@ -18,6 +21,5 @@ namespace GitIssue.Util
             await using var issues = Initialize(options);
             await issues.CommitAsync();
         }
-        
     }
 }

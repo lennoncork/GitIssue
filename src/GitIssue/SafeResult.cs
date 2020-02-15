@@ -75,7 +75,7 @@ namespace GitIssue
         /// <param name="exception"></param>
         public SafeResult(Exception exception) : base(exception)
         {
-            this.Result = default!;
+            Result = default!;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace GitIssue
         /// </summary>
         public SafeResult(bool success = false) : base(success)
         {
-            this.Result = default!;
+            Result = default!;
         }
 
         /// <summary>

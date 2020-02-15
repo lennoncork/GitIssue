@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands.Find
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Find), HelpText = "Finds an existing issue")]
@@ -12,7 +12,7 @@ namespace GitIssue.Util
         [Option("Format", HelpText = "The format to output in", Required = false)]
         public string Format { get; set; } = "%Key: %Title";
 
-        [Value(1, HelpText = "The LINQ expression to use when matching", Required = false)]
+        [Value(1, MetaName = "LINQ", HelpText = "The LINQ expression to use when matching", Required = false)]
         public string Linq { get; set; } = "i => true";
     }
 #pragma warning restore 1591

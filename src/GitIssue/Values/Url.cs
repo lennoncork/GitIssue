@@ -44,7 +44,10 @@ namespace GitIssue.Values
         public bool IsValid { get; }
 
         /// <inheritdoc />
-        public override string ToString() => value;
+        public override string ToString()
+        {
+            return value;
+        }
 
         /// <inheritdoc />
         public JToken ToJson()
@@ -62,6 +65,9 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public override int GetHashCode() => value.GetHashCode();
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
     }
 }

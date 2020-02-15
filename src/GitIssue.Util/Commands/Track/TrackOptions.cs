@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands.Track
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Track), HelpText = "Tracks an existing issue")]

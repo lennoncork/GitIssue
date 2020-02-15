@@ -4,18 +4,21 @@ using System.Threading.Tasks;
 using GitIssue.Formatters;
 using Serilog;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands.Show
 {
     /// <summary>
-    /// Show command
+    ///     Show command
     /// </summary>
-    public class ShowCommand: Command<ShowOptions>
+    public class ShowCommand : Command<ShowOptions>
     {
         private static ILogger Logger => Program.Logger;
 
-        private static IIssueManager Initialize(Options options) => Program.Initialize(options);
+        private static IIssueManager Initialize(Options options)
+        {
+            return Program.Initialize(options);
+        }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override async Task Exec(ShowOptions options)
         {
             var formatter = new DetailedFormatter();

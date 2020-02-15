@@ -89,6 +89,7 @@ namespace GitIssue
                 if (IsIssueRoot(current, name, out var issues)) return new RepositoryRoot(current.FullName, name);
                 current = parent;
             }
+
             return None;
         }
 

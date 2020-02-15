@@ -25,7 +25,7 @@ namespace GitIssue.Fields
         public static FieldKey Create(string? key)
         {
             if (string.IsNullOrEmpty(key))
-                return FieldKey.None;
+                return None;
             return new FieldKey(key);
         }
 
@@ -70,13 +70,19 @@ namespace GitIssue.Fields
         ///     Implicit cast to string
         /// </summary>
         /// <param name="value"></param>
-        public static implicit operator string(FieldKey value) => value.ToString();
+        public static implicit operator string(FieldKey value)
+        {
+            return value.ToString();
+        }
 
         /// <summary>
         ///     Implicit cast to FieldKey
         /// </summary>
         /// <param name="value"></param>
-        public static implicit operator FieldKey(string value) => FieldKey.Create(value);
+        public static implicit operator FieldKey(string value)
+        {
+            return Create(value);
+        }
 
         /// <inheritdoc />
         public override string ToString()

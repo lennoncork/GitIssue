@@ -15,7 +15,7 @@ namespace GitIssue.Issues
     public abstract class Issue : IIssue
     {
         /// <summary>
-        /// The issue manager
+        ///     The issue manager
         /// </summary>
         protected readonly IIssueManager manager;
 

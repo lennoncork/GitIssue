@@ -49,7 +49,8 @@ namespace GitIssue.Issues.Json
         /// <param name="manager">the issue manager</param>
         /// <param name="root">the issue root</param>
         /// <param name="fields">the issue's fields</param>
-        public JsonIssue(IIssueManager manager, IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) : base(manager, root)
+        public JsonIssue(IIssueManager manager, IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) : base(manager,
+            root)
         {
             Root = root;
             this.fields = fields.ToDictionary(f => f.Key,
@@ -140,6 +141,7 @@ namespace GitIssue.Issues.Json
                 value = field;
                 return true;
             }
+
             value = null!;
             return false;
         }
@@ -177,7 +179,8 @@ namespace GitIssue.Issues.Json
         /// <param name="root">the issue root</param>
         /// <param name="fields">the expected fields</param>
         /// <returns></returns>
-        public static async Task<IIssue?> ReadAsync(IIssueManager manager, IssueRoot root, IDictionary<FieldKey, FieldInfo> fields)
+        public static async Task<IIssue?> ReadAsync(IIssueManager manager, IssueRoot root,
+            IDictionary<FieldKey, FieldInfo> fields)
         {
             if (Directory.Exists(root.IssuePath) == false)
                 return null;

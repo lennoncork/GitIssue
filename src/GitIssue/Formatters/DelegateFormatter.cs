@@ -50,9 +50,15 @@ namespace GitIssue.Formatters
         public static DelegateFormatter Default => new DelegateFormatter();
 
         /// <inheritdoc />
-        public string? Format(IField field) => fieldFormatter?.Invoke(field);
-        
+        public string? Format(IField field)
+        {
+            return fieldFormatter?.Invoke(field);
+        }
+
         /// <inheritdoc />
-        public string? Format(IReadOnlyIssue issue) => issueFormatter?.Invoke(issue);
+        public string? Format(IReadOnlyIssue issue)
+        {
+            return issueFormatter?.Invoke(issue);
+        }
     }
 }

@@ -63,6 +63,7 @@ namespace GitIssue.Issues.Json
 
                 return CreateField<T>(issue, key, info);
             }
+
             return null!;
         }
 

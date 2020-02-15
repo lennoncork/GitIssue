@@ -94,7 +94,7 @@ namespace GitIssue
                 using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
                 using var reader = new StreamReader(stream);
                 var serializer = new JsonSerializer();
-                var configuration = (T)serializer.Deserialize(reader, typeof(T))!;
+                var configuration = (T) serializer.Deserialize(reader, typeof(T))!;
                 return configuration;
             }
             catch (Exception ex)

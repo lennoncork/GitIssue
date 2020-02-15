@@ -27,7 +27,7 @@ namespace GitIssue
         IssueConfiguration Configuration { get; }
 
         /// <summary>
-        /// Gets the change log for the issues
+        ///     Gets the change log for the issues
         /// </summary>
         ChangeLog ChangeLog { get; }
 

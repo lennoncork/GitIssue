@@ -34,11 +34,12 @@ namespace GitIssue.Issues.File
                 if (read != null)
                 {
                     object[] args = {issueRoot, key, info};
-                    var task = (Task)read.Invoke(null, args)!;
+                    var task = (Task) read.Invoke(null, args)!;
                     await task;
-                    var result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
+                    var result = (IField) task.GetType().GetProperty("Result")?.GetValue(task)!;
                     return result;
                 }
+
                 return null!;
             }
             catch (Exception e)
@@ -121,24 +122,25 @@ namespace GitIssue.Issues.File
             try
             {
                 var directory = Path.Combine(issueRoot.IssuePath, key.ToString());
+                var field = new FileArrayField<T>(issueRoot, key, new T[] { });
 
                 if (Directory.Exists(directory) == false)
-                    return new FileArrayField<T>(issueRoot, key, new T[] { });
+                    return field;
 
                 var values = new List<T>();
                 foreach (var fieldFile in Directory.EnumerateFiles(directory))
                 {
                     var content = await System.IO.File.ReadAllTextAsync(fieldFile);
-                    if (TryParse(content, out var result))
+                    if (field.TryParse(content, out var result))
                     {
-                        values.Add(result);
+                        field.Add(result);
                         continue;
                     }
 
                     throw new SerializationException($"Unable to convert field content to type {typeof(T)}");
                 }
 
-                return new FileArrayField<T>(issueRoot, key, values.ToArray());
+                return field;
             }
             catch (Exception e)
             {

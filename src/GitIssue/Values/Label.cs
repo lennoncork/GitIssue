@@ -58,6 +58,9 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public override int GetHashCode() => value.GetHashCode();
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
     }
 }

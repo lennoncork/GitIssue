@@ -4,7 +4,7 @@ using GitIssue.Issues;
 using Newtonsoft.Json;
 using Serilog;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands.Track
 {
     /// <summary>
     ///     Tracked issue metadata

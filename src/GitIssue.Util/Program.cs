@@ -2,6 +2,18 @@
 using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
+using GitIssue.Util.Commands;
+using GitIssue.Util.Commands.Add;
+using GitIssue.Util.Commands.Commit;
+using GitIssue.Util.Commands.Create;
+using GitIssue.Util.Commands.Delete;
+using GitIssue.Util.Commands.Edit;
+using GitIssue.Util.Commands.Fields;
+using GitIssue.Util.Commands.Find;
+using GitIssue.Util.Commands.Init;
+using GitIssue.Util.Commands.Remove;
+using GitIssue.Util.Commands.Show;
+using GitIssue.Util.Commands.Track;
 using Serilog;
 
 namespace GitIssue.Util
@@ -21,12 +33,15 @@ namespace GitIssue.Util
             });
 
             parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
-                    ShowOptions, EditOptions, TrackOptions, FieldsOptions, CommitOptions>(args)
+                    ShowOptions, AddOptions, RemoveOptions, EditOptions, TrackOptions,
+                    FieldsOptions, CommitOptions>(args)
                 .WithParsed<InitOptions>(o => ExecAsync<InitCommand, InitOptions>(o).Wait())
                 .WithParsed<CreateOptions>(o => ExecAsync<CreateCommand, CreateOptions>(o).Wait())
                 .WithParsed<DeleteOptions>(o => ExecAsync<DeleteCommand, DeleteOptions>(o).Wait())
                 .WithParsed<FindOptions>(o => ExecAsync<FindCommand, FindOptions>(o).Wait())
-                .WithParsed<ShowOptions>(o => ExecAsync<ShowCommand,ShowOptions>(o).Wait())
+                .WithParsed<ShowOptions>(o => ExecAsync<ShowCommand, ShowOptions>(o).Wait())
+                .WithParsed<AddOptions>(o => ExecAsync<AddCommand, AddOptions>(o).Wait())
+                .WithParsed<RemoveOptions>(o => ExecAsync<RemoveCommand, RemoveOptions>(o).Wait())
                 .WithParsed<EditOptions>(o => ExecAsync<EditCommand, EditOptions>(o).Wait())
                 .WithParsed<FieldsOptions>(o => ExecAsync<FieldsCommand, FieldsOptions>(o).Wait())
                 .WithParsed<TrackOptions>(o => ExecAsync<TrackCommand, TrackOptions>(o).Wait())
@@ -49,11 +64,11 @@ namespace GitIssue.Util
             return new IssueManager(options.Path, options.Name, Logger);
         }
 
-        private static async Task ExecAsync<TC, T>(T value) 
-            where TC : Command<T> 
+        private static async Task ExecAsync<TC, T>(T value)
+            where TC : Command<T>
             where T : Options
         {
-            TC command = Activator.CreateInstance<TC>();
+            var command = Activator.CreateInstance<TC>();
             await ExecAsync(command.Exec, value);
         }
 
