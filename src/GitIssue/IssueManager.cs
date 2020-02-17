@@ -206,31 +206,37 @@ namespace GitIssue
 
 
         /// <inheritdoc />
-        public void Delete(string id)
+        public bool Delete(string id)
         {
             throw new NotImplementedException();
         }
 
 
         /// <inheritdoc />
-        public void Delete(IssueKey key)
+        public bool Delete(IssueKey key)
         {
             throw new NotImplementedException();
         }
 
 
         /// <inheritdoc />
-        public async Task DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(string id)
         {
-            if (KeyProvider.TryGetKey(id, out var key)) await DeleteAsync(key);
-            logger?.Debug($"Failed to get issue key from {id}");
+            if (KeyProvider.TryGetKey(id, out var key))
+            {
+                await DeleteAsync(key);
+                return true;
+            }
+            logger?.Error($"Failed to get issue key from {id}");
+            return false;
         }
 
 
         /// <inheritdoc />
-        public async Task DeleteAsync(IssueKey key)
+        public async Task<bool> DeleteAsync(IssueKey key)
         {
             await FileIssue.DeleteAsync(new IssueRoot(Root, key));
+            return true;
         }
 
         /// <inheritdoc />

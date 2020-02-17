@@ -97,26 +97,26 @@ namespace GitIssue
         ///     Deletes an existing issue
         /// </summary>
         /// <param name="id">the id to search</param>
-        void Delete(string id);
+        bool Delete(string id);
 
         /// <summary>
         ///     Deletes an existing issue
         /// </summary>
         /// <param name="key">the issue key</param>
-        void Delete(IssueKey key);
+        bool Delete(IssueKey key);
 
         /// <summary>
         ///     Deletes an existing issue
         /// </summary>
         /// <param name="id">the id to search</param>
         /// <returns></returns>
-        Task DeleteAsync(string id);
+        Task<bool> DeleteAsync(string id);
 
         /// <summary>
         ///     Deletes an existing issue
         /// </summary>
         /// <param name="key">the issue key</param>
         /// <returns></returns>
-        Task DeleteAsync(IssueKey key);
+        Task<bool> DeleteAsync(IssueKey key);
     }
 }

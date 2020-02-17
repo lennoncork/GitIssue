@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Serilog;
 
 namespace GitIssue.Util.Commands.Delete
@@ -19,7 +20,9 @@ namespace GitIssue.Util.Commands.Delete
         public override async Task Exec(DeleteOptions options)
         {
             await using var issues = Initialize(options);
-            await issues.DeleteAsync(options.Key);
+            var result = await issues.DeleteAsync(options.Key);
+            if(result)
+                Console.WriteLine($"Deleted issue '{options.Key}'");
         }
     }
 }
