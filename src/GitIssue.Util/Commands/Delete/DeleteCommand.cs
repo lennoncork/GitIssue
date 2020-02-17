@@ -8,7 +8,7 @@ namespace GitIssue.Util.Commands.Delete
     /// </summary>
     public class DeleteCommand : Command<DeleteOptions>
     {
-        private static ILogger Logger => Program.Logger;
+        private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {
@@ -18,7 +18,7 @@ namespace GitIssue.Util.Commands.Delete
         /// <inheritdoc />
         public override async Task Exec(DeleteOptions options)
         {
-            await using var issues = new IssueManager(options.Path, Logger);
+            await using var issues = Initialize(options);
             await issues.DeleteAsync(options.Key);
         }
     }

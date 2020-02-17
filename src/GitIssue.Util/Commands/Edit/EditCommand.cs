@@ -12,7 +12,7 @@ namespace GitIssue.Util.Commands.Edit
     /// </summary>
     public class EditCommand : Command<EditOptions>
     {
-        private static ILogger Logger => Program.Logger;
+        private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {
@@ -30,7 +30,7 @@ namespace GitIssue.Util.Commands.Edit
 
             if (issue == null)
             {
-                Logger.Error($"Issue \"{options.Key}\" not found");
+                Logger?.Error($"Issue \"{options.Key}\" not found");
                 return;
             }
 
@@ -56,7 +56,7 @@ namespace GitIssue.Util.Commands.Edit
             var key = FieldKey.Create(options.Field);
             if (!issue.ContainsKey(key))
             {
-                Logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
+                Logger?.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
                 return;
             }
 

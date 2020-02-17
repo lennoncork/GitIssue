@@ -17,6 +17,7 @@ namespace GitIssue.Util.Commands.Track
         /// </summary>
         public TrackedIssue()
         {
+            Key = string.Empty;
         }
 
         /// <summary>
@@ -47,11 +48,53 @@ namespace GitIssue.Util.Commands.Track
         public static TrackedIssue None => new TrackedIssue();
 
         /// <summary>
+        /// Equals
+        /// </summary>
+        /// <param name="lhs"></param>
+        /// <param name="rhs"></param>
+        /// <returns></returns>
+        public static bool operator ==(TrackedIssue lhs, TrackedIssue rhs)
+        {
+            if (string.IsNullOrEmpty(lhs?.Key) && string.IsNullOrEmpty(rhs?.Key))
+                return true;
+            if (string.IsNullOrEmpty(lhs?.Key) || string.IsNullOrEmpty(rhs?.Key))
+                return false;
+            return rhs.Equals(lhs);
+        }
+
+        /// <summary>
+        /// Not Equals
+        /// </summary>
+        /// <param name="lhs"></param>
+        /// <param name="rhs"></param>
+        /// <returns></returns>
+        public static bool operator !=(TrackedIssue lhs, TrackedIssue rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj is TrackedIssue track)
+            {
+                if (string.IsNullOrEmpty(this.Key) && 
+                    string.IsNullOrEmpty(track.Key))
+                    return true;
+                return this.Key == track.Key;
+            }
+            return base.Equals(obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode() => this.Key.GetHashCode();
+
+        /// <summary>
         ///     Saves the configuration to a file
         /// </summary>
         /// <param name="file">the configuration file</param>
         /// <param name="logger">the logger</param>
-        public void Save(string file, ILogger logger = null)
+        public void Save(string file, ILogger? logger = null)
         {
             try
             {
@@ -66,7 +109,7 @@ namespace GitIssue.Util.Commands.Track
             }
             catch (Exception ex)
             {
-                logger.Error($"Unable to serialize {file} as tracked issue file ", ex);
+                logger?.Error($"Unable to serialize {file} as tracked issue file ", ex);
             }
         }
 
@@ -76,7 +119,7 @@ namespace GitIssue.Util.Commands.Track
         /// <param name="file">the tracking file</param>
         /// <param name="logger">the logger</param>
         /// <returns>the <see cref="TrackedIssue" /></returns>
-        public static TrackedIssue Read(string file, ILogger logger = null)
+        public static TrackedIssue Read(string file, ILogger? logger = null)
         {
             try
             {
@@ -85,13 +128,13 @@ namespace GitIssue.Util.Commands.Track
                     using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
                     using var reader = new StreamReader(stream);
                     var serializer = new JsonSerializer();
-                    var tracked = (TrackedIssue) serializer.Deserialize(reader, typeof(TrackedIssue));
+                    var tracked = (TrackedIssue) serializer.Deserialize(reader, typeof(TrackedIssue))!;
                     return tracked;
                 }
             }
             catch (Exception ex)
             {
-                logger.Error($"Unable to deserialize {file} as tracked issue file ", ex);
+                logger?.Error($"Unable to deserialize {file} as tracked issue file ", ex);
             }
 
             return None;

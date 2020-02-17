@@ -9,7 +9,7 @@ namespace GitIssue.Util.Commands.Fields
     /// </summary>
     public class FieldsCommand : Command<FieldsOptions>
     {
-        private static ILogger Logger => Program.Logger;
+        private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {

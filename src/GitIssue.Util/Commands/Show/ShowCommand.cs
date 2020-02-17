@@ -11,7 +11,7 @@ namespace GitIssue.Util.Commands.Show
     /// </summary>
     public class ShowCommand : Command<ShowOptions>
     {
-        private static ILogger Logger => Program.Logger;
+        private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {

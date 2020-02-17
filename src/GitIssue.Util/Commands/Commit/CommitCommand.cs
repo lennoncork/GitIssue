@@ -8,7 +8,7 @@ namespace GitIssue.Util.Commands.Commit
     /// </summary>
     public class CommitCommand : Command<CommitOptions>
     {
-        private static ILogger Logger => Program.Logger;
+        private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {

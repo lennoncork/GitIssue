@@ -20,9 +20,20 @@ namespace GitIssue.Util
         public string Tracking { get; set; } = "tracking.json";
     }
 
-    public class KeyOptions : Options
+    public interface ITrackedOptions
     {
-        private static readonly HashSet<string> tracking = new HashSet<string>
+        public string Path { get; set; }
+
+        public string Name { get; set; }
+
+        TrackedIssue Tracked { get; set; }
+
+        public string Tracking { get; set; }
+    }
+
+    public class KeyOptions : Options, ITrackedOptions
+    {
+        private static readonly HashSet<string?> tracking = new HashSet<string?>
         {
             null,
             string.Empty,
@@ -36,7 +47,7 @@ namespace GitIssue.Util
         /// <summary>
         ///     Gets or sets the traced issue
         /// </summary>
-        public TrackedIssue Tracked { get; set; }
+        public TrackedIssue Tracked { get; set; } = TrackedIssue.None;
 
         [Value(1, MetaName = "Issue Key", HelpText = "The issue key", Required = false)]
         public string Key

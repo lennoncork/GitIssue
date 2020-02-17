@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Serilog;
 
 namespace GitIssue.Util.Commands.Init
@@ -8,7 +9,7 @@ namespace GitIssue.Util.Commands.Init
     /// </summary>
     public class InitCommand : Command<InitOptions>
     {
-        private static ILogger Logger => Program.Logger;
+        private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {
@@ -19,6 +20,7 @@ namespace GitIssue.Util.Commands.Init
         public override async Task Exec(InitOptions options)
         {
             await using var issues = IssueManager.Init(options.Path, options.Name);
+            Console.WriteLine($"Initialized empty 'Issue' repository in {issues.Root.IssuesPath}");
         }
     }
 }

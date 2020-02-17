@@ -2,10 +2,16 @@
 using GitIssue.Issues.Json;
 using GitIssue.Values;
 
-namespace GitIssue.Tests.IntegrationTests.Bug
+namespace GitIssue.Configurations.Bug
 {
+    /// <summary>
+    /// A defect configuration
+    /// </summary>
     public class BugConfiguration : IssueConfiguration
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BugConfiguration"/> class
+        /// </summary>
         public BugConfiguration()
         {
             Fields.Add(FieldKey.Create("AffectsVersion"), new FieldInfo<Version, JsonArrayField>(false));

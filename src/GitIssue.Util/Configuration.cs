@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using GitIssue.Configurations;
+using Newtonsoft.Json;
 
 namespace GitIssue.Util
 {

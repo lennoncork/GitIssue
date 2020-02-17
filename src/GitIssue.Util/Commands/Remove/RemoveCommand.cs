@@ -13,7 +13,7 @@ namespace GitIssue.Util.Commands.Remove
     /// </summary>
     public class RemoveCommand : Command<RemoveOptions>
     {
-        private static ILogger Logger => Program.Logger;
+        private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {
@@ -33,20 +33,20 @@ namespace GitIssue.Util.Commands.Remove
 
             if (issue == null)
             {
-                Logger.Error($"Issue \"{options.Key}\" not found");
+                Logger?.Error($"Issue \"{options.Key}\" not found");
                 return;
             }
 
             if (string.IsNullOrEmpty(options.Field))
             {
-                Logger.Error($"Field must be supplied to remove a value on \"{issue.Key}\"");
+                Logger?.Error($"Field must be supplied to remove a value on \"{issue.Key}\"");
                 return;
             }
 
             var key = FieldKey.Create(options.Field);
             if (!issue.ContainsKey(key))
             {
-                Logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
+                Logger?.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
                 return;
             }
 
@@ -63,17 +63,17 @@ namespace GitIssue.Util.Commands.Remove
                     }
                     else
                     {
-                        Logger.Error($"Item \"{options.Remove}\" does not exist on field {options.Field}");
+                        Logger?.Error($"Item \"{options.Remove}\" does not exist on field {options.Field}");
                     }
                 }
                 else
                 {
-                    Logger.Error($"Item \"{options.Remove}\" is not a valid value for field {options.Field}");
+                    Logger?.Error($"Item \"{options.Remove}\" is not a valid value for field {options.Field}");
                 }
             }
             else
             {
-                Logger.Error($"Field \"{key}\" is not an array type, cannot remove value");
+                Logger?.Error($"Field \"{key}\" is not an array type, cannot remove value");
             }
         }
     }

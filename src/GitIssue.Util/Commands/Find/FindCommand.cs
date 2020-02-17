@@ -13,7 +13,7 @@ namespace GitIssue.Util.Commands.Find
     /// </summary>
     public class FindCommand : Command<FindOptions>
     {
-        private static ILogger Logger => Program.Logger;
+        private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {
@@ -32,7 +32,7 @@ namespace GitIssue.Util.Commands.Find
             }
             catch (Exception e)
             {
-                Logger.Error($"Unable to parse expression {e.Message}", e);
+                Logger?.Error($"Unable to parse expression {e.Message}", e);
                 return;
             }
 

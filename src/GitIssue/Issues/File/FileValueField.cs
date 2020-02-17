@@ -20,13 +20,24 @@ namespace GitIssue.Issues.File
         /// <summary>
         ///     Initializes a new instance of the <see cref="FileValueField{T}" /> class
         /// </summary>
-        /// <param name="issueRoot"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public FileValueField(IssueRoot issueRoot, FieldKey key, T value)
+        /// <param name="root">the issue root</param>
+        /// <param name="key">the field key</param>
+        public FileValueField(IssueRoot root, FieldKey key)
+            : base(key, default!)
+        {
+            this.issueRoot = root;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="FileValueField{T}" /> class
+        /// </summary>
+        /// <param name="root">the issue root</param>
+        /// <param name="key">the field key</param>
+        /// <param name="value">the field value</param>
+        public FileValueField(IssueRoot root, FieldKey key, T value)
             : base(key, value)
         {
-            this.issueRoot = issueRoot;
+            this.issueRoot = root;
         }
 
         /// <summary>
@@ -75,7 +86,11 @@ namespace GitIssue.Issues.File
             {
                 var fieldFile = Path.Combine(issueRoot.IssuePath, key.ToString());
                 var content = await System.IO.File.ReadAllTextAsync(fieldFile);
-                if (TryParse(content, out var result)) return new FileValueField<T>(issueRoot, key, result);
+                var field = new FileValueField<T>(issueRoot, key);
+                if (field.TryParse(content, out T value))
+                {
+                    field.Value = value;
+                }
                 throw new SerializationException($"Unable to convert field content to type {typeof(T)}");
             }
             catch (Exception e)

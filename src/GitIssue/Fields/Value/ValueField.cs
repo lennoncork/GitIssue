@@ -13,8 +13,8 @@ namespace GitIssue.Fields.Value
         /// <summary>
         ///     Initializes a new instance of the <see cref="ValueField{T}" /> class
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">the issue key</param>
+        /// <param name="value">the issue value</param>
         protected ValueField(FieldKey key, T value) : base(key)
         {
             Value = value;
@@ -34,17 +34,23 @@ namespace GitIssue.Fields.Value
                 Value = result;
                 return Task.FromResult(true);
             }
-
             return Task.FromResult(false);
         }
 
-        /// <summary>
-        ///     Tries to parse the string input to the output value
-        /// </summary>
-        /// <param name="input">the input string</param>
-        /// <param name="value">the output value</param>
-        /// <returns></returns>
-        internal static bool TryParse(string input, out T value)
+        /// <inheritdoc />
+        bool IValueField.TryParse(string input, out object? value)
+        {
+            if (ValueExtensions.TryParse(input, out T result))
+            {
+                value = result;
+                return true;
+            }
+            value = null;
+            return false;
+        }
+
+        /// <inheritdoc />
+        public bool TryParse(string input, out T value)
         {
             return ValueExtensions.TryParse(input, out value);
         }

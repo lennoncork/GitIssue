@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GitIssue.Configurations;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
 using LibGit2Sharp;
@@ -336,7 +337,8 @@ namespace GitIssue
             {
                 Root = root,
                 Configuration = configuration,
-                Repository = new Repository(directory)
+                Repository = new Repository(directory),
+                ChangeLog = new ChangeLog()
             };
         }
     }

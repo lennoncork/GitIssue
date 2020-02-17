@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using GitIssue.Configurations.Bug;
 using GitIssue.Values;
 using NUnit.Framework;
 

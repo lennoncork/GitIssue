@@ -20,10 +20,15 @@ namespace GitIssue.Util
 {
     internal class Program
     {
-        public static ILogger Logger;
+        public static ILogger? Logger;
 
         private static void Main(string[] args)
         {
+            Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .MinimumLevel.Debug()
+                .CreateLogger();
+
             var parser = new Parser(with =>
             {
                 with.EnableDashDash = true;
@@ -50,18 +55,11 @@ namespace GitIssue.Util
 
         public static IIssueManager Initialize(Options options)
         {
-            Logger = new LoggerConfiguration()
-                .WriteTo.Console()
-                .MinimumLevel.Debug()
-                .CreateLogger();
-
-            if (options is KeyOptions keyOptions)
+            if (options is ITrackedOptions keyOptions)
                 keyOptions.Tracked = TrackedIssue
                     .Read(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
 
-            //Configuration configuration = Configuration.Read();
-
-            return new IssueManager(options.Path, options.Name, Logger);
+            return new IssueManager(options.Path, options.Name, Logger!);
         }
 
         private static async Task ExecAsync<TC, T>(T value)

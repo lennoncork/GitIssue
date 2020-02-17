@@ -33,12 +33,12 @@ namespace GitIssue.Util
         /// <summary>
         ///     Gets or sets the command
         /// </summary>
-        public string Command { get; set; }
+        public string Command { get; set; } = string.Empty;
 
         /// <summary>
         ///     Gets or sets the arguments
         /// </summary>
-        public string Arguments { get; set; }
+        public string Arguments { get; set; } = string.Empty;
 
         /// <inheritdoc />
         public async Task Open(IIssue issue)
@@ -123,8 +123,7 @@ namespace GitIssue.Util
                 match = Regex.Match(input, pattern);
                 return match.Success;
             }
-
-            match = null;
+            match = null!;
             return false;
         }
 

@@ -6,6 +6,7 @@
     <OutputType>Exe</OutputType>
     <StartupObject />
     <IncludeSymbolsInSingleFile>true</IncludeSymbolsInSingleFile>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>

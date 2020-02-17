@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GitIssue.Configurations;
 using GitIssue.Issues;
 using LibGit2Sharp;
 
@@ -15,6 +16,11 @@ namespace GitIssue
         ///     Gets the working directory
         /// </summary>
         string WorkingDirectory { get; }
+
+        /// <summary>
+        ///     Gets the repository root
+        /// </summary>
+        public RepositoryRoot Root { get; }
 
         /// <summary>
         ///     Gets the GIT repository

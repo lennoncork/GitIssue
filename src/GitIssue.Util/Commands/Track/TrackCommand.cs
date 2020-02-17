@@ -11,7 +11,7 @@ namespace GitIssue.Util.Commands.Track
     /// </summary>
     public class TrackCommand : Command<TrackOptions>
     {
-        private static ILogger Logger => Program.Logger;
+        private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {

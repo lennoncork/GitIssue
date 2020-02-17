@@ -8,13 +8,13 @@ using Newtonsoft.Json;
 using DateTime = GitIssue.Values.DateTime;
 using String = GitIssue.Values.String;
 
-namespace GitIssue
+namespace GitIssue.Configurations
 {
     /// <summary>
     ///     Class defining the configuration of all issues in a repository
     /// </summary>
     [JsonObject]
-    public class IssueConfiguration
+    public class IssueConfiguration : IIssueConfiguration
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueConfiguration" /> class
@@ -52,7 +52,7 @@ namespace GitIssue
         /// </summary>
         /// <typeparam name="T">the configuration type</typeparam>
         /// <param name="file">the configuration file</param>
-        public void Save<T>(string file) where T : IssueConfiguration
+        public void Save<T>(string file) where T : IssueConfiguration, new()
         {
             try
             {

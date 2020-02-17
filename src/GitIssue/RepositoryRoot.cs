@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using GitIssue.Configurations;
 using GitIssue.Exceptions;
 
 namespace GitIssue
