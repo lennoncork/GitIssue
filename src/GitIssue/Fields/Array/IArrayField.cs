@@ -10,17 +10,17 @@ namespace GitIssue.Fields.Array
     public interface IArrayField : IField, IList
     {
         /// <summary>
-        /// Tries to parse the input into an array value
+        ///     Gets the value type
+        /// </summary>
+        Type ValueType { get; }
+
+        /// <summary>
+        ///     Tries to parse the input into an array value
         /// </summary>
         /// <param name="input">the input to parse</param>
         /// <param name="value">the output value</param>
         /// <returns>true is successful, false otherwise</returns>
         bool TryParse(string input, out object? value);
-
-        /// <summary>
-        ///     Gets the value type
-        /// </summary>
-        Type ValueType { get; }
     }
 
     /// <summary>
@@ -30,16 +30,16 @@ namespace GitIssue.Fields.Array
     public interface IArrayField<T> : IArrayField, IList<T>
     {
         /// <summary>
-        /// Tries to parse the input into an array value
+        ///     Gets or sets the fields array of value
+        /// </summary>
+        T[] Values { get; set; }
+
+        /// <summary>
+        ///     Tries to parse the input into an array value
         /// </summary>
         /// <param name="input">the input to parse</param>
         /// <param name="value">the output value</param>
         /// <returns>true is successful, false otherwise</returns>
         bool TryParse(string input, out T value);
-
-        /// <summary>
-        ///     Gets or sets the fields array of value
-        /// </summary>
-        T[] Values { get; set; }
     }
 }

@@ -123,6 +123,7 @@ namespace GitIssue.Util
                 match = Regex.Match(input, pattern);
                 return match.Success;
             }
+
             match = null!;
             return false;
         }

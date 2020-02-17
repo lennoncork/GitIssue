@@ -1,8 +1,4 @@
-﻿using System;
-using GitIssue.Values;
-using String = GitIssue.Values.String;
-
-namespace GitIssue.Converters
+﻿namespace GitIssue.Values
 {
     /// <summary>
     ///     Converts from a string to a version type

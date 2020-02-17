@@ -227,6 +227,7 @@ namespace GitIssue
                 await DeleteAsync(key);
                 return true;
             }
+
             logger?.Error($"Failed to get issue key from {id}");
             return false;
         }

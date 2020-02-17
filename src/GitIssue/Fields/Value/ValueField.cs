@@ -34,6 +34,7 @@ namespace GitIssue.Fields.Value
                 Value = result;
                 return Task.FromResult(true);
             }
+
             return Task.FromResult(false);
         }
 
@@ -45,6 +46,7 @@ namespace GitIssue.Fields.Value
                 value = result;
                 return true;
             }
+
             value = null;
             return false;
         }

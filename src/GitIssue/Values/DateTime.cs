@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using GitIssue.Converters;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 

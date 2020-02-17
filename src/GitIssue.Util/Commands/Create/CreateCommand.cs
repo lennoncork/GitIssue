@@ -12,14 +12,13 @@ namespace GitIssue.Util.Commands.Create
     /// </summary>
     public class CreateCommand : Command<CreateOptions>
     {
+        private Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => new DetailedFormatter());
         private static ILogger? Logger => Program.Logger;
 
         private static IIssueManager Initialize(Options options)
         {
             return Program.Initialize(options);
         }
-
-        private Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => new DetailedFormatter());
 
         /// <inheritdoc />
         public override async Task Exec(CreateOptions options)
@@ -33,7 +32,9 @@ namespace GitIssue.Util.Commands.Create
                 Console.WriteLine($"Created and tracking new issue '{issue.Key}'");
             }
             else
+            {
                 Console.WriteLine($"Created new issue '{issue.Key}'");
+            }
         }
     }
 }

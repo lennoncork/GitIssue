@@ -21,7 +21,7 @@ namespace GitIssue.Util.Commands.Delete
         {
             await using var issues = Initialize(options);
             var result = await issues.DeleteAsync(options.Key);
-            if(result)
+            if (result)
                 Console.WriteLine($"Deleted issue '{options.Key}'");
         }
     }

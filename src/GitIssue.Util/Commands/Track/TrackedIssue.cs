@@ -48,7 +48,7 @@ namespace GitIssue.Util.Commands.Track
         public static TrackedIssue None => new TrackedIssue();
 
         /// <summary>
-        /// Equals
+        ///     Equals
         /// </summary>
         /// <param name="lhs"></param>
         /// <param name="rhs"></param>
@@ -63,7 +63,7 @@ namespace GitIssue.Util.Commands.Track
         }
 
         /// <summary>
-        /// Not Equals
+        ///     Not Equals
         /// </summary>
         /// <param name="lhs"></param>
         /// <param name="rhs"></param>
@@ -78,16 +78,20 @@ namespace GitIssue.Util.Commands.Track
         {
             if (obj is TrackedIssue track)
             {
-                if (string.IsNullOrEmpty(this.Key) && 
+                if (string.IsNullOrEmpty(Key) &&
                     string.IsNullOrEmpty(track.Key))
                     return true;
-                return this.Key == track.Key;
+                return Key == track.Key;
             }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
-        public override int GetHashCode() => this.Key.GetHashCode();
+        public override int GetHashCode()
+        {
+            return Key.GetHashCode();
+        }
 
         /// <summary>
         ///     Saves the configuration to a file

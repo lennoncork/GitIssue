@@ -5,7 +5,7 @@ using GitIssue.Values;
 namespace GitIssue.Configurations.Bug
 {
     /// <summary>
-    /// Extension methods for the 'Bug' issue type
+    ///     Extension methods for the 'Bug' issue type
     /// </summary>
     public static class BugExtensions
     {
@@ -13,7 +13,7 @@ namespace GitIssue.Configurations.Bug
         private static readonly FieldKey SeverityKey = FieldKey.Create("Severity");
 
         /// <summary>
-        /// Sets the fix version of the issue
+        ///     Sets the fix version of the issue
         /// </summary>
         /// <param name="issue">the issue</param>
         /// <param name="fixVersion">the fix version to set</param>
@@ -23,7 +23,7 @@ namespace GitIssue.Configurations.Bug
         }
 
         /// <summary>
-        /// Gets the fix version of the issue
+        ///     Gets the fix version of the issue
         /// </summary>
         /// <param name="issue">the issue</param>
         public static Version[] GetFixVersion(this IIssue issue)
@@ -33,7 +33,7 @@ namespace GitIssue.Configurations.Bug
         }
 
         /// <summary>
-        /// Sets the severity of the issue
+        ///     Sets the severity of the issue
         /// </summary>
         /// <param name="issue">the issue</param>
         /// <param name="severity">the issue's severity</param>
@@ -43,7 +43,7 @@ namespace GitIssue.Configurations.Bug
         }
 
         /// <summary>
-        /// Gets the severity of the issue
+        ///     Gets the severity of the issue
         /// </summary>
         /// <param name="issue">the issue</param>
         /// <returns></returns>

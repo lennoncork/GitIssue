@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Net.Mail;
-using GitIssue.Converters;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 

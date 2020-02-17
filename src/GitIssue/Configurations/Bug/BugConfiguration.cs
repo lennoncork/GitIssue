@@ -5,12 +5,12 @@ using GitIssue.Values;
 namespace GitIssue.Configurations.Bug
 {
     /// <summary>
-    /// A defect configuration
+    ///     A defect configuration
     /// </summary>
     public class BugConfiguration : IssueConfiguration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BugConfiguration"/> class
+        ///     Initializes a new instance of the <see cref="BugConfiguration" /> class
         /// </summary>
         public BugConfiguration()
         {

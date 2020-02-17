@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using GitIssue.Converters;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using GitIssue.Values;
 
-namespace GitIssue.Converters
+namespace GitIssue.Values
 {
     /// <summary>
     ///     Base class for value type converters

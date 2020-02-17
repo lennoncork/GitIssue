@@ -1,38 +1,42 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using GitIssue.Issues;
 
-namespace GitIssue.Converters
+namespace GitIssue.Values
 {
     /// <summary>
-    ///     TypeConverter for FieldKey and String
+    ///     TypeConverter for FieldType and String
     /// </summary>
-    public class IssuedKeyTypeConverter : TypeConverter
+    public class TypeValueTypeConverter : TypeConverter
     {
         /// <inheritdoc />
         public override bool CanConvertFrom(ITypeDescriptorContext context,
             Type sourceType)
         {
-            if (sourceType == typeof(string)) return true;
+            if (sourceType == typeof(string))
+                return true;
+
             return base.CanConvertFrom(context, sourceType);
         }
 
         /// <inheritdoc />
-        public override object ConvertFrom(ITypeDescriptorContext context,
+        public override object? ConvertFrom(ITypeDescriptorContext context,
             CultureInfo culture, object value)
         {
-            if (value is string str) return IssueKey.Create(str);
+            if (value is string str)
+                if (TypeValue.TryParse(str, out var type))
+                    return type;
+
             return base.ConvertFrom(context, culture, value);
         }
 
         /// <inheritdoc />
-        public override object ConvertTo(ITypeDescriptorContext context,
+        public override object? ConvertTo(ITypeDescriptorContext context,
             CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string))
-                if (value is IssueKey key)
-                    return key.ToString();
+                if (value is TypeValue type)
+                    return type.ToString();
             return base.ConvertTo(context, culture, value, destinationType);
         }
     }

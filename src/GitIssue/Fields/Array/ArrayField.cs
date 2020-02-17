@@ -203,7 +203,10 @@ namespace GitIssue.Fields.Array
         }
 
         /// <inheritdoc />
-        public void Clear() => values.Clear();
+        public void Clear()
+        {
+            values.Clear();
+        }
 
         /// <inheritdoc />
         bool IArrayField.TryParse(string input, out object? value)
@@ -213,6 +216,7 @@ namespace GitIssue.Fields.Array
                 value = result;
                 return true;
             }
+
             value = null;
             return false;
         }

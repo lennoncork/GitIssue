@@ -4,7 +4,7 @@ using CommandLine;
 using GitIssue.Issues;
 using GitIssue.Util.Commands.Track;
 
-namespace GitIssue.Util
+namespace GitIssue.Util.Commands
 {
 #pragma warning disable 1591
 
@@ -44,22 +44,22 @@ namespace GitIssue.Util
 
         private string key = string.Empty;
 
-        /// <summary>
-        ///     Gets or sets the traced issue
-        /// </summary>
-        public TrackedIssue Tracked { get; set; } = TrackedIssue.None;
-
         [Value(1, MetaName = "Issue Key", HelpText = "The issue key", Required = false)]
         public string Key
         {
             get
             {
-                if(tracking.Contains(key))
+                if (tracking.Contains(key))
                     return Tracked?.Key.ToString() ?? IssueKey.None.ToString();
                 return key;
             }
             set => key = value;
         }
+
+        /// <summary>
+        ///     Gets or sets the traced issue
+        /// </summary>
+        public TrackedIssue Tracked { get; set; } = TrackedIssue.None;
     }
 
     public class EditorOptions : KeyOptions

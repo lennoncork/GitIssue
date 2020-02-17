@@ -1,9 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using GitIssue.Fields;
 
-namespace GitIssue.Converters
+namespace GitIssue.Fields
 {
     /// <summary>
     ///     TypeConverter for FieldKey and String

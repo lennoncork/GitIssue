@@ -1,6 +1,4 @@
-﻿using GitIssue.Values;
-
-namespace GitIssue.Converters
+﻿namespace GitIssue.Values
 {
     /// <summary>
     ///     Converts from a string to a label

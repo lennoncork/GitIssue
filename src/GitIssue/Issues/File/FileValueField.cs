@@ -25,7 +25,7 @@ namespace GitIssue.Issues.File
         public FileValueField(IssueRoot root, FieldKey key)
             : base(key, default!)
         {
-            this.issueRoot = root;
+            issueRoot = root;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace GitIssue.Issues.File
         public FileValueField(IssueRoot root, FieldKey key, T value)
             : base(key, value)
         {
-            this.issueRoot = root;
+            issueRoot = root;
         }
 
         /// <summary>
@@ -87,10 +87,7 @@ namespace GitIssue.Issues.File
                 var fieldFile = Path.Combine(issueRoot.IssuePath, key.ToString());
                 var content = await System.IO.File.ReadAllTextAsync(fieldFile);
                 var field = new FileValueField<T>(issueRoot, key);
-                if (field.TryParse(content, out T value))
-                {
-                    field.Value = value;
-                }
+                if (field.TryParse(content, out var value)) field.Value = value;
                 throw new SerializationException($"Unable to convert field content to type {typeof(T)}");
             }
             catch (Exception e)

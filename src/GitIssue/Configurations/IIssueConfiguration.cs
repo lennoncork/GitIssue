@@ -4,7 +4,7 @@ using GitIssue.Fields;
 namespace GitIssue.Configurations
 {
     /// <summary>
-    /// The issue configuration interface
+    ///     The issue configuration interface
     /// </summary>
     public interface IIssueConfiguration
     {
