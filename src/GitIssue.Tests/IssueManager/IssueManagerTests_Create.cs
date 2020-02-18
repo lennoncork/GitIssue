@@ -23,12 +23,6 @@ namespace GitIssue.Tests.IssueManager
             }
 
             [Test]
-            public Task CreatesCommit()
-            {
-                throw new NotImplementedException();
-            }
-
-            [Test]
             public async Task GeneratesUniqueId()
             {
                 Initialize(TestDirectory);
