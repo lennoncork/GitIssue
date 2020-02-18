@@ -39,10 +39,11 @@ namespace GitIssue.Util
 
             parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
                     ShowOptions, AddOptions, RemoveOptions, EditOptions, TrackOptions,
-                    FieldsOptions, CommitOptions>(args)
+                    FieldsOptions, CommitOptions, ExportOptions>(args)
                 .WithParsed<InitOptions>(o => ExecAsync<InitCommand, InitOptions>(o).Wait())
                 .WithParsed<CreateOptions>(o => ExecAsync<CreateCommand, CreateOptions>(o).Wait())
                 .WithParsed<DeleteOptions>(o => ExecAsync<DeleteCommand, DeleteOptions>(o).Wait())
+                .WithParsed<ExportOptions>(o => ExecAsync<ExportCommand, ExportOptions>(o).Wait())
                 .WithParsed<FindOptions>(o => ExecAsync<FindCommand, FindOptions>(o).Wait())
                 .WithParsed<ShowOptions>(o => ExecAsync<ShowCommand, ShowOptions>(o).Wait())
                 .WithParsed<AddOptions>(o => ExecAsync<AddCommand, AddOptions>(o).Wait())

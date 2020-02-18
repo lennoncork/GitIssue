@@ -16,20 +16,14 @@ namespace GitIssue.Issues.Json
         /// <param name="issue"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static async Task SaveAsJsonAsync(this IIssue issue, string path)
+        public static async Task SaveAsJsonAsync(this IJsonIssue issue, string path)
         {
-            // Convert the issue to json
-            var json = new JObject();
-            foreach (var field in issue.Values)
-                if (field is IJsonField jsonField)
-                    json[field.Key.ToString()] = jsonField.ToJson();
-
             // Save the json
             await using var stream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite);
             using JsonWriter writer = new JsonTextWriter(new StreamWriter(stream));
             var serializer = new JsonSerializer();
             serializer.Formatting = Formatting.Indented;
-            serializer.Serialize(writer, json);
+            serializer.Serialize(writer, issue.ToJson());
         }
 
         /// <summary>

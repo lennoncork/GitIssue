@@ -31,6 +31,11 @@
         Delete,
 
         /// <summary>
+        ///     Exports all issues into a JSON file
+        /// </summary>
+        Export,
+
+        /// <summary>
         ///     Deletes and existing issue
         /// </summary>
         Track,
