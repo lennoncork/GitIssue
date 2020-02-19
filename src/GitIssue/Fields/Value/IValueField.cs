@@ -13,6 +13,11 @@ namespace GitIssue.Fields.Value
         Type ValueType { get; }
 
         /// <summary>
+        /// Gets or sets the value
+        /// </summary>
+        object? Value { get; set; }
+
+        /// <summary>
         ///     Tries to parse the input into an array value
         /// </summary>
         /// <param name="input">the input to parse</param>
@@ -30,7 +35,7 @@ namespace GitIssue.Fields.Value
         /// <summary>
         ///     Gets or sets the field's value
         /// </summary>
-        T Value { get; set; }
+        new T Value { get; set; }
 
         /// <summary>
         ///     Tries to parse the input into an array value

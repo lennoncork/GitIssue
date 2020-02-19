@@ -35,10 +35,21 @@ namespace GitIssue.Util
         /// </summary>
         public string Command { get; set; } = string.Empty;
 
-        /// <summary>
-        ///     Gets or sets the arguments
-        /// </summary>
-        public string Arguments { get; set; } = string.Empty;
+        private static (string, string) GetProcessAndArgumentsFromCommand(string command)
+        {
+            try
+            {
+                var match = Regex.Match(command, "^\\s?([\\w.]+|\"[\\w\\s.]*\")\\s?(.*)?$");
+                if(match.Success)
+                    if(match.Groups.Count == 3)
+                        return (match.Groups[1].ToString().Trim(), match.Groups[2].ToString().Trim());
+            }
+            catch(Exception)
+            {
+                // Ignored
+            }
+            return (command.Trim(), String.Empty);
+        }
 
         /// <inheritdoc />
         public async Task Open(IIssue issue)
@@ -55,7 +66,8 @@ namespace GitIssue.Util
 
             // Open and modify the file
             var created = File.GetLastWriteTime(temp);
-            if (await EditFileAsync(Command, Arguments + " " + temp))
+            var result = GetProcessAndArgumentsFromCommand(Command);
+            if (await EditFileAsync(result.Item1, result.Item2 + " " + temp))
             {
                 if (created == File.GetLastWriteTime(temp))
                     return;
@@ -104,7 +116,8 @@ namespace GitIssue.Util
             await File.AppendAllTextAsync(temp, FieldTemplate);
 
             var created = File.GetLastWriteTime(temp);
-            if (await EditFileAsync(Command, Arguments + " " + temp))
+            var result = GetProcessAndArgumentsFromCommand(Command);
+            if (await EditFileAsync(result.Item1, result.Item2 + " " + temp))
                 if (created != File.GetLastWriteTime(temp))
                     return;
 

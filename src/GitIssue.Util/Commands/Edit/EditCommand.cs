@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Formatters;
+using LibGit2Sharp;
 using Serilog;
 
 namespace GitIssue.Util.Commands.Edit
@@ -19,11 +20,18 @@ namespace GitIssue.Util.Commands.Edit
             return Program.Initialize(options);
         }
 
+        private static bool TryGetEditor(IRepository repository, string key, out string config)
+        {
+            config = repository.Config.GetValueOrDefault<string>(key);
+            return string.IsNullOrEmpty(config) == false;
+        }
+
         /// <inheritdoc />
         public override async Task Exec(EditOptions options)
         {
             var formatter = new DetailedFormatter();
             await using var issues = Initialize(options);
+            
             var issue = await issues
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
@@ -34,13 +42,17 @@ namespace GitIssue.Util.Commands.Edit
                 return;
             }
 
+            if (TryGetEditor(issues.Repository, "issues.editor", out string config))
+            {
+                options.Editor = config;
+            }
+
             var updated = false;
             if (string.IsNullOrEmpty(options.Field))
             {
                 var editor = new Editor
                 {
-                    Command = options.Editor,
-                    Arguments = options.Arguments
+                    Command = options.Editor
                 };
                 await editor.Open(issue);
                 updated = true;
@@ -64,8 +76,7 @@ namespace GitIssue.Util.Commands.Edit
             {
                 var editor = new Editor
                 {
-                    Command = options.Editor,
-                    Arguments = options.Arguments
+                    Command = options.Editor
                 };
                 await editor.Open(issue[key]);
                 updated = true;

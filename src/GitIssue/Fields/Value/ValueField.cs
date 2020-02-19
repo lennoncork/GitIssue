@@ -26,6 +26,18 @@ namespace GitIssue.Fields.Value
         /// <inheritdoc />
         public T Value { get; set; }
 
+        object? IValueField.Value 
+        { 
+            get => Value;
+            set
+            {
+                if (value is T result)
+                {
+                    Value = result;
+                }
+            }
+        }
+
         /// <inheritdoc />
         public override Task<bool> UpdateAsync(string input)
         {
@@ -61,6 +73,11 @@ namespace GitIssue.Fields.Value
         public override string ToString()
         {
             return Value?.ToString()!;
+        }
+
+        bool IValueField<T>.TryParse(string input, out T value)
+        {
+            throw new NotImplementedException();
         }
     }
 }

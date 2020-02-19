@@ -14,7 +14,9 @@ using GitIssue.Util.Commands.Init;
 using GitIssue.Util.Commands.Remove;
 using GitIssue.Util.Commands.Show;
 using GitIssue.Util.Commands.Track;
+using LibGit2Sharp;
 using Serilog;
+using CommitOptions = GitIssue.Util.Commands.Commit.CommitOptions;
 
 namespace GitIssue.Util
 {
@@ -56,11 +58,13 @@ namespace GitIssue.Util
 
         public static IIssueManager Initialize(Options options)
         {
+            var manager = new IssueManager(options.Path, options.Name, Logger!);
+
             if (options is ITrackedOptions keyOptions)
                 keyOptions.Tracked = TrackedIssue
                     .Read(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
 
-            return new IssueManager(options.Path, options.Name, Logger!);
+            return manager;
         }
 
         private static async Task ExecAsync<TC, T>(T value)
