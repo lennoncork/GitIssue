@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using DateTime = GitIssue.Values.DateTime;
 using String = GitIssue.Values.String;
 
-namespace GitIssue.Configurations
+namespace GitIssue
 {
     /// <summary>
     ///     Class defining the configuration of all issues in a repository

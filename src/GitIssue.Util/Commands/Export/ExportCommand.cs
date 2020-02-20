@@ -1,16 +1,13 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using GitIssue.Fields;
-using GitIssue.Fields.Array;
 using GitIssue.Formatters;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Add
+namespace GitIssue.Util.Commands.Export
 {
     /// <summary>
     ///     Edit command

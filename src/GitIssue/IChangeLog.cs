@@ -11,7 +11,7 @@ namespace GitIssue
         /// <summary>
         ///     Gets the dictionary of changes
         /// </summary>
-        public Dictionary<IssueKey, List<string>> Changes { get; set; }
+        public Dictionary<IssueKey, List<string>> Log { get; set; }
 
         /// <summary>
         ///     Clears all changes in the log
@@ -32,5 +32,11 @@ namespace GitIssue
         /// <param name="change"></param>
         /// <param name="summary"></param>
         public void Add(IIssue issue, ChangeType change, string summary);
+
+        /// <summary>
+        /// Saved the change log to a file
+        /// </summary>
+        /// <param name="file"></param>
+        public void Save(string file);
     }
 }

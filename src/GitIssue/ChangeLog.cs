@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
-using GitIssue.Configurations;
 using GitIssue.Issues;
 using Newtonsoft.Json;
 
@@ -18,13 +17,13 @@ namespace GitIssue
         private bool hasChanged;
 
         /// <inheritdoc />
-        public Dictionary<IssueKey, List<string>> Changes { get; set; } = new Dictionary<IssueKey, List<string>>();
+        public Dictionary<IssueKey, List<string>> Log { get; set; } = new Dictionary<IssueKey, List<string>>();
 
         /// <inheritdoc />
         public void Clear()
         {
             hasChanged = true;
-            Changes.Clear();
+            Log.Clear();
         }
 
         /// <inheritdoc />
@@ -37,10 +36,10 @@ namespace GitIssue
         public void Add(IIssue issue, ChangeType change, string summary)
         {
             hasChanged = true;
-            if (Changes.ContainsKey(issue.Key) == false)
-                Changes[issue.Key] = new List<string>();
+            if (Log.ContainsKey(issue.Key) == false)
+                Log[issue.Key] = new List<string>();
 
-            Changes[issue.Key].Add($"{DateTime.Now}: {GetChangeDescription(change)}");
+            Log[issue.Key].Add($"{DateTime.Now}: {GetChangeDescription(change)}");
         }
 
         private static string GetChangeDescription(ChangeType change)

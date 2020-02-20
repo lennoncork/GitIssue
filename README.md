@@ -10,6 +10,10 @@ This project runs on .NET Core 3.1 and is compatible with the following,
 ## Usage
 You use _git issue_ with the following sub-commands.
 
+## Configuration
+
+### Editor
+
 ## Help
 
 ### Initialization
@@ -28,6 +32,7 @@ You use _git issue_ with the following sub-commands.
 * `git issue fields`: Display the fields available in the issue repository
 * `git issue export`: Dump the whole database in json format to stdout.
 * `git issue version`: Displays the version
+
 
 ## Contributing
 This project is in it's early phases of development and contributions  are very welcome. 

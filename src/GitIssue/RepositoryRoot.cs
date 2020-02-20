@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using GitIssue.Configurations;
 using GitIssue.Exceptions;
 
 namespace GitIssue
@@ -33,6 +32,11 @@ namespace GitIssue
         ///     Gets the path to the change log
         /// </summary>
         public string ChangeLog => Path.Combine(IssuesPath, Paths.ChangeLogFileName);
+
+        /// <summary>
+        ///     Gets the path to the tracked file
+        /// </summary>
+        public string Tracked => Path.Combine(IssuesPath, Paths.TrackedIssueFileName);
 
         /// <summary>
         ///     Gets the issue configuration

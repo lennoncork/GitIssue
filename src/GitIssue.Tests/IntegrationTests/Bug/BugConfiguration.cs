@@ -2,7 +2,7 @@
 using GitIssue.Issues.Json;
 using GitIssue.Values;
 
-namespace GitIssue.Configurations.Bug
+namespace GitIssue.Tests.IntegrationTests.Bug
 {
     /// <summary>
     ///     A defect configuration

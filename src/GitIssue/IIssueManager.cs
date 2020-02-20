@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using GitIssue.Configurations;
 using GitIssue.Issues;
 using LibGit2Sharp;
 
@@ -30,12 +29,17 @@ namespace GitIssue
         /// <summary>
         ///     Gets the issue configuration
         /// </summary>
-        IssueConfiguration Configuration { get; }
+        IIssueConfiguration Configuration { get; }
 
         /// <summary>
         ///     Gets the change log for the issues
         /// </summary>
-        ChangeLog ChangeLog { get; }
+        IChangeLog Changes { get; }
+
+        /// <summary>
+        /// Gets the tracked issue
+        /// </summary>
+        ITrackedIssue Tracked { get; }
 
         /// <summary>
         ///     Commits the changes
@@ -118,5 +122,13 @@ namespace GitIssue
         /// <param name="key">the issue key</param>
         /// <returns></returns>
         Task<bool> DeleteAsync(IssueKey key);
+
+        /// <summary>
+        ///     Tracks the issue
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        Task<bool> TrackAsync(IssueKey key);
+
     }
 }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GitIssue.Issues;
 using Serilog;
 
 namespace GitIssue.Util.Commands.Track
@@ -35,7 +36,7 @@ namespace GitIssue.Util.Commands.Track
                 }
             }
 
-            options.Tracked.Save(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
+            await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
             Console.WriteLine($"Tacking Issue '{options.Tracked.Key}'");
         }
     }

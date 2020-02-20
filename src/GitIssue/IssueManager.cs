@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GitIssue.Configurations;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
 using LibGit2Sharp;
 using Serilog;
+using Serilog.Core;
 
 namespace GitIssue
 {
@@ -22,70 +22,47 @@ namespace GitIssue
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
-        public IssueManager() : this(Environment.CurrentDirectory)
+        public IssueManager(string directory) : this(directory, Paths.IssueRootFolderName)
         {
+
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
-        /// <param name="path">the repository path</param>
-        public IssueManager(string path) : this(new Repository(path), path, Paths.IssueRootFolderName)
+        public IssueManager(string directory, string name)
         {
+            this.logger = Logger.None;
+            this.Root = RepositoryRoot.Open(directory, name);
+            this.Repository = new Repository(directory);
+            this.WorkingDirectory = this.Root.RootPath;
+            this.KeyProvider = new FileIssueKeyProvider(this.Root);
+            this.Configuration = IssueConfiguration.Read(Root.ConfigFile);
+            this.Changes = ChangeLog.Read(Root.ChangeLog);
+            this.Tracked = TrackedIssue.Read(Root.Tracked);
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
-        /// <param name="path">the repository path</param>
-        /// <param name="name">the issues directory name</param>
-        public IssueManager(string path, string name) : this(new Repository(path), path, name)
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="IssueManager" /> mass
-        /// </summary>
-        /// <param name="path">the repository path</param>
-        /// <param name="logger">the logger</param>
-        public IssueManager(string path, ILogger logger) : this(new Repository(path), path, Paths.IssueRootFolderName)
+        public IssueManager(
+            ILogger? logger, 
+            RepositoryRoot root, 
+            IRepository repository, 
+            IIssueKeyProvider keyProvider, 
+            IChangeLog changeLog,
+            IIssueConfiguration configuration, 
+            ITrackedIssue tracked)
         {
             this.logger = logger;
+            this.Repository = repository;
+            this.WorkingDirectory = root.RootPath;
+            this.Root = root;
+            this.KeyProvider = keyProvider;
+            this.Configuration = configuration;
+            this.Changes = changeLog;
+            this.Tracked = tracked;
         }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="IssueManager" /> mass
-        /// </summary>
-        /// <param name="path">the repository path</param>
-        /// <param name="name">the issues directory name</param>
-        /// <param name="logger">the logger</param>
-        public IssueManager(string path, string name, ILogger logger) : this(new Repository(path), path, name)
-        {
-            this.logger = logger;
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="IssueManager" /> mass
-        /// </summary>
-        /// <param name="repository">the git repository</param>
-        /// <param name="path">the path for the repository path</param>
-        /// <param name="name">the issues directory name</param>
-        public IssueManager(IRepository repository, string path, string name)
-        {
-            logger = null;
-            Repository = repository;
-            WorkingDirectory = path;
-            FolderName = name;
-            Root = RepositoryRoot.Open(WorkingDirectory, FolderName);
-            KeyProvider = new FileIssueKeyProvider(Root);
-            Configuration = IssueConfiguration.Read(Root.ConfigFile);
-            ChangeLog = ChangeLog.Read(Root.ChangeLog);
-        }
-
-        /// <summary>
-        ///     Gets or sets the issue name
-        /// </summary>
-        public string FolderName { get; protected set; }
 
         /// <summary>
         ///     Gets or sets the key provider
@@ -103,10 +80,10 @@ namespace GitIssue
         public string WorkingDirectory { get; protected set; }
 
         /// <inheritdoc />
-        public IssueConfiguration Configuration { get; protected set; }
+        public IIssueConfiguration Configuration { get; protected set; }
 
         /// <inheritdoc />
-        public ChangeLog ChangeLog { get; protected set; }
+        public IChangeLog Changes { get; protected set; }
 
         /// <inheritdoc />
         public bool Commit()
@@ -146,7 +123,7 @@ namespace GitIssue
 
             var builder = new StringBuilder();
             var count = 0;
-            foreach (var changes in ChangeLog.Changes)
+            foreach (var changes in Changes.Log)
             {
                 if (count++ > 0) builder.AppendLine();
                 builder.AppendLine($"Issue: {changes.Key}");
@@ -156,12 +133,15 @@ namespace GitIssue
             var config = Repository.Config;
             var author = config.BuildSignature(DateTimeOffset.Now);
             Repository.Commit(builder.ToString(), author, author);
-            ChangeLog.Clear();
+            Changes.Clear();
             return Task.FromResult(true);
         }
 
         /// <inheritdoc />
         public IRepository Repository { get; protected set; }
+
+        /// <inheritdoc />
+        public ITrackedIssue Tracked { get; protected set; }
 
         /// <inheritdoc />
         public async Task<IIssue> CreateAsync(string title)
@@ -178,7 +158,7 @@ namespace GitIssue
                 Description = description
             };
             await issue.SaveAsync();
-            ChangeLog.Add(issue, ChangeType.Create);
+            Changes.Add(issue, ChangeType.Create);
             return issue;
         }
 
@@ -244,7 +224,7 @@ namespace GitIssue
         public void Dispose()
         {
             Repository?.Dispose();
-            ChangeLog.Save(Root.ChangeLog);
+            Changes.Save(Root.ChangeLog);
         }
 
         /// <inheritdoc />
@@ -339,14 +319,25 @@ namespace GitIssue
 
             var root = RepositoryRoot.Create(directory, name);
             configuration.Save(root.ConfigFile);
+            var logger = Logger.None;
+            var repository = new Repository(directory);
+            var keyProvider = new FileIssueKeyProvider(root);
+            var changeLog = new ChangeLog();
+            var tracked = TrackedIssue.Read(root.Tracked);
 
-            return new IssueManager(directory, name)
+            return new IssueManager(logger, root, repository, keyProvider, changeLog, configuration, tracked);
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> TrackAsync(IssueKey key)
+        {
+            if (this.Tracked.Key != key)
             {
-                Root = root,
-                Configuration = configuration,
-                Repository = new Repository(directory),
-                ChangeLog = new ChangeLog()
-            };
+                this.Tracked = new TrackedIssue(key);
+                await this.Tracked.SaveAsync(Root.Tracked, this.logger);
+                return false;
+            }
+            return true;
         }
     }
 }

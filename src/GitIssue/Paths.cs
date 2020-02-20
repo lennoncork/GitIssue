@@ -24,5 +24,10 @@
         ///     Gets or sets the change log file name
         /// </summary>
         public static string ChangeLogFileName { get; set; } = "changes.json";
+
+        /// <summary>
+        /// Gets or sets the tracked issue file name
+        /// </summary>
+        public static string TrackedIssueFileName { get; set; } = "tracking.json";
     }
 }

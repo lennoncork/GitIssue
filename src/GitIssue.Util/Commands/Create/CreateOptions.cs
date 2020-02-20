@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using GitIssue.Issues;
 using GitIssue.Util.Commands.Track;
 
 namespace GitIssue.Util.Commands.Create

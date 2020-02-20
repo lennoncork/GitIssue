@@ -2,7 +2,7 @@
 using GitIssue.Issues;
 using GitIssue.Values;
 
-namespace GitIssue.Configurations.Bug
+namespace GitIssue.Tests.IntegrationTests.Bug
 {
     /// <summary>
     ///     Extension methods for the 'Bug' issue type

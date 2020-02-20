@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using GitIssue.Configurations.Bug;
 using LibGit2Sharp;
 using NUnit.Framework;
 

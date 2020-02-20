@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using GitIssue.Fields;
 
-namespace GitIssue.Configurations
+namespace GitIssue
 {
     /// <summary>
     ///     The issue configuration interface

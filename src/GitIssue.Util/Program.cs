@@ -2,12 +2,15 @@
 using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
+using GitIssue.Issues;
+using GitIssue.Issues.File;
 using GitIssue.Util.Commands;
 using GitIssue.Util.Commands.Add;
 using GitIssue.Util.Commands.Commit;
 using GitIssue.Util.Commands.Create;
 using GitIssue.Util.Commands.Delete;
 using GitIssue.Util.Commands.Edit;
+using GitIssue.Util.Commands.Export;
 using GitIssue.Util.Commands.Fields;
 using GitIssue.Util.Commands.Find;
 using GitIssue.Util.Commands.Init;
@@ -58,7 +61,15 @@ namespace GitIssue.Util
 
         public static IIssueManager Initialize(Options options)
         {
-            var manager = new IssueManager(options.Path, options.Name, Logger!);
+            var logger = Logger;
+            var root = RepositoryRoot.Open(options.Path, options.Name);
+            var repository = new Repository(options.Path);
+            var keyProvider = new FileIssueKeyProvider(root);
+            var configuration = IssueConfiguration.Read(root.ConfigFile);
+            var changes = ChangeLog.Read(root.ChangeLog);
+            var tracked = TrackedIssue.Read(root.Tracked);
+
+            var manager = new IssueManager(logger, root, repository, keyProvider, changes, configuration, tracked);
 
             if (options is ITrackedOptions keyOptions)
                 keyOptions.Tracked = TrackedIssue

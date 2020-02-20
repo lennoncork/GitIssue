@@ -1,23 +1,22 @@
 ﻿using System;
 using System.IO;
-using GitIssue.Issues;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Track
+namespace GitIssue.Issues
 {
     /// <summary>
     ///     Tracked issue metadata
     /// </summary>
     [JsonObject]
-    public class TrackedIssue
+    public class TrackedIssue : ITrackedIssue
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="TrackedIssue" /> class
         /// </summary>
         public TrackedIssue()
         {
-            Key = string.Empty;
         }
 
         /// <summary>
@@ -98,12 +97,12 @@ namespace GitIssue.Util.Commands.Track
         /// </summary>
         /// <param name="file">the configuration file</param>
         /// <param name="logger">the logger</param>
-        public void Save(string file, ILogger? logger = null)
+        public async Task SaveAsync(string file, ILogger? logger = null)
         {
             try
             {
-                using var stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                using var writer = new StreamWriter(stream);
+                await using var stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
+                await using var writer = new StreamWriter(stream);
                 var serializer = JsonSerializer.Create(new JsonSerializerSettings
                 {
                     Formatting = Formatting.Indented,
@@ -127,7 +126,7 @@ namespace GitIssue.Util.Commands.Track
         {
             try
             {
-                if (File.Exists(file))
+                if (System.IO.File.Exists(file))
                 {
                     using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
                     using var reader = new StreamReader(stream);

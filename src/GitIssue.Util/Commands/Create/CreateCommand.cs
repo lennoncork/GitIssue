@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Formatters;
+using GitIssue.Issues;
 using GitIssue.Util.Commands.Track;
 using Serilog;
 
@@ -28,7 +29,7 @@ namespace GitIssue.Util.Commands.Create
             if (options.Tracked == TrackedIssue.None)
             {
                 options.Tracked = new TrackedIssue(issue.Key);
-                options.Tracked.Save(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
+                await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
                 Console.WriteLine($"Created and tracking new issue '{issue.Key}'");
             }
             else
