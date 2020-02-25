@@ -11,9 +11,19 @@ namespace GitIssue.Values
     /// </summary>
     [TypeConverter(typeof(EmailTypeConverter))]
     [TypeAlias(nameof(Email))]
-    public struct Email : IJsonValue
+    public struct Email : IJsonValue, IEquatable<Email>, IValue<string>
     {
         private readonly string value;
+
+        /// <summary>
+        ///     Parses the value as an email address
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Email Parse(string value)
+        {
+            return new Email(value);
+        }
 
         /// <summary>
         ///     Tries to parse the email value
@@ -60,11 +70,16 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
+        public bool Equals(Email other)
+        {
+            return value == other.value;
+        }
+
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Email email)
-                if (value == email.value)
-                    return true;
+                return this.Equals(email);
             return base.Equals(obj);
         }
 
@@ -73,5 +88,8 @@ namespace GitIssue.Values
         {
             return value.GetHashCode();
         }
+
+        /// <inheritdoc />
+        public string Item => this.value;
     }
 }

@@ -8,7 +8,7 @@ namespace GitIssue.Values
     ///     Version value type
     /// </summary>
     [TypeAlias(nameof(Url))]
-    public struct Url : IJsonValue
+    public struct Url : IJsonValue, IEquatable<Url>, IValue<string>
     {
         private readonly string value;
 
@@ -56,11 +56,16 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
+        public bool Equals(Url other)
+        {
+            return value == other.value;
+        }
+
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Url url)
-                if (value == url.value)
-                    return true;
+                return this.Equals(url);
             return base.Equals(obj);
         }
 
@@ -69,5 +74,8 @@ namespace GitIssue.Values
         {
             return value.GetHashCode();
         }
+
+        /// <inheritdoc />
+        public string Item => this.value;
     }
 }

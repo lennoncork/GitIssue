@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
@@ -10,7 +11,7 @@ namespace GitIssue.Values
     /// </summary>
     [TypeConverter(typeof(VersionTypeConverter))]
     [TypeAlias(nameof(Version))]
-    public struct Version : IJsonValue
+    public struct Version : IJsonValue, IEquatable<Version>
     {
         private static readonly string regex = @"^[\s]*(\d*).(\d*).(\d*)(\-[\w.]*)?(\+[\w.]*)?[\s]*$";
 
@@ -126,14 +127,21 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
+        public bool Equals(Version other)
+        {
+            return 
+                MajorVersion == other.MajorVersion &&
+                MinorVersion == other.MinorVersion &&
+                PatchVersion == other.PatchVersion &&
+                PreRelease == other.PreRelease &&
+                BuildMetadata == other.BuildMetadata;
+        }
+
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Version version)
-                return MajorVersion == version.MajorVersion &&
-                       MinorVersion == version.MinorVersion &&
-                       PatchVersion == version.PatchVersion &&
-                       PreRelease == version.PreRelease &&
-                       BuildMetadata == version.BuildMetadata;
+                return this.Equals(version);
             return false;
         }
 

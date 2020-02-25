@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
@@ -9,9 +11,19 @@ namespace GitIssue.Values
     /// </summary>
     [TypeConverter(typeof(StringTypeConverter))]
     [TypeAlias(nameof(String))]
-    public struct String : IJsonValue
+    public struct String : IJsonValue, IEquatable<String>, IValue<string>
     {
         private readonly string value;
+
+        /// <summary>
+        /// Parses the string
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static String Parse(string value)
+        {
+            return new String(value);
+        }
 
         /// <summary>
         ///     Tries to parse the string value
@@ -64,8 +76,7 @@ namespace GitIssue.Values
         public override bool Equals(object? obj)
         {
             if (obj is String str)
-                if (str.value == value)
-                    return true;
+                return this.Equals(str);
             return base.Equals(obj);
         }
 
@@ -74,5 +85,14 @@ namespace GitIssue.Values
         {
             return value.GetHashCode();
         }
+
+        /// <inheritdoc />
+        public bool Equals([AllowNull] String other)
+        {
+            return value == other.value;
+        }
+
+        /// <inheritdoc />
+        public string Item => this.value;
     }
 }

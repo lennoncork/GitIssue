@@ -12,7 +12,7 @@ namespace GitIssue.Values
     /// </summary>
     [TypeConverter(typeof(EnumTypeConverter))]
     [TypeAlias(nameof(Enumerated))]
-    public struct Enumerated : IJsonValue
+    public struct Enumerated : IJsonValue, IEquatable<Enumerated>, IValue<string>
     {
         private static readonly string regex = @"^\[(([\w]*)[,\s]*)*]$";
         private readonly string value;
@@ -81,6 +81,9 @@ namespace GitIssue.Values
         public string[] Values { get; }
 
         /// <inheritdoc />
+        public string Item => this.value;
+
+        /// <inheritdoc />
         public override string ToString()
         {
             return value;
@@ -93,11 +96,16 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
+        public bool Equals(Enumerated other)
+        {
+            return value == other.value;
+        }
+
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Enumerated enumerated)
-                if (enumerated.value == value)
-                    return true;
+                return this.Equals(enumerated);
             return base.Equals(obj);
         }
 

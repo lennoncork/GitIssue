@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
@@ -9,7 +10,7 @@ namespace GitIssue.Values
     /// </summary>
     [TypeConverter(typeof(MarkdownTypeConverter))]
     [TypeAlias(nameof(Markdown))]
-    public struct Markdown : IJsonValue
+    public struct Markdown : IJsonValue, IEquatable<Markdown>, IValue<string>
     {
         private readonly string value;
 
@@ -31,6 +32,26 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj is Markdown str)
+                return this.Equals(str);
+            return base.Equals(obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return value.GetHashCode();
+        }
+
+        /// <inheritdoc />
+        public bool Equals(Markdown other)
+        {
+            return value == other.value;
+        }
+
+        /// <inheritdoc />
         public override string ToString()
         {
             return value;
@@ -41,5 +62,8 @@ namespace GitIssue.Values
         {
             return new JValue(value);
         }
+
+        /// <inheritdoc />
+        public string Item => this.value;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
@@ -10,9 +11,22 @@ namespace GitIssue.Values
     /// </summary>
     [TypeConverter(typeof(NumberTypeConverter))]
     [TypeAlias(nameof(Number))]
-    public struct Number : IJsonValue
+    public struct Number : IJsonValue, IEquatable<Number>, IValue<double>
     {
         private readonly double value;
+
+        /// <inheritdoc />
+        public double Item => this.value;
+
+        /// <summary>
+        ///     Tries to parse the number value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Number Parse(string value)
+        {
+            return new Number(double.Parse(value));
+        }
 
         /// <summary>
         ///     Tries to parse the number value
@@ -68,11 +82,16 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
+        public bool Equals(Number other)
+        {
+            return value == other.value;
+        }
+
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Number number)
-                if (value == number.value)
-                    return true;
+                return this.Equals(number);
             return base.Equals(obj);
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
@@ -11,7 +12,7 @@ namespace GitIssue.Values
     /// </summary>
     [TypeConverter(typeof(DateTimeTypeConverter))]
     [TypeAlias(nameof(DateTime))]
-    public struct DateTime : IJsonValue
+    public struct DateTime : IJsonValue, IEquatable<DateTime>, IValue<System.DateTime>
     {
         private readonly System.DateTime value;
 
@@ -86,8 +87,7 @@ namespace GitIssue.Values
         public override bool Equals(object? obj)
         {
             if (obj is DateTime datetime)
-                if (value == datetime.value)
-                    return true;
+                return this.Equals(datetime);
             return base.Equals(obj);
         }
 
@@ -96,5 +96,14 @@ namespace GitIssue.Values
         {
             return value.GetHashCode();
         }
+
+        /// <inheritdoc />
+        public bool Equals([AllowNull] DateTime other)
+        {
+            return value == other.value;
+        }
+
+        /// <inheritdoc />
+        public System.DateTime Item => this.value;
     }
 }

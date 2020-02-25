@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
@@ -9,9 +10,19 @@ namespace GitIssue.Values
     /// </summary>
     [TypeConverter(typeof(LabelTypeConverter))]
     [TypeAlias(nameof(Label))]
-    public struct Label : IJsonValue
+    public struct Label : IJsonValue, IValue<string>, IEquatable<Label>
     {
         private readonly string value;
+
+        /// <summary>
+        ///     Tries to parse the label value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static Label Parse(string value)
+        {
+            return new Label(value);
+        }
 
         /// <summary>
         ///     Tries to parse the label value
@@ -31,7 +42,7 @@ namespace GitIssue.Values
         /// <param name="value"></param>
         public Label(string value)
         {
-            this.value = !string.IsNullOrWhiteSpace(value) ? value.Split()[0].ToLowerInvariant() : string.Empty;
+            this.value = !string.IsNullOrWhiteSpace(value) ? value.Trim().Split()[0].ToLowerInvariant() : string.Empty;
         }
 
         /// <inheritdoc />
@@ -47,12 +58,16 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
+        public bool Equals(Label other)
+        {
+            return value == other.value;
+        }
+
+        /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Label label)
-                if (value == label.value)
-                    return true;
-
+                return this.Equals(label);
             return base.Equals(obj);
         }
 
@@ -61,5 +76,8 @@ namespace GitIssue.Values
         {
             return value.GetHashCode();
         }
+
+        /// <inheritdoc />
+        public string Item => this.value;
     }
 }
