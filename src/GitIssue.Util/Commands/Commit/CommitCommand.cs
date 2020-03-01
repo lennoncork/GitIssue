@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Serilog;
 
 namespace GitIssue.Util.Commands.Commit
@@ -19,7 +20,11 @@ namespace GitIssue.Util.Commands.Commit
         public override async Task Exec(CommitOptions options)
         {
             await using var issues = Initialize(options);
-            await issues.CommitAsync();
+            var result = await issues.CommitAsync();
+            if (result)
+            {
+                Console.WriteLine($"Committed changes in {issues.Root.Name}, see log for details");
+            }
         }
     }
 }

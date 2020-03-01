@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using GitIssue.Values;
 
 namespace GitIssue.Fields
 {
@@ -7,7 +8,8 @@ namespace GitIssue.Fields
     ///     The unique key of a issue field
     /// </summary>
     [TypeConverter(typeof(FieldKeyTypeConverter))]
-    public struct FieldKey : IEquatable<FieldKey>
+    [TypeAlias(nameof(FieldKey))]
+    public struct FieldKey : IValue, IEquatable<FieldKey>
     {
         private readonly string key;
 

@@ -68,6 +68,11 @@
         /// <summary>
         ///     Removes an existing value from an existing field
         /// </summary>
-        Remove
+        Remove,
+
+        /// <summary>
+        ///     Shows the current status
+        /// </summary>
+        Changes
     }
 }

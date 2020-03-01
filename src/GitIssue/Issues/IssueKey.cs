@@ -11,6 +11,7 @@ namespace GitIssue.Issues
     ///     Issue key (unique identifier)
     /// </summary>
     [TypeConverter(typeof(IssuedKeyTypeConverter))]
+    [TypeAlias(nameof(IssueKey))]
     public struct IssueKey : IValue, IJsonValue, IEquatable<IssueKey>
     {
         private readonly string key;

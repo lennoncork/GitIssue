@@ -117,6 +117,7 @@ namespace GitIssue
                 RecurseUntrackedDirs = true,
             }))
             {
+                bool ignored = Repository.Ignore.IsPathIgnored(Root.Name);
                 var relative = item.FilePath;
 
                 if (Path.GetFullPath(relative).Equals(Path.GetFullPath(Root.ChangeLog)))
@@ -125,7 +126,7 @@ namespace GitIssue
                 if (Path.GetFullPath(relative).Equals(Path.GetFullPath(Root.Tracked)))
                     continue;
 
-                if ((item.State & FileStatus.Ignored) != 0)
+                if (ignored && (item.State & FileStatus.Ignored) != 0)
                 {
                     if (Directory.Exists(Path.GetFullPath(item.FilePath)))
                         continue;
@@ -142,18 +143,10 @@ namespace GitIssue
 
             Repository.Index.Write();
 
-            var builder = new StringBuilder();
-            var count = 0;
-            foreach (var changes in Changes.Log)
-            {
-                if (count++ > 0) builder.AppendLine();
-                builder.AppendLine($"Issue: {changes.Key}");
-                foreach (var change in changes.Value) builder.AppendLine($" - {change}");
-            }
-
+            string comments = Changes.GenerateComments();
             var config = Repository.Config;
             var author = config.BuildSignature(DateTimeOffset.Now);
-            Repository.Commit(builder.ToString(), author, author);
+            Repository.Commit(comments, author, author);
             Changes.Clear();
             return Task.FromResult(true);
         }
