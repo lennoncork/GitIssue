@@ -17,26 +17,30 @@ namespace GitIssue.Issues
         /// <summary>
         ///     The issue manager
         /// </summary>
-        protected readonly IIssueManager manager;
+        protected readonly IIssueManager Manager;
 
         /// <summary>
         ///     Creates a new Issue
         /// </summary>
         /// <param name="manager">the issue manager</param>
-        /// <param name="root">the issue root</param>
-        protected Issue(IIssueManager manager, IssueRoot root)
+        /// <param name="key">the issue key</param>
+        protected Issue(IIssueManager manager, IssueKey key)
         {
-            this.manager = manager;
-            Root = root;
+            this.Manager = manager;
+            this.Root = new IssueRoot(Manager.Root, key);
         }
 
         /// <summary>
         ///     Gets or sets the repository root
         /// </summary>
-        public IssueRoot Root { get; protected set; }
+        public IssueRoot Root { get; }
 
         /// <inheritdoc />
-        public IssueKey Key => Root.Key;
+        public IssueKey Key
+        {
+            get => GetField().AsValue<IssueKey>();
+            protected set => SetField().WithValue<IssueKey>(value);
+        }
 
         /// <inheritdoc cref="IIssue" />
         public string Title

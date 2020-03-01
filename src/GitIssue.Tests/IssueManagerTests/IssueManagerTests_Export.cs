@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using GitIssue.Issues.Json;
 using NUnit.Framework;
 
-namespace GitIssue.Tests.IssueManager
+namespace GitIssue.Tests.IssueManagerTests
 {
     [TestFixture]
     public partial class IssueManagerTests

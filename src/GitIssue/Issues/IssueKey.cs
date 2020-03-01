@@ -1,5 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
+using GitIssue.Issues.Json;
+using GitIssue.Values;
+using Newtonsoft.Json.Linq;
+using String = System.String;
 
 namespace GitIssue.Issues
 {
@@ -7,7 +11,7 @@ namespace GitIssue.Issues
     ///     Issue key (unique identifier)
     /// </summary>
     [TypeConverter(typeof(IssuedKeyTypeConverter))]
-    public struct IssueKey : IEquatable<IssueKey>
+    public struct IssueKey : IValue, IJsonValue, IEquatable<IssueKey>
     {
         private readonly string key;
 
@@ -17,7 +21,7 @@ namespace GitIssue.Issues
         /// <param name="key">the key string</param>
         private IssueKey(string key)
         {
-            if (key == nameof(None))
+            if (key == null || key == nameof(None))
                 this.key = string.Empty;
             else
                 this.key = key;
@@ -89,9 +93,15 @@ namespace GitIssue.Issues
         }
 
         /// <inheritdoc />
+        public JToken ToJson()
+        {
+            return new JValue(key);
+        }
+
+        /// <inheritdoc />
         public override int GetHashCode()
         {
-            return key.GetHashCode();
+            return string.IsNullOrEmpty(key) ? nameof(None).GetHashCode() : key.GetHashCode();
         }
 
         /// <inheritdoc />

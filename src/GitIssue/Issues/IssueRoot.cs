@@ -5,7 +5,7 @@ namespace GitIssue.Issues
     /// <summary>
     ///     Specifies the location on disk of a given issue
     /// </summary>
-    public class IssueRoot
+    public struct IssueRoot
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueRoot" /> class.
@@ -21,12 +21,12 @@ namespace GitIssue.Issues
         /// <summary>
         ///     Gets the <see cref="RepositoryRoot" />
         /// </summary>
-        public RepositoryRoot Root { get; protected set; }
+        public RepositoryRoot Root { get; }
 
         /// <summary>
         ///     Gets the <see cref="IssueKey" /> for the issue
         /// </summary>
-        public IssueKey Key { get; protected set; }
+        public IssueKey Key { get; }
 
         /// <summary>
         ///     Gets the <see cref="IssuePath" /> for the issue

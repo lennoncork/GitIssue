@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using GitIssue.Fields;
+using GitIssue.Issues;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
 using Newtonsoft.Json;
@@ -23,6 +24,7 @@ namespace GitIssue
         {
             Fields = new Dictionary<FieldKey, FieldInfo>
             {
+                {FieldKey.Create("Key"), new FieldInfo<IssueKey, JsonValueField>(true)},
                 {FieldKey.Create("Title"), new FieldInfo<String, JsonValueField>(true)},
                 {FieldKey.Create("Description"), new FieldInfo<String, JsonValueField>(true)},
                 {FieldKey.Create("Created"), new FieldInfo<DateTime, JsonValueField>(true)},

@@ -1,0 +1,66 @@
+{
+  "projects" : [ {
+    "externalName" : "Project Name",
+    "name" : "Project Name",
+    "key" : "PNKEY",
+    "lead" : "lennonco",
+    "type" : "software",
+    "assigneeType" : 3,
+    "versions" : [ {
+      "name" : "1.0.0",
+      "released" : false,
+      "archived" : false,
+      "releaseDate" : 1564124400000,
+      "description" : "Version 1.0.0"
+    }],
+    "components" : [ {
+      "name" : "Foo"
+    }, {
+      "name" : "Bar",
+      "lead" : "Foo Bar",
+      "description" : "Foo Bar"
+    } ],
+    "issues": [
+      {
+        "key": "PNKEY-1816",
+        "summary": "This is a jira issue",
+        "reporter": "foobar",
+        "assignee": "foobar",
+        "description": "Foo Bar",
+        "issueType": "Bug",
+        "status": "Done",
+        "priority": "Undefined",
+        "resolution": "Done",
+        "created": 1565724981710,
+        "updated": 1569600063967,
+        "resolutionDate": 1569600063937,
+        "fixedVersions": [ "1.0.0" ],
+        "labels": [ "Decision" ],
+        "watchers": [ "foobar" ],
+        "history": [
+          {
+            "author": "foobar",
+            "created": 1565725429070,
+            "items": [
+              {
+                "fieldType": "jira",
+                "field": "description",
+                "oldDisplayValue": "We need to be able to import JIRA issues",
+                "newDisplayValue": "We need to be able to import JIRA issues."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  } ],
+  "users": [
+    {
+      "name": "foobar",
+      "fullname": "Foo Bar",
+      "email": "foo.bar@foobar.com",
+      "groups": [  ],
+      "active": true
+    }
+  ]
+}

@@ -231,12 +231,13 @@ namespace GitIssue.Fields.Array
         public override string ToString()
         {
             var builder = new StringBuilder();
+            builder.Append("[");
             for (var i = 0; i < values.Count; i++)
             {
                 if (i > 0) builder.Append(", ");
                 builder.Append(Values[i]);
             }
-
+            builder.Append("]");
             return builder.ToString();
         }
     }

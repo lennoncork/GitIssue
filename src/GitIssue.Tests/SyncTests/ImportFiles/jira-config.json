@@ -1,0 +1,8 @@
+{
+  "Mapping": {
+    "Key": "key",
+    "Title": "summary",
+    "Description": "description",
+    "Labels": "labels"
+  } 
+}

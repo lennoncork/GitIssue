@@ -3,7 +3,7 @@ using System.IO;
 using GitIssue.Exceptions;
 using NUnit.Framework;
 
-namespace GitIssue.Tests.IssueManager
+namespace GitIssue.Tests.IssueManagerTests
 {
     [TestFixture]
     public partial class IssueManagerTests

@@ -9,6 +9,8 @@ namespace GitIssue.Tests
     {
         private static readonly Random random = new Random();
 
+        public static string TestData = "TestData";
+
         /// <summary>
         ///     Gets a random unique string, max length 64
         /// </summary>
@@ -27,7 +29,7 @@ namespace GitIssue.Tests
         /// <returns></returns>
         public static string GetTestDirectory()
         {
-            return Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData");
+            return Path.Combine(TestContext.CurrentContext.TestDirectory, TestData);
         }
 
         /// <summary>

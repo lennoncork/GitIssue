@@ -2,6 +2,7 @@
 using GitIssue.Fields.Array;
 using GitIssue.Fields.Value;
 using GitIssue.Issues;
+using GitIssue.Values;
 
 namespace GitIssue.Fields
 {
@@ -28,7 +29,7 @@ namespace GitIssue.Fields
         }
 
         /// <inheritdoc />
-        public void WithValue<T>(T value)
+        public void WithValue<T>(T value) where T : IValue
         {
             var field = callback?.Invoke();
             if (field is ValueField<T> valueField)
@@ -36,7 +37,7 @@ namespace GitIssue.Fields
         }
 
         /// <inheritdoc />
-        public void WithArray<T>(T[] values)
+        public void WithArray<T>(T[] values) where T : IValue
         {
             var field = callback?.Invoke();
             if (field is ArrayField<T> arrayField) arrayField.Values = values;

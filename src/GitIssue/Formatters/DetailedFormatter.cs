@@ -35,8 +35,6 @@ namespace GitIssue.Formatters
         public virtual string Format(IReadOnlyIssue issue)
         {
             var builder = new StringBuilder();
-            builder.Append(IssueKeyFormatter(issue.Key));
-            builder.Append(NewLine);
             var fieldCount = 0;
             foreach (var kvp in issue)
             {

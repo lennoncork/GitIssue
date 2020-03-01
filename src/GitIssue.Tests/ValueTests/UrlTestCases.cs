@@ -6,9 +6,9 @@ using NUnit.Framework;
 namespace GitIssue.Tests.ValueTests
 {
     [TestFixture]
-    public class EmailValueTests : JsonValueTests<Email, string>
+    public class UrlValueTests : JsonValueTests<Url, string>
     {
-        public class TypeConverter : EmailValueTests
+        public class TypeConverter : UrlValueTests
         {
             [TestCaseSource(typeof(CanConvertTestCases))]
             public bool CanConvert(Type type)
@@ -17,9 +17,9 @@ namespace GitIssue.Tests.ValueTests
             }
 
             [TestCaseSource(typeof(ConvertFromStringTestCases))]
-            public Email Convert(object value)
+            public Url Convert(object value)
             {
-                return (Email)UseConverter(value);
+                return (Url)UseConverter(value);
             }
 
             public class CanConvertTestCases : ValueTestCases
@@ -39,22 +39,22 @@ namespace GitIssue.Tests.ValueTests
             {
                 public override IEnumerator<TestCaseData> GetEnumerator()
                 {
-                    yield return new TestCaseData("foo.bar@gmail.com")
-                        .Returns(Email.Parse("foo.bar@gmail.com"))
-                        .SetName("{m}FromStringWithCorrectLabel");
-                    yield return new TestCaseData(new ValueMetadata("foo.bar@gmail.com", ""))
-                        .Returns(Email.Parse("foo.bar@gmail.com"))
+                    yield return new TestCaseData("http://www.google.com/")
+                        .Returns(Url.Parse("http://www.google.com/"))
+                        .SetName("{m}FromStringWithCorrectUrl");
+                    yield return new TestCaseData(new ValueMetadata("http://www.google.com/", ""))
+                        .Returns(Url.Parse("http://www.google.com/"))
                         .SetName("{m}FromMetadataWithString");
                 }
             }
         }
 
-        public class TryParse : EmailValueTests
+        public class TryParse : UrlValueTests
         {
             [TestCaseSource(typeof(TryParseTestCases))]
-            public bool Test(string value, Email expected)
+            public bool Test(string value, Url expected)
             {
-                if (Email.TryParse(value, out var result))
+                if (Url.TryParse(value, out var result))
                 {
                     Assert.That(expected, Is.EqualTo(result));
                     return true;
@@ -67,17 +67,17 @@ namespace GitIssue.Tests.ValueTests
             {
                 public override IEnumerator<TestCaseData> GetEnumerator()
                 {
-                    yield return new TestCaseData("foo.bar@gmail.com", Email.Parse("foo.bar@gmail.com"))
+                    yield return new TestCaseData("http://www.google.com/", Url.Parse("http://www.google.com/"))
                         .Returns(true)
-                        .SetName("ParsesEmailSuccessfully");
+                        .SetName("ParsesUrlSuccessfully");
                 }
             }
         }
 
-        public new class ToString : EmailValueTests
+        public new class ToString : UrlValueTests
         {
             [TestCaseSource(typeof(ToStringTestCases))]
-            public string Test(Email value)
+            public string Test(Url value)
             {
                 return value.ToString();
             }
@@ -86,17 +86,17 @@ namespace GitIssue.Tests.ValueTests
             {
                 public override IEnumerator<TestCaseData> GetEnumerator()
                 {
-                    yield return new TestCaseData(Email.Parse("foo.bar@gmail.com"))
-                        .Returns("foo.bar@gmail.com")
+                    yield return new TestCaseData(Url.Parse("http://www.google.com/"))
+                        .Returns("http://www.google.com/")
                         .SetName("ReturnsEmailString");
                 }
             }
         }
 
-        public class Item : EmailValueTests
+        public class Item : UrlValueTests
         {
             [TestCaseSource(typeof(GetItemTestCases))]
-            public string Tests(Email value)
+            public string Tests(Url value)
             {
                 return base.GetItem(value);
             }
@@ -105,17 +105,17 @@ namespace GitIssue.Tests.ValueTests
             {
                 public override IEnumerator<TestCaseData> GetEnumerator()
                 {
-                    yield return new TestCaseData(Email.Parse("foo.bar@gmail.com"))
-                        .Returns("foo.bar@gmail.com")
+                    yield return new TestCaseData(Url.Parse("http://www.google.com/"))
+                        .Returns("http://www.google.com/")
                         .SetName("ReturnsString");
                 }
             }
         }
 
-        public class ToJson : EmailValueTests
+        public class ToJson : UrlValueTests
         {
             [TestCaseSource(typeof(ConvertToJsonTestCases))]
-            public string Tests(Email value)
+            public string Tests(Url value)
             {
                 return base.ConvertToJson(value);
             }
@@ -124,14 +124,14 @@ namespace GitIssue.Tests.ValueTests
             {
                 public override IEnumerator<TestCaseData> GetEnumerator()
                 {
-                    yield return new TestCaseData(Email.Parse("foo.bar@gmail.com"))
-                        .Returns("\"foo.bar@gmail.com\"")
+                    yield return new TestCaseData(Url.Parse("http://www.google.com/"))
+                        .Returns("\"http://www.google.com/\"")
                         .SetName("ReturnsJsonString");
                 }
             }
         }
 
-        public new class Equals : EmailValueTests
+        public new class Equals : UrlValueTests
         {
             [TestCaseSource(typeof(EqualsTestCases))]
             public bool Tests(object first, object second)
@@ -143,13 +143,13 @@ namespace GitIssue.Tests.ValueTests
             {
                 public override IEnumerator<TestCaseData> GetEnumerator()
                 {
-                    yield return new TestCaseData(Email.Parse("foo.bar@gmail.com"), Email.Parse("foo.bar@gmail.com"))
+                    yield return new TestCaseData(Url.Parse("http://www.google.com/"), Url.Parse("http://www.google.com/"))
                         .Returns(true)
-                        .SetName("ReturnsTrueForSameEmail"); 
-                    yield return new TestCaseData(Email.Parse("foo.bar@gmail.com"), Email.Parse("bar.foo@gmail.com"))
+                        .SetName("ReturnsTrueForSameUrl"); 
+                    yield return new TestCaseData(Url.Parse("http://www.google.com/"), Url.Parse("http://www.apple.com/"))
                         .Returns(false)
-                        .SetName("ReturnsFalseForDifferentEmail");
-                    yield return new TestCaseData(Email.Parse("foo.bar@gmail.com"), null)
+                        .SetName("ReturnsFalseForDifferentUrl");
+                    yield return new TestCaseData(Url.Parse("http://www.google.com/"), null)
                         .Returns(false)
                         .SetName("ReturnsFalseComparedToNull");
                 }

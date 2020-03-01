@@ -152,7 +152,7 @@ namespace GitIssue
         /// <inheritdoc />
         public async Task<IIssue> CreateAsync(string title, string description)
         {
-            Issue issue = new FileIssue(this, new IssueRoot(Root, KeyProvider.Next()), Configuration.Fields)
+            Issue issue = new FileIssue(this, KeyProvider.Next(), Configuration.Fields)
             {
                 Title = title,
                 Description = description

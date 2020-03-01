@@ -15,8 +15,8 @@ namespace GitIssue.Issues.File
         ///     Initializes a new instance of a <see cref="FileIssue" /> class
         /// </summary>
         /// <param name="manager">the issue manager</param>
-        /// <param name="root">the issue root</param>
-        public FileIssue(IIssueManager manager, IssueRoot root) : base(manager, root)
+        /// <param name="key">the issue key</param>
+        public FileIssue(IIssueManager manager, IssueKey key) : base(manager, key)
         {
         }
 
@@ -24,10 +24,10 @@ namespace GitIssue.Issues.File
         ///     Initializes a new instance of a <see cref="FileIssue" /> class
         /// </summary>
         /// <param name="manager">the issue manager</param>
-        /// <param name="root">the issue root</param>
+        /// <param name="key">the issue root</param>
         /// <param name="fields">the issue manager</param>
-        public FileIssue(IIssueManager manager, IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) :
-            base(manager, root, fields)
+        public FileIssue(IIssueManager manager, IssueKey key, IDictionary<FieldKey, FieldInfo> fields) :
+            base(manager, key, fields)
         {
         }
 
@@ -61,7 +61,7 @@ namespace GitIssue.Issues.File
             if (Directory.Exists(root.IssuePath) == false)
                 return null;
 
-            var issue = new FileIssue(manager, root, fields);
+            var issue = new FileIssue(manager, root.Key, fields);
             foreach (var key in fields.Keys)
             {
                 var valueField = await fields[key].ReadFieldAsync(issue, key);

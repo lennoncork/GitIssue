@@ -1,0 +1,31 @@
+{
+  "key": "PNKEY-1816",
+  "summary": "This is a jira issue",
+  "reporter": "foobar",
+  "assignee": "foobar",
+  "description": "Foo Bar",
+  "issueType": "Bug",
+  "status": "Done",
+  "priority": "Undefined",
+  "resolution": "Done",
+  "created": 1565724981710,
+  "updated": 1569600063967,
+  "resolutionDate": 1569600063937,
+  "fixedVersions": [ "1.0.0" ],
+  "labels": [ "Decision" ],
+  "watchers": [ "foobar" ],
+  "history": [
+    {
+      "author": "foobar",
+      "created": 1565725429070,
+      "items": [
+        {
+          "fieldType": "jira",
+          "field": "description",
+          "oldDisplayValue": "We need to be able to import JIRA issues",
+          "newDisplayValue": "We need to be able to import JIRA issues."
+        }
+      ]
+    }
+  ]
+}

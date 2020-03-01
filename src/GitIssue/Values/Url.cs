@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
@@ -8,9 +9,20 @@ namespace GitIssue.Values
     ///     Version value type
     /// </summary>
     [TypeAlias(nameof(Url))]
+    [TypeConverter(typeof(UrlTypeConverter))]
     public struct Url : IJsonValue, IEquatable<Url>, IValue<string>
     {
         private readonly string value;
+
+        /// <summary>
+        ///     Parse a string to the url
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static Url Parse(string str)
+        {
+            return new Url(str);
+        }
 
         /// <summary>
         ///     Tries to parse a string to the email address
@@ -28,6 +40,8 @@ namespace GitIssue.Values
         {
             try
             {
+                if (url.StartsWith("www."))
+                    url = "http://" + url;
                 value = new Uri(url).ToString();
                 IsValid = true;
             }

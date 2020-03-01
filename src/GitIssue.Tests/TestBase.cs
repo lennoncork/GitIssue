@@ -2,39 +2,34 @@
 using LibGit2Sharp;
 using NUnit.Framework;
 
-namespace GitIssue.Tests.IssueManager
+namespace GitIssue.Tests
 {
-    [TestFixture]
-    public partial class IssueManagerTests
+    
+    public class TestsBase
     {
         [SetUp]
-        public void Setup()
+        public virtual void Setup()
         {
             TestDirectory = Helpers.GetTempDirectory();
             if (Directory.Exists(TestDirectory) == false) Directory.CreateDirectory(TestDirectory);
         }
 
-        [TearDown]
-        public void Teardown()
-        {
-            Sut?.Dispose();
-        }
+        protected virtual string TestDirectory { get; set; } = Helpers.GetTestDirectory();
 
-        protected string TestDirectory;
+        protected virtual string GitDirectory => Path.Combine(TestDirectory, Paths.GitFolderName);
 
-        protected string GitDirectory => Path.Combine(TestDirectory, Paths.GitFolderName);
+        protected virtual string IssueDirectory => Path.Combine(TestDirectory, Paths.IssueRootFolderName);
 
-        protected string IssueDirectory => Path.Combine(TestDirectory, Paths.IssueRootFolderName);
+        protected virtual string ConfigFile => Path.Combine(IssueDirectory, Paths.ConfigFileName);
 
-        protected string ConfigFile => Path.Combine(IssueDirectory, Paths.ConfigFileName);
-
-        protected GitIssue.IssueManager Sut;
+        protected virtual IssueManager Manager { get; set; }
 
         [OneTimeSetUp]
-        public void OneTimeSetup()
+        public virtual void OneTimeSetup()
         {
             TestDirectory = Helpers.GetTestDirectory();
-            if (Directory.Exists(TestDirectory)) Directory.Delete(TestDirectory, true);
+            if (Directory.Exists(TestDirectory)) 
+                Directory.Delete(TestDirectory, true);
             Directory.CreateDirectory(TestDirectory);
         }
 
@@ -46,7 +41,7 @@ namespace GitIssue.Tests.IssueManager
         {
             if (initGit) Repository.Init(directory);
             if (initIssue) GitIssue.IssueManager.Init(directory);
-            if (initSut) Sut = new GitIssue.IssueManager(TestDirectory);
+            if (initSut) Manager = new GitIssue.IssueManager(TestDirectory);
         }
 
         public void Initialize(
@@ -58,7 +53,7 @@ namespace GitIssue.Tests.IssueManager
         {
             if (initGit) Repository.Init(directory);
             if (initIssue) GitIssue.IssueManager.Init(directory, name);
-            if (initSut) Sut = new GitIssue.IssueManager(TestDirectory, name);
+            if (initSut) Manager = new GitIssue.IssueManager(TestDirectory, name);
         }
     }
 }
