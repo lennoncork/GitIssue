@@ -10,7 +10,7 @@ jobs:
       uses: actions/checkout@v2
     - name: Setup
       uses: actions/setup-dotnet@v1
-      with:
+      with: 
         dotnet-version: 3.1.100
     - name: Build
       run: dotnet build --configuration Release "src/GitIssue.sln"
@@ -18,3 +18,8 @@ jobs:
       run: dotnet test --configuration Release "src/GitIssue.sln"
     - name: Publish
       run: dotnet publish "src/GitIssue.Util/GitIssue.Util.csproj" --framework netcoreapp3.1 --runtime win10-x64 --self-contained
+    - name: Upload
+      uses: actions/upload-artifact@v1
+      with:
+        name: GitIssue-win10-x64
+        path: src/output/GitIssue.Util/bin/Debug/netcoreapp3.1/win10-x64/publish/GitIssue.Util.exe
