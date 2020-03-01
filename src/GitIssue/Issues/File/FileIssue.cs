@@ -76,12 +76,16 @@ namespace GitIssue.Issues.File
         /// </summary>
         /// <param name="issueRoot"></param>
         /// <returns></returns>
-        public new static async Task DeleteAsync(IssueRoot issueRoot)
+        public new static async Task<bool> DeleteAsync(IssueRoot issueRoot)
         {
-            await JsonIssue.DeleteAsync(issueRoot);
+            bool result = await JsonIssue.DeleteAsync(issueRoot);
+            if (result == false)
+                return false;
 
             if (Directory.Exists(issueRoot.IssuePath))
                 Directory.Delete(issueRoot.IssuePath, true);
+
+            return true;
         }
     }
 }

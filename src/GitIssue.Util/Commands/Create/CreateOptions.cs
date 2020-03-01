@@ -8,6 +8,9 @@ namespace GitIssue.Util.Commands.Create
     [Verb(nameof(CommandType.Create), HelpText = "Creates a new issue")]
     public class CreateOptions : Options, ITrackedOptions
     {
+        [Option("Track", HelpText = "Track the new issue, even if another issue is already tracked", Required = false)]
+        public bool Track { get; set; } = false;
+
         [Value(1, MetaName = "Title", HelpText = "The issue title", Required = true)]
         public string Title { get; set; } = string.Empty;
 

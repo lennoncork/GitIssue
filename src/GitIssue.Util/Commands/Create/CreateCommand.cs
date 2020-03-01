@@ -26,7 +26,7 @@ namespace GitIssue.Util.Commands.Create
         {
             await using var issues = Initialize(options);
             var issue = await issues.CreateAsync(options.Title, options.Description);
-            if (options.Tracked == TrackedIssue.None)
+            if (options.Track || options.Tracked == TrackedIssue.None)
             {
                 options.Tracked = new TrackedIssue(issue.Key);
                 await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), Logger);

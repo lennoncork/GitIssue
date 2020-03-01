@@ -88,7 +88,9 @@ namespace GitIssue
         /// <inheritdoc />
         public bool Commit()
         {
-            throw new NotImplementedException();
+            return this.CommitAsync()
+                .WithSafeResult()
+                .GetResult();
         }
 
         /// <inheritdoc />
@@ -106,20 +108,39 @@ namespace GitIssue
                 return Task.FromResult(false);
             }
 
-            var files = Directory.EnumerateFiles(Root.IssuesPath, "*.*", SearchOption.AllDirectories);
-            foreach (var file in files)
+            foreach (var item in Repository.RetrieveStatus(new StatusOptions()
             {
-                var relative = Path.GetRelativePath(Root.RootPath, file);
-
-                if (Repository.Ignore.IsPathIgnored(relative))
-                    continue;
+                PathSpec = new[] { $"{Path.GetRelativePath(Root.RootPath, Root.IssuesPath)}/*"  },
+                IncludeIgnored = true,
+                IncludeUntracked = true,
+                RecurseIgnoredDirs = true,
+                RecurseUntrackedDirs = true,
+            }))
+            {
+                var relative = item.FilePath;
 
                 if (Path.GetFullPath(relative).Equals(Path.GetFullPath(Root.ChangeLog)))
                     continue;
 
-                Repository.Index.Add(relative);
-                Repository.Index.Write();
+                if (Path.GetFullPath(relative).Equals(Path.GetFullPath(Root.Tracked)))
+                    continue;
+
+                if ((item.State & FileStatus.Ignored) != 0)
+                {
+                    if (Directory.Exists(Path.GetFullPath(item.FilePath)))
+                        continue;
+                    Repository.Index.Add(item.FilePath);
+                }
+
+                if ((item.State & FileStatus.NewInWorkdir) != 0 ||
+                    (item.State & FileStatus.ModifiedInWorkdir) != 0)
+                    Repository.Index.Add(item.FilePath);
+
+                if ((item.State & FileStatus.DeletedFromWorkdir) != 0)
+                    Repository.Index.Remove(item.FilePath);
             }
+
+            Repository.Index.Write();
 
             var builder = new StringBuilder();
             var count = 0;
@@ -188,14 +209,18 @@ namespace GitIssue
         /// <inheritdoc />
         public bool Delete(string id)
         {
-            throw new NotImplementedException();
+            return this.DeleteAsync(id)
+                .WithSafeResult()
+                .GetResult();
         }
 
 
         /// <inheritdoc />
         public bool Delete(IssueKey key)
         {
-            throw new NotImplementedException();
+            return this.DeleteAsync(key)
+                .WithSafeResult()
+                .GetResult();
         }
 
 
@@ -216,7 +241,10 @@ namespace GitIssue
         /// <inheritdoc />
         public async Task<bool> DeleteAsync(IssueKey key)
         {
-            await FileIssue.DeleteAsync(new IssueRoot(Root, key));
+            if (await FileIssue.DeleteAsync(new IssueRoot(Root, key)))
+            {
+                this.Changes.Add(key, ChangeType.Delete);
+            }
             return true;
         }
 
@@ -230,13 +258,17 @@ namespace GitIssue
         /// <inheritdoc />
         public IIssue Create(string title)
         {
-            return Task.Run(() => CreateAsync(title)).Result;
+            return this.CreateAsync(title)
+                .WithSafeResult()
+                .GetResult();
         }
 
         /// <inheritdoc />
         public IIssue Create(string title, string description)
         {
-            return Task.Run(() => CreateAsync(title, description)).Result;
+            return this.CreateAsync(title, description)
+                .WithSafeResult()
+                .GetResult();
         }
 
         /// <inheritdoc />
@@ -338,6 +370,14 @@ namespace GitIssue
                 return false;
             }
             return true;
+        }
+
+        /// <inheritdoc />
+        public bool Track(IssueKey key)
+        {
+            return this.TrackAsync(key)
+                .WithSafeResult()
+                .GetResult();
         }
     }
 }

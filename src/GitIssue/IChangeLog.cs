@@ -21,6 +21,21 @@ namespace GitIssue
         /// <summary>
         ///     Records a new change in the log
         /// </summary>
+        /// <param name="key"></param>
+        /// <param name="change"></param>
+        public void Add(IssueKey key, ChangeType change);
+
+        /// <summary>
+        ///     Records a new change in the log
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="change"></param>
+        /// <param name="summary"></param>
+        public void Add(IssueKey key, ChangeType change, string summary);
+
+        /// <summary>
+        ///     Records a new change in the log
+        /// </summary>
         /// <param name="issue"></param>
         /// <param name="change"></param>
         public void Add(IIssue issue, ChangeType change);

@@ -145,5 +145,23 @@ namespace GitIssue
             result = default!;
             return false;
         }
+
+        /// <summary>
+        /// Gets the result of the command
+        /// </summary>
+        /// <param name="throwIfFailed">throw a <see cref="SafeResultException"/> if the task failed</param>
+        /// <returns></returns>
+        public T GetResult(bool throwIfFailed = true)
+        {
+            if (this.IsSuccess)
+                return this.Result;
+
+            if (throwIfFailed == false)
+                return default!;
+
+            if(this.Exception == null)
+                throw new SafeResultException("Task execution failed");
+            throw new SafeResultException("Task execution failed", this.Exception);
+        }
     }
 }

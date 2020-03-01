@@ -128,6 +128,13 @@ namespace GitIssue
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
+        bool Track(IssueKey key);
+
+        /// <summary>
+        ///     Tracks the issue
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         Task<bool> TrackAsync(IssueKey key);
 
     }

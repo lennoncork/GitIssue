@@ -27,19 +27,31 @@ namespace GitIssue
         }
 
         /// <inheritdoc />
+        public void Add(IssueKey key, ChangeType change)
+        {
+            Add(key, change, string.Empty);
+        }
+
+        /// <inheritdoc />
+        public void Add(IssueKey key, ChangeType change, string summary)
+        {
+            hasChanged = true;
+            if (Log.ContainsKey(key) == false)
+                Log[key] = new List<string>();
+
+            Log[key].Add($"{DateTime.Now}: {GetChangeDescription(change)}");
+        }
+
+        /// <inheritdoc />
         public void Add(IIssue issue, ChangeType change)
         {
-            Add(issue, change, string.Empty);
+            Add(issue.Key, change, string.Empty);
         }
 
         /// <inheritdoc />
         public void Add(IIssue issue, ChangeType change, string summary)
         {
-            hasChanged = true;
-            if (Log.ContainsKey(issue.Key) == false)
-                Log[issue.Key] = new List<string>();
-
-            Log[issue.Key].Add($"{DateTime.Now}: {GetChangeDescription(change)}");
+            Add(issue.Key, change, string.Empty);
         }
 
         private static string GetChangeDescription(ChangeType change)

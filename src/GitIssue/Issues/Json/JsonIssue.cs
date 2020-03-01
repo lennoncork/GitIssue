@@ -201,7 +201,7 @@ namespace GitIssue.Issues.Json
         /// </summary>
         /// <param name="issueRoot"></param>
         /// <returns></returns>
-        public static Task DeleteAsync(IssueRoot issueRoot)
+        public static Task<bool> DeleteAsync(IssueRoot issueRoot)
         {
             // Issue should exist before attempting to delete
             if (Directory.Exists(issueRoot.IssuePath) == false)
@@ -216,7 +216,7 @@ namespace GitIssue.Issues.Json
                 Directory.Delete(issueRoot.IssuePath);
 
             // Success
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 }
