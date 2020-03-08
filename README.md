@@ -2,7 +2,7 @@
 
 An 'in-source' issue management system built on GIT. Inspired by the great work of the [git-issue](https://github.com/dspinellis/git-issue) project. This project implements a similar concept in a .NET core application with a flexible issue schema. 
 
-![build](https://github.com/lennoncork/GitIssue/workflows/build/badge.svg)
+![build](https://github.com/lennoncork/GitIssue/workflows/build/badge.svg?branch=master)
 
 # Compatibility
 This project runs on .NET Core 3.1 and is compatible with the following,
