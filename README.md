@@ -4,6 +4,25 @@ An 'in-source' issue management system built on GIT. Inspired by the great work 
 
 ![build](https://github.com/lennoncork/GitIssue/workflows/build/badge.svg?branch=master)
 
+# Quick Start
+To get started, clone this repository, build and configure an alias in GIT. 
+```
+git clone git@github.com:lennoncork/GitIssue.git
+
+cd GitIssue
+
+dotnet publish \
+ --framework netcoreapp3.1 \
+ --runtime win10-x64 \
+ --configuration release \
+ --self-contained true \
+ src/GitIssue.Util/GitIssue.Util.csproj
+
+./scripts/config-alias.sh
+
+git issue help
+```
+
 # Compatibility
 This project runs on .NET Core 3.1 and is compatible with the following,
 * Windows 
