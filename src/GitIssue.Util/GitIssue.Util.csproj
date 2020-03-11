@@ -5,15 +5,16 @@
     <ApplicationIcon />
     <OutputType>Exe</OutputType>
     <StartupObject />
-    <IncludeSymbolsInSingleFile>true</IncludeSymbolsInSingleFile>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
     <PublishSingleFile>true</PublishSingleFile>
-    <PublishTrimmed>true</PublishTrimmed>
+    <IncludeSymbolsInSingleFile>true</IncludeSymbolsInSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
     <PublishReadyToRun>false</PublishReadyToRun>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>
