@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
+using GitIssue.Values;
 using LibGit2Sharp;
 using Serilog;
 using Serilog.Core;
@@ -17,39 +19,46 @@ namespace GitIssue
     /// </summary>
     public class IssueManager : IIssueManager
     {
+        private IContainer? container;
+
         private readonly ILogger? logger;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
-        public IssueManager(string directory) : this(directory, Paths.IssueRootFolderName)
-        {
+        public static IIssueManager Open(string directory) => Open(directory, Paths.IssueRootFolderName);
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="IssueManager" /> mass
+        /// </summary>
+        public static IIssueManager Open(string directory, string name)
+        {
+            var builder = new ContainerBuilder();
+            var root = RepositoryRoot.Open(directory, name);
+            builder.Register(c => root).As<RepositoryRoot>().SingleInstance();
+            return Open(builder);
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
-        public IssueManager(string directory, string name)
+        public static IIssueManager Open(ContainerBuilder builder)
         {
-            this.logger = Logger.None;
-            this.Root = RepositoryRoot.Open(directory, name);
-            this.Repository = new Repository(directory);
-            this.WorkingDirectory = this.Root.RootPath;
-            this.KeyProvider = new FileIssueKeyProvider(this.Root);
-            this.Configuration = IssueConfiguration.Read(Root.ConfigFile);
-            this.Changes = ChangeLog.Read(Root.ChangeLog);
-            this.Tracked = TrackedIssue.Read(Root.Tracked);
+            builder.RegisterModule<GitIssueModule>();
+            IContainer container = builder.Build();
+            var manager = container.Resolve<IssueManager>();
+            manager.container = container;
+            return manager;
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
         public IssueManager(
-            ILogger? logger, 
+            ILogger logger, 
             RepositoryRoot root, 
             IRepository repository, 
-            IIssueKeyProvider keyProvider, 
+            IIssueKeyProvider provider,
             IChangeLog changeLog,
             IIssueConfiguration configuration, 
             ITrackedIssue tracked)
@@ -57,8 +66,8 @@ namespace GitIssue
             this.logger = logger;
             this.Repository = repository;
             this.WorkingDirectory = root.RootPath;
+            this.KeyProvider = provider;
             this.Root = root;
-            this.KeyProvider = keyProvider;
             this.Configuration = configuration;
             this.Changes = changeLog;
             this.Tracked = tracked;
@@ -244,8 +253,8 @@ namespace GitIssue
         /// <inheritdoc />
         public void Dispose()
         {
-            Repository?.Dispose();
             Changes.Save(Root.ChangeLog);
+            container?.Dispose();
         }
 
         /// <inheritdoc />
@@ -344,13 +353,12 @@ namespace GitIssue
 
             var root = RepositoryRoot.Create(directory, name);
             configuration.Save(root.ConfigFile);
-            var logger = Logger.None;
-            var repository = new Repository(directory);
-            var keyProvider = new FileIssueKeyProvider(root);
-            var changeLog = new ChangeLog();
-            var tracked = TrackedIssue.Read(root.Tracked);
+            var builder = new ContainerBuilder();
 
-            return new IssueManager(logger, root, repository, keyProvider, changeLog, configuration, tracked);
+            builder.Register(c => root).As<RepositoryRoot>().SingleInstance();
+            builder.Register(c => configuration).As<IIssueConfiguration>().SingleInstance();
+
+            return Open(builder);
         }
 
         /// <inheritdoc />

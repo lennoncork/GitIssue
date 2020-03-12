@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Autofac.Core;
 using GitIssue.Exceptions;
 using NUnit.Framework;
 
@@ -16,7 +17,7 @@ namespace GitIssue.Tests.IssueManagerTests
             {
                 Initialize(TestDirectory, true, true, false);
                 File.Delete(Path.Combine(TestDirectory, Paths.IssueRootFolderName, Paths.ConfigFileName));
-                Assert.Throws<AggregateException>(() => { Sut = new GitIssue.IssueManager(TestDirectory); });
+                Assert.Throws<DependencyResolutionException>(() => { Sut = IssueManager.Open(TestDirectory); });
             }
 
             [Test]
@@ -24,7 +25,7 @@ namespace GitIssue.Tests.IssueManagerTests
             {
                 Initialize(TestDirectory, true, true, false);
                 Directory.Delete(Path.Combine(TestDirectory, Paths.IssueRootFolderName), true);
-                Assert.Throws<RepositoryNotFoundException>(() => { Sut = new GitIssue.IssueManager(TestDirectory); });
+                Assert.Throws<RepositoryNotFoundException>(() => { Sut = IssueManager.Open(TestDirectory); });
             }
 
             [Test]
@@ -32,9 +33,9 @@ namespace GitIssue.Tests.IssueManagerTests
             {
                 Initialize(TestDirectory);
                 Directory.Delete(Path.Combine(TestDirectory, Paths.GitFolderName), true);
-                Assert.Throws<LibGit2Sharp.RepositoryNotFoundException>(() =>
+                Assert.Throws<DependencyResolutionException>(() =>
                 {
-                    Sut = new GitIssue.IssueManager(TestDirectory);
+                    Sut = IssueManager.Open(TestDirectory);
                 });
             }
 

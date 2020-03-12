@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Autofac.Core;
 using LibGit2Sharp;
 using NUnit.Framework;
 
@@ -30,7 +31,7 @@ namespace GitIssue.Tests.IssueManagerTests
             [Test]
             public void FailsIfNotAGitRepository()
             {
-                Assert.Throws<RepositoryNotFoundException>(() => { GitIssue.IssueManager.Init(TestDirectory); });
+                Assert.Throws<DependencyResolutionException>(() => { GitIssue.IssueManager.Init(TestDirectory); });
             }
         }
     }

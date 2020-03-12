@@ -22,7 +22,7 @@ namespace GitIssue.Tests
 
         protected virtual string ConfigFile => Path.Combine(IssueDirectory, Paths.ConfigFileName);
 
-        protected virtual IssueManager Manager { get; set; }
+        protected virtual IIssueManager Manager { get; set; }
 
         [OneTimeSetUp]
         public virtual void OneTimeSetup()
@@ -41,7 +41,7 @@ namespace GitIssue.Tests
         {
             if (initGit) Repository.Init(directory);
             if (initIssue) GitIssue.IssueManager.Init(directory);
-            if (initSut) Manager = new GitIssue.IssueManager(TestDirectory);
+            if (initSut) Manager = GitIssue.IssueManager.Open(TestDirectory);
         }
 
         public void Initialize(
@@ -52,8 +52,8 @@ namespace GitIssue.Tests
             bool initSut = true)
         {
             if (initGit) Repository.Init(directory);
-            if (initIssue) GitIssue.IssueManager.Init(directory, name);
-            if (initSut) Manager = new GitIssue.IssueManager(TestDirectory, name);
+            if (initIssue) IssueManager.Init(directory, name);
+            if (initSut) Manager = IssueManager.Open(TestDirectory, name);
         }
     }
 }

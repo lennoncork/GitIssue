@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Issues.File;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
 using Newtonsoft.Json;
@@ -22,6 +23,7 @@ namespace GitIssue
         /// </summary>
         public IssueConfiguration()
         {
+            KeyProvider = TypeValue.Create<FileIssueKeyProvider>();
             Fields = new Dictionary<FieldKey, FieldInfo>
             {
                 {FieldKey.Create("Key"), new FieldInfo<IssueKey, JsonValueField>(true)},
@@ -34,26 +36,21 @@ namespace GitIssue
             };
         }
 
-        /// <summary>
-        ///     Gets or sets the dictionary of fields
-        /// </summary>
+        /// <inheritdoc/>
+        [JsonProperty]
+        public TypeValue KeyProvider { get; set; }
+
+        /// <inheritdoc/>
         [JsonProperty]
         public Dictionary<FieldKey, FieldInfo> Fields { get; set; }
 
-        /// <summary>
-        ///     Saves the configuration to a file
-        /// </summary>
-        /// <param name="file">the configuration file</param>
+        /// <inheritdoc/>
         public void Save(string file)
         {
             Save<IssueConfiguration>(file);
         }
 
-        /// <summary>
-        ///     Saves the configuration to a file
-        /// </summary>
-        /// <typeparam name="T">the configuration type</typeparam>
-        /// <param name="file">the configuration file</param>
+        /// <inheritdoc/>
         public void Save<T>(string file) where T : IssueConfiguration, new()
         {
             try

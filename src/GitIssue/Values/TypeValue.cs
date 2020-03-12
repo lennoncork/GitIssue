@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
 using GitIssue.Fields;
 using Newtonsoft.Json;
 
@@ -20,6 +22,43 @@ namespace GitIssue.Values
         private TypeValue(Type type)
         {
             Type = type;
+        }
+        
+        /// <summary>
+        /// Tries to create the type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool TryCreate<T>(out T result, params object[] args)
+            where T : class
+        {
+            if (typeof(T).IsAssignableFrom(this.Type) == false)
+            {
+                result = null!;
+                return false;
+            }
+
+            try
+            {
+                var info = this.Type.GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public,
+                    null,
+                    args.Select(o => o.GetType()).ToArray(),
+                    null);
+
+                var create = info?.Invoke(args) as T;
+                result = create!;
+
+                if (create == null)
+                    return false;
+
+                return true;
+            }
+            catch (Exception)
+            {
+                result = null!;
+                return false;
+            }
         }
 
         /// <summary>

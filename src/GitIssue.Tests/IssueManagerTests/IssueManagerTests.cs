@@ -5,9 +5,9 @@ namespace GitIssue.Tests.IssueManagerTests
     [TestFixture]   
     public partial class IssueManagerTests : TestsBase
     {
-        private IssueManager sut;
+        private IIssueManager sut;
 
-        public IssueManager Sut
+        public IIssueManager Sut
         {
             get
             {
@@ -15,7 +15,7 @@ namespace GitIssue.Tests.IssueManagerTests
                     return this.Manager;
                 return this.sut;
             }
-            set { this.sut = value; }
+            set => this.sut = value;
         }
     }
 }

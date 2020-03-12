@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GitIssue.Fields;
+using GitIssue.Values;
 
 namespace GitIssue
 {
@@ -8,6 +9,11 @@ namespace GitIssue
     /// </summary>
     public interface IIssueConfiguration
     {
+        /// <summary>
+        /// Gets or sets the key provider
+        /// </summary>
+        TypeValue KeyProvider { get; set; }
+
         /// <summary>
         ///     Gets or sets the dictionary of fields
         /// </summary>

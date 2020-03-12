@@ -42,6 +42,11 @@ namespace GitIssue
         ITrackedIssue Tracked { get; }
 
         /// <summary>
+        /// Gets the issue key provider
+        /// </summary>
+        IIssueKeyProvider KeyProvider { get; }
+
+        /// <summary>
         ///     Commits the changes
         /// </summary>
         /// <returns></returns>
