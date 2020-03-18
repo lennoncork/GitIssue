@@ -6,6 +6,10 @@
     <OutputType>Exe</OutputType>
     <StartupObject />
     <Nullable>enable</Nullable>
+    <PackageId>GitIssue.Tool</PackageId>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>gitissue</ToolCommandName>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup>

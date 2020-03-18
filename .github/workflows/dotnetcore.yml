@@ -19,9 +19,9 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release "src/GitIssue.sln"
     - name: Publish
-      run: dotnet publish "src/GitIssue.Util/GitIssue.Util.csproj" --framework netcoreapp3.1 --runtime win10-x64 --self-contained
+      run: dotnet publish "src/GitIssue.Tool/GitIssue.Tool.csproj" --framework netcoreapp3.1 --runtime win10-x64 --self-contained
     - name: Upload
       uses: actions/upload-artifact@v1
       with:
         name: GitIssue-win10-x64
-        path: src/output/GitIssue.Util/bin/Debug/netcoreapp3.1/win10-x64/publish/GitIssue.Util.exe
+        path: src/output/GitIssue.Tool/bin/Debug/netcoreapp3.1/win10-x64/publish/GitIssue.Tool.exe

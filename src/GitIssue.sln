@@ -7,12 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitIssue", "GitIssue\GitIss
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitIssue.Tests", "GitIssue.Tests\GitIssue.Tests.csproj", "{EA15286A-8828-4458-A356-C65AC7BB0B54}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitIssue.Util", "GitIssue.Util\GitIssue.Util.csproj", "{83253972-BCF7-4F0D-805E-A24159DACB8C}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DC90B53D-BE75-400F-AEF6-C148F3A52BE4}"
 	ProjectSection(SolutionItems) = preProject
+		..\LICENSE.md = ..\LICENSE.md
 		..\README.md = ..\README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitIssue.Tool", "GitIssue.Tool\GitIssue.Tool.csproj", "{E74A28A8-F402-4D16-B116-26ACB6283672}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,10 +29,10 @@ Global
 		{EA15286A-8828-4458-A356-C65AC7BB0B54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA15286A-8828-4458-A356-C65AC7BB0B54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA15286A-8828-4458-A356-C65AC7BB0B54}.Release|Any CPU.Build.0 = Release|Any CPU
-		{83253972-BCF7-4F0D-805E-A24159DACB8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{83253972-BCF7-4F0D-805E-A24159DACB8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{83253972-BCF7-4F0D-805E-A24159DACB8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{83253972-BCF7-4F0D-805E-A24159DACB8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E74A28A8-F402-4D16-B116-26ACB6283672}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E74A28A8-F402-4D16-B116-26ACB6283672}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E74A28A8-F402-4D16-B116-26ACB6283672}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E74A28A8-F402-4D16-B116-26ACB6283672}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
