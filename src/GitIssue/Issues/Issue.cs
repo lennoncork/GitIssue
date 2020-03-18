@@ -27,7 +27,7 @@ namespace GitIssue.Issues
         protected Issue(IIssueManager manager, IssueKey key)
         {
             this.Manager = manager;
-            this.Root = new IssueRoot(Manager.Root, key);
+            this.Root = new IssueRoot(Manager.Root, Manager.KeyProvider.GetIssuePath(key));
         }
 
         /// <summary>

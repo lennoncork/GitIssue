@@ -21,6 +21,13 @@ namespace GitIssue.Issues
         bool TryGetKey(string value, out IssueKey key);
 
         /// <summary>
+        /// Gets the path for the issue key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        string GetIssuePath(IssueKey key);
+
+        /// <summary>
         ///     The next, unique, issue key
         /// </summary>
         /// <returns></returns>

@@ -243,7 +243,7 @@ namespace GitIssue
         /// <inheritdoc />
         public async Task<bool> DeleteAsync(IssueKey key)
         {
-            if (await FileIssue.DeleteAsync(new IssueRoot(Root, key)))
+            if (await FileIssue.DeleteAsync(new IssueRoot(Root, KeyProvider.GetIssuePath(key))))
             {
                 this.Changes.Add(key, ChangeType.Delete);
             }

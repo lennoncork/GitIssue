@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Autofac;
 using CommandLine;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
@@ -62,15 +63,12 @@ namespace GitIssue.Util
 
         public static IIssueManager Initialize(Options options)
         {
-            var logger = Logger;
-            var root = RepositoryRoot.Open(options.Path, options.Name);
-            var repository = new Repository(options.Path);
-            var keyProvider = new FileIssueKeyProvider(root);
-            var configuration = IssueConfiguration.Read(root.ConfigFile);
-            var changes = ChangeLog.Read(root.ChangeLog);
-            var tracked = TrackedIssue.Read(root.Tracked);
-
-            var manager = new IssueManager(logger, root, repository, keyProvider, changes, configuration, tracked);
+            var builder = new ContainerBuilder();
+            builder.Register(c => Logger!)
+                .As<ILogger>();
+            builder.Register( c => RepositoryRoot.Open(options.Path, options.Name))
+                .As<RepositoryRoot>();
+            var manager = IssueManager.Open(builder);
 
             if (options is ITrackedOptions keyOptions)
                 keyOptions.Tracked = TrackedIssue

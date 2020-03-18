@@ -1,5 +1,7 @@
-﻿using System.IO;
-using GitIssue.Exceptions;
+﻿using System.Diagnostics.Contracts;
+using System.IO;
+using LibGit2Sharp;
+using RepositoryNotFoundException = GitIssue.Exceptions.RepositoryNotFoundException;
 
 namespace GitIssue
 {
@@ -9,6 +11,11 @@ namespace GitIssue
     public struct RepositoryRoot
     {
         /// <summary>
+        ///     Gets a value indicating if the issue directory is shared with the repository root
+        /// </summary>
+        public bool IsOwnedRepository => this.Name == null;
+
+        /// <summary>
         ///     Gets the repository path
         /// </summary>
         public string RootPath { get; }
@@ -16,12 +23,14 @@ namespace GitIssue
         /// <summary>
         ///     Gets the issue path
         /// </summary>
-        public string IssuesPath => Path.Combine(RootPath, Name);
+        public string IssuesPath => this.Name == null ? 
+            this.RootPath : 
+            Path.Combine(this.RootPath, Name);
 
         /// <summary>
         ///     Gets the repository name
         /// </summary>
-        public string Name { get; }
+        public string? Name { get; }
 
         /// <summary>
         ///     Gets the path for the config file
@@ -42,6 +51,16 @@ namespace GitIssue
         ///     Gets the issue configuration
         /// </summary>
         public IssueConfiguration Configuration => IssueConfiguration.Read(ConfigFile);
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="RepositoryRoot" /> struct
+        /// </summary>
+        /// <param name="directory">the directory of the repository</param>
+        internal RepositoryRoot(string directory)
+        {
+            RootPath = directory;
+            Name = null;
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RepositoryRoot" /> struct
@@ -73,10 +92,13 @@ namespace GitIssue
         /// <param name="directory">the directory of the repository</param>
         /// <param name="name">the name of the repository</param>
         /// <returns>the repository root</returns>
-        public static RepositoryRoot Open(string directory, string name)
+        public static RepositoryRoot Open(string directory, string? name)
         {
             var current = new DirectoryInfo(directory);
-            if (IsIssueRoot(current, name, out var issues)) return new RepositoryRoot(current.FullName, name);
+            if(name == null)
+                return new RepositoryRoot(current.FullName);
+            if (IsIssueRoot(current, name, out var issues)) 
+                return new RepositoryRoot(current.FullName, name);
             throw new RepositoryNotFoundException($"Failed to open directory {directory} as issue root");
         }
 
@@ -91,10 +113,10 @@ namespace GitIssue
             var current = new DirectoryInfo(directory);
             while (TryGetParent(current, out var parent))
             {
-                if (IsIssueRoot(current, name, out var issues)) return new RepositoryRoot(current.FullName, name);
+                if (IsIssueRoot(current, name, out var issues)) 
+                    return new RepositoryRoot(current.FullName, name);
                 current = parent;
             }
-
             return None;
         }
 
@@ -127,6 +149,16 @@ namespace GitIssue
         {
             parent = directory.Parent;
             return directory.Exists && directory.Parent != null;
+        }
+
+        /// <summary>
+        /// Gets the GIT repository at the root
+        /// </summary>
+        /// <returns></returns>
+        [Pure]
+        public IRepository GetRepository()
+        {
+            return new Repository(this.RootPath);
         }
     }
 }

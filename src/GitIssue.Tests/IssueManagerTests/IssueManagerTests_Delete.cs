@@ -18,12 +18,12 @@ namespace GitIssue.Tests.IssueManagerTests
                     .CreateAsync(nameof(DeletesExistingIssue), string.Empty)
                     .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
-                Assert.IsTrue(Directory.Exists(Path.Combine(IssueDirectory, create.Result.Key.ToString())));
+                Assert.IsTrue(Directory.Exists(Path.Combine(IssueDirectory, Sut.KeyProvider.GetIssuePath(create.Result.Key))));
                 var delete = await Sut
                     .DeleteAsync(create.Result.Key)
                     .WithSafeResultAsync();
                 Assert.IsTrue(delete.IsSuccess);
-                Assert.IsFalse(Directory.Exists(Path.Combine(IssueDirectory, create.Result.Key.ToString())));
+                Assert.IsFalse(Directory.Exists(Path.Combine(IssueDirectory, Sut.KeyProvider.GetIssuePath(create.Result.Key))));
             }
 
             [Test]

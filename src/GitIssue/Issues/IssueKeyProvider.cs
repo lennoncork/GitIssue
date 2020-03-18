@@ -11,6 +11,9 @@ namespace GitIssue.Issues
         public abstract IEnumerable<IssueKey> Keys { get; }
 
         /// <inheritdoc />
+        public abstract string GetIssuePath(IssueKey key);
+
+        /// <inheritdoc />
         public abstract IssueKey Next();
 
         /// <inheritdoc />

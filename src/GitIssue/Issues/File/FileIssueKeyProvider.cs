@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using LibGit2Sharp;
 
 namespace GitIssue.Issues.File
 {
@@ -11,6 +12,8 @@ namespace GitIssue.Issues.File
     /// </summary>
     public class FileIssueKeyProvider : IssueKeyProvider
     {
+        private static char separator = '-';
+
         private readonly RepositoryRoot root;
 
         /// <summary>
@@ -26,31 +29,35 @@ namespace GitIssue.Issues.File
         public override IEnumerable<IssueKey> Keys => FindAll(root.IssuesPath);
 
         /// <inheritdoc />
+        public override string GetIssuePath(IssueKey key)
+        {
+            return key.ToString().Replace(separator, Path.DirectorySeparatorChar);
+        }
+
+        /// <inheritdoc />
         public override IssueKey Next()
         {
             var created = DateTime.Now;
             string[] values =
             {
-                created.Year.ToString(),
-                created.Month.ToString(),
-                created.Day.ToString(),
+                created.Year.ToString("D4"),
+                created.Month.ToString("D2"),
+                created.Day.ToString("D2"),
                 GetUniqueId(8)
             };
-            var key = string.Join(Path.DirectorySeparatorChar.ToString(), values);
+            var key = string.Join(separator, values);
             return IssueKey.Create(key);
         }
 
         private string GetUniqueId(int length)
         {
-            using (var sha = new SHA256Managed())
-            {
-                var checksum = sha.ComputeHash(Guid.NewGuid().ToByteArray());
-                var key = BitConverter.ToString(checksum)
-                    .Replace("-", "")
-                    .ToUpperInvariant()
-                    .Substring(0, length);
-                return key;
-            }
+            using var sha = new SHA256Managed();
+            var checksum = sha.ComputeHash(Guid.NewGuid().ToByteArray());
+            var key = BitConverter.ToString(checksum)
+                .Replace("-", "")
+                .ToUpperInvariant()
+                .Substring(0, length);
+            return key;
         }
 
         private IEnumerable<IssueKey> FindAll(string directory)
@@ -80,7 +87,9 @@ namespace GitIssue.Issues.File
         /// <inheritdoc />
         public override bool TryGetKey(string value, out IssueKey key)
         {
-            var split = NormalizePath(value).Split('/', '\\');
+            value = value.Replace(separator, '/');
+            var split = NormalizePath(value)
+                .Split('/', '\\');
             if (split.Length == 4)
             {
                 var year = split[0];
@@ -90,13 +99,26 @@ namespace GitIssue.Issues.File
 
                 if (DateTime.TryParse($"{year}/{month}/{day}", out var time))
                 {
-                    key = IssueKey.Create(value);
+                    key = IssueKey.Create(value
+                        .Replace('/', separator));
                     return true;
                 }
             }
 
             key = IssueKey.None;
             return false;
+        }
+
+        /// <summary>
+        /// Tries to get the commit of the current branch
+        /// </summary>
+        /// <param name="commit"></param>
+        /// <returns></returns>
+        public bool TryGetGitCommit(out string commit)
+        {
+            using IRepository repository = root.GetRepository();
+            commit = repository.Head.Tip.Sha;
+            return true;
         }
 
         private string NormalizePath(string path)
