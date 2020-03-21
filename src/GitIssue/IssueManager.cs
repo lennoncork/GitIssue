@@ -201,7 +201,7 @@ namespace GitIssue
         {
             foreach (var key in KeyProvider.Keys)
             {
-                var issue = await FileIssue.ReadAsync(this, new IssueRoot(Root, key), Configuration.Fields);
+                var issue = await FileIssue.ReadAsync(this, new IssueRoot(Root, key, this.KeyProvider.GetIssuePath(key)), Configuration.Fields);
                 if (issue != null && predicated.Invoke(issue))
                     yield return issue;
             }
@@ -243,7 +243,7 @@ namespace GitIssue
         /// <inheritdoc />
         public async Task<bool> DeleteAsync(IssueKey key)
         {
-            if (await FileIssue.DeleteAsync(new IssueRoot(Root, KeyProvider.GetIssuePath(key))))
+            if (await FileIssue.DeleteAsync(new IssueRoot(Root, key, KeyProvider.GetIssuePath(key))))
             {
                 this.Changes.Add(key, ChangeType.Delete);
             }

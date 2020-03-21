@@ -87,9 +87,8 @@ namespace GitIssue.Issues.File
         /// <inheritdoc />
         public override bool TryGetKey(string value, out IssueKey key)
         {
-            value = value.Replace(separator, '/');
-            var split = NormalizePath(value)
-                .Split('/', '\\');
+            value = value.Replace(separator, Path.DirectorySeparatorChar);
+            var split = NormalizePath(value).Split('/', '\\');
             if (split.Length == 4)
             {
                 var year = split[0];
@@ -99,8 +98,7 @@ namespace GitIssue.Issues.File
 
                 if (DateTime.TryParse($"{year}/{month}/{day}", out var time))
                 {
-                    key = IssueKey.Create(value
-                        .Replace('/', separator));
+                    key = IssueKey.Create(value.Replace(Path.DirectorySeparatorChar, separator));
                     return true;
                 }
             }
