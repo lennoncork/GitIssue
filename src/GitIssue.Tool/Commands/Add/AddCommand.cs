@@ -13,40 +13,41 @@ namespace GitIssue.Util.Commands.Add
     /// </summary>
     public class AddCommand : Command<AddOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        private readonly ILogger logger;
+        
+        private readonly IIssueManager manager;
 
-        private static IIssueManager Initialize(Options options)
+        public AddCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public override async Task Exec(AddOptions options)
         {
             var formatter = new DetailedFormatter();
-
-            await using var issues = Initialize(options);
-
-            var issue = await issues
+            
+            var issue = await manager
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
 
             if (issue == null)
             {
-                Logger?.Error($"Issue \"{options.Key}\" not found");
+                this.logger?.Error($"Issue \"{options.Key}\" not found");
                 return;
             }
 
             if (string.IsNullOrEmpty(options.Field))
             {
-                Logger?.Error($"Field must be supplied to remove a value on \"{issue.Key}\"");
+                this.logger?.Error($"Field must be supplied to remove a value on \"{issue.Key}\"");
                 return;
             }
 
             var key = FieldKey.Create(options.Field);
             if (!issue.ContainsKey(key))
             {
-                Logger?.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
+                this.logger?.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
                 return;
             }
 
@@ -63,17 +64,17 @@ namespace GitIssue.Util.Commands.Add
                     }
                     else
                     {
-                        Logger?.Error($"Item \"{options.Add}\" already exists on field {options.Field}");
+                        this.logger?.Error($"Item \"{options.Add}\" already exists on field {options.Field}");
                     }
                 }
                 else
                 {
-                    Logger?.Error($"Item \"{options.Add}\" is not a valid value for field {options.Field}");
+                    this.logger?.Error($"Item \"{options.Add}\" is not a valid value for field {options.Field}");
                 }
             }
             else
             {
-                Logger?.Error($"Field \"{key}\" is not an array type, cannot remove value");
+                this.logger?.Error($"Field \"{key}\" is not an array type, cannot remove value");
             }
         }
     }

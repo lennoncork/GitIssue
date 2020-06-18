@@ -9,18 +9,27 @@ namespace GitIssue.Util.Commands.Init
     /// </summary>
     public class InitCommand : Command<InitOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        public delegate void Initializer();
 
-        private static IIssueManager Initialize(Options options)
+        private readonly ILogger logger;
+
+        private readonly Func<IIssueManager> factory;
+
+        private readonly Action onInit;
+
+        public InitCommand(ILogger logger, Func<IIssueManager> factory, Initializer initializer)
         {
-            return Program.Initialize(options);
+            this.onInit = () => initializer.Invoke();
+            this.factory = factory;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public override async Task Exec(InitOptions options)
         {
-            await using var issues = IssueManager.Init(options.Path, options.Name);
-            Console.WriteLine($"Initialized empty 'Issue' repository in {issues.Root.IssuesPath}");
+            this.onInit();
+            var manager = factory.Invoke();
+            Console.WriteLine($"Initialized empty 'Issue' repository in {manager.Root.IssuesPath}");
         }
     }
 }

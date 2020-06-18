@@ -14,22 +14,24 @@ namespace GitIssue.Util.Commands.Create
     public class CreateCommand : Command<CreateOptions>
     {
         private Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => new DetailedFormatter());
-        private static ILogger? Logger => Program.Logger;
+        
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public CreateCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
-
         /// <inheritdoc />
         public override async Task Exec(CreateOptions options)
         {
-            await using var issues = Initialize(options);
-            var issue = await issues.CreateAsync(options.Title, options.Description);
+            var issue = await manager.CreateAsync(options.Title, options.Description);
             if (options.Track || options.Tracked == TrackedIssue.None)
             {
                 options.Tracked = new TrackedIssue(issue.Key);
-                await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
+                await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);
                 Console.WriteLine($"Created and tracking new issue '{issue.Key}'");
             }
             else

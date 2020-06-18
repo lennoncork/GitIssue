@@ -13,11 +13,14 @@ namespace GitIssue.Util.Commands.Edit
     /// </summary>
     public class EditCommand : Command<EditOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public EditCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         private static bool TryGetEditor(IRepository repository, string key, out string config)
@@ -30,19 +33,18 @@ namespace GitIssue.Util.Commands.Edit
         public override async Task Exec(EditOptions options)
         {
             var formatter = new DetailedFormatter();
-            await using var issues = Initialize(options);
             
-            var issue = await issues
+            var issue = await manager
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
 
             if (issue == null)
             {
-                Logger?.Error($"Issue \"{options.Key}\" not found");
+                this.logger.Error($"Issue \"{options.Key}\" not found");
                 return;
             }
 
-            if (TryGetEditor(issues.Repository, "issues.editor", out string config))
+            if (TryGetEditor(manager.Repository, "issues.editor", out string config))
             {
                 options.Editor = config;
             }
@@ -68,7 +70,7 @@ namespace GitIssue.Util.Commands.Edit
             var key = FieldKey.Create(options.Field);
             if (!issue.ContainsKey(key))
             {
-                Logger?.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
+                this.logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
                 return;
             }
 

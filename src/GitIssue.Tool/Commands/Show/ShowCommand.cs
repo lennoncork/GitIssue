@@ -11,19 +11,21 @@ namespace GitIssue.Util.Commands.Show
     /// </summary>
     public class ShowCommand : Command<ShowOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public ShowCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public override async Task Exec(ShowOptions options)
         {
             var formatter = new DetailedFormatter();
-            await using var issues = Initialize(options);
-            var issue = await issues
+            var issue = await manager
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
             Console.WriteLine(issue?.Format(formatter));

@@ -15,11 +15,16 @@ using Serilog.Core;
 namespace GitIssue
 {
     /// <summary>
+    /// Delegates for callback on disposal
+    /// </summary>
+    public delegate void IssueManagerDisposal(IIssueManager manager);
+
+    /// <summary>
     ///     Issue manager class
     /// </summary>
     public class IssueManager : IIssueManager
     {
-        private IContainer? container;
+        private bool disposed = false;
 
         private readonly ILogger? logger;
 
@@ -47,7 +52,6 @@ namespace GitIssue
             builder.RegisterModule<GitIssueModule>();
             IContainer container = builder.Build();
             var manager = container.Resolve<IssueManager>();
-            manager.container = container;
             return manager;
         }
 
@@ -253,8 +257,9 @@ namespace GitIssue
         /// <inheritdoc />
         public void Dispose()
         {
+            if (disposed) return;
             Changes.Save(Root.ChangeLog);
-            container?.Dispose();
+            disposed = true;
         }
 
         /// <inheritdoc />
@@ -353,12 +358,14 @@ namespace GitIssue
 
             var root = RepositoryRoot.Create(directory, name);
             configuration.Save(root.ConfigFile);
+            
             var builder = new ContainerBuilder();
-
             builder.Register(c => root).As<RepositoryRoot>().SingleInstance();
             builder.Register(c => configuration).As<IIssueConfiguration>().SingleInstance();
+            builder.RegisterModule<GitIssueModule>();
+            var container = builder.Build();
 
-            return Open(builder);
+            return container.Resolve<IIssueManager>();
         }
 
         /// <inheritdoc />

@@ -14,11 +14,14 @@ namespace GitIssue.Util.Commands.Export
     /// </summary>
     public class ExportCommand : Command<ExportOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public ExportCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
@@ -26,10 +29,8 @@ namespace GitIssue.Util.Commands.Export
         {
             var formatter = new DetailedFormatter();
 
-            await using var issues = Initialize(options);
-
             JObject json = new JObject();
-            await foreach (var issue in issues.FindAsync(i => true))
+            await foreach (var issue in manager.FindAsync(i => true))
             {
                 if (issue is IJsonIssue jsonIssue)
                 {
@@ -39,7 +40,7 @@ namespace GitIssue.Util.Commands.Export
 
             if (File.Exists(options.Export) && options.Overwrite == false)
             {
-                Logger?.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
+                this.logger.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
                 return;
             }
 

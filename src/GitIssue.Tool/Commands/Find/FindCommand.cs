@@ -13,17 +13,19 @@ namespace GitIssue.Util.Commands.Find
     /// </summary>
     public class FindCommand : Command<FindOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public FindCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public override async Task Exec(FindOptions options)
         {
-            await using var issues = Initialize(options);
             Func<IIssue, bool> issueFilter;
             try
             {
@@ -32,12 +34,12 @@ namespace GitIssue.Util.Commands.Find
             }
             catch (Exception e)
             {
-                Logger?.Error($"Unable to parse expression {e.Message}", e);
+                this.logger.Error($"Unable to parse expression {e.Message}", e);
                 return;
             }
 
             var formatter = new SimpleFormatter(options.Format);
-            var find = issues.FindAsync(i => issueFilter.Invoke(i));
+            var find = manager.FindAsync(i => issueFilter.Invoke(i));
             await foreach (var issue in find) Console.WriteLine(issue.Format(formatter));
         }
     }

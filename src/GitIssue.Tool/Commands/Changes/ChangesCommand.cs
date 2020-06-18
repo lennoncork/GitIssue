@@ -13,19 +13,22 @@ namespace GitIssue.Util.Commands.Create
     /// </summary>
     public class ChangesCommand : Command<ChangesOptions>
     {
-        private Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => new DetailedFormatter());
-        private static ILogger? Logger => Program.Logger;
+        private readonly Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => new DetailedFormatter());
+        
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public ChangesCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public override async Task Exec(ChangesOptions options)
         {
-            await using var issues = Initialize(options);
-            Console.Write(issues.Changes.GenerateComments());
+            Console.Write(manager.Changes.GenerateComments());
         }
     }
 }

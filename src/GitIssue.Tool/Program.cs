@@ -19,6 +19,7 @@ using GitIssue.Util.Commands.Remove;
 using GitIssue.Util.Commands.Show;
 using GitIssue.Util.Commands.Track;
 using LibGit2Sharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Serilog;
 using CommitOptions = GitIssue.Util.Commands.Commit.CommitOptions;
 
@@ -26,11 +27,11 @@ namespace GitIssue.Util
 {
     internal class Program
     {
-        public static ILogger? Logger;
+        private static ILogger? logger;
 
         private static void Main(string[] args)
         {
-            Logger = new LoggerConfiguration()
+            logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .MinimumLevel.Debug()
                 .CreateLogger();
@@ -61,28 +62,44 @@ namespace GitIssue.Util
                 .WithParsed<ChangesOptions>(o => ExecAsync<ChangesCommand, ChangesOptions>(o).Wait());
         }
 
-        public static IIssueManager Initialize(Options options)
-        {
-            var builder = new ContainerBuilder();
-            builder.Register(c => Logger!)
-                .As<ILogger>();
-            builder.Register( c => RepositoryRoot.Open(options.Path, options.Name))
-                .As<RepositoryRoot>();
-            var manager = IssueManager.Open(builder);
-
-            if (options is ITrackedOptions keyOptions)
-                keyOptions.Tracked = TrackedIssue
-                    .Read(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
-
-            return manager;
-        }
-
-        private static async Task ExecAsync<TC, T>(T value)
+        private static async Task ExecAsync<TC, T>(T options)
             where TC : Command<T>
             where T : Options
         {
-            var command = Activator.CreateInstance<TC>();
-            await ExecAsync(command.Exec, value);
+            var builder = new ContainerBuilder();
+
+            builder.Register(c => logger!)
+                .As<ILogger>();
+
+            builder.Register(c =>
+                {
+                    // Initialize the repository root and save the configuration
+                    InitCommand.Initializer onInitCommand = () =>
+                    {
+                        var config = new IssueConfiguration();
+                        var root = RepositoryRoot.Create(options.Path, options.Name);
+                        config.Save(root.ConfigFile);
+                    };
+                    return onInitCommand;
+                })
+                .As<InitCommand.Initializer>();
+
+            builder.Register(c => RepositoryRoot.Open(options.Path, options.Name))
+                .As<RepositoryRoot>();
+
+            builder.RegisterType<TC>()
+                .As<Command<T>>();
+
+            builder.RegisterModule<GitIssueModule>();
+            
+            using var container = builder.Build();
+
+            if (options is ITrackedOptions keyOptions)
+                keyOptions.Tracked = TrackedIssue
+                    .Read(Path.Combine(options.Path, options.Name, options.Tracking), logger);
+
+            var command = container.Resolve<Command<T>>();
+            await ExecAsync(command.Exec, options);
         }
 
         private static async Task ExecAsync<T>(Func<T, Task> func, T value)
@@ -97,7 +114,7 @@ namespace GitIssue.Util
                 }
                 catch (Exception e)
                 {
-                    Logger?.Error($"Exception caught when executing command: {e.Message}", e);
+                    logger?.Error($"Exception caught when executing command: {e.Message}", e);
                 }
             });
         }

@@ -25,8 +25,7 @@ namespace GitIssue
             builder.RegisterType<IssueManager>()
                 .As<IIssueManager>()
                 .AsSelf()
-                .SingleInstance()
-                .ExternallyOwned();
+                .SingleInstance();
 
             // Core services
             builder.Register(c => RepositoryRoot.Open(Directory.GetCurrentDirectory(), Paths.IssueRootFolderName))

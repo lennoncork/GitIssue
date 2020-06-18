@@ -10,20 +10,20 @@ namespace GitIssue.Util.Commands.Sync
     /// </summary>
     public class SyncCommand : Command<SyncOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public SyncCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public override async Task Exec(SyncOptions options)
         {
-            await using var issues = Initialize(options);
-
-            var importer = new FileImporter(issues);
-
+            var importer = new FileImporter(manager);
             Console.WriteLine($"Exported issues to {options.Import}");
         }
     }

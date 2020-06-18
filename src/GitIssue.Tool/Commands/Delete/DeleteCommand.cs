@@ -11,18 +11,20 @@ namespace GitIssue.Util.Commands.Delete
     /// </summary>
     public class DeleteCommand : Command<DeleteOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public DeleteCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public override async Task Exec(DeleteOptions options)
         {
-            await using var issues = Initialize(options);
-            var result = await issues.DeleteAsync(options.Key);
+            var result = await manager.DeleteAsync(options.Key);
             if (result)
             {
                 Console.WriteLine($"Deleted issue '{options.Key}'");
@@ -31,7 +33,7 @@ namespace GitIssue.Util.Commands.Delete
                     if (options.Tracked.Key == options.Key)
                     {
                         options.Tracked = TrackedIssue.None;
-                        await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
+                        await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);
                     }
                 }
             }

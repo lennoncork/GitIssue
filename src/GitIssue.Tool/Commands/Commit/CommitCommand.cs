@@ -9,21 +9,23 @@ namespace GitIssue.Util.Commands.Commit
     /// </summary>
     public class CommitCommand : Command<CommitOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public CommitCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public override async Task Exec(CommitOptions options)
         {
-            await using var issues = Initialize(options);
-            var result = await issues.CommitAsync();
+            var result = await manager.CommitAsync();
             if (result)
             {
-                Console.WriteLine($"Committed changes in {issues.Root.Name}, see log for details");
+                Console.WriteLine($"Committed changes in {manager.Root.Name}, see log for details");
             }
         }
     }

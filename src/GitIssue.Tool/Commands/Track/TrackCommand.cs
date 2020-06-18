@@ -12,21 +12,23 @@ namespace GitIssue.Util.Commands.Track
     /// </summary>
     public class TrackCommand : Command<TrackOptions>
     {
-        private static ILogger? Logger => Program.Logger;
+        private readonly ILogger logger;
 
-        private static IIssueManager Initialize(Options options)
+        private readonly IIssueManager manager;
+
+        public TrackCommand(IIssueManager manager, ILogger logger)
         {
-            return Program.Initialize(options);
+            this.manager = manager;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public override async Task Exec(TrackOptions options)
         {
-            await using var issues = Initialize(options);
             options.Tracked = TrackedIssue.None;
             if (!string.IsNullOrEmpty(options.Key))
             {
-                var find = await issues.FindAsync(i => i.Key.ToString() == options.Key)
+                var find = await manager.FindAsync(i => i.Key.ToString() == options.Key)
                     .FirstOrDefaultAsync();
 
                 if (find != null)
@@ -36,7 +38,7 @@ namespace GitIssue.Util.Commands.Track
                 }
             }
 
-            await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), Logger);
+            await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);
             Console.WriteLine($"Tacking Issue '{options.Tracked.Key}'");
         }
     }
