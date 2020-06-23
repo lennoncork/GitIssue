@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace GitIssue.Fields
 {
@@ -8,11 +9,17 @@ namespace GitIssue.Fields
     public interface IField : IReadOnlyField
     {
         /// <summary>
+        /// Copy's the field 
+        /// </summary>
+        /// <param name="other"></param>
+        bool Copy([AllowNull] IField other);
+
+        /// <summary>
         ///     Parses the input and updates the field if successful
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        Task<bool> UpdateAsync(string input);
+        bool Update(string input);
 
         /// <summary>
         ///     Saves any additional filed data

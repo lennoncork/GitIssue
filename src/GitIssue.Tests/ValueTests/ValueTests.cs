@@ -54,6 +54,15 @@ namespace GitIssue.Tests.ValueTests
         }
     }
 
+    public abstract class JsonValueTests<TValue> : ValueTests<TValue>
+        where TValue : IValue, IJsonValue
+    {
+        public virtual string ConvertToJson(TValue value)
+        {
+            return value.ToJson().ToString(Newtonsoft.Json.Formatting.None);
+        }
+    }
+
     public abstract class JsonValueTests<TValue, TBacking> : ValueTests<TValue, TBacking>
         where TValue : IValue, IValue<TBacking>, IJsonValue
     {

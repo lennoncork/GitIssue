@@ -57,6 +57,40 @@ namespace GitIssue
                 .SingleInstance()
                 .IfNotRegistered(typeof(ILogger));
 
+            // Issue delegates
+            builder.Register(c =>
+                {
+                    RepositoryRoot root = c.Resolve<RepositoryRoot>();
+                    IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
+                    IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
+                    IssueCreation creation = (key) => new FileIssue(new IssueRoot(root, key, provider.GetIssuePath(key)), configuration.Fields);
+                    return creation;
+                })
+                .AsSelf()
+                .SingleInstance()
+                .IfNotRegistered(typeof(IssueCreation));
+            builder.Register(c =>
+                {
+                    RepositoryRoot root = c.Resolve<RepositoryRoot>();
+                    IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
+                    IssueDeletion deletion = (key) => FileIssue.DeleteAsync(new IssueRoot(root, key, provider.GetIssuePath(key)));
+                    return deletion;
+                })
+                .AsSelf()
+                .SingleInstance()
+                .IfNotRegistered(typeof(IssueDeletion));
+            builder.Register(c =>
+                {
+                    RepositoryRoot root = c.Resolve<RepositoryRoot>();
+                    IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
+                    IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
+                    IssueLoading read = (key) => FileIssue.ReadAsync(new IssueRoot(root, key, provider.GetIssuePath(key)), configuration.Fields);
+                    return read;
+                })
+                .AsSelf()
+                .SingleInstance()
+                .IfNotRegistered(typeof(IssueLoading));
+
             // Key providers
             builder.RegisterType<FileIssueKeyProvider>().AsSelf();
         }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues;
 
@@ -15,6 +16,13 @@ namespace GitIssue.Util
         /// <param name="issue"></param>
         /// <returns></returns>
         Task Open(IIssue issue);
+
+        /// <summary>
+        ///     Opens an collection of fields for editing
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <returns></returns>
+        Task Open(IEnumerable<IField> fields);
 
         /// <summary>
         ///     Opens a field for editing

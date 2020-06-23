@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Formatters;
+using GitIssue.Issues;
 using Serilog;
 
 namespace GitIssue.Util.Commands.Show
@@ -25,10 +27,36 @@ namespace GitIssue.Util.Commands.Show
         public override async Task Exec(ShowOptions options)
         {
             var formatter = new DetailedFormatter();
-            var issue = await manager
-                .FindAsync(i => i.Key.ToString() == options.Key)
-                .FirstOrDefaultAsync();
-            Console.WriteLine(issue?.Format(formatter));
+
+            IAsyncEnumerable<IIssue> issues;
+            switch(options.Show)
+            {
+                case ShowSubCommand.tracked:
+                case ShowSubCommand.Tracked:
+                    issues = manager.FindAsync(i => i.Key.ToString() == options.Key);
+                    break;
+
+                case ShowSubCommand.all:
+                case ShowSubCommand.All:
+                    issues = manager.FindAsync(i => true);
+                    break;
+
+                case ShowSubCommand.mine:
+                case ShowSubCommand.Mine:
+                    issues = manager.FindAsync(i => true);
+                    break;
+
+                default:
+                    issues = AsyncEnumerable.Empty<IIssue>();
+                    break;
+            }
+
+            int count = 0;
+            await foreach(var issue in issues)
+            {
+                if (count++ > 0) Console.WriteLine();
+                Console.WriteLine(issue.Format(formatter));
+            }    
         }
     }
 }

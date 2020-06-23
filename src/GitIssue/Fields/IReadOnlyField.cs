@@ -1,11 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace GitIssue.Fields
 {
     /// <summary>
     ///     Field Interface
     /// </summary>
-    public interface IReadOnlyField
+    public interface IReadOnlyField : IEquatable<IField>
     {
         /// <summary>
         ///     Gets the field's key

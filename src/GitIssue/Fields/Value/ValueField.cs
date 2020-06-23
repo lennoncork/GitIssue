@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using GitIssue.Values;
 
@@ -39,15 +40,14 @@ namespace GitIssue.Fields.Value
         }
 
         /// <inheritdoc />
-        public override Task<bool> UpdateAsync(string input)
+        public override bool Update(string input)
         {
             if (TryParse(input, out var result))
             {
                 Value = result;
-                return Task.FromResult(true);
+                return true;
             }
-
-            return Task.FromResult(false);
+            return false;
         }
 
         /// <inheritdoc />
@@ -78,6 +78,26 @@ namespace GitIssue.Fields.Value
         bool IValueField<T>.TryParse(string input, out T value)
         {
             throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override bool Copy([AllowNull] IField other)
+        {
+            if (other is IValueField<T> valueField)
+            {
+                this.Value = valueField.Value;
+            }
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override bool Equals([AllowNull] IField other)
+        {
+            if (other is IValueField<T> valueField)
+            {
+                return this.Value?.Equals(valueField.Value) ?? false;
+            }
+            return false;
         }
     }
 }

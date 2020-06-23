@@ -34,30 +34,28 @@ namespace GitIssue.Issues.Json
         /// <summary>
         ///     Initializes a new instance of a <see cref="JsonIssue" /> class
         /// </summary>
-        /// <param name="manager">the issue manager</param>
-        /// <param name="key">the issue key</param>
-        public JsonIssue(IIssueManager manager, IssueKey key) : base(manager, key)
+        /// <param name="root">the issue root</param>
+        public JsonIssue(IssueRoot root) : base(root)
         {
             fields = new Dictionary<FieldKey, IField>();
             modifiedFields = new HashSet<FieldKey>();
             keyProvider = new FileFieldKeyProvider();
-            this.Key = key;
+            this.Key = root.Key;
         }
 
         /// <summary>
         ///     Initializes a new instance of a <see cref="JsonIssue" /> class
         /// </summary>
-        /// <param name="manager">the issue manager</param>
-        /// <param name="key">the issue key</param>
+        /// <param name="root">the issue root</param>
         /// <param name="fields">the issue's fields</param>
-        public JsonIssue(IIssueManager manager, IssueKey key, IDictionary<FieldKey, FieldInfo> fields) : 
-            base(manager, key)
+        public JsonIssue(IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) : 
+            base(root)
         {
             this.fields = fields.ToDictionary(f => f.Key,
                 f => f.Value.CreateField(this, f.Key));
             modifiedFields = new HashSet<FieldKey>();
             keyProvider = new FileFieldKeyProvider();
-            this.Key = key;
+            this.Key = root.Key;
         }
 
         /// <summary>
@@ -180,13 +178,13 @@ namespace GitIssue.Issues.Json
         /// <param name="root">the issue root</param>
         /// <param name="fields">the expected fields</param>
         /// <returns></returns>
-        public static async Task<IIssue?> ReadAsync(IIssueManager manager, IssueRoot root,
+        public static async Task<IIssue?> ReadAsync(IssueRoot root,
             IDictionary<FieldKey, FieldInfo> fields)
         {
             if (Directory.Exists(root.IssuePath) == false)
                 return null;
 
-            var issue = new JsonIssue(manager, root.Key, fields);
+            var issue = new JsonIssue(root, fields);
             foreach (var key in fields.Keys)
             {
                 var valueField = await fields[key].ReadFieldAsync(issue, key);

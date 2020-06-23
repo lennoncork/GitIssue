@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using GitIssue.Fields.Value;
 using GitIssue.Formatters;
 using GitIssue.Issues;
 using GitIssue.Util.Commands.Track;
+using GitIssue.Values;
 using Serilog;
 
 namespace GitIssue.Util.Commands.Create
@@ -19,15 +22,63 @@ namespace GitIssue.Util.Commands.Create
 
         private readonly IIssueManager manager;
 
-        public CreateCommand(IIssueManager manager, ILogger logger)
+        private readonly IIssueConfiguration configuration;
+
+        public CreateCommand(IIssueManager manager, IIssueConfiguration configuration, ILogger logger)
         {
             this.manager = manager;
+            this.configuration = configuration;
             this.logger = logger;
         }
+
         /// <inheritdoc />
         public override async Task Exec(CreateOptions options)
         {
-            var issue = await manager.CreateAsync(options.Title, options.Description);
+            IIssue issue;
+            if (string.IsNullOrEmpty(options.Title))
+            {
+                var editor = new Editor
+                {
+                    Command = options.Editor
+                };
+
+                var fields = this.configuration.Fields
+                    .Where(f => f.Key != nameof(IIssue.Key))
+                    .Where(f => f.Key != nameof(IIssue.Created))
+                    .Where(f => f.Key != nameof(IIssue.Updated))
+                    .Select(f => f.Value.CreateField(null!, f.Key))
+                    .ToArray();
+
+                await editor.Open(fields);
+
+                if (!(fields.FirstOrDefault(f => f.Key == nameof(IIssue.Title)) is IValueField title))
+                {
+                    this.logger.Error($"Title is not a valid value field");
+                    return;
+                }
+
+                if (!(title.Value is IValue<string> value))
+                {
+                    this.logger.Error($"Title {title} is not a valid string, {title.GetType()}");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(value.Item))
+                {
+                    this.logger.Error($"A valid title must be provided");
+                }
+
+                issue = await manager.CreateAsync(value.Item);
+                foreach(var field in fields)
+                {
+                    issue.SetField(field.Key).WithField(field);
+                }
+            }
+            else
+            {
+                issue = await manager.CreateAsync(options.Title, options.Description);
+            }
+
             if (options.Track || options.Tracked == TrackedIssue.None)
             {
                 options.Tracked = new TrackedIssue(issue.Key);

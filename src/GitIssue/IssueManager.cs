@@ -20,6 +20,28 @@ namespace GitIssue
     public delegate void IssueManagerDisposal(IIssueManager manager);
 
     /// <summary>
+    /// Delegate for issue creation
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public delegate IIssue IssueCreation(IssueKey key);
+
+    /// <summary>
+    /// Delegate for issue deletion
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public delegate Task<bool> IssueDeletion(IssueKey key);
+
+
+    /// <summary>
+    /// Delegate for issue deletion
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public delegate Task<IIssue?> IssueLoading(IssueKey key);
+
+    /// <summary>
     ///     Issue manager class
     /// </summary>
     public class IssueManager : IIssueManager
@@ -27,6 +49,12 @@ namespace GitIssue
         private bool disposed = false;
 
         private readonly ILogger? logger;
+
+        private readonly IssueCreation issueCreation;
+
+        private readonly IssueDeletion issueDeletion;
+
+        private readonly IssueLoading issueLoading;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
@@ -63,9 +91,12 @@ namespace GitIssue
             RepositoryRoot root, 
             IRepository repository, 
             IIssueKeyProvider provider,
+            IIssueConfiguration configuration,
             IChangeLog changeLog,
-            IIssueConfiguration configuration, 
-            ITrackedIssue tracked)
+            ITrackedIssue tracked,
+            IssueCreation issueCreation,
+            IssueDeletion issueDeletion,
+            IssueLoading issueLoading)
         {
             this.logger = logger;
             this.Repository = repository;
@@ -75,6 +106,9 @@ namespace GitIssue
             this.Configuration = configuration;
             this.Changes = changeLog;
             this.Tracked = tracked;
+            this.issueCreation = issueCreation;
+            this.issueDeletion = issueDeletion;
+            this.issueLoading = issueLoading;
         }
 
         /// <summary>
@@ -179,11 +213,9 @@ namespace GitIssue
         /// <inheritdoc />
         public async Task<IIssue> CreateAsync(string title, string description)
         {
-            Issue issue = new FileIssue(this, KeyProvider.Next(), Configuration.Fields)
-            {
-                Title = title,
-                Description = description
-            };
+            IIssue issue = issueCreation(KeyProvider.Next());
+            issue.Title = title;
+            issue.Description = description;
             await issue.SaveAsync();
             Changes.Add(issue, ChangeType.Create);
             return issue;
@@ -205,7 +237,7 @@ namespace GitIssue
         {
             foreach (var key in KeyProvider.Keys)
             {
-                var issue = await FileIssue.ReadAsync(this, new IssueRoot(Root, key, this.KeyProvider.GetIssuePath(key)), Configuration.Fields);
+                var issue = await this.issueLoading(key);
                 if (issue != null && predicated.Invoke(issue))
                     yield return issue;
             }
@@ -247,7 +279,7 @@ namespace GitIssue
         /// <inheritdoc />
         public async Task<bool> DeleteAsync(IssueKey key)
         {
-            if (await FileIssue.DeleteAsync(new IssueRoot(Root, key, KeyProvider.GetIssuePath(key))))
+            if (await this.issueDeletion(key))
             {
                 this.Changes.Add(key, ChangeType.Delete);
             }

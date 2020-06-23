@@ -51,12 +51,17 @@ namespace GitIssue.Util
             return (command.Trim(), String.Empty);
         }
 
-        /// <inheritdoc />
         public async Task Open(IIssue issue)
+        {
+            await this.Open(issue.Values);
+        }
+
+        /// <inheritdoc />
+        public async Task Open(IEnumerable<IField> fields)
         {
             // Convert fields to a file
             var temp = GetTempFile();
-            foreach (var field in issue.Values)
+            foreach (var field in fields)
             {
                 await File.AppendAllTextAsync(temp, $"{CommentChar} {field.Key} {Newline}");
                 await File.AppendAllTextAsync(temp, $"{await field.ExportAsync()}{Newline}");
@@ -102,9 +107,9 @@ namespace GitIssue.Util
                 }
 
             // Update the fields
-            foreach (var field in issue.Values)
+            foreach (var field in fields)
                 if (updates.ContainsKey(field.Key))
-                    await field.UpdateAsync(updates[field.Key]);
+                    field.Update(updates[field.Key]);
         }
 
         /// <inheritdoc />
@@ -121,7 +126,7 @@ namespace GitIssue.Util
                 if (created != File.GetLastWriteTime(temp))
                     return;
 
-            await field.UpdateAsync(RemoveComments(await File.ReadAllTextAsync(temp)));
+            field.Update(RemoveComments(await File.ReadAllTextAsync(temp)));
         }
 
         private static string GetTempFile()

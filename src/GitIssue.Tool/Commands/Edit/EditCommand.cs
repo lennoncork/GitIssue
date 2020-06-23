@@ -83,7 +83,7 @@ namespace GitIssue.Util.Commands.Edit
                 await editor.Open(issue[key]);
                 updated = true;
             }
-            else if (await issue[key].UpdateAsync(options.Update))
+            else if (issue[key].Update(options.Update))
             {
                 updated = true;
             }

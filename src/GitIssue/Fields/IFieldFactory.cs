@@ -8,6 +8,12 @@ namespace GitIssue.Fields
     public interface IFieldFactory
     {
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="field"></param>
+        void WithField(IField field);
+
+        /// <summary>
         ///     Updates a field using the specified value
         /// </summary>
         /// <typeparam name="T">the field data type</typeparam>

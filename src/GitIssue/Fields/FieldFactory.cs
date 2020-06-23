@@ -42,5 +42,16 @@ namespace GitIssue.Fields
             var field = callback?.Invoke();
             if (field is ArrayField<T> arrayField) arrayField.Values = values;
         }
+
+        /// <inheritdoc />
+        public void WithField(IField updated)
+        {
+            var field = callback?.Invoke();
+            if(field?.GetType() == updated.GetType())
+            {
+                
+            }
+
+        }
     }
 }

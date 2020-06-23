@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Dynamic;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -6,28 +7,24 @@ using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Values;
 using DateTime = System.DateTime;
+using GitIssue.Fields.Value;
+using GitIssue.Fields.Array;
+using System.Linq;
 
 namespace GitIssue.Issues
 {
     /// <summary>
     ///     Abstract issue implementation
     /// </summary>
-    public abstract class Issue : IIssue
+    public abstract class Issue : DynamicObject, IIssue
     {
-        /// <summary>
-        ///     The issue manager
-        /// </summary>
-        protected readonly IIssueManager Manager;
-
         /// <summary>
         ///     Creates a new Issue
         /// </summary>
-        /// <param name="manager">the issue manager</param>
-        /// <param name="key">the issue key</param>
-        protected Issue(IIssueManager manager, IssueKey key)
+        /// <param name="root">the issue root</param>
+        protected Issue(IssueRoot root)
         {
-            this.Manager = manager;
-            this.Root = new IssueRoot(Manager.Root, key, Manager.KeyProvider.GetIssuePath(key));
+            this.Root = root;
         }
 
         /// <summary>
@@ -115,7 +112,60 @@ namespace GitIssue.Issues
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{Key.ToString()} {Title}";
+            return $"{Key} {Title}";
+        }
+
+        /// <inheritdoc />
+        public override bool TryGetMember(
+            GetMemberBinder binder, out object result)
+        {
+            FieldKey key = FieldKey.Create(binder.Name);
+            if(TryGetValue(key, out var field))
+            {
+                result = field;
+                return true;
+            }
+            result = null!;
+            return true;
+        }
+
+        /// <inheritdoc />
+        public override bool TrySetMember(
+            SetMemberBinder binder, object value)
+        {
+            FieldKey key = FieldKey.Create(binder.Name);
+            if (TryGetValue(key, out var field))
+            {
+                if (field is IValueField valueField)
+                {
+                    if(value.GetType() == valueField.ValueType)
+                    {
+                        valueField.Value = value;
+                    }
+                }
+                else if (field is IArrayField arrayField)
+                {
+                    if (value is IEnumerable enumerable)
+                    {
+                        arrayField.Values = enumerable.Cast<object>().ToArray();
+                    }
+                }
+                else if (value.GetType() == typeof(string))
+                {
+                    if (field.Update((string)value))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (field.Update(value.ToString() ?? string.Empty))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

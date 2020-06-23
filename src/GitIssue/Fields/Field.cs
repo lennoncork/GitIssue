@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace GitIssue.Fields
 {
@@ -22,12 +23,18 @@ namespace GitIssue.Fields
         public FieldKey Key { get; protected set; }
 
         /// <inheritdoc />
-        public abstract Task<bool> UpdateAsync(string input);
+        public abstract bool Update(string input);
 
         /// <inheritdoc />
         public abstract Task<bool> SaveAsync();
 
         /// <inheritdoc />
         public abstract Task<string> ExportAsync();
+
+        /// <inheritdoc />
+        public abstract bool Copy([AllowNull] IField other);
+
+        /// <inheritdoc />
+        public abstract bool Equals([AllowNull] IField other);
     }
 }

@@ -15,6 +15,11 @@ namespace GitIssue.Fields.Array
         Type ValueType { get; }
 
         /// <summary>
+        /// Gets or sets the value
+        /// </summary>
+        object[]? Values { get; set; }
+
+        /// <summary>
         ///     Tries to parse the input into an array value
         /// </summary>
         /// <param name="input">the input to parse</param>
@@ -32,7 +37,7 @@ namespace GitIssue.Fields.Array
         /// <summary>
         ///     Gets or sets the fields array of value
         /// </summary>
-        T[] Values { get; set; }
+        new T[] Values { get; set; }
 
         /// <summary>
         ///     Tries to parse the input into an array value

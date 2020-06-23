@@ -14,20 +14,18 @@ namespace GitIssue.Issues.File
         /// <summary>
         ///     Initializes a new instance of a <see cref="FileIssue" /> class
         /// </summary>
-        /// <param name="manager">the issue manager</param>
-        /// <param name="key">the issue key</param>
-        public FileIssue(IIssueManager manager, IssueKey key) : base(manager, key)
+        /// <param name="root">the issue root</param>
+        public FileIssue(IssueRoot root) : base(root)
         {
         }
 
         /// <summary>
         ///     Initializes a new instance of a <see cref="FileIssue" /> class
         /// </summary>
-        /// <param name="manager">the issue manager</param>
-        /// <param name="key">the issue root</param>
+        /// <param name="root">the issue root</param>
         /// <param name="fields">the issue manager</param>
-        public FileIssue(IIssueManager manager, IssueKey key, IDictionary<FieldKey, FieldInfo> fields) :
-            base(manager, key, fields)
+        public FileIssue(IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) :
+            base(root, fields)
         {
         }
 
@@ -51,17 +49,16 @@ namespace GitIssue.Issues.File
         /// <summary>
         ///     Reads an issue from disk
         /// </summary>
-        /// <param name="manager">the issue manager</param>
         /// <param name="root">the issue root</param>
         /// <param name="fields">the expected fields</param>
         /// <returns></returns>
-        public new static async Task<IIssue?> ReadAsync(IIssueManager manager, IssueRoot root,
+        public new static async Task<IIssue?> ReadAsync(IssueRoot root,
             IDictionary<FieldKey, FieldInfo> fields)
         {
             if (Directory.Exists(root.IssuePath) == false)
                 return null;
 
-            var issue = new FileIssue(manager, root.Key, fields);
+            var issue = new FileIssue(root, fields);
             foreach (var key in fields.Keys)
             {
                 var valueField = await fields[key].ReadFieldAsync(issue, key);

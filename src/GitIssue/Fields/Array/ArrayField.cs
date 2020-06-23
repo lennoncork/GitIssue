@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GitIssue.Values;
@@ -27,6 +29,26 @@ namespace GitIssue.Fields.Array
 
         /// <inheritdoc />
         public Type ValueType => typeof(T);
+
+        /// <inheritdoc />
+        object[]? IArrayField.Values
+        {
+            get => Values.Cast<object>().ToArray();
+            set
+            {
+                if (value == null)
+                    return;
+
+                this.values.Clear();
+                foreach(var v in value)
+                {
+                    if(v is T result)
+                    {
+                        this.values.Add(result);
+                    }
+                }
+            }
+        }
 
         /// <inheritdoc />
         public T[] Values
@@ -81,7 +103,7 @@ namespace GitIssue.Fields.Array
         }
 
         /// <inheritdoc />
-        public override Task<bool> UpdateAsync(string input)
+        public override bool Update(string input)
         {
             T result;
             if (input.StartsWith('+'))
@@ -89,7 +111,7 @@ namespace GitIssue.Fields.Array
                 if (TryParse(input.TrimStart('+'), out result))
                     if (!values.Contains(result))
                         values.Add(result);
-                return Task.FromResult(true);
+                return true;
             }
 
             if (input.StartsWith('-'))
@@ -97,7 +119,7 @@ namespace GitIssue.Fields.Array
                 if (TryParse(input.TrimStart('-'), out result))
                     if (values.Contains(result))
                         values.Remove(result);
-                return Task.FromResult(true);
+                return true;
             }
 
             if (input.StartsWith('[') && input.EndsWith(']'))
@@ -108,10 +130,10 @@ namespace GitIssue.Fields.Array
                     if (TryParse(value.Trim(), out result))
                         if (!this.values.Contains(result))
                             this.values.Add(result);
-                return Task.FromResult(true);
+                return true;
             }
 
-            return Task.FromResult(false);
+            return false;
         }
 
         /// <inheritdoc />
@@ -239,6 +261,26 @@ namespace GitIssue.Fields.Array
             }
             builder.Append("]");
             return builder.ToString();
+        }
+
+        /// <inheritdoc />
+        public override bool Copy([AllowNull] IField other)
+        {
+            if (other is IArrayField<T> valueField)
+            {
+                this.Values = valueField.Values.ToArray();
+            }
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override bool Equals([AllowNull] IField other)
+        {
+            if (other is IArrayField<T> valueField)
+            {
+                return this.Values?.SequenceEqual(valueField.Values) ?? false;
+            }
+            return false;
         }
     }
 }
