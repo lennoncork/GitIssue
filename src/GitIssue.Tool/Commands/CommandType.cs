@@ -26,6 +26,11 @@
         Commit,
 
         /// <summary>
+        ///     Adds a comment to the issues
+        /// </summary>
+        Comment,
+
+        /// <summary>
         ///     Deletes and existing issue
         /// </summary>
         Delete,

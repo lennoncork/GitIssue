@@ -44,7 +44,7 @@ namespace GitIssue.Util.Commands
 
         private string key = string.Empty;
 
-        [Value(1, MetaName = "Issue Key", HelpText = "The issue key", Required = false)]
+        [Value(1, MetaName = "Issue Key", HelpText = "The issue key (use '.', 'T', or 'Tracked' to refernce the tracked issue)", Required = false)]
         public string Key
         {
             get

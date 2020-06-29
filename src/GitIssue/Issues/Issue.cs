@@ -6,10 +6,11 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Values;
-using DateTime = System.DateTime;
 using GitIssue.Fields.Value;
 using GitIssue.Fields.Array;
 using System.Linq;
+
+using DateTime = System.DateTime;
 
 namespace GitIssue.Issues
 {
@@ -65,6 +66,13 @@ namespace GitIssue.Issues
         {
             get => GetField().AsValue<Values.DateTime>();
             set => SetField().WithValue<Values.DateTime>(value);
+        }
+
+        /// <inheritdoc cref="IIssue" />
+        public Markdown[] Comments
+        {
+            get => GetField().AsArray<Markdown>();
+            set => SetField().WithArray<Markdown>(value);
         }
 
         /// <inheritdoc />

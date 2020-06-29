@@ -174,7 +174,6 @@ namespace GitIssue.Issues.Json
         /// <summary>
         ///     Reads an issue from disk
         /// </summary>
-        /// <param name="manager">the issue manager</param>
         /// <param name="root">the issue root</param>
         /// <param name="fields">the expected fields</param>
         /// <returns></returns>

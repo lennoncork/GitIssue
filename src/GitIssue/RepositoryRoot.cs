@@ -95,10 +95,13 @@ namespace GitIssue
         public static RepositoryRoot Open(string directory, string? name)
         {
             var current = new DirectoryInfo(directory);
+
             if(name == null)
                 return new RepositoryRoot(current.FullName);
+
             if (IsIssueRoot(current, name, out var issues)) 
                 return new RepositoryRoot(current.FullName, name);
+
             throw new RepositoryNotFoundException($"Failed to open directory {directory} as issue root");
         }
 
@@ -115,7 +118,7 @@ namespace GitIssue
             {
                 if (IsIssueRoot(current, name, out var issues)) 
                     return new RepositoryRoot(current.FullName, name);
-                current = parent;
+                current = parent;   
             }
             return None;
         }

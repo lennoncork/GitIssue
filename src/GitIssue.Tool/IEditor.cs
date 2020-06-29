@@ -9,7 +9,15 @@ namespace GitIssue.Util
     ///     Editor interface
     /// </summary>
     public interface IEditor
-    {
+    { 
+        /// <summary>
+        /// Edits existing content
+        /// </summary>
+        /// <param name="header">the header</param>
+        /// <param name="content">the content</param>
+        /// <returns></returns>
+        Task<string> Edit(string header, string content);
+
         /// <summary>
         ///     Opens an issue for editing
         /// </summary>

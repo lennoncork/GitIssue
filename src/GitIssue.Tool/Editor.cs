@@ -51,6 +51,27 @@ namespace GitIssue.Util
             return (command.Trim(), String.Empty);
         }
 
+        /// <inheritdoc />
+        public async Task<string> Edit(string header, string content)
+        {
+            var temp = GetTempFile();
+            
+            await File.AppendAllTextAsync(temp, $"{CommentChar} {header} {Newline}");
+            await File.AppendAllTextAsync(temp, content);
+            await File.AppendAllTextAsync(temp, FieldTemplate);
+
+            var created = File.GetLastWriteTime(temp);
+            
+            var result = GetProcessAndArgumentsFromCommand(Command);
+
+            if (await EditFileAsync(result.Item1, result.Item2 + " " + temp))
+                if (created == File.GetLastWriteTime(temp))
+                    return content;
+
+            return RemoveComments(await File.ReadAllTextAsync(temp));
+        }
+
+        /// <inheritdoc />
         public async Task Open(IIssue issue)
         {
             await this.Open(issue.Values);
@@ -123,7 +144,7 @@ namespace GitIssue.Util
             var created = File.GetLastWriteTime(temp);
             var result = GetProcessAndArgumentsFromCommand(Command);
             if (await EditFileAsync(result.Item1, result.Item2 + " " + temp))
-                if (created != File.GetLastWriteTime(temp))
+                if (created == File.GetLastWriteTime(temp))
                     return;
 
             field.Update(RemoveComments(await File.ReadAllTextAsync(temp)));
@@ -189,5 +210,6 @@ namespace GitIssue.Util
             });
             return result == Success;
         }
+
     }
 }
