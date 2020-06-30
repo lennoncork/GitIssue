@@ -18,12 +18,15 @@ namespace GitIssue.Util.Commands.Add
         private readonly static string CommentField = "Comments";
 
         private readonly ILogger logger;
-        
+
+        private readonly IEditor editor;
+
         private readonly IIssueManager manager;
 
-        public CommentCommand(IIssueManager manager, ILogger logger)
+        public CommentCommand(IIssueManager manager, IEditor editor, ILogger logger)
         {
-            this.manager = manager;
+            this.manager = manager; 
+            this.editor = editor;
             this.logger = logger;
         }
 
@@ -44,11 +47,6 @@ namespace GitIssue.Util.Commands.Add
 
             if (string.IsNullOrEmpty(options.Comment))
             {
-                var editor = new Editor
-                {
-                    Command = options.Editor
-                };
-
                 options.Comment = await editor.Edit($"Add a comment to {issue.Key} below", "");
             }
 

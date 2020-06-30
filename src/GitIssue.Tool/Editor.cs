@@ -25,6 +25,12 @@ namespace GitIssue.Util
 
         private static readonly string FieldHeaderRegex = @$"^{CommentChar}[\s]?([\w]*)[\s]?$";
 
+        public Editor(Configuration configuration)
+        {
+            this.Command = configuration.Editor;
+            this.Arguments = configuration.Arguments;
+        }
+
         /// <summary>
         ///     Gets or sets the successful result
         /// </summary>
@@ -34,6 +40,18 @@ namespace GitIssue.Util
         ///     Gets or sets the command
         /// </summary>
         public string Command { get; set; } = string.Empty;
+
+        /// <summary>
+        ///     Gets or sets the command
+        /// </summary>
+        public string Arguments { get; set; } = string.Empty;
+
+        public void UpdateCommand(string command)
+        {
+            var result = GetProcessAndArgumentsFromCommand(command);
+            this.Command = result.Item1;
+            this.Arguments = result.Item2;
+        }
 
         private static (string, string) GetProcessAndArgumentsFromCommand(string command)
         {
@@ -61,10 +79,8 @@ namespace GitIssue.Util
             await File.AppendAllTextAsync(temp, FieldTemplate);
 
             var created = File.GetLastWriteTime(temp);
-            
-            var result = GetProcessAndArgumentsFromCommand(Command);
 
-            if (await EditFileAsync(result.Item1, result.Item2 + " " + temp))
+            if (await EditFileAsync(this.Command, this.Arguments + " " + temp))
                 if (created == File.GetLastWriteTime(temp))
                     return content;
 
@@ -92,8 +108,7 @@ namespace GitIssue.Util
 
             // Open and modify the file
             var created = File.GetLastWriteTime(temp);
-            var result = GetProcessAndArgumentsFromCommand(Command);
-            if (await EditFileAsync(result.Item1, result.Item2 + " " + temp))
+            if (await EditFileAsync(this.Command, this.Arguments + " " + temp))
             {
                 if (created == File.GetLastWriteTime(temp))
                     return;
@@ -142,8 +157,7 @@ namespace GitIssue.Util
             await File.AppendAllTextAsync(temp, FieldTemplate);
 
             var created = File.GetLastWriteTime(temp);
-            var result = GetProcessAndArgumentsFromCommand(Command);
-            if (await EditFileAsync(result.Item1, result.Item2 + " " + temp))
+            if (await EditFileAsync(this.Command, this.Arguments + " " + temp))
                 if (created == File.GetLastWriteTime(temp))
                     return;
 

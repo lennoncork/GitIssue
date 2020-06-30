@@ -93,6 +93,12 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
+        public bool Equals([AllowNull] string other)
+        {
+            return value == other;
+        }
+
+        /// <inheritdoc />
         public string Item => this.value;
     }
 }

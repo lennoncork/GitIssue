@@ -81,13 +81,22 @@ namespace GitIssue.Values
             return invalid;
         }
 
+        /// <summary>
+        ///     Implicit cast to System.DateTime
+        /// </summary>
+        /// <param name="value"></param>
+        public static implicit operator Signature(LibGit2Sharp.Signature value)
+        {
+            return new Signature(value.Name, value.Email);
+        }
+
         /// <inheritdoc />
         public JToken ToJson()
         {
-            var json = new JObject();
-            json.Add(new JProperty(nameof(Username), this.Username));
-            json.Add(new JProperty(nameof(Email), this.Email));
-            return json;
+            //var json = new JObject();
+            //json.Add(new JProperty(nameof(Username), this.Username));
+            //json.Add(new JProperty(nameof(Email), this.Email));
+            return new JValue(this.ToString());
         }
 
         /// <inheritdoc />

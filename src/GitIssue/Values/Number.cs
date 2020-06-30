@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
@@ -99,6 +100,12 @@ namespace GitIssue.Values
         public override int GetHashCode()
         {
             return value.GetHashCode();
+        }
+
+        /// <inheritdoc />
+        public bool Equals([AllowNull] double other)
+        {
+            return value == other;
         }
     }
 }

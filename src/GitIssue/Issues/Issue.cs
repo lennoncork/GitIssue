@@ -10,7 +10,8 @@ using GitIssue.Fields.Value;
 using GitIssue.Fields.Array;
 using System.Linq;
 
-using DateTime = System.DateTime;
+using String = GitIssue.Values.String;
+using DateTime = GitIssue.Values.DateTime;
 
 namespace GitIssue.Issues
 {
@@ -41,38 +42,45 @@ namespace GitIssue.Issues
         }
 
         /// <inheritdoc cref="IIssue" />
-        public string Title
+        public String Title
         {
             get => GetField().AsValue<String>();
             set => SetField().WithValue<String>(value);
         }
 
         /// <inheritdoc cref="IIssue" />
-        public string Description
+        public String Description
         {
             get => GetField().AsValue<String>();
             set => SetField().WithValue<String>(value);
+        }
+
+        /// <inheritdoc cref="IIssue" />
+        public Signature Author
+        {
+            get => GetField().AsValue<Signature>();
+            set => SetField().WithValue<Signature>(value);
         }
 
         /// <inheritdoc cref="IIssue" />
         public DateTime Created
         {
-            get => GetField().AsValue<Values.DateTime>();
-            set => SetField().WithValue<Values.DateTime>(value);
+            get => GetField().AsValue<DateTime>();
+            set => SetField().WithValue<DateTime>(value);
         }
 
         /// <inheritdoc cref="IIssue" />
         public DateTime Updated
         {
-            get => GetField().AsValue<Values.DateTime>();
-            set => SetField().WithValue<Values.DateTime>(value);
+            get => GetField().AsValue<DateTime>();
+            set => SetField().WithValue<DateTime>(value);
         }
 
         /// <inheritdoc cref="IIssue" />
-        public Markdown[] Comments
+        public String[] Comments
         {
-            get => GetField().AsArray<Markdown>();
-            set => SetField().WithArray<Markdown>(value);
+            get => GetField().AsArray<String>();
+            set => SetField().WithArray<String>(value);
         }
 
         /// <inheritdoc />

@@ -104,6 +104,12 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
+        public bool Equals([AllowNull] System.DateTime other)
+        {
+            return value == other;
+        }
+
+        /// <inheritdoc />
         public System.DateTime Item => this.value;
     }
 }

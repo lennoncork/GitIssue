@@ -26,9 +26,10 @@ namespace GitIssue.Util.Commands.Create
         }
 
         /// <inheritdoc />
-        public override async Task Exec(ChangesOptions options)
+        public override Task Exec(ChangesOptions options)
         {
             Console.Write(manager.Changes.GenerateComments());
+            return Task.CompletedTask;
         }
     }
 }

@@ -15,11 +15,14 @@ namespace GitIssue.Util.Commands.Edit
     {
         private readonly ILogger logger;
 
+        private readonly IEditor editor;
+
         private readonly IIssueManager manager;
 
-        public EditCommand(IIssueManager manager, ILogger logger)
+        public EditCommand(IIssueManager manager, IEditor editor, ILogger logger)
         {
             this.manager = manager;
+            this.editor = editor;
             this.logger = logger;
         }
 
@@ -52,10 +55,6 @@ namespace GitIssue.Util.Commands.Edit
             var updated = false;
             if (string.IsNullOrEmpty(options.Field))
             {
-                var editor = new Editor
-                {
-                    Command = options.Editor
-                };
                 await editor.Open(issue);
                 updated = true;
             }
@@ -76,10 +75,6 @@ namespace GitIssue.Util.Commands.Edit
 
             if (string.IsNullOrEmpty(options.Update))
             {
-                var editor = new Editor
-                {
-                    Command = options.Editor
-                };
                 await editor.Open(issue[key]);
                 updated = true;
             }

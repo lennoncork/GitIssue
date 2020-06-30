@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
 
@@ -70,9 +71,16 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public bool Equals(Url other)
+        public bool Equals([AllowNull] Url other)
         {
             return value == other.value;
+        }
+
+
+        /// <inheritdoc />
+        public bool Equals([AllowNull] string other)
+        {
+            return value == other;
         }
 
         /// <inheritdoc />

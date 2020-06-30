@@ -26,11 +26,12 @@ namespace GitIssue.Util.Commands.Init
         }
 
         /// <inheritdoc />
-        public override async Task Exec(InitOptions options)
+        public override Task Exec(InitOptions options)
         {
             this.onInit();
             var manager = factory.Invoke();
             Console.WriteLine($"Initialized empty 'Issue' repository in {manager.Root.IssuesPath}");
+            return Task.CompletedTask;
         }
     }
 }

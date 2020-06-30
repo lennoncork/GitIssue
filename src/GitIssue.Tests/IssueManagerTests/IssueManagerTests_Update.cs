@@ -21,7 +21,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 await create.Result.SaveAsync();
                 var find = Sut.Find(i => i.Key == create.Result.Key).ToArray();
                 var issue = find[0];
-                Assert.That(issue.Updated, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
+                Assert.That((DateTime)issue.Updated, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
             }
 
             [Test]

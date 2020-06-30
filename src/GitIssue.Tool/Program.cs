@@ -71,7 +71,13 @@ namespace GitIssue.Util
             var builder = new ContainerBuilder();
 
             builder.Register(c => logger!)
-                .As<ILogger>();
+                .As<ILogger>()
+                .SingleInstance();
+
+            builder.RegisterType<Configuration>()
+                .As<IssueConfiguration>()
+                .AsSelf()
+                .SingleInstance();
 
             builder.Register(c =>
                 {
@@ -87,10 +93,15 @@ namespace GitIssue.Util
                 .As<InitCommand.Initializer>();
 
             builder.Register(c => RepositoryRoot.Open(options.Path, options.Name))
-                .As<RepositoryRoot>();
+                .As<RepositoryRoot>()
+                .SingleInstance();
 
             builder.RegisterType<TC>()
                 .As<Command<T>>();
+
+            builder.RegisterType<Editor>()
+                .As<IEditor>()
+                .AsSelf();
 
             builder.RegisterModule<GitIssueModule>();
             

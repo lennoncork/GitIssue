@@ -1,4 +1,6 @@
-﻿namespace GitIssue.Values
+﻿using System;
+
+namespace GitIssue.Values
 {
     /// <summary>
     ///     Interface for value types
@@ -11,7 +13,7 @@
     /// <summary>
     ///     Interface for value types with a backing variable
     /// </summary>
-    public interface IValue<out T> : IValue
+    public interface IValue<T> : IValue, IEquatable<T>
     {
         /// <summary>
         /// Gets the item backing the value

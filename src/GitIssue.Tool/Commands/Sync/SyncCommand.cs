@@ -21,10 +21,11 @@ namespace GitIssue.Util.Commands.Sync
         }
 
         /// <inheritdoc />
-        public override async Task Exec(SyncOptions options)
+        public override Task Exec(SyncOptions options)
         {
             var importer = new FileImporter(manager);
             Console.WriteLine($"Exported issues to {options.Import}");
+            return Task.CompletedTask;
         }
     }
 }

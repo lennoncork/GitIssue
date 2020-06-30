@@ -44,7 +44,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 var create = await Sut
                     .CreateAsync(nameof(SetsCreatedDate), string.Empty)
                     .WithSafeResultAsync();
-                Assert.That(create.Result.Created, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
+                Assert.That((DateTime)create.Result.Created, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
             }
 
             [Test]
@@ -54,7 +54,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 var create = await Sut
                     .CreateAsync(nameof(SetsUpdatedDate), string.Empty)
                     .WithSafeResultAsync();
-                Assert.That(create.Result.Updated, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
+                Assert.That((DateTime)create.Result.Updated, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
             }
         }
     }

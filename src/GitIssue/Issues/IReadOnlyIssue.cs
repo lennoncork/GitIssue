@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using GitIssue.Fields;
+using GitIssue.Values;
+
+using String = GitIssue.Values.String;
+using DateTime = GitIssue.Values.DateTime;
 
 namespace GitIssue.Issues
 {
@@ -18,12 +22,17 @@ namespace GitIssue.Issues
         /// <summary>
         ///     Gets or sets the issue title
         /// </summary>
-        string Title { get; }
+        String Title { get; }
 
         /// <summary>
         ///     Gets or sets the issue description
         /// </summary>
-        string Description { get; }
+        String Description { get; }
+
+        /// <summary>
+        ///     Gets or sets when the issue was created
+        /// </summary>
+        Signature Author { get; }
 
         /// <summary>
         ///     Gets or sets when the issue was created

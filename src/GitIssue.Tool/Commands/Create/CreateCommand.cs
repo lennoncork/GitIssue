@@ -20,14 +20,17 @@ namespace GitIssue.Util.Commands.Create
         
         private readonly ILogger logger;
 
+        private readonly IEditor editor;
+
         private readonly IIssueManager manager;
 
         private readonly IIssueConfiguration configuration;
 
-        public CreateCommand(IIssueManager manager, IIssueConfiguration configuration, ILogger logger)
+        public CreateCommand(IIssueManager manager, IIssueConfiguration configuration, IEditor editor, ILogger logger)
         {
             this.manager = manager;
-            this.configuration = configuration;
+            this.configuration = configuration; 
+            this.editor = editor;
             this.logger = logger;
         }
 
@@ -37,11 +40,6 @@ namespace GitIssue.Util.Commands.Create
             IIssue issue;
             if (string.IsNullOrEmpty(options.Title))
             {
-                var editor = new Editor
-                {
-                    Command = options.Editor
-                };
-
                 var fields = this.configuration.Fields
                     .Where(f => f.Key != nameof(IIssue.Key))
                     .Where(f => f.Key != nameof(IIssue.Created))

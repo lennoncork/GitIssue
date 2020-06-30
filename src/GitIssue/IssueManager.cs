@@ -213,9 +213,10 @@ namespace GitIssue
         /// <inheritdoc />
         public async Task<IIssue> CreateAsync(string title, string description)
         {
-            IIssue issue = issueCreation(KeyProvider.Next());
+            IIssue issue = this.issueCreation(KeyProvider.Next());
             issue.Title = title;
             issue.Description = description;
+            issue.Author = this.Repository.Config.BuildSignature(issue.Created.Item);
             await issue.SaveAsync();
             Changes.Add(issue, ChangeType.Create);
             return issue;
