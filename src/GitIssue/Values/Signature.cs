@@ -93,9 +93,6 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public JToken ToJson()
         {
-            //var json = new JObject();
-            //json.Add(new JProperty(nameof(Username), this.Username));
-            //json.Add(new JProperty(nameof(Email), this.Email));
             return new JValue(this.ToString());
         }
 

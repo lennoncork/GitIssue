@@ -106,7 +106,7 @@ namespace GitIssue.Tests.ValueTests
                 public override IEnumerator<TestCaseData> GetEnumerator()
                 {
                     yield return new TestCaseData(Signature.Parse("Foo Bar <foo.bar@gmail.com>"))
-                        .Returns("{\"Username\":\"Foo Bar\",\"Email\":\"foo.bar@gmail.com\"}")
+                        .Returns("\"Foo Bar <foo.bar@gmail.com>\"")
                         .SetName("ReturnsJsonString");
                 }
             }
