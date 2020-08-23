@@ -10,44 +10,44 @@ namespace GitIssue.Values
     /// <typeparam name="T"></typeparam>
     public abstract class ValueTypeConverter<T> : TypeConverter where T : IValue
     {
-            /// <inheritdoc />
-            public override bool CanConvertFrom(ITypeDescriptorContext context,
-                Type sourceType)
-            {
-                if (sourceType == typeof(string))
-                    return true;
+        /// <inheritdoc />
+        public override bool CanConvertFrom(ITypeDescriptorContext context,
+            Type sourceType)
+        {
+            if (sourceType == typeof(string))
+                return true;
 
-                if (sourceType == typeof(ValueMetadata))
-                    return true;
+            if (sourceType == typeof(ValueMetadata))
+                return true;
 
-                return base.CanConvertFrom(context, sourceType);
-            }
+            return base.CanConvertFrom(context, sourceType);
+        }
 
-            /// <inheritdoc />
-            public override object? ConvertFrom(ITypeDescriptorContext context,
-                CultureInfo culture, object value)
-            {
-                if (value is string str)
-                    if (TryParse(str, out var result))
-                        return result;
+        /// <inheritdoc />
+        public override object? ConvertFrom(ITypeDescriptorContext context,
+            CultureInfo culture, object value)
+        {
+            if (value is string str)
+                if (TryParse(str, out var result))
+                    return result;
 
-                if (value is ValueMetadata valueMetadata)
-                    if (TryParse(valueMetadata, out var result))
-                        return result;
+            if (value is ValueMetadata valueMetadata)
+                if (TryParse(valueMetadata, out var result))
+                    return result;
 
-                return base.ConvertFrom(context, culture, value);
-            }
+            return base.ConvertFrom(context, culture, value);
+        }
 
-            /// <inheritdoc />
-            public override object? ConvertTo(ITypeDescriptorContext context,
-                CultureInfo culture, object value, Type destinationType)
-            {
-                if (destinationType == typeof(string))
-                    if (value is T result)
-                        return result.ToString();
+        /// <inheritdoc />
+        public override object? ConvertTo(ITypeDescriptorContext context,
+            CultureInfo culture, object value, Type destinationType)
+        {
+            if (destinationType == typeof(string))
+                if (value is T result)
+                    return result.ToString();
 
-                return base.ConvertTo(context, culture, value, destinationType);
-            }
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
 
         /// <summary>
         ///     Tries to parse the value
