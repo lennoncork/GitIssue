@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <DirectoryBuildPath>$(MSBuildThisFileDirectory)</DirectoryBuildPath>
-    <SolutionOutputPath>$(MSBuildThisFileDirectory)output</SolutionOutputPath>
+    <SolutionOutputPath>$(MSBuildThisFileDirectory).output</SolutionOutputPath>
     <ProjectOutputPath>$(SolutionOutputPath)\$(MSBuildProjectName)</ProjectOutputPath>
     <BaseOutputPath>$(ProjectOutputPath)\bin</BaseOutputPath>
     <BaseIntermediateOutputPath>$(ProjectOutputPath)\obj</BaseIntermediateOutputPath>
