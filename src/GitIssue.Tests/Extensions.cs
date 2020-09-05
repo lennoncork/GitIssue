@@ -17,7 +17,7 @@ namespace GitIssue.Tests
         public static async Task<T> AssertIfNotSuccess<T>(this Task<SafeResult<T>> result)
         {
             var safe = await result;
-            Assert.That(safe.IsSuccess, Is.True, $"SafeResult was not successful, {safe.Exception.Message}", safe);
+            Assert.That(safe.IsSuccess, Is.True, $"SafeResult was not successful, {safe.Exception?.Message}", safe);
             return safe.Result;
         }
     }
