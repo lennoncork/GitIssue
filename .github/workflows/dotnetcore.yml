@@ -31,4 +31,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: GitIssue-win10-x64
-        path: src/output/GitIssue.Tool/bin/Debug/netcoreapp3.1/win10-x64/publish/GitIssue.Tool.exe
+        path: src/.output/GitIssue.Tool/bin/Debug/netcoreapp3.1/win10-x64/publish/GitIssue.Tool.exe
