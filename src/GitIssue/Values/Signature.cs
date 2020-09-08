@@ -23,6 +23,11 @@ namespace GitIssue.Values
         private string Email { get; }
 
         /// <summary>
+        /// An invalid signature
+        /// </summary>
+        public static Signature Invalid => new Signature(null!, null!);
+
+        /// <summary>
         ///     Parses the value as an Signature
         /// </summary>
         /// <param name="value"></param>
@@ -63,7 +68,7 @@ namespace GitIssue.Values
         {
             this.Username = username;
             this.Email = email;
-            this.IsValid = true;
+            this.IsValid = username != null && email != null;
         }
 
         /// <summary>
@@ -87,6 +92,8 @@ namespace GitIssue.Values
         /// <param name="value"></param>
         public static implicit operator Signature(LibGit2Sharp.Signature value)
         {
+            if(value == null || value.Name == null || value.Email == null)
+                return Signature.Invalid;
             return new Signature(value.Name, value.Email);
         }
 
