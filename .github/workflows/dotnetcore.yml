@@ -10,23 +10,14 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macOS-latest]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        clean: true
-        fetch-depth: 0
-    - name: Setup
-      uses: actions/setup-dotnet@v1
-      with: 
-        dotnet-version: 3.1.301    
-    - name: Restore
-      run: dotnet tools restore
-    - name: Build
-      run: dotnet cake
-    - name: Upload
-      uses: actions/upload-artifact@v1
-      with:
-        name: GitIssue-win10-x64
-        path: .publish/GitIssue.Tool.exe
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run the build script
+        uses: cake-build/cake-action@v1
+        with:
+          target: Test
