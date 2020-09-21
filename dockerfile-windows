@@ -1,0 +1,9 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-nanoserver-2004
+WORKDIR C:\\gitissue
+COPY .config/ .config/
+COPY .git/ .git/
+COPY src/ src/
+COPY ./build.cake ./
+COPY ./cake.config ./
+RUN dotnet tool restore
+RUN dotnet cake

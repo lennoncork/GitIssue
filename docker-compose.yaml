@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  linux:
+    build:
+      context: ./
+      dockerfile: Dockerfile-Linux
+    working_dir: /gitissue
+    entrypoint: ["dotnet", "test", "src/GitIssue.sln", "--logger:trx"]
+    volumes:
+      - ./.git/:/gitissue/.git
+      - ./src/:/gitissue/src
+
+  windows:
+    build:
+      context: ./
+      dockerfile: Dockerfile-Windows
+    working_dir: C:\gitissue
+    entrypoint: ["dotnet", "test", "src/GitIssue.sln", "--logger:trx"]
+    volumes:
+      - ./.git/:C:\gitissue/.git
+      - ./src/:C:\gitissue/src
+  

@@ -2,33 +2,25 @@ name: build
 
 on:
   push:
-    branches: [ master ]
+    branches: 
+      - master
   pull_request:
-    branches: [ master ]
+    branches: 
+      - '**'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        clean: true
-        fetch-depth: 0
-    - name: Setup
-      uses: actions/setup-dotnet@v1
-      with: 
-        dotnet-version: 3.1.301    
-    - name: Restore
-      run: dotnet restore "src/GitIssue.sln"
-    - name: Build
-      run: dotnet build --configuration Release "src/GitIssue.sln"
-    - name: Test
-      run: dotnet test --configuration Release "src/GitIssue.sln"
-    - name: Publish
-      run: dotnet publish "src/GitIssue.Tool/GitIssue.Tool.csproj" --framework netcoreapp3.1 --runtime win10-x64 --self-contained
-    - name: Upload
-      uses: actions/upload-artifact@v1
-      with:
-        name: GitIssue-win10-x64
-        path: src/.output/GitIssue.Tool/bin/Debug/netcoreapp3.1/win10-x64/publish/GitIssue.Tool.exe
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          clean: true
+          fetch-depth: 0
+      - name: Build
+        uses: cake-build/cake-action@v1
+        with:
+          target: Test
