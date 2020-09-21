@@ -20,15 +20,11 @@ jobs:
       with: 
         dotnet-version: 3.1.301    
     - name: Restore
-      run: dotnet restore "src/GitIssue.sln"
+      run: dotnet tools restore
     - name: Build
-      run: dotnet build --configuration Release "src/GitIssue.sln"
-    - name: Test
-      run: dotnet test --configuration Release "src/GitIssue.sln"
-    - name: Publish
-      run: dotnet publish "src/GitIssue.Tool/GitIssue.Tool.csproj" --framework netcoreapp3.1 --runtime win10-x64 --self-contained
+      run: dotnet cake
     - name: Upload
       uses: actions/upload-artifact@v1
       with:
         name: GitIssue-win10-x64
-        path: src/output/GitIssue.Tool/bin/Debug/netcoreapp3.1/win10-x64/publish/GitIssue.Tool.exe
+        path: .publish/GitIssue.Tool.exe

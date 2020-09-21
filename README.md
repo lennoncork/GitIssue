@@ -12,8 +12,8 @@ git clone git@github.com:lennoncork/GitIssue.git
 ```
 2) Build the GitIssue Tool
 ```
-cd GitIssue
-dotnet publish --framework netcoreapp3.1 --runtime win10-x64 --configuration release src/GitIssue.Tool/GitIssue.Tool.csproj
+dotnet tool restore
+dotnet cake
 ```
 3) Configure the git alias
 ```

@@ -24,11 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="IntegrationTests\Specification\" />
-    <Folder Include="FieldTests\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="SyncTests\ImportFiles\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
