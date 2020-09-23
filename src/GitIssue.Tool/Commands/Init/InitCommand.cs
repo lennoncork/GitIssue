@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Init
+namespace GitIssue.Tool.Commands.Init
 {
     /// <summary>
     ///     Init command

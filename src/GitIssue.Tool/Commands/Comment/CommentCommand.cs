@@ -8,7 +8,7 @@ using Serilog;
 
 using String = GitIssue.Values.String;
 
-namespace GitIssue.Util.Commands.Add
+namespace GitIssue.Tool.Commands.Add
 {
     /// <summary>
     ///     Edit command
@@ -33,7 +33,7 @@ namespace GitIssue.Util.Commands.Add
         /// <inheritdoc />
         public override async Task Exec(CommentOptions options)
         {
-            var formatter = new DetailedFormatter();
+            var formatter = TerminalFormatter.Detailed;
 
             var issue = await manager
                 .FindAsync(i => i.Key.ToString() == options.Key)

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using GitIssue.Issues;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Delete
+namespace GitIssue.Tool.Commands.Delete
 {
     /// <summary>
     ///     Delete command

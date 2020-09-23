@@ -3,17 +3,17 @@ using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Formatters;
 using GitIssue.Issues;
-using GitIssue.Util.Commands.Track;
+using GitIssue.Tool.Commands.Track;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Create
+namespace GitIssue.Tool.Commands.Create
 {
     /// <summary>
     ///     Create Command
     /// </summary>
     public class ChangesCommand : Command<ChangesOptions>
     {
-        private readonly Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => new DetailedFormatter());
+        private readonly Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => IssueFormatter.Detailed);
         
         private readonly ILogger logger;
 

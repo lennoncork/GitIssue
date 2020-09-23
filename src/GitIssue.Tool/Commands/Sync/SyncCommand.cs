@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using GitIssue.Syncs;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Sync
+namespace GitIssue.Tool.Commands.Sync
 {
     /// <summary>
     ///     Edit command

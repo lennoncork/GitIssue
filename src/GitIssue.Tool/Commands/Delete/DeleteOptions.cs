@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util.Commands.Delete
+namespace GitIssue.Tool.Commands.Delete
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Delete), HelpText = "Deletes an existing issue")]

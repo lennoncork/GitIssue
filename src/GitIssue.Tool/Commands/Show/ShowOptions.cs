@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util.Commands.Show
+namespace GitIssue.Tool.Commands.Show
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Show), HelpText = "Shows the details of an issue")]

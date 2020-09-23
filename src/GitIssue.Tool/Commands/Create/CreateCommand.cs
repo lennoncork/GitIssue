@@ -5,18 +5,18 @@ using System.Threading.Tasks;
 using GitIssue.Fields.Value;
 using GitIssue.Formatters;
 using GitIssue.Issues;
-using GitIssue.Util.Commands.Track;
+using GitIssue.Tool.Commands.Track;
 using GitIssue.Values;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Create
+namespace GitIssue.Tool.Commands.Create
 {
     /// <summary>
     ///     Create Command
     /// </summary>
     public class CreateCommand : Command<CreateOptions>
     {
-        private Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => new DetailedFormatter());
+        private Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => IssueFormatter.Detailed);
         
         private readonly ILogger logger;
 

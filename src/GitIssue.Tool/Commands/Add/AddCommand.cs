@@ -6,7 +6,7 @@ using GitIssue.Fields.Array;
 using GitIssue.Formatters;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Add
+namespace GitIssue.Tool.Commands.Add
 {
     /// <summary>
     ///     Edit command
@@ -26,7 +26,7 @@ namespace GitIssue.Util.Commands.Add
         /// <inheritdoc />
         public override async Task Exec(AddOptions options)
         {
-            var formatter = new DetailedFormatter();
+            var formatter = IssueFormatter.Simple;
             
             var issue = await manager
                 .FindAsync(i => i.Key.ToString() == options.Key)

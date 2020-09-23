@@ -1,4 +1,4 @@
-﻿namespace GitIssue.Util.Commands
+﻿namespace GitIssue.Tool.Commands
 {
     /// <summary>
     ///     The GitIssueCommand

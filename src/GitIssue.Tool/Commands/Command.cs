@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace GitIssue.Util.Commands
+namespace GitIssue.Tool.Commands
 {
     /// <summary>
     ///     The GitIssueCommand

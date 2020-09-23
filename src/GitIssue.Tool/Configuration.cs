@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace GitIssue.Util
+namespace GitIssue.Tool
 {
     /// <summary>
     ///     Configuration for the issue

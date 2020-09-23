@@ -15,7 +15,7 @@ namespace GitIssue.Formatters
         /// <returns></returns>
         public static string Format(this IReadOnlyIssue issue)
         {
-            return SimpleFormatter.Default.Format(issue);
+            return IssueFormatter.Simple.Format(issue);
         }
 
         /// <summary>

@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util.Commands.Remove
+namespace GitIssue.Tool.Commands.Remove
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Remove), HelpText = "Removes a value from an existing field on an existing issue")]

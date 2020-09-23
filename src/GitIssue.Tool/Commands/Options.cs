@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using CommandLine;
 using GitIssue.Issues;
-using GitIssue.Util.Commands.Track;
+using GitIssue.Tool.Commands.Track;
 
-namespace GitIssue.Util.Commands
+namespace GitIssue.Tool.Commands
 {
 #pragma warning disable 1591
 

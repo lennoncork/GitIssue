@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using GitIssue.Issues;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Track
+namespace GitIssue.Tool.Commands.Track
 {
     /// <summary>
     ///     Track command
