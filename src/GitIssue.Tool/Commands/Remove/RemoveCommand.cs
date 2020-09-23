@@ -6,7 +6,7 @@ using GitIssue.Fields.Array;
 using GitIssue.Formatters;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Remove
+namespace GitIssue.Tool.Commands.Remove
 {
     /// <summary>
     ///     Edit command
@@ -26,7 +26,7 @@ namespace GitIssue.Util.Commands.Remove
         /// <inheritdoc />
         public override async Task Exec(RemoveOptions options)
         {
-            var formatter = new DetailedFormatter();
+            var formatter = TerminalFormatter.Detailed;
 
             var issue = await manager
                 .FindAsync(i => i.Key.ToString() == options.Key)

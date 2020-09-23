@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Fields
+namespace GitIssue.Tool.Commands.Fields
 {
     /// <summary>
     ///     Fields command

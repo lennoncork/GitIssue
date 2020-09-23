@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util.Commands.Edit
+namespace GitIssue.Tool.Commands.Edit
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Edit), HelpText = "Edits fields of an existing issue")]

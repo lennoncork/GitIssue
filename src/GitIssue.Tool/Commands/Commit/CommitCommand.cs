@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Commit
+namespace GitIssue.Tool.Commands.Commit
 {
     /// <summary>
     ///     Commit command

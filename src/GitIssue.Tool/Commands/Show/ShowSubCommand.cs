@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GitIssue.Util.Commands.Show
+namespace GitIssue.Tool.Commands.Show
 {
     public enum ShowSubCommand
     {

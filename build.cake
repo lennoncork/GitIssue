@@ -38,8 +38,23 @@ Task("Publish")
         {
             Framework = "netcoreapp3.1",
             Runtime = "win10-x64",
+            PublishReadyToRun = false,
+            PublishTrimmed = false,
+            SelfContained = true,
+            PublishSingleFile = true,
             Configuration = "Release",
             OutputDirectory = "./.publish/"
+        });
+    });
+
+Task("Package")
+    .IsDependentOn("Test")
+    .Does(() =>
+    {
+        DotNetCorePack("src/GitIssue.sln", new DotNetCorePackSettings
+        {
+            Configuration = "Release",
+            OutputDirectory = "./.packages/"
         });
     });
 
@@ -47,6 +62,7 @@ Task("Default")
     .IsDependentOn("Clean")
     .IsDependentOn("Build")
     .IsDependentOn("Test")
+    .IsDependentOn("Package")
     .IsDependentOn("Publish");
 
 RunTarget(target);

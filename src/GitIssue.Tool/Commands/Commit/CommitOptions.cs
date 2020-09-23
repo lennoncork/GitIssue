@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util.Commands.Commit
+namespace GitIssue.Tool.Commands.Commit
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Commit), HelpText = "Commits the issues")]

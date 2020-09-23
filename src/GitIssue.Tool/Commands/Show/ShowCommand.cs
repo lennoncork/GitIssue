@@ -6,7 +6,7 @@ using GitIssue.Formatters;
 using GitIssue.Issues;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Show
+namespace GitIssue.Tool.Commands.Show
 {
     /// <summary>
     ///     Show command
@@ -26,7 +26,7 @@ namespace GitIssue.Util.Commands.Show
         /// <inheritdoc />
         public override async Task Exec(ShowOptions options)
         {
-            var formatter = new DetailedFormatter();
+            var formatter = new TerminalFormatter("%*");
 
             IAsyncEnumerable<IIssue> issues;
             switch(options.Show)

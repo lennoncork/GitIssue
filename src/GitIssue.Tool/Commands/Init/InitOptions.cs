@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util.Commands.Init
+namespace GitIssue.Tool.Commands.Init
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Init), HelpText = "Initializes the issue repository")]

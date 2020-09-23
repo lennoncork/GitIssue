@@ -5,25 +5,25 @@ using Autofac;
 using CommandLine;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
-using GitIssue.Util.Commands;
-using GitIssue.Util.Commands.Add;
-using GitIssue.Util.Commands.Commit;
-using GitIssue.Util.Commands.Create;
-using GitIssue.Util.Commands.Delete;
-using GitIssue.Util.Commands.Edit;
-using GitIssue.Util.Commands.Export;
-using GitIssue.Util.Commands.Fields;
-using GitIssue.Util.Commands.Find;
-using GitIssue.Util.Commands.Init;
-using GitIssue.Util.Commands.Remove;
-using GitIssue.Util.Commands.Show;
-using GitIssue.Util.Commands.Track;
+using GitIssue.Tool.Commands;
+using GitIssue.Tool.Commands.Add;
+using GitIssue.Tool.Commands.Commit;
+using GitIssue.Tool.Commands.Create;
+using GitIssue.Tool.Commands.Delete;
+using GitIssue.Tool.Commands.Edit;
+using GitIssue.Tool.Commands.Export;
+using GitIssue.Tool.Commands.Fields;
+using GitIssue.Tool.Commands.Find;
+using GitIssue.Tool.Commands.Init;
+using GitIssue.Tool.Commands.Remove;
+using GitIssue.Tool.Commands.Show;
+using GitIssue.Tool.Commands.Track;
 using LibGit2Sharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Serilog;
-using CommitOptions = GitIssue.Util.Commands.Commit.CommitOptions;
+using CommitOptions = GitIssue.Tool.Commands.Commit.CommitOptions;
 
-namespace GitIssue.Util
+namespace GitIssue.Tool
 {
     internal class Program
     {

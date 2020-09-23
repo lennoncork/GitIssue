@@ -2,11 +2,12 @@
 using System.Threading.Tasks;
 using GitIssue.Formatters;
 using GitIssue.Issues;
+using GitIssue.Tool;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Find
+namespace GitIssue.Tool.Commands.Find
 {
     /// <summary>
     ///     Fine options
@@ -38,7 +39,7 @@ namespace GitIssue.Util.Commands.Find
                 return;
             }
 
-            var formatter = new SimpleFormatter(options.Format);
+            var formatter = new TerminalFormatter(options.Format);
             var find = manager.FindAsync(i => issueFilter.Invoke(i));
             await foreach (var issue in find) Console.WriteLine(issue.Format(formatter));
         }

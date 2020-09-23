@@ -5,7 +5,7 @@ namespace GitIssue.Formatters
     /// <summary>
     ///     Field defining an issue formatter
     /// </summary>
-    public interface IIssueFormatter
+    public interface IIssueFormatter : IFieldFormatter
     {
         /// <summary>
         ///     Formats the issue

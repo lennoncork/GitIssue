@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util.Commands.Sync
+namespace GitIssue.Tool.Commands.Sync
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Export), HelpText = "Exports all issues into a JSON file")]

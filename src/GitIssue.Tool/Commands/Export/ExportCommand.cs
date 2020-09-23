@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 
-namespace GitIssue.Util.Commands.Export
+namespace GitIssue.Tool.Commands.Export
 {
     /// <summary>
     ///     Edit command
@@ -27,7 +27,7 @@ namespace GitIssue.Util.Commands.Export
         /// <inheritdoc />
         public override async Task Exec(ExportOptions options)
         {
-            var formatter = new DetailedFormatter();
+            var formatter = TerminalFormatter.Detailed;
 
             JObject json = new JObject();
             await foreach (var issue in manager.FindAsync(i => true))

@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Util.Commands.Fields
+namespace GitIssue.Tool.Commands.Fields
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Fields), HelpText = "Shows the list of available fields")]

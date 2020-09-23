@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues;
 
-namespace GitIssue.Util
+namespace GitIssue.Tool
 {
     /// <summary>
     ///     Editor interface
