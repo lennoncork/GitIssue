@@ -8,6 +8,7 @@ namespace GitIssue.Tests.ValueTests
     [TestFixture]
     public class SignatureValueTests : JsonValueTests<Signature>
     {
+        [TestFixture]
         public class TypeConverter : SignatureValueTests
         {
             [TestCaseSource(typeof(CanConvertTestCases))]
@@ -49,6 +50,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public class TryParse : SignatureValueTests
         {
             [TestCaseSource(typeof(TryParseTestCases))]
@@ -74,6 +76,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public new class ToString : SignatureValueTests
         {
             [TestCaseSource(typeof(ToStringTestCases))]
@@ -93,6 +96,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public class ToJson : SignatureValueTests
         {
             [TestCaseSource(typeof(ConvertToJsonTestCases))]
@@ -112,6 +116,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public new class Equals : SignatureValueTests
         {
             [TestCaseSource(typeof(EqualsTestCases))]

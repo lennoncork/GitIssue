@@ -22,7 +22,7 @@ namespace GitIssue.Tests
 
         protected virtual string ConfigFile => Path.Combine(IssueDirectory, Paths.ConfigFileName);
 
-        protected virtual IIssueManager Manager { get; set; }
+        protected virtual IIssueManager Manager { get; set; } = null!;
 
         [OneTimeSetUp]
         public virtual void OneTimeSetup()
