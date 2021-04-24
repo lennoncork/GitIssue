@@ -150,7 +150,7 @@ namespace GitIssue
         /// <returns>true if the parent directory exists</returns>
         private static bool TryGetParent(DirectoryInfo directory, out DirectoryInfo parent)
         {
-            parent = directory.Parent;
+            parent = directory.Parent!;
             return directory.Exists && directory.Parent != null;
         }
 

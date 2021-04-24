@@ -32,7 +32,7 @@ namespace GitIssue.Tests.ValueTests
 
         public TValue UseConverter<TIn>(TIn input)
         {
-            return (TValue) UseConverter((object) input);
+            return (TValue) UseConverter((object) input!);
         }
 
         public new virtual bool Equals(object first, object second)

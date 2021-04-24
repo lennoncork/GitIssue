@@ -20,7 +20,7 @@ namespace GitIssue.Issues
         ///     Initialized a new instance of the key
         /// </summary>
         /// <param name="key">the key string</param>
-        private IssueKey(string key)
+        private IssueKey(string? key)
         {
             if (key == null || key == nameof(None))
                 this.key = string.Empty;
@@ -33,7 +33,7 @@ namespace GitIssue.Issues
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static IssueKey Create(string key)
+        public static IssueKey Create(string? key)
         {
             return new IssueKey(key);
         }

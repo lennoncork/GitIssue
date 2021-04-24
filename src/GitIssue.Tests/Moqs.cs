@@ -54,19 +54,26 @@ namespace GitIssue.Tests
         {
             var moq = new Mock<IReadOnlyIssue>(MockBehavior.Strict);
 
-            FieldKey tryGetFieldKey;
-            IField tryGetResult = null;
+            FieldKey? tryGetFieldKey = null;
+            IField? tryGetResult = null;
 
             moq.Setup(i => i[It.IsAny<FieldKey>()]).Returns((FieldKey key) => fields[key]);
 
             moq.Setup(i => i.TryGetValue(It.IsAny<FieldKey>(), out tryGetResult))
-                .Callback(new MockOutDelegate<FieldKey, IField> ((FieldKey key, out IField output) =>
+                .Callback(new MockOutDelegate<FieldKey, IField>((FieldKey key, out IField output) =>
                 {
-                    tryGetFieldKey = key;
-                    fields.TryGetValue(key, out output);
-                    tryGetResult = output;
+                   tryGetFieldKey = key;
+                   fields.TryGetValue(key, out tryGetResult);
+                   output = tryGetResult ?? new EmptyField(key);
                 }))
-                .Returns(() => fields.ContainsKey(tryGetFieldKey));
+                .Returns(() =>
+                {
+                    if (tryGetFieldKey == null)
+                    {
+                        return false;
+                    }
+                    return fields.ContainsKey(tryGetFieldKey.Value);
+                });
 
             moq.Setup(i => i.GetEnumerator()).Returns(fields.GetEnumerator());
 
@@ -76,16 +83,16 @@ namespace GitIssue.Tests
                     moq.Setup(i => i.Key).Returns(IssueKey.Create(field.ToString()));
 
                 if (field.Key == nameof(IIssue.Title))
-                    moq.Setup(i => i.Title).Returns(field.ToString());
+                    moq.Setup(i => i.Title).Returns(field.ToString() ?? string.Empty);
 
                 if (field.Key == nameof(IIssue.Description))
-                    moq.Setup(i => i.Description).Returns(field.ToString());
+                    moq.Setup(i => i.Description).Returns(field.ToString() ?? string.Empty);
 
                 if (field.Key == nameof(IIssue.Created))
-                    moq.Setup(i => i.Created).Returns(DateTime.Parse(field.ToString()));
+                    moq.Setup(i => i.Created).Returns(DateTime.Parse(field.ToString() ?? string.Empty));
 
                 if (field.Key == nameof(IIssue.Updated))
-                    moq.Setup(i => i.Updated).Returns(DateTime.Parse(field.ToString()));
+                    moq.Setup(i => i.Updated).Returns(DateTime.Parse(field.ToString() ?? string.Empty));
             }
             
             return moq.Object;

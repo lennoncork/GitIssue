@@ -8,6 +8,7 @@ namespace GitIssue.Tests.ValueTests
     [TestFixture]
     public class LabelValueTests : JsonValueTests<Label, string>
     {
+        [TestFixture]
         public class TypeConverter : LabelValueTests
         {
             [TestCaseSource(typeof(CanConvertTestCases))]
@@ -58,6 +59,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public class TryParse : LabelValueTests
         {
             [TestCaseSource(typeof(TryParseTestCases))]
@@ -83,10 +85,11 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public new class ToString : LabelValueTests
         {
             [TestCaseSource(typeof(ToStringTestCases))]
-            public string Test(Label label)
+            public string? Test(Label label)
             {
                 return label.ToString();
             }
@@ -102,6 +105,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public class Item : LabelValueTests
         {
             [TestCaseSource(typeof(GetItemTestCases))]
@@ -121,6 +125,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public class ToJson : LabelValueTests
         {
             [TestCaseSource(typeof(ConvertToJsonTestCases))]
@@ -140,6 +145,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public new class Equals : LabelValueTests
         {
             [TestCaseSource(typeof(EqualsTestCases))]

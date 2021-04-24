@@ -117,7 +117,7 @@ namespace GitIssue.Tests
         /// </summary>
         public class EnvironmentCurrentDirectory : IDisposable
         {
-            private readonly string environment;
+            private readonly string? environment;
 
             /// <summary>
             ///     Creates a new instance of the <see cref="EnvironmentCurrentDirectory" /> class

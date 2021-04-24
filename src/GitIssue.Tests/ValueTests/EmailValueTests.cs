@@ -8,6 +8,7 @@ namespace GitIssue.Tests.ValueTests
     [TestFixture]
     public class EmailValueTests : JsonValueTests<Email, string>
     {
+        [TestFixture]
         public class TypeConverter : EmailValueTests
         {
             [TestCaseSource(typeof(CanConvertTestCases))]
@@ -49,6 +50,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public class TryParse : EmailValueTests
         {
             [TestCaseSource(typeof(TryParseTestCases))]
@@ -74,6 +76,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public new class ToString : EmailValueTests
         {
             [TestCaseSource(typeof(ToStringTestCases))]
@@ -93,6 +96,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public class Item : EmailValueTests
         {
             [TestCaseSource(typeof(GetItemTestCases))]
@@ -112,6 +116,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public class ToJson : EmailValueTests
         {
             [TestCaseSource(typeof(ConvertToJsonTestCases))]
@@ -131,6 +136,7 @@ namespace GitIssue.Tests.ValueTests
             }
         }
 
+        [TestFixture]
         public new class Equals : EmailValueTests
         {
             [TestCaseSource(typeof(EqualsTestCases))]

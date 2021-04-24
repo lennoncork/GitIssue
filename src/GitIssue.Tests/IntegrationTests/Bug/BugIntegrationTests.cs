@@ -14,7 +14,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
             if (Directory.Exists(TestDirectory) == false) Directory.CreateDirectory(TestDirectory);
         }
 
-        protected string TestDirectory;
+        protected string TestDirectory = Path.GetTempPath();
 
         protected string GitDirectory => Path.Combine(TestDirectory, Paths.GitFolderName);
 
@@ -22,9 +22,9 @@ namespace GitIssue.Tests.IntegrationTests.Bug
 
         protected string ConfigFile => Path.Combine(IssueDirectory, Paths.ConfigFileName);
 
-        protected IRepository GitRepository { get; set; }
+        protected IRepository GitRepository { get; set; } = null!;
 
-        protected IIssueManager Issues { get; set; }
+        protected IIssueManager Issues { get; set; } = null!;
 
         [OneTimeSetUp]
         public void OneTimeSetup()

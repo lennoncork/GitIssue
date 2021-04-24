@@ -147,14 +147,14 @@ namespace GitIssue.Issues
 
         /// <inheritdoc />
         public override bool TrySetMember(
-            SetMemberBinder binder, object value)
+            SetMemberBinder binder, object? value)
         {
             FieldKey key = FieldKey.Create(binder.Name);
             if (TryGetValue(key, out var field))
             {
                 if (field is IValueField valueField)
                 {
-                    if(value.GetType() == valueField.ValueType)
+                    if(value?.GetType() == valueField.ValueType)
                     {
                         valueField.Value = value;
                     }
@@ -166,7 +166,7 @@ namespace GitIssue.Issues
                         arrayField.Values = enumerable.Cast<object>().ToArray();
                     }
                 }
-                else if (value.GetType() == typeof(string))
+                else if (value?.GetType() == typeof(string))
                 {
                     if (field.Update((string)value))
                     {
@@ -175,7 +175,7 @@ namespace GitIssue.Issues
                 }
                 else
                 {
-                    if (field.Update(value.ToString() ?? string.Empty))
+                    if (field.Update(value?.ToString() ?? string.Empty))
                     {
                         return true;
                     }
