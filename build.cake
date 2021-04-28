@@ -36,12 +36,12 @@ Task("Publish")
     {
         DotNetCorePublish("src/GitIssue.Tool/GitIssue.Tool.csproj", new DotNetCorePublishSettings
         {
-            Framework = "netcoreapp3.1",
+            Framework = "net5.0",
             Runtime = "win10-x64",
             PublishReadyToRun = false,
             PublishTrimmed = false,
             SelfContained = true,
-            PublishSingleFile = true,
+            PublishSingleFile = false,
             Configuration = "Release",
             OutputDirectory = "./.publish/"
         });

@@ -124,6 +124,7 @@ namespace GitIssue.Tool
                 {
                     Console.WriteLine();
                     await func(value);
+                    Console.WriteLine();
                 }
                 catch (Exception e)
                 {
