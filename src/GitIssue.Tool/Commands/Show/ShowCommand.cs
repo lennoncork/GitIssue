@@ -33,16 +33,19 @@ namespace GitIssue.Tool.Commands.Show
             {
                 case ShowSubCommand.tracked:
                 case ShowSubCommand.Tracked:
+                    Console.WriteLine("Showing 'tracked' issue");
                     issues = manager.FindAsync(i => i.Key.ToString() == options.Key);
                     break;
 
                 case ShowSubCommand.all:
                 case ShowSubCommand.All:
+                    Console.WriteLine("Showing 'all' issues");
                     issues = manager.FindAsync(i => true);
                     break;
 
                 case ShowSubCommand.mine:
                 case ShowSubCommand.Mine:
+                    Console.WriteLine("Showing 'my' issues");
                     issues = manager.FindAsync(i => true);
                     break;
 
@@ -56,7 +59,12 @@ namespace GitIssue.Tool.Commands.Show
             {
                 if (count++ > 0) Console.WriteLine();
                 Console.WriteLine(issue.Format(formatter));
-            }    
+            }
+
+            if(count == 0)
+            {   
+                Console.WriteLine("No issues to show");
+            }
         }
     }
 }
