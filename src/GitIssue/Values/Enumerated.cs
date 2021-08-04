@@ -61,7 +61,7 @@ namespace GitIssue.Values
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Label" /> struct
+        ///     Initializes a new instance of the <see cref="Enumerated" /> struct
         /// </summary>
         /// <param name="value"></param>
         /// <param name="values"></param>
