@@ -11,6 +11,9 @@ namespace GitIssue.Tool.Commands.Export
 
         [Option("Overwrite", HelpText = "Enable overwrite of the export file", Required = false)]
         public bool Overwrite { get; set; } = false;
+
+        [Option("Separator", HelpText = "The seperator to use when exporting CSV", Required = false)]
+        public string Separator { get; set; } = "; ";
     }
 #pragma warning restore 1591
 }

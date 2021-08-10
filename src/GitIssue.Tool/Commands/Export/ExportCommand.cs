@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using GitIssue.Formatters;
+using GitIssue.Issues;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -27,7 +30,25 @@ namespace GitIssue.Tool.Commands.Export
         /// <inheritdoc />
         public override async Task Exec(ExportOptions options)
         {
-            var formatter = TerminalFormatter.Detailed;
+            switch (Path.GetExtension(options.Export))
+            {
+                case ".json":
+                    await exportJson(options);
+                    break;
+
+                case ".csv":
+                    await exportCsv(options);
+                    break;
+            }
+        }
+
+        public async Task exportJson(ExportOptions options)
+        {
+            if (File.Exists(options.Export) && options.Overwrite == false)
+            {
+                this.logger.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
+                return;
+            }
 
             JObject json = new JObject();
             await foreach (var issue in manager.FindAsync(i => true))
@@ -38,6 +59,17 @@ namespace GitIssue.Tool.Commands.Export
                 }
             }
 
+            await using var stream = new FileStream(options.Export, FileMode.Create, FileAccess.ReadWrite);
+            using JsonWriter writer = new JsonTextWriter(new StreamWriter(stream));
+            var serializer = new JsonSerializer();
+            serializer.Formatting = Formatting.Indented;
+            serializer.Serialize(writer, json);
+
+            Console.WriteLine($"Exported issues to {options.Export}");
+        }
+
+        public async Task exportCsv(ExportOptions options)
+        {
             if (File.Exists(options.Export) && options.Overwrite == false)
             {
                 this.logger.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
@@ -45,10 +77,32 @@ namespace GitIssue.Tool.Commands.Export
             }
 
             await using var stream = new FileStream(options.Export, FileMode.Create, FileAccess.ReadWrite);
-            using JsonWriter writer = new JsonTextWriter(new StreamWriter(stream));
-            var serializer = new JsonSerializer();
-            serializer.Formatting = Formatting.Indented;
-            serializer.Serialize(writer, json);
+            using TextWriter writer = new StreamWriter(stream);
+
+            StringBuilder builder = new StringBuilder();
+            foreach (var field in manager.Configuration.Fields)
+            {
+                if (builder.Length != 0)
+                {
+                    builder.Append(options.Separator);
+                }
+                builder.Append(field.Key.ToString());
+            }
+            await writer.WriteLineAsync(builder.ToString());
+
+            await foreach (var issue in manager.FindAsync(i => true))
+            {
+                builder.Clear();
+                foreach(var field in manager.Configuration.Fields)
+                {
+                    if(builder.Length != 0)
+                    {
+                        builder.Append(options.Separator);
+                    }
+                    builder.Append(issue[field.Key].ToString());
+                }
+                await writer.WriteLineAsync(builder.ToString());
+            }
 
             Console.WriteLine($"Exported issues to {options.Export}");
         }
