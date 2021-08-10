@@ -25,7 +25,7 @@ git issue help
 ```
 
 # Compatibility
-This project runs on .NET Core 3.1 and is compatible with both Windows and Linux. 
+This project runs on .NET 5 and is compatible with both Windows and Linux. 
 
 ## Configuration
 
