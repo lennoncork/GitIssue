@@ -35,8 +35,14 @@
         /// </summary>
         Delete,
 
+
         /// <summary>
-        ///     Exports all issues into a JSON file
+        ///     Imports issues from a JSON or CSV file
+        /// </summary>
+        Import,
+
+        /// <summary>
+        ///     Exports all issues into a JSON or CSV file
         /// </summary>
         Export,
 

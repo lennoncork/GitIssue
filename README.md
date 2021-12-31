@@ -5,8 +5,11 @@ An 'in-source' issue management system built on GIT. Inspired by the great work 
 ![build](https://github.com/lennoncork/GitIssue/workflows/build/badge.svg?branch=master)
 
 # Quick Start
+
 To get started, clone this repository, build and configure an alias in GIT. 
+
 1) Clone the repository
+
 ```
 git clone git@github.com:lennoncork/GitIssue.git
 ```
@@ -25,6 +28,7 @@ git issue help
 ```
 
 # Compatibility
+
 This project runs on .NET 5 and is compatible with both Windows and Linux. 
 
 ## Configuration
@@ -34,9 +38,11 @@ The issue configuration is contained in the config.json file checked into source
 ## Help
 
 ### Initialization
+
 * `git issue init`: Create a new issues repository in the current directory.
 
 ### Work with an issue
+
 * `git issue create`: Create a new open issue.
 * `git issue track`: Tracks an existing issue, simplifies subsequent commands.
 * `git issue delete`: Create a specified or tracked issue.
@@ -45,11 +51,13 @@ The issue configuration is contained in the config.json file checked into source
 * `git issue commit`: Commits an issue to the repository.
 
 ### Help and debug
+
 * `git issue help`: Display help information about git issue.
 * `git issue fields`: Display the fields available in the issue repository.
 * `git issue export`: Dump the whole database in json format to stdout.
 * `git issue version`: Displays the version of the tool.
 
 ## Contributing
+
 This project is in it's early phases of development and contributions are very welcome. 
 

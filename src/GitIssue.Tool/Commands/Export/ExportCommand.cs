@@ -65,7 +65,7 @@ namespace GitIssue.Tool.Commands.Export
             serializer.Formatting = Formatting.Indented;
             serializer.Serialize(writer, json);
 
-            Console.WriteLine($"Exported issues to {options.Export}");
+            Console.WriteLine($"Exported {json.Count} issues to {options.Export}");
         }
 
         public async Task exportCsv(ExportOptions options)
@@ -90,6 +90,7 @@ namespace GitIssue.Tool.Commands.Export
             }
             await writer.WriteLineAsync(builder.ToString());
 
+            int count = 0;
             await foreach (var issue in manager.FindAsync(i => true))
             {
                 builder.Clear();
@@ -102,9 +103,10 @@ namespace GitIssue.Tool.Commands.Export
                     builder.Append(issue[field.Key].ToString());
                 }
                 await writer.WriteLineAsync(builder.ToString());
+                count++;
             }
 
-            Console.WriteLine($"Exported issues to {options.Export}");
+            Console.WriteLine($"Exported {count} issues to {options.Export}");
         }
     }
 }
