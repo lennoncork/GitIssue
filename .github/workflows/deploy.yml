@@ -12,6 +12,10 @@ jobs:
         with:
           clean: true
           fetch-depth: 0
+      - name: Setup
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
       - name: Push
         uses: cake-build/cake-action@v1
         with:

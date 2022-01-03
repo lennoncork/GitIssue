@@ -13,7 +13,7 @@ Task("Build")
     .IsDependentOn("Clean")
     .Does(() =>
     {
-        DotNetCoreBuild("./src/GitIssue.sln", new DotNetCoreBuildSettings
+        DotNetBuild("./src/GitIssue.sln", new DotNetBuildSettings
         {
             Configuration = configuration,
         });
@@ -23,7 +23,7 @@ Task("Test")
     .IsDependentOn("Build")
     .Does(() =>
     {
-        DotNetCoreTest("./src/GitIssue.sln", new DotNetCoreTestSettings
+        DotNetTest("./src/GitIssue.sln", new DotNetTestSettings
         {
             Configuration = configuration,
             NoBuild = true,
@@ -34,7 +34,7 @@ Task("Publish")
     .IsDependentOn("Test")
     .Does(() =>
     {
-        DotNetCorePublish("src/GitIssue.Tool/GitIssue.Tool.csproj", new DotNetCorePublishSettings
+        DotNetPublish("src/GitIssue.Tool/GitIssue.Tool.csproj", new DotNetPublishSettings
         {
             Framework = "net5.0",
             Runtime = "win10-x64",
@@ -51,7 +51,7 @@ Task("Package")
     .IsDependentOn("Build")
     .Does(() =>
     {
-        DotNetCorePack("src/GitIssue.sln", new DotNetCorePackSettings
+        DotNetPack("src/GitIssue.sln", new DotNetPackSettings
         {
             Configuration = "Release",
             OutputDirectory = "./.packages/",

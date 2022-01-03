@@ -18,17 +18,17 @@
   </PropertyGroup>
 
   <PropertyGroup>
-	<Description>An 'in-source' issue management system built on GIT.</Description>
-	<ProjectUrl>https://github.com/lennoncork/GitIssue</ProjectUrl>
-	<License>MIT</License>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<RepositoryType>GIT</RepositoryType>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>An 'in-source' issue management system built on GIT.</Description>
+    <ProjectUrl>https://github.com/lennoncork/GitIssue</ProjectUrl>
+    <License>MIT</License>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>GIT</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
-	<None Include="..\..\LICENSE.md" Link="Properties\LICENSE.md" Pack="true" PackagePath="docs\"/>
-	<None Include="..\..\README.md" Link="Properties\README.md" Pack="true" PackagePath="docs\"/>
+	  <None Include="..\..\LICENSE.md" Link="Properties\LICENSE.md" Pack="true" PackagePath="docs\"/>
+	  <None Include="..\..\README.md" Link="Properties\README.md" Pack="true" PackagePath="docs\"/>
   </ItemGroup>
 
   <PropertyGroup>
