@@ -61,3 +61,5 @@ The issue configuration is contained in the config.json file checked into source
 
 This project is in it's early phases of development and contributions are very welcome. 
 
+## Thanks
+Thank you to [JetBrains](https://www.jetbrains.com/) for providing developers with an Open Source License for [ReSharper](https://www.jetbrains.com/resharper/).
