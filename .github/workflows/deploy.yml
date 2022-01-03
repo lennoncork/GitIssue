@@ -5,11 +5,7 @@ on:
 
 jobs:
   push:
-    runs-on: ${{ matrix.os }}
-    environment: Nuget Deploy
-    strategy:
-      matrix:
-        os: [windows-latest]
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -20,3 +16,5 @@ jobs:
         uses: cake-build/cake-action@v1
         with:
           target: Push
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
