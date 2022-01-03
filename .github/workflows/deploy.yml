@@ -6,6 +6,7 @@ on:
 jobs:
   push:
     runs-on: ${{ matrix.os }}
+    environment: Nuget Deploy
     strategy:
       matrix:
         os: [windows-latest]
