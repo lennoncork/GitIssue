@@ -1,8 +1,6 @@
 ﻿using CommandLine;
-using GitIssue.Issues;
-using GitIssue.Tool.Commands.Track;
 
-namespace GitIssue.Tool.Commands.Create
+namespace GitIssue.Tool.Commands.Changes
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Changes), HelpText = "Shows the change log")]

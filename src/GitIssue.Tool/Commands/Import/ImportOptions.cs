@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Tool.Commands.Export
+namespace GitIssue.Tool.Commands.Import
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Import), HelpText = "Imports issues from a JSON or CSV file")]

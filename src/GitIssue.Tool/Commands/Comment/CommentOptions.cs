@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace GitIssue.Tool.Commands.Add
+namespace GitIssue.Tool.Commands.Comment
 {
 #pragma warning disable 1591
     [Verb(nameof(CommandType.Comment), HelpText = "Add a new comment to an existing issue")]

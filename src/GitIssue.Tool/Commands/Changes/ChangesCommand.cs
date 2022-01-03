@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using GitIssue.Formatters;
-using GitIssue.Issues;
-using GitIssue.Tool.Commands.Track;
+﻿using GitIssue.Formatters;
 using Serilog;
+using System;
+using System.Threading.Tasks;
 
-namespace GitIssue.Tool.Commands.Create
+namespace GitIssue.Tool.Commands.Changes
 {
     /// <summary>
     ///     Create Command

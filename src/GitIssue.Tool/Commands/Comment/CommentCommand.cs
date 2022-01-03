@@ -1,14 +1,12 @@
-﻿using System;
+﻿using GitIssue.Fields;
+using GitIssue.Fields.Array;
+using Serilog;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using GitIssue.Fields;
-using GitIssue.Fields.Array;
-using GitIssue.Formatters;
-using Serilog;
-
 using String = GitIssue.Values.String;
 
-namespace GitIssue.Tool.Commands.Add
+namespace GitIssue.Tool.Commands.Comment
 {
     /// <summary>
     ///     Edit command
