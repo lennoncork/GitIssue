@@ -1,0 +1,21 @@
+name: deploy
+
+on:
+  deployment:
+
+jobs:
+  push:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          clean: true
+          fetch-depth: 0
+      - name: Push
+        uses: cake-build/cake-action@v1
+        with:
+          target: Push
