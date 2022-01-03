@@ -48,15 +48,36 @@ Task("Publish")
     });
 
 Task("Package")
-    .IsDependentOn("Test")
+    .IsDependentOn("Build")
     .Does(() =>
     {
         DotNetCorePack("src/GitIssue.sln", new DotNetCorePackSettings
         {
             Configuration = "Release",
-            OutputDirectory = "./.packages/"
+            OutputDirectory = "./.packages/",
+            NoBuild = true,
         });
     });
+
+Task("Push")
+    .IsDependentOn("Package")
+    .Does(() => 
+{
+    // Make sure that there is an API key.
+    var apiKey =  EnvironmentVariable("NUGET_API_KEY");
+    if (string.IsNullOrWhiteSpace(apiKey)) {
+        throw new CakeException("No NuGet API key specified.");
+    }
+
+    foreach(var file in GetFiles("./.packages/*.nupkg"))
+    {
+        Information("Publishing {0}...", file.FullPath);
+        NuGetPush(file, new NuGetPushSettings {
+            ApiKey = apiKey,
+            Source = "https://api.nuget.org/v3/index.json"
+        });
+    }
+});
 
 Task("Default")
     .IsDependentOn("Clean")
