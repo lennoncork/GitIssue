@@ -1,11 +1,11 @@
-﻿using GitIssue.Fields;
-using GitIssue.Issues;
-using Serilog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GitIssue.Fields;
+using GitIssue.Issues;
+using Serilog;
 
 namespace GitIssue.Tool.Commands.Import
 {
@@ -47,32 +47,32 @@ namespace GitIssue.Tool.Commands.Import
             using TextReader reader = new StreamReader(stream);
 
             string? header = await reader.ReadLineAsync();
-            if(header == null)
+            if (header == null)
             {
                 return;
             }
 
             var fields = header.Split(options.Separator);
             var mapping = new Dictionary<FieldKey, int>();
-            foreach(var field in manager.Configuration.Fields)
+            foreach (var field in manager.Configuration.Fields)
             {
                 int? index = fields.Select((f, i) => new { Field = f, Index = i })
                     .Where(x => x.Field == field.Key.ToString())
                     .Select(x => (int?)x.Index)
                     .FirstOrDefault();
 
-                if(index.HasValue)
+                if (index.HasValue)
                 {
                     mapping[field.Key] = index.Value;
                 }
             }
 
-            if(mapping.ContainsKey("Key") == false)
+            if (mapping.ContainsKey("Key") == false)
             {
                 return;
             }
 
-            foreach(var map in mapping)
+            foreach (var map in mapping)
             {
                 Console.WriteLine($"[{map.Value}] => {map.Key}");
             }
@@ -88,7 +88,7 @@ namespace GitIssue.Tool.Commands.Import
                 }
 
                 var import = line.Split(options.Separator);
-                if(import.Length != fields.Length)
+                if (import.Length != fields.Length)
                 {
                     continue;
                 }
@@ -100,7 +100,7 @@ namespace GitIssue.Tool.Commands.Import
                     Console.WriteLine($"Updating {import[mapping["Key"]]}");
                     break;
                 }
-                if(issue == null)
+                if (issue == null)
                 {
                     Console.WriteLine($"Creating {import[mapping["Key"]]}");
                     issue = await manager.CreateAsync(import[mapping["Title"]]);

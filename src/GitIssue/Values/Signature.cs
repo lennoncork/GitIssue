@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Net.Mail;
 using System.Text.RegularExpressions;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json.Linq;
@@ -91,7 +90,7 @@ namespace GitIssue.Values
         /// <param name="value"></param>
         public static implicit operator Signature(LibGit2Sharp.Signature value)
         {
-            if(value == null || value.Name == null || value.Email == null)
+            if (value == null || value.Name == null || value.Email == null)
                 return Signature.Invalid;
             return new Signature(value.Name, value.Email);
         }

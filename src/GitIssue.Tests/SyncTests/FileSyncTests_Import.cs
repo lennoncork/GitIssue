@@ -14,7 +14,7 @@ namespace GitIssue.Tests.SyncTests
             [Test]
             public async Task ImportsIssue()
             {
-                var issue_file = Path.Combine(TestContext.CurrentContext.TestDirectory, 
+                var issue_file = Path.Combine(TestContext.CurrentContext.TestDirectory,
                     "SyncTests", "ImportFiles", "jira-issue.json");
 
                 var config_file = Path.Combine(TestContext.CurrentContext.TestDirectory,

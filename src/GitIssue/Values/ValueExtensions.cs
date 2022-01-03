@@ -21,13 +21,13 @@ namespace GitIssue.Values
                 var converter = TypeDescriptor.GetConverter(typeof(T2));
                 if (converter.CanConvertFrom(typeof(T1)))
                 {
-                    value = (T2) converter.ConvertFrom(input);
+                    value = (T2)converter.ConvertFrom(input);
                     return true;
                 }
 
                 if (converter.CanConvertFrom(typeof(string)))
                 {
-                    value = (T2) converter.ConvertFrom(input?.ToString());
+                    value = (T2)converter.ConvertFrom(input?.ToString());
                     return true;
                 }
             }

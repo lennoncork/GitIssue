@@ -7,7 +7,7 @@ namespace GitIssue.Values
     /// </summary>
     public interface IValue
     {
-        
+
     }
 
     /// <summary>

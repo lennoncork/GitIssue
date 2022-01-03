@@ -24,7 +24,7 @@ namespace GitIssue.Tests.ValueTests
         public object UseConverter(object input)
         {
             var converter = TypeDescriptor.GetConverter(typeof(TValue));
-            if (converter.CanConvertFrom(input.GetType())) 
+            if (converter.CanConvertFrom(input.GetType()))
                 return converter.ConvertFrom(input);
             Assert.Fail($"Failed to convert from {input.GetType()} to {typeof(TValue)}");
             return default!;
@@ -32,7 +32,7 @@ namespace GitIssue.Tests.ValueTests
 
         public TValue UseConverter<TIn>(TIn input)
         {
-            return (TValue) UseConverter((object) input!);
+            return (TValue)UseConverter((object)input!);
         }
 
         public new virtual bool Equals(object first, object second)

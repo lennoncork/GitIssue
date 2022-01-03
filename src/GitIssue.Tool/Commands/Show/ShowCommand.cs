@@ -29,7 +29,7 @@ namespace GitIssue.Tool.Commands.Show
             var formatter = new TerminalFormatter("%*");
 
             IAsyncEnumerable<IIssue> issues;
-            switch(options.Show)
+            switch (options.Show)
             {
                 case ShowSubCommand.tracked:
                 case ShowSubCommand.Tracked:
@@ -55,14 +55,14 @@ namespace GitIssue.Tool.Commands.Show
             }
 
             int count = 0;
-            await foreach(var issue in issues)
+            await foreach (var issue in issues)
             {
                 if (count++ > 0) Console.WriteLine();
                 Console.WriteLine(issue.Format(formatter));
             }
 
-            if(count == 0)
-            {   
+            if (count == 0)
+            {
                 Console.WriteLine("No issues to show");
             }
         }

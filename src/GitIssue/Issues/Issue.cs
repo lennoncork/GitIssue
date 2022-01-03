@@ -1,17 +1,16 @@
-﻿using System.Dynamic;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Dynamic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using GitIssue.Fields;
-using GitIssue.Values;
-using GitIssue.Fields.Value;
 using GitIssue.Fields.Array;
-using System.Linq;
-
-using String = GitIssue.Values.String;
+using GitIssue.Fields.Value;
+using GitIssue.Values;
 using DateTime = GitIssue.Values.DateTime;
+using String = GitIssue.Values.String;
 
 namespace GitIssue.Issues
 {
@@ -136,7 +135,7 @@ namespace GitIssue.Issues
             GetMemberBinder binder, out object result)
         {
             FieldKey key = FieldKey.Create(binder.Name);
-            if(TryGetValue(key, out var field))
+            if (TryGetValue(key, out var field))
             {
                 result = field;
                 return true;
@@ -154,7 +153,7 @@ namespace GitIssue.Issues
             {
                 if (field is IValueField valueField)
                 {
-                    if(value?.GetType() == valueField.ValueType)
+                    if (value?.GetType() == valueField.ValueType)
                     {
                         valueField.Value = value;
                     }

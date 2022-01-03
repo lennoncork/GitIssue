@@ -1,13 +1,13 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using GitIssue.Fields;
 using GitIssue.Formatters;
 using GitIssue.Issues;
 using Humanizer;
 using Pastel;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 
 namespace GitIssue.Tool
 {

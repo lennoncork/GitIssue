@@ -69,17 +69,17 @@ namespace GitIssue.Issues.File
 
             foreach (var year in Directory.EnumerateDirectories(root.IssuesPath)
                 .Select(d => new DirectoryInfo(d)))
-            foreach (var month in Directory.EnumerateDirectories(year.FullName)
-                .Select(d => new DirectoryInfo(d)))
-            foreach (var day in Directory.EnumerateDirectories(month.FullName)
-                .Select(d => new DirectoryInfo(d)))
-            foreach (var id in Directory.EnumerateDirectories(day.FullName)
-                .Select(d => new DirectoryInfo(d)))
-            {
-                var path = Path.Combine(year.Name, month.Name, day.Name, id.Name);
-                if (TryGetKey(path, out var key))
-                    keys.Add(key);
-            }
+                foreach (var month in Directory.EnumerateDirectories(year.FullName)
+                    .Select(d => new DirectoryInfo(d)))
+                    foreach (var day in Directory.EnumerateDirectories(month.FullName)
+                        .Select(d => new DirectoryInfo(d)))
+                        foreach (var id in Directory.EnumerateDirectories(day.FullName)
+                            .Select(d => new DirectoryInfo(d)))
+                        {
+                            var path = Path.Combine(year.Name, month.Name, day.Name, id.Name);
+                            if (TryGetKey(path, out var key))
+                                keys.Add(key);
+                        }
 
             return keys;
         }

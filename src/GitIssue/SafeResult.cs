@@ -159,7 +159,7 @@ namespace GitIssue
             if (throwIfFailed == false)
                 return default!;
 
-            if(this.Exception == null)
+            if (this.Exception == null)
                 throw new SafeResultException("Task execution failed");
             throw new SafeResultException("Task execution failed", this.Exception);
         }

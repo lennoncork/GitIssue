@@ -48,7 +48,7 @@ namespace GitIssue.Issues.Json
         /// </summary>
         /// <param name="root">the issue root</param>
         /// <param name="fields">the issue's fields</param>
-        public JsonIssue(IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) : 
+        public JsonIssue(IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) :
             base(root)
         {
             this.fields = fields.ToDictionary(f => f.Key,

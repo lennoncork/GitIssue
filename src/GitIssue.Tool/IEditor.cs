@@ -9,7 +9,7 @@ namespace GitIssue.Tool
     ///     Editor interface
     /// </summary>
     public interface IEditor
-    { 
+    {
         /// <summary>
         /// Edits existing content
         /// </summary>

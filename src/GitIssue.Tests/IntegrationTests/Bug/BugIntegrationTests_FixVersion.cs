@@ -20,9 +20,9 @@ namespace GitIssue.Tests.IntegrationTests.Bug
                     .CreateAsync(nameof(CanBeSetFromString), string.Empty)
                     .WithSafeResultAsync()
                     .AssertIfNotSuccess();
-                
+
                 var fixVersion = Version.Parse("1.2.3-abs+def");
-                create.SetFixVersion(new[] {fixVersion});
+                create.SetFixVersion(new[] { fixVersion });
 
                 await create
                     .SaveAsync()

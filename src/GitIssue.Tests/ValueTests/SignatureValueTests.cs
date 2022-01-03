@@ -131,7 +131,7 @@ namespace GitIssue.Tests.ValueTests
                 {
                     yield return new TestCaseData(Signature.Parse("Foo Bar <foo.bar@gmail.com>"), Signature.Parse("Foo Bar <foo.bar@gmail.com>"))
                         .Returns(true)
-                        .SetName("ReturnsTrueForSameSignature"); 
+                        .SetName("ReturnsTrueForSameSignature");
                     yield return new TestCaseData(Signature.Parse("Foo Bar <foo.bar@gmail.com>"), Signature.Parse("Bar Foo <bar.foo@gmail.com>"))
                         .Returns(false)
                         .SetName("ReturnsFalseForDifferentSignature");

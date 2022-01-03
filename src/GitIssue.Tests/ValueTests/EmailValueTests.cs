@@ -151,7 +151,7 @@ namespace GitIssue.Tests.ValueTests
                 {
                     yield return new TestCaseData(Email.Parse("foo.bar@gmail.com"), Email.Parse("foo.bar@gmail.com"))
                         .Returns(true)
-                        .SetName("ReturnsTrueForSameEmail"); 
+                        .SetName("ReturnsTrueForSameEmail");
                     yield return new TestCaseData(Email.Parse("foo.bar@gmail.com"), Email.Parse("bar.foo@gmail.com"))
                         .Returns(false)
                         .SetName("ReturnsFalseForDifferentEmail");

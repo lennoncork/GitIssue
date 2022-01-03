@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using GitIssue.Fields;
 using GitIssue.Issues;
 using Moq;
@@ -62,9 +60,9 @@ namespace GitIssue.Tests
             moq.Setup(i => i.TryGetValue(It.IsAny<FieldKey>(), out tryGetResult))
                 .Callback(new MockOutDelegate<FieldKey, IField>((FieldKey key, out IField output) =>
                 {
-                   tryGetFieldKey = key;
-                   fields.TryGetValue(key, out tryGetResult);
-                   output = tryGetResult ?? new EmptyField(key);
+                    tryGetFieldKey = key;
+                    fields.TryGetValue(key, out tryGetResult);
+                    output = tryGetResult ?? new EmptyField(key);
                 }))
                 .Returns(() =>
                 {
@@ -94,7 +92,7 @@ namespace GitIssue.Tests
                 if (field.Key == nameof(IIssue.Updated))
                     moq.Setup(i => i.Updated).Returns(DateTime.Parse(field.ToString() ?? string.Empty));
             }
-            
+
             return moq.Object;
         }
 

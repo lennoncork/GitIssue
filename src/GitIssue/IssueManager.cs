@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using GitIssue.Issues;
-using GitIssue.Issues.File;
-using GitIssue.Values;
 using LibGit2Sharp;
 using Serilog;
-using Serilog.Core;
 
 namespace GitIssue
 {
@@ -87,9 +83,9 @@ namespace GitIssue
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
         public IssueManager(
-            ILogger logger, 
-            RepositoryRoot root, 
-            IRepository repository, 
+            ILogger logger,
+            RepositoryRoot root,
+            IRepository repository,
             IIssueKeyProvider provider,
             IIssueConfiguration configuration,
             IChangeLog changeLog,
@@ -157,7 +153,7 @@ namespace GitIssue
 
             foreach (var item in Repository.RetrieveStatus(new StatusOptions()
             {
-                PathSpec = new[] { $"{Path.GetRelativePath(Root.RootPath, Root.IssuesPath)}/*"  },
+                PathSpec = new[] { $"{Path.GetRelativePath(Root.RootPath, Root.IssuesPath)}/*" },
                 IncludeIgnored = true,
                 IncludeUntracked = true,
                 RecurseIgnoredDirs = true,
@@ -391,7 +387,7 @@ namespace GitIssue
 
             var root = RepositoryRoot.Create(directory, name);
             configuration.Save(root.ConfigFile);
-            
+
             var builder = new ContainerBuilder();
             builder.Register(c => root).As<RepositoryRoot>().SingleInstance();
             builder.Register(c => configuration).As<IIssueConfiguration>().SingleInstance();

@@ -1,7 +1,7 @@
-﻿using GitIssue.Formatters;
-using Serilog;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using GitIssue.Formatters;
+using Serilog;
 
 namespace GitIssue.Tool.Commands.Changes
 {
@@ -11,7 +11,7 @@ namespace GitIssue.Tool.Commands.Changes
     public class ChangesCommand : Command<ChangesOptions>
     {
         private readonly Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => IssueFormatter.Detailed);
-        
+
         private readonly ILogger logger;
 
         private readonly IIssueManager manager;

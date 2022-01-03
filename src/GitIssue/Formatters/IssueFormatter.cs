@@ -27,7 +27,7 @@ namespace GitIssue.Formatters
         private readonly Dictionary<string, Func<IIssueFormatter, IReadOnlyField, string>> fieldFormatters =
             new Dictionary<string, Func<IIssueFormatter, IReadOnlyField, string>>
             {
-                
+
             };
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace GitIssue.Formatters
         /// <param name="issueFormatters">the collection of issue formatters</param>
         /// <param name="fieldFormatters">the collection of issue formatters</param>
         public IssueFormatter(
-            string format, 
+            string format,
             Dictionary<string, Func<IIssueFormatter, IReadOnlyIssue, string>> issueFormatters,
             Dictionary<string, Func<IIssueFormatter, IReadOnlyField, string>> fieldFormatters)
         {
@@ -89,7 +89,7 @@ namespace GitIssue.Formatters
             var regex = new Regex(matcher, RegexOptions.Compiled);
             foreach (Match? match in regex.Matches(format))
             {
-                if (match == null) 
+                if (match == null)
                     continue;
 
                 var property = match.Value.TrimStart('%');

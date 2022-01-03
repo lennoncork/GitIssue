@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using Autofac;
-using Autofac.Core;
-using Autofac.Core.Registration;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
 using LibGit2Sharp;

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using GitIssue.Values;
 
 namespace GitIssue.Fields.Array
@@ -40,9 +39,9 @@ namespace GitIssue.Fields.Array
                     return;
 
                 this.values.Clear();
-                foreach(var v in value)
+                foreach (var v in value)
                 {
-                    if(v is T result)
+                    if (v is T result)
                     {
                         this.values.Add(result);
                     }
@@ -57,24 +56,24 @@ namespace GitIssue.Fields.Array
             set => values = new List<T>(value);
         }
 
-        bool IList.IsFixedSize => ((IList) values).IsFixedSize;
+        bool IList.IsFixedSize => ((IList)values).IsFixedSize;
 
         /// <inheritdoc />
-        bool IList.IsReadOnly => ((IList) values).IsReadOnly;
+        bool IList.IsReadOnly => ((IList)values).IsReadOnly;
 
         /// <inheritdoc />
-        int ICollection.Count => ((ICollection) values).Count;
+        int ICollection.Count => ((ICollection)values).Count;
 
         /// <inheritdoc />
-        bool ICollection.IsSynchronized => ((ICollection) values).IsSynchronized;
+        bool ICollection.IsSynchronized => ((ICollection)values).IsSynchronized;
 
         /// <inheritdoc />
-        object ICollection.SyncRoot => ((ICollection) values).SyncRoot;
+        object ICollection.SyncRoot => ((ICollection)values).SyncRoot;
 
         /// <inheritdoc />
         public int Count => values.Count;
 
-        bool ICollection<T>.IsReadOnly => ((ICollection<T>) values).IsReadOnly;
+        bool ICollection<T>.IsReadOnly => ((ICollection<T>)values).IsReadOnly;
 
         /// <inheritdoc />
         public T this[int index]
@@ -86,8 +85,8 @@ namespace GitIssue.Fields.Array
         /// <inheritdoc />
         object? IList.this[int index]
         {
-            get => ((IList) values)[index];
-            set => ((IList) values)[index] = value;
+            get => ((IList)values)[index];
+            set => ((IList)values)[index] = value;
         }
 
         /// <inheritdoc />
@@ -145,7 +144,7 @@ namespace GitIssue.Fields.Array
         /// <inheritdoc />
         int IList.Add(object? value)
         {
-            return ((IList) values).Add(value);
+            return ((IList)values).Add(value);
         }
 
         /// <inheritdoc />
@@ -157,29 +156,29 @@ namespace GitIssue.Fields.Array
         /// <inheritdoc />
         bool IList.Contains(object? value)
         {
-            return ((IList) values).Contains(value);
+            return ((IList)values).Contains(value);
         }
 
         /// <inheritdoc />
         int IList.IndexOf(object? value)
         {
-            return ((IList) values).IndexOf(value);
+            return ((IList)values).IndexOf(value);
         }
 
         /// <inheritdoc />
         void IList.Insert(int index, object? value)
         {
-            ((IList) values).Insert(index, value);
+            ((IList)values).Insert(index, value);
         }
 
         void IList.Remove(object? value)
         {
-            ((IList) values).Remove(value);
+            ((IList)values).Remove(value);
         }
 
         void ICollection.CopyTo(System.Array array, int index)
         {
-            ((IList) values).CopyTo(array, index);
+            ((IList)values).CopyTo(array, index);
         }
 
         /// <inheritdoc />

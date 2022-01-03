@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace GitIssue.Tests
@@ -17,7 +14,7 @@ namespace GitIssue.Tests
         public static async Task<T> AssertIfNotSuccess<T>(this Task<SafeResult<T>> result)
         {
             var safe = await result;
-            if(safe.IsSuccess == false && safe.Exception != null)
+            if (safe.IsSuccess == false && safe.Exception != null)
             {
                 TestContext.Out.Write(safe.Exception);
             }

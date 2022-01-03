@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using GitIssue.Fields;
 using GitIssue.Values;
-
-using String = GitIssue.Values.String;
 using DateTime = GitIssue.Values.DateTime;
+using String = GitIssue.Values.String;
 
 namespace GitIssue.Issues
 {

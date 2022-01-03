@@ -47,9 +47,9 @@ namespace GitIssue.Fields
         public void WithField(IField updated)
         {
             var field = callback?.Invoke();
-            if(field?.GetType() == updated.GetType())
+            if (field?.GetType() == updated.GetType())
             {
-                
+
             }
 
         }

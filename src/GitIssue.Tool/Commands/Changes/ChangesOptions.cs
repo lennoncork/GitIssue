@@ -6,7 +6,7 @@ namespace GitIssue.Tool.Commands.Changes
     [Verb(nameof(CommandType.Changes), HelpText = "Shows the change log")]
     public class ChangesOptions : Options
     {
-        
+
     }
 #pragma warning restore 1591
 }

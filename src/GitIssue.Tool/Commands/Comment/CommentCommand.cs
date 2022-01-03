@@ -1,9 +1,9 @@
-﻿using GitIssue.Fields;
-using GitIssue.Fields.Array;
-using Serilog;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using GitIssue.Fields;
+using GitIssue.Fields.Array;
+using Serilog;
 using String = GitIssue.Values.String;
 
 namespace GitIssue.Tool.Commands.Comment
@@ -23,7 +23,7 @@ namespace GitIssue.Tool.Commands.Comment
 
         public CommentCommand(IIssueManager manager, IEditor editor, ILogger logger)
         {
-            this.manager = manager; 
+            this.manager = manager;
             this.editor = editor;
             this.logger = logger;
         }
@@ -55,9 +55,9 @@ namespace GitIssue.Tool.Commands.Comment
             }
 
             var key = FieldKey.Create(CommentField);
-            if(issue.TryGetValue(key, out var field))
+            if (issue.TryGetValue(key, out var field))
             {
-                if(field is IArrayField arrayField)
+                if (field is IArrayField arrayField)
                 {
                     if (arrayField.TryParse(options.Comment, out var value))
                     {

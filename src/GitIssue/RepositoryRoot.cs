@@ -23,8 +23,8 @@ namespace GitIssue
         /// <summary>
         ///     Gets the issue path
         /// </summary>
-        public string IssuesPath => this.Name == null ? 
-            this.RootPath : 
+        public string IssuesPath => this.Name == null ?
+            this.RootPath :
             Path.Combine(this.RootPath, Name);
 
         /// <summary>
@@ -96,10 +96,10 @@ namespace GitIssue
         {
             var current = new DirectoryInfo(directory);
 
-            if(name == null)
+            if (name == null)
                 return new RepositoryRoot(current.FullName);
 
-            if (IsIssueRoot(current, name, out var issues)) 
+            if (IsIssueRoot(current, name, out var issues))
                 return new RepositoryRoot(current.FullName, name);
 
             throw new RepositoryNotFoundException($"Failed to open directory {directory} as issue root");
@@ -116,9 +116,9 @@ namespace GitIssue
             var current = new DirectoryInfo(directory);
             while (TryGetParent(current, out var parent))
             {
-                if (IsIssueRoot(current, name, out var issues)) 
+                if (IsIssueRoot(current, name, out var issues))
                     return new RepositoryRoot(current.FullName, name);
-                current = parent;   
+                current = parent;
             }
             return None;
         }

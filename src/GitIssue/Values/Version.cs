@@ -129,7 +129,7 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public bool Equals(Version other)
         {
-            return 
+            return
                 MajorVersion == other.MajorVersion &&
                 MinorVersion == other.MinorVersion &&
                 PatchVersion == other.PatchVersion &&

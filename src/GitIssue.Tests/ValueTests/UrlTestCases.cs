@@ -150,7 +150,7 @@ namespace GitIssue.Tests.ValueTests
                 {
                     yield return new TestCaseData(Url.Parse("http://www.google.com/"), Url.Parse("http://www.google.com/"))
                         .Returns(true)
-                        .SetName("ReturnsTrueForSameUrl"); 
+                        .SetName("ReturnsTrueForSameUrl");
                     yield return new TestCaseData(Url.Parse("http://www.google.com/"), Url.Parse("http://www.apple.com/"))
                         .Returns(false)
                         .SetName("ReturnsFalseForDifferentUrl");

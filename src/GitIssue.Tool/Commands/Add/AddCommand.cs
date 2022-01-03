@@ -14,7 +14,7 @@ namespace GitIssue.Tool.Commands.Add
     public class AddCommand : Command<AddOptions>
     {
         private readonly ILogger logger;
-        
+
         private readonly IIssueManager manager;
 
         public AddCommand(IIssueManager manager, ILogger logger)
@@ -27,7 +27,7 @@ namespace GitIssue.Tool.Commands.Add
         public override async Task Exec(AddOptions options)
         {
             var formatter = IssueFormatter.Simple;
-            
+
             var issue = await manager
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();

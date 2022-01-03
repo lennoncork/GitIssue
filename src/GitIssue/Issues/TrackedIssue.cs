@@ -131,7 +131,7 @@ namespace GitIssue.Issues
                     using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
                     using var reader = new StreamReader(stream);
                     var serializer = new JsonSerializer();
-                    var tracked = (TrackedIssue) serializer.Deserialize(reader, typeof(TrackedIssue))!;
+                    var tracked = (TrackedIssue)serializer.Deserialize(reader, typeof(TrackedIssue))!;
                     return tracked;
                 }
             }

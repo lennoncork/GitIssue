@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GitIssue.Tool.Commands.Show
+﻿namespace GitIssue.Tool.Commands.Show
 {
     public enum ShowSubCommand
     {

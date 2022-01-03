@@ -29,14 +29,14 @@ namespace GitIssue.Issues.File
             try
             {
                 var generic = typeof(FileArrayField<>);
-                var specific = generic.MakeGenericType((Type) info.ValueType);
+                var specific = generic.MakeGenericType((Type)info.ValueType);
                 var read = specific.GetMethod(nameof(ReadAsync), BindingFlags.Public | BindingFlags.Static);
                 if (read != null)
                 {
-                    object[] args = {issueRoot, key, info};
-                    var task = (Task) read.Invoke(null, args)!;
+                    object[] args = { issueRoot, key, info };
+                    var task = (Task)read.Invoke(null, args)!;
                     await task;
-                    var result = (IField) task.GetType().GetProperty("Result")?.GetValue(task)!;
+                    var result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
                     return result;
                 }
 

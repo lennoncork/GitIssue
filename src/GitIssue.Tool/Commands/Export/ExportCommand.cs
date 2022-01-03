@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using GitIssue.Formatters;
-using GitIssue.Issues;
 using GitIssue.Issues.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -94,9 +91,9 @@ namespace GitIssue.Tool.Commands.Export
             await foreach (var issue in manager.FindAsync(i => true))
             {
                 builder.Clear();
-                foreach(var field in manager.Configuration.Fields)
+                foreach (var field in manager.Configuration.Fields)
                 {
-                    if(builder.Length != 0)
+                    if (builder.Length != 0)
                     {
                         builder.Append(options.Separator);
                     }

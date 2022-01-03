@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
 using GitIssue.Values;
 
 namespace GitIssue.Fields.Value
@@ -27,8 +26,8 @@ namespace GitIssue.Fields.Value
         /// <inheritdoc />
         public T Value { get; set; }
 
-        object? IValueField.Value 
-        { 
+        object? IValueField.Value
+        {
             get => Value;
             set
             {

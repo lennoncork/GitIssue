@@ -23,7 +23,7 @@ namespace GitIssue.Values
             aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
                 .Where(IsAlias)
                 .Where(IsParameterless)
-                .Select(t => (ITypeAlias) Activator.CreateInstance(t)!)
+                .Select(t => (ITypeAlias)Activator.CreateInstance(t)!)
                 .Where(IsNotNull));
 
             aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
@@ -194,7 +194,7 @@ namespace GitIssue.Values
             if (IsAlias(type) && IsParameterless(type))
                 try
                 {
-                    alias = (ITypeAlias) Activator.CreateInstance(type)!;
+                    alias = (ITypeAlias)Activator.CreateInstance(type)!;
                     return true;
                 }
                 catch (Exception)

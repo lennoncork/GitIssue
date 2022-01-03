@@ -58,11 +58,11 @@ namespace GitIssue.Tool
             try
             {
                 var match = Regex.Match(command, "^\\s?([\\w.]+|\"[\\w\\s.]*\")\\s?(.*)?$");
-                if(match.Success)
-                    if(match.Groups.Count == 3)
+                if (match.Success)
+                    if (match.Groups.Count == 3)
                         return (match.Groups[1].ToString().Trim(), match.Groups[2].ToString().Trim());
             }
-            catch(Exception)
+            catch (Exception)
             {
                 // Ignored
             }
@@ -73,7 +73,7 @@ namespace GitIssue.Tool
         public async Task<string> Edit(string header, string content)
         {
             var temp = GetTempFile();
-            
+
             await File.AppendAllTextAsync(temp, $"{CommentChar} {header} {Newline}");
             await File.AppendAllTextAsync(temp, content);
             await File.AppendAllTextAsync(temp, FieldTemplate);
@@ -196,7 +196,7 @@ namespace GitIssue.Tool
         private static string RemoveComments(string input)
         {
             var comments = $@"^{CommentChar}(.*)$";
-            var lines = input.Split(new[] {"\r\n", "\r", "\n"}, StringSplitOptions.None)
+            var lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
                 .Where(l => Regex.IsMatch(l, comments) == false)
                 .ToArray();
             return string.Join(Newline, lines);

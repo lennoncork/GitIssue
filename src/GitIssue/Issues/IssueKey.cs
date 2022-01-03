@@ -3,7 +3,6 @@ using System.ComponentModel;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
 using Newtonsoft.Json.Linq;
-using String = System.String;
 
 namespace GitIssue.Issues
 {

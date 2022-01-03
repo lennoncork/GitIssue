@@ -37,7 +37,7 @@ namespace GitIssue.Issues.Json
             await using var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Read);
             using JsonReader reader = new JsonTextReader(new StreamReader(stream));
             var serializer = new JsonSerializer();
-            var json = (JObject) serializer.Deserialize(reader)!;
+            var json = (JObject)serializer.Deserialize(reader)!;
             return json;
         }
     }

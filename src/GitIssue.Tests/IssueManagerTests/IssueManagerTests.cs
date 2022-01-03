@@ -2,7 +2,7 @@
 
 namespace GitIssue.Tests.IssueManagerTests
 {
-    [TestFixture]   
+    [TestFixture]
     public partial class IssueManagerTests : TestsBase
     {
         private IIssueManager? sut;

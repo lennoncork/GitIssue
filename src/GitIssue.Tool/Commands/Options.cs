@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using CommandLine;
 using GitIssue.Issues;
-using GitIssue.Tool.Commands.Track;
 
 namespace GitIssue.Tool.Commands
 {

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -46,7 +45,7 @@ namespace GitIssue.Syncs
         /// <inheritdoc />
         public async IAsyncEnumerator<SyncedIssue> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
-            if(Directory.Exists(this.Root.ImportPath) == false)
+            if (Directory.Exists(this.Root.ImportPath) == false)
                 yield break;
 
             var files = Directory
@@ -130,7 +129,7 @@ namespace GitIssue.Syncs
                 synced = new SyncedIssue(this, issue.Key, importKey);
             }
 
-            if(await Import(issue, tokens))
+            if (await Import(issue, tokens))
             {
                 await issue.SaveAsync();
                 await synced.SaveAsync();

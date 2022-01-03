@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace GitIssue.Tests
 {
-    
+
     public class TestsBase
     {
         [SetUp]
@@ -28,7 +28,7 @@ namespace GitIssue.Tests
         public virtual void OneTimeSetup()
         {
             TestDirectory = Helpers.GetTestDirectory();
-            if (Directory.Exists(TestDirectory)) 
+            if (Directory.Exists(TestDirectory))
                 Directory.Delete(TestDirectory, true);
             Directory.CreateDirectory(TestDirectory);
         }

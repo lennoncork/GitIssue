@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using GitIssue.Fields.Value;
 using GitIssue.Formatters;
 using GitIssue.Issues;
-using GitIssue.Tool.Commands.Track;
 using GitIssue.Values;
 using Serilog;
 
@@ -17,7 +16,7 @@ namespace GitIssue.Tool.Commands.Create
     public class CreateCommand : Command<CreateOptions>
     {
         private Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => IssueFormatter.Detailed);
-        
+
         private readonly ILogger logger;
 
         private readonly IEditor editor;
@@ -29,7 +28,7 @@ namespace GitIssue.Tool.Commands.Create
         public CreateCommand(IIssueManager manager, IIssueConfiguration configuration, IEditor editor, ILogger logger)
         {
             this.manager = manager;
-            this.configuration = configuration; 
+            this.configuration = configuration;
             this.editor = editor;
             this.logger = logger;
         }
@@ -67,7 +66,7 @@ namespace GitIssue.Tool.Commands.Create
                 }
 
                 issue = await manager.CreateAsync(value.Item);
-                foreach(var field in fields)
+                foreach (var field in fields)
                 {
                     issue.SetField(field.Key).WithField(field);
                 }

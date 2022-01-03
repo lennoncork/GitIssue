@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Autofac;
 using CommandLine;
 using GitIssue.Issues;
-using GitIssue.Issues.File;
 using GitIssue.Tool.Commands;
 using GitIssue.Tool.Commands.Add;
 using GitIssue.Tool.Commands.Changes;
@@ -21,8 +20,6 @@ using GitIssue.Tool.Commands.Init;
 using GitIssue.Tool.Commands.Remove;
 using GitIssue.Tool.Commands.Show;
 using GitIssue.Tool.Commands.Track;
-using LibGit2Sharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Serilog;
 using CommitOptions = GitIssue.Tool.Commands.Commit.CommitOptions;
 
@@ -109,7 +106,7 @@ namespace GitIssue.Tool
                 .AsSelf();
 
             builder.RegisterModule<GitIssueModule>();
-            
+
             using var container = builder.Build();
 
             if (options is ITrackedOptions keyOptions)

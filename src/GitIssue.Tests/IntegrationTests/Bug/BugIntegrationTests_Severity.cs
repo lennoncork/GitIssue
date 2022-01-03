@@ -19,7 +19,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
                     .CreateAsync(nameof(CanBeSetFromString), string.Empty)
                     .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
-                var severity = new Enumerated("S1", new[] {"S1", "S2", "S3", "S4", "S5"});
+                var severity = new Enumerated("S1", new[] { "S1", "S2", "S3", "S4", "S5" });
                 create.Result.SetSeverity(severity);
                 await create.Result.SaveAsync();
                 var find = Issues.Find(i => i.Key == create.Result.Key).ToArray();

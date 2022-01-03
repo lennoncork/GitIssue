@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
-using GitIssue.Formatters;
 using Serilog;
 
 namespace GitIssue.Tool.Commands.Remove

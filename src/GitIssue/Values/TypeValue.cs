@@ -23,7 +23,7 @@ namespace GitIssue.Values
         {
             Type = type;
         }
-        
+
         /// <summary>
         /// Tries to create the type
         /// </summary>

@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using GitIssue.Formatters;
 using GitIssue.Issues;
-using GitIssue.Tool;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Serilog;

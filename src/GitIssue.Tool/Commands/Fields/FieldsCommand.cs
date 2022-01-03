@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
-using Serilog;
-using Pastel;
 using System.Drawing;
+using System.Threading.Tasks;
+using Pastel;
+using Serilog;
 
 namespace GitIssue.Tool.Commands.Fields
 {

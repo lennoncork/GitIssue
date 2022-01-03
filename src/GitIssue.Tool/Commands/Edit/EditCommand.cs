@@ -36,7 +36,7 @@ namespace GitIssue.Tool.Commands.Edit
         public override async Task Exec(EditOptions options)
         {
             var formatter = TerminalFormatter.Detailed;
-            
+
             var issue = await manager
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
