@@ -1,7 +1,7 @@
 name: deploy
 
 on:
-  deployment:
+  workflow_dispatch:
 
 jobs:
   push:
