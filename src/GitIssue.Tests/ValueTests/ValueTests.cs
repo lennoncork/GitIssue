@@ -25,7 +25,13 @@ namespace GitIssue.Tests.ValueTests
         {
             var converter = TypeDescriptor.GetConverter(typeof(TValue));
             if (converter.CanConvertFrom(input.GetType()))
-                return converter.ConvertFrom(input);
+            {
+                var result = converter.ConvertFrom(input);
+                if(result != null)
+                {
+                    return result;
+                }
+            }
             Assert.Fail($"Failed to convert from {input.GetType()} to {typeof(TValue)}");
             return default!;
         }
