@@ -10,7 +10,7 @@ namespace GitIssue.Issues
     public class IssuedKeyTypeConverter : TypeConverter
     {
         /// <inheritdoc />
-        public override bool CanConvertFrom(ITypeDescriptorContext context,
+        public override bool CanConvertFrom(ITypeDescriptorContext? context,
             Type sourceType)
         {
             if (sourceType == typeof(string)) return true;
@@ -18,16 +18,16 @@ namespace GitIssue.Issues
         }
 
         /// <inheritdoc />
-        public override object ConvertFrom(ITypeDescriptorContext context,
-            CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext? context,
+            CultureInfo? culture, object value)
         {
             if (value is string str) return IssueKey.Create(str);
             return base.ConvertFrom(context, culture, value);
         }
 
         /// <inheritdoc />
-        public override object ConvertTo(ITypeDescriptorContext context,
-            CultureInfo culture, object value, Type destinationType)
+        public override object? ConvertTo(ITypeDescriptorContext? context,
+            CultureInfo? culture, object? value, Type destinationType)
         {
             if (destinationType == typeof(string))
                 if (value is IssueKey key)

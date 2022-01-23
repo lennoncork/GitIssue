@@ -13,6 +13,12 @@
       "commands": [
         "dotnet-gitversion"
       ]
+    },
+    "gitissue.tool": {
+      "version": "0.1.1-alpha-01",
+      "commands": [
+        "gitissue"
+      ]
     }
   }
 }

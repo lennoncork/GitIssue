@@ -6,23 +6,45 @@ An 'in-source' issue management system built on GIT. Inspired by the great work 
 
 # Quick Start
 
-To get started, clone this repository, build and configure an alias in GIT. 
+## Using the dotnet tool
+
+To get the latest version as a dotnet tool
+
+1) Install the tool
+```
+dotnet tool install gitissue.tool
+```
+
+2) Try it out
+```
+dotnet gitissue help
+```
+
+## Building from source
+
+To build from source, clone this repository, build and configure an alias in GIT. 
 
 1) Clone the repository
 
 ```
 git clone git@github.com:lennoncork/GitIssue.git
 ```
+
 2) Build the GitIssue Tool
+
 ```
 dotnet tool restore
 dotnet cake
 ```
+
 3) Configure the git alias
 ```
+
 ./scripts/config-alias.sh
 ```
+
 4) Try it out
+
 ```
 git issue help
 ```
