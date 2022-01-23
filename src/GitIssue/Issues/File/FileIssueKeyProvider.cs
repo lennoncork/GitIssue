@@ -51,7 +51,7 @@ namespace GitIssue.Issues.File
 
         private string GetUniqueId(int length)
         {
-            using var sha = new SHA256Managed();
+            using var sha = SHA256.Create();
             var checksum = sha.ComputeHash(Guid.NewGuid().ToByteArray());
             var key = BitConverter.ToString(checksum)
                 .Replace("-", "")

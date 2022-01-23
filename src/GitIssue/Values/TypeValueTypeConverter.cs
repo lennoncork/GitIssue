@@ -10,7 +10,7 @@ namespace GitIssue.Values
     public class TypeValueTypeConverter : TypeConverter
     {
         /// <inheritdoc />
-        public override bool CanConvertFrom(ITypeDescriptorContext context,
+        public override bool CanConvertFrom(ITypeDescriptorContext? context,
             Type sourceType)
         {
             if (sourceType == typeof(string))
@@ -20,8 +20,8 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public override object? ConvertFrom(ITypeDescriptorContext context,
-            CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext? context,
+            CultureInfo? culture, object value)
         {
             if (value is string str)
                 if (TypeValue.TryParse(str, out var type))
@@ -31,8 +31,8 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public override object? ConvertTo(ITypeDescriptorContext context,
-            CultureInfo culture, object value, Type destinationType)
+        public override object? ConvertTo(ITypeDescriptorContext? context,
+            CultureInfo? culture, object? value, Type destinationType)
         {
             if (destinationType == typeof(string))
                 if (value is TypeValue type)
