@@ -18,7 +18,7 @@ namespace GitIssue.Tests
             {
                 TestContext.Out.Write(safe.Exception);
             }
-            Assert.That(safe.IsSuccess, Is.True, $"SafeResult was not successful, {safe.Exception?.Message}", safe);
+            Assert.That(safe.IsSuccess, Is.True, $"SafeResult was not successful, {safe.Exception?.Message}");
             return safe.Result;
         }
     }
