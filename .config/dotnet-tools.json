@@ -3,22 +3,25 @@
   "isRoot": true,
   "tools": {
     "cake.tool": {
-      "version": "2.0.0",
+      "version": "6.1.0",
       "commands": [
         "dotnet-cake"
-      ]
+      ],
+      "rollForward": false
     },
     "gitversion.tool": {
-      "version": "5.8.1",
+      "version": "6.6.2",
       "commands": [
         "dotnet-gitversion"
-      ]
+      ],
+      "rollForward": false
     },
     "gitissue.tool": {
       "version": "0.1.1-alpha-01",
       "commands": [
         "gitissue"
-      ]
+      ],
+      "rollForward": false
     }
   }
 }

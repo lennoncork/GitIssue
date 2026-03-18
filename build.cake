@@ -35,8 +35,8 @@ Task("Publish")
     {
         DotNetPublish("src/GitIssue.Tool/GitIssue.Tool.csproj", new DotNetPublishSettings
         {
-            Framework = "net6.0",
-            Runtime = "win10-x64",
+            Framework = "net10.0",
+            Runtime = "win-x64",
             PublishReadyToRun = false,
             PublishTrimmed = false,
             SelfContained = true,
