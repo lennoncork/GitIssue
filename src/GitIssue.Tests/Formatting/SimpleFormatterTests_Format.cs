@@ -1,4 +1,5 @@
 ﻿using GitIssue.Formatters;
+using GitIssue.Issues;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.Formatting
@@ -12,9 +13,9 @@ namespace GitIssue.Tests.Formatting
             [Test]
             public void FormatsIssue()
             {
-                var issue = Moqs.CreateIssue(nameof(FormatsIssue));
-                var output = issue.Format();
-                var expected = $"{issue.Key}: {issue.Title}";
+                IReadOnlyIssue issue = Moqs.CreateIssue(nameof(Format.FormatsIssue));
+                string output = issue.Format();
+                string expected = $"{issue.Key}: {issue.Title}";
                 Assert.That(output, Is.EqualTo(expected));
             }
         }

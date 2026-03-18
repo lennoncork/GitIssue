@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
+using GitIssue.Fields;
 using Pastel;
 using Serilog;
 
@@ -24,11 +26,12 @@ namespace GitIssue.Tool.Commands.Fields
         /// <inheritdoc />
         public override Task Exec(FieldsOptions options)
         {
-            foreach (var kvp in manager.Configuration.Fields)
+            foreach (KeyValuePair<FieldKey, FieldInfo> kvp in this.manager.Configuration.Fields)
             {
-                var output = $"{kvp.Key.ToString().Pastel(Color.FromArgb(165, 229, 250))}: A '{kvp.Value.FieldType}' field with '{kvp.Value.ValueType}' values";
+                string output = $"{kvp.Key.ToString().Pastel(Color.FromArgb(165, 229, 250))}: A '{kvp.Value.FieldType}' field with '{kvp.Value.ValueType}' values";
                 Console.WriteLine(output);
             }
+
             return Task.CompletedTask;
         }
     }

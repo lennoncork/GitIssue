@@ -21,7 +21,7 @@ namespace GitIssue.Issues.Json
         /// <returns></returns>
         public static async Task ExportAsJsonAsync(this IIssueManager manager, string path)
         {
-            await ExportAsJsonAsync(manager, path, AllIssues);
+            await manager.ExportAsJsonAsync(path, JsonIssueManagerExtensions.AllIssues);
         }
 
 
@@ -36,13 +36,18 @@ namespace GitIssue.Issues.Json
             Func<IIssue, bool> predicate)
         {
             await using Stream stream = System.IO.File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            await using var writer = new StreamWriter(stream);
-            using var text = new JsonTextWriter(writer);
+            await using StreamWriter writer = new StreamWriter(stream);
+            using JsonTextWriter text = new JsonTextWriter(writer);
             {
-                var json = new JObject();
-                await foreach (var issue in manager.FindAsync(predicate))
+                JObject json = new JObject();
+                await foreach (IIssue issue in manager.FindAsync(predicate))
+                {
                     if (issue is IJsonIssue jsonIssue)
+                    {
                         json[issue.Key.ToString()] = jsonIssue.ToJson();
+                    }
+                }
+
                 text.Formatting = Formatting.Indented;
                 await json.WriteToAsync(text);
             }

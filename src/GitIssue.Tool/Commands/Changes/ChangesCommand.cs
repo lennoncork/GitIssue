@@ -25,7 +25,7 @@ namespace GitIssue.Tool.Commands.Changes
         /// <inheritdoc />
         public override Task Exec(ChangesOptions options)
         {
-            Console.Write(manager.Changes.GenerateComments());
+            Console.Write(this.manager.Changes.GenerateComments());
             return Task.CompletedTask;
         }
     }

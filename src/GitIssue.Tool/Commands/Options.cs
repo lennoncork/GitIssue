@@ -9,11 +9,11 @@ namespace GitIssue.Tool.Commands
 
     public class Options
     {
-        [Option("path", Required = false, HelpText = "The path to the working directory")]
-        public string Path { get; set; } = Environment.CurrentDirectory;
-
         [Option("name", Required = false, HelpText = "The name of the issues folder")]
         public string Name { get; set; } = ".issues";
+
+        [Option("path", Required = false, HelpText = "The path to the working directory")]
+        public string Path { get; set; } = Environment.CurrentDirectory;
 
         [Option("tracking", Required = false, HelpText = "The tracking file to use")]
         public string Tracking { get; set; } = "tracking.json";
@@ -21,13 +21,12 @@ namespace GitIssue.Tool.Commands
 
     public interface ITrackedOptions
     {
-        public string Path { get; set; }
-
-        public string Name { get; set; }
+        string Name { get; set; }
+        string Path { get; set; }
 
         TrackedIssue Tracked { get; set; }
 
-        public string Tracking { get; set; }
+        string Tracking { get; set; }
     }
 
     public class KeyOptions : Options, ITrackedOptions
@@ -38,7 +37,7 @@ namespace GitIssue.Tool.Commands
             string.Empty,
             ".",
             "T",
-            "Tracked"
+            "Tracked",
         };
 
         private string key = string.Empty;
@@ -48,11 +47,14 @@ namespace GitIssue.Tool.Commands
         {
             get
             {
-                if (tracking.Contains(key))
-                    return Tracked?.Key.ToString() ?? IssueKey.None.ToString();
-                return key;
+                if (KeyOptions.tracking.Contains(this.key))
+                {
+                    return this.Tracked?.Key.ToString() ?? IssueKey.None.ToString();
+                }
+
+                return this.key;
             }
-            set => key = value;
+            set => this.key = value;
         }
 
         /// <summary>
@@ -63,11 +65,11 @@ namespace GitIssue.Tool.Commands
 
     public class EditorOptions : KeyOptions
     {
-        [Option("editor", HelpText = "The editor to use", Required = false)]
-        public string Editor { get; set; } = "joe";
-
         [Option("arguments", HelpText = "Any additional arguments to give to the editor", Required = false)]
         public string Arguments { get; set; } = "-pound_comment -syntax git-commit";
+
+        [Option("editor", HelpText = "The editor to use", Required = false)]
+        public string Editor { get; set; } = "joe";
     }
 #pragma warning restore 1591
 }

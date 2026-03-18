@@ -12,19 +12,9 @@ namespace GitIssue
     public interface IIssueManager : IAsyncDisposable, IDisposable
     {
         /// <summary>
-        ///     Gets the working directory
+        ///     Gets the change log for the issues
         /// </summary>
-        string WorkingDirectory { get; }
-
-        /// <summary>
-        ///     Gets the repository root
-        /// </summary>
-        public RepositoryRoot Root { get; }
-
-        /// <summary>
-        ///     Gets the GIT repository
-        /// </summary>
-        IRepository Repository { get; }
+        IChangeLog Changes { get; }
 
         /// <summary>
         ///     Gets the issue configuration
@@ -32,19 +22,29 @@ namespace GitIssue
         IIssueConfiguration Configuration { get; }
 
         /// <summary>
-        ///     Gets the change log for the issues
+        ///     Gets the issue key provider
         /// </summary>
-        IChangeLog Changes { get; }
+        IIssueKeyProvider KeyProvider { get; }
 
         /// <summary>
-        /// Gets the tracked issue
+        ///     Gets the GIT repository
+        /// </summary>
+        IRepository Repository { get; }
+
+        /// <summary>
+        ///     Gets the repository root
+        /// </summary>
+        RepositoryRoot Root { get; }
+
+        /// <summary>
+        ///     Gets the tracked issue
         /// </summary>
         ITrackedIssue Tracked { get; }
 
         /// <summary>
-        /// Gets the issue key provider
+        ///     Gets the working directory
         /// </summary>
-        IIssueKeyProvider KeyProvider { get; }
+        string WorkingDirectory { get; }
 
         /// <summary>
         ///     Commits the changes
@@ -89,20 +89,6 @@ namespace GitIssue
         Task<IIssue> CreateAsync(string title, string description);
 
         /// <summary>
-        ///     Finds an issue
-        /// </summary>
-        /// <param name="predicated">the predicate to evaluate</param>
-        /// <returns></returns>
-        IEnumerable<IIssue> Find(Func<IIssue, bool> predicated);
-
-        /// <summary>
-        ///     Finds an issue asynchronously.
-        /// </summary>
-        /// <param name="predicated">the predicate to evaluate the issue against</param>
-        /// <returns></returns>
-        IAsyncEnumerable<IIssue> FindAsync(Func<IIssue, bool> predicated);
-
-        /// <summary>
         ///     Deletes an existing issue
         /// </summary>
         /// <param name="id">the id to search</param>
@@ -129,6 +115,20 @@ namespace GitIssue
         Task<bool> DeleteAsync(IssueKey key);
 
         /// <summary>
+        ///     Finds an issue
+        /// </summary>
+        /// <param name="predicated">the predicate to evaluate</param>
+        /// <returns></returns>
+        IEnumerable<IIssue> Find(Func<IIssue, bool> predicated);
+
+        /// <summary>
+        ///     Finds an issue asynchronously.
+        /// </summary>
+        /// <param name="predicated">the predicate to evaluate the issue against</param>
+        /// <returns></returns>
+        IAsyncEnumerable<IIssue> FindAsync(Func<IIssue, bool> predicated);
+
+        /// <summary>
         ///     Tracks the issue
         /// </summary>
         /// <param name="key"></param>
@@ -141,6 +141,5 @@ namespace GitIssue
         /// <param name="key"></param>
         /// <returns></returns>
         Task<bool> TrackAsync(IssueKey key);
-
     }
 }

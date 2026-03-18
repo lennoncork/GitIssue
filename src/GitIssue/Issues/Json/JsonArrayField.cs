@@ -41,16 +41,10 @@ namespace GitIssue.Issues.Json
         }
 
         /// <inheritdoc />
-        public override Task<string> ExportAsync()
-        {
-            return Task.FromResult(ToString());
-        }
-
-        /// <inheritdoc />
         public JToken ToJson()
         {
-            var array = new JArray();
-            foreach (var value in Values)
+            JArray array = new JArray();
+            foreach (T value in this.Values)
             {
                 if (value is IJsonValue jValue)
                 {
@@ -62,6 +56,12 @@ namespace GitIssue.Issues.Json
             }
 
             return array;
+        }
+
+        /// <inheritdoc />
+        public override Task<string> ExportAsync()
+        {
+            return Task.FromResult(this.ToString());
         }
     }
 }

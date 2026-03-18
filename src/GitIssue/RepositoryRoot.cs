@@ -23,9 +23,7 @@ namespace GitIssue
         /// <summary>
         ///     Gets the issue path
         /// </summary>
-        public string IssuesPath => this.Name == null ?
-            this.RootPath :
-            Path.Combine(this.RootPath, Name);
+        public string IssuesPath => this.Name == null ? this.RootPath : Path.Combine(this.RootPath, this.Name);
 
         /// <summary>
         ///     Gets the repository name
@@ -35,22 +33,22 @@ namespace GitIssue
         /// <summary>
         ///     Gets the path for the config file
         /// </summary>
-        public string ConfigFile => Path.Combine(IssuesPath, Paths.ConfigFileName);
+        public string ConfigFile => Path.Combine(this.IssuesPath, Paths.ConfigFileName);
 
         /// <summary>
         ///     Gets the path to the change log
         /// </summary>
-        public string ChangeLog => Path.Combine(IssuesPath, Paths.ChangeLogFileName);
+        public string ChangeLog => Path.Combine(this.IssuesPath, Paths.ChangeLogFileName);
 
         /// <summary>
         ///     Gets the path to the tracked file
         /// </summary>
-        public string Tracked => Path.Combine(IssuesPath, Paths.TrackedIssueFileName);
+        public string Tracked => Path.Combine(this.IssuesPath, Paths.TrackedIssueFileName);
 
         /// <summary>
         ///     Gets the issue configuration
         /// </summary>
-        public IssueConfiguration Configuration => IssueConfiguration.Read(ConfigFile);
+        public IssueConfiguration Configuration => IssueConfiguration.Read(this.ConfigFile);
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RepositoryRoot" /> struct
@@ -58,8 +56,8 @@ namespace GitIssue
         /// <param name="directory">the directory of the repository</param>
         internal RepositoryRoot(string directory)
         {
-            RootPath = directory;
-            Name = null;
+            this.RootPath = directory;
+            this.Name = null;
         }
 
         /// <summary>
@@ -69,8 +67,8 @@ namespace GitIssue
         /// <param name="name">the name of the repository</param>
         internal RepositoryRoot(string directory, string name)
         {
-            RootPath = directory;
-            Name = name;
+            this.RootPath = directory;
+            this.Name = name;
         }
 
         /// <summary>
@@ -81,8 +79,8 @@ namespace GitIssue
         /// <returns>the repository root</returns>
         public static RepositoryRoot Create(string directory, string name)
         {
-            var info = new DirectoryInfo(directory);
-            var created = info.CreateSubdirectory(name).FullName;
+            DirectoryInfo info = new DirectoryInfo(directory);
+            string created = info.CreateSubdirectory(name).FullName;
             return new RepositoryRoot(directory, name);
         }
 
@@ -94,13 +92,17 @@ namespace GitIssue
         /// <returns>the repository root</returns>
         public static RepositoryRoot Open(string directory, string? name)
         {
-            var current = new DirectoryInfo(directory);
+            DirectoryInfo current = new DirectoryInfo(directory);
 
             if (name == null)
+            {
                 return new RepositoryRoot(current.FullName);
+            }
 
-            if (IsIssueRoot(current, name, out var issues))
+            if (RepositoryRoot.IsIssueRoot(current, name, out DirectoryInfo issues))
+            {
                 return new RepositoryRoot(current.FullName, name);
+            }
 
             throw new RepositoryNotFoundException($"Failed to open directory {directory} as issue root");
         }
@@ -113,14 +115,18 @@ namespace GitIssue
         /// <returns>the repository root</returns>
         public static RepositoryRoot Locate(string directory, string name)
         {
-            var current = new DirectoryInfo(directory);
-            while (TryGetParent(current, out var parent))
+            DirectoryInfo current = new DirectoryInfo(directory);
+            while (RepositoryRoot.TryGetParent(current, out DirectoryInfo parent))
             {
-                if (IsIssueRoot(current, name, out var issues))
+                if (RepositoryRoot.IsIssueRoot(current, name, out DirectoryInfo issues))
+                {
                     return new RepositoryRoot(current.FullName, name);
+                }
+
                 current = parent;
             }
-            return None;
+
+            return RepositoryRoot.None;
         }
 
         /// <summary>
@@ -151,11 +157,11 @@ namespace GitIssue
         private static bool TryGetParent(DirectoryInfo directory, out DirectoryInfo parent)
         {
             parent = directory.Parent!;
-            return directory.Exists && directory.Parent != null;
+            return directory.Exists && (directory.Parent != null);
         }
 
         /// <summary>
-        /// Gets the GIT repository at the root
+        ///     Gets the GIT repository at the root
         /// </summary>
         /// <returns></returns>
         [Pure]

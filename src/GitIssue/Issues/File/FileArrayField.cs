@@ -28,15 +28,15 @@ namespace GitIssue.Issues.File
         {
             try
             {
-                var generic = typeof(FileArrayField<>);
-                var specific = generic.MakeGenericType((Type)info.ValueType);
-                var read = specific.GetMethod(nameof(ReadAsync), BindingFlags.Public | BindingFlags.Static);
+                Type generic = typeof(FileArrayField<>);
+                Type specific = generic.MakeGenericType((Type)info.ValueType);
+                MethodInfo? read = specific.GetMethod(nameof(FileArrayField.ReadAsync), BindingFlags.Public | BindingFlags.Static);
                 if (read != null)
                 {
                     object[] args = { issueRoot, key, info };
-                    var task = (Task)read.Invoke(null, args)!;
+                    Task task = (Task)read.Invoke(null, args)!;
                     await task;
-                    var result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
+                    IField result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
                     return result;
                 }
 
@@ -71,44 +71,7 @@ namespace GitIssue.Issues.File
         /// <summary>
         ///     Gets the directory used to save the fields values
         /// </summary>
-        public string DirectoryPath => Path.Combine(issueRoot.IssuePath, Key.ToString());
-
-        /// <inheritdoc />
-        public override async Task<bool> SaveAsync()
-        {
-            try
-            {
-                if (Directory.Exists(DirectoryPath) == false)
-                    Directory.CreateDirectory(DirectoryPath);
-
-                var count = 0;
-                foreach (var value in Values)
-                {
-                    var file = Path.Combine(DirectoryPath, count.ToString());
-                    await using var stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                    await using var writer = new StreamWriter(stream);
-                    await writer.WriteAsync(value?.ToString());
-                }
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                throw new ArgumentException($"Failed to save field {Key} on issue {issueRoot.Key}", e);
-            }
-        }
-
-        /// <inheritdoc />
-        public override Task<string> ExportAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public JToken ToJson()
-        {
-            return new JArray(Values);
-        }
+        public string DirectoryPath => Path.Combine(this.issueRoot.IssuePath, this.Key.ToString());
 
         /// <summary>
         ///     Asynchronously reads the field from disk
@@ -121,17 +84,19 @@ namespace GitIssue.Issues.File
         {
             try
             {
-                var directory = Path.Combine(issueRoot.IssuePath, key.ToString());
-                var field = new FileArrayField<T>(issueRoot, key, new T[] { });
+                string directory = Path.Combine(issueRoot.IssuePath, key.ToString());
+                FileArrayField<T> field = new FileArrayField<T>(issueRoot, key, new T[] { });
 
-                if (Directory.Exists(directory) == false)
-                    return field;
-
-                var values = new List<T>();
-                foreach (var fieldFile in Directory.EnumerateFiles(directory))
+                if (!Directory.Exists(directory))
                 {
-                    var content = await System.IO.File.ReadAllTextAsync(fieldFile);
-                    if (field.TryParse(content, out var result))
+                    return field;
+                }
+
+                List<T> values = new List<T>();
+                foreach (string fieldFile in Directory.EnumerateFiles(directory))
+                {
+                    string content = await System.IO.File.ReadAllTextAsync(fieldFile);
+                    if (field.TryParse(content, out T result))
                     {
                         field.Add(result);
                         continue;
@@ -146,6 +111,45 @@ namespace GitIssue.Issues.File
             {
                 throw new ArgumentException($"Failed to read field {key} on issue {issueRoot.Key}", e);
             }
+        }
+
+        /// <inheritdoc />
+        public override async Task<bool> SaveAsync()
+        {
+            try
+            {
+                if (!Directory.Exists(this.DirectoryPath))
+                {
+                    Directory.CreateDirectory(this.DirectoryPath);
+                }
+
+                int count = 0;
+                foreach (T value in this.Values)
+                {
+                    string file = Path.Combine(this.DirectoryPath, count.ToString());
+                    await using FileStream stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
+                    await using StreamWriter writer = new StreamWriter(stream);
+                    await writer.WriteAsync(value?.ToString());
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException($"Failed to save field {this.Key} on issue {this.issueRoot.Key}", e);
+            }
+        }
+
+        /// <inheritdoc />
+        public JToken ToJson()
+        {
+            return new JArray(this.Values);
+        }
+
+        /// <inheritdoc />
+        public override Task<string> ExportAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

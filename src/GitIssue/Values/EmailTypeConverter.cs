@@ -14,7 +14,7 @@
         /// <inheritdoc />
         public override bool TryParse(ValueMetadata input, out Email result)
         {
-            return TryParse(input.Value, out result);
+            return this.TryParse(input.Value, out result);
         }
     }
 }

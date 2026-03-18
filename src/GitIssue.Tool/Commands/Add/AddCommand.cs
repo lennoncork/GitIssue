@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
 using GitIssue.Formatters;
+using GitIssue.Issues;
 using Serilog;
 
 namespace GitIssue.Tool.Commands.Add
@@ -26,9 +27,9 @@ namespace GitIssue.Tool.Commands.Add
         /// <inheritdoc />
         public override async Task Exec(AddOptions options)
         {
-            var formatter = IssueFormatter.Simple;
+            IssueFormatter formatter = IssueFormatter.Simple;
 
-            var issue = await manager
+            IIssue? issue = await this.manager
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
 
@@ -44,17 +45,17 @@ namespace GitIssue.Tool.Commands.Add
                 return;
             }
 
-            var key = FieldKey.Create(options.Field);
+            FieldKey key = FieldKey.Create(options.Field);
             if (!issue.ContainsKey(key))
             {
                 this.logger?.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
                 return;
             }
 
-            var field = issue[key];
+            IField field = issue[key];
             if (field is IArrayField arrayField)
             {
-                if (arrayField.TryParse(options.Add, out var value))
+                if (arrayField.TryParse(options.Add, out object? value))
                 {
                     if (!arrayField.Contains(value))
                     {

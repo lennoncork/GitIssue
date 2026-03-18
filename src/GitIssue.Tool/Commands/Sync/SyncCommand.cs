@@ -23,7 +23,7 @@ namespace GitIssue.Tool.Commands.Sync
         /// <inheritdoc />
         public override Task Exec(SyncOptions options)
         {
-            var importer = new FileImporter(manager);
+            FileImporter importer = new FileImporter(this.manager);
             Console.WriteLine($"Exported issues to {options.Import}");
             return Task.CompletedTask;
         }

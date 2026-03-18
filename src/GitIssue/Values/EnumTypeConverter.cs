@@ -8,7 +8,7 @@
         /// <inheritdoc />
         public override bool TryParse(string input, out Enumerated result)
         {
-            return TryParse(new ValueMetadata(input, string.Empty), out result);
+            return this.TryParse(new ValueMetadata(input, string.Empty), out result);
         }
 
         /// <inheritdoc />

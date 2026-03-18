@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
+using GitIssue.Issues;
 using Serilog;
 
 namespace GitIssue.Tool.Commands.Remove
@@ -25,9 +26,9 @@ namespace GitIssue.Tool.Commands.Remove
         /// <inheritdoc />
         public override async Task Exec(RemoveOptions options)
         {
-            var formatter = TerminalFormatter.Detailed;
+            TerminalFormatter formatter = TerminalFormatter.Detailed;
 
-            var issue = await manager
+            IIssue? issue = await this.manager
                 .FindAsync(i => i.Key.ToString() == options.Key)
                 .FirstOrDefaultAsync();
 
@@ -43,17 +44,17 @@ namespace GitIssue.Tool.Commands.Remove
                 return;
             }
 
-            var key = FieldKey.Create(options.Field);
+            FieldKey key = FieldKey.Create(options.Field);
             if (!issue.ContainsKey(key))
             {
                 this.logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
                 return;
             }
 
-            var field = issue[key];
+            IField field = issue[key];
             if (field is IArrayField arrayField)
             {
-                if (arrayField.TryParse(options.Remove, out var value))
+                if (arrayField.TryParse(options.Remove, out object? value))
                 {
                     if (arrayField.Contains(value))
                     {

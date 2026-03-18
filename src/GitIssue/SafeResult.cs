@@ -13,7 +13,7 @@ namespace GitIssue
         /// <param name="success">the success of the task</param>
         public SafeResult(bool success = false)
         {
-            IsSuccess = success;
+            this.IsSuccess = success;
         }
 
         /// <summary>
@@ -22,13 +22,8 @@ namespace GitIssue
         /// <param name="exception">the exception thrown</param>
         public SafeResult(Exception exception) : this()
         {
-            Exception = exception;
+            this.Exception = exception;
         }
-
-        /// <summary>
-        ///     Returns true if the command is a success
-        /// </summary>
-        public bool IsSuccess { get; set; }
 
         /// <summary>
         ///     Captures the exception if failed
@@ -36,13 +31,9 @@ namespace GitIssue
         public Exception? Exception { get; set; }
 
         /// <summary>
-        ///     Returns a successful command
+        ///     Returns true if the command is a success
         /// </summary>
-        /// <returns></returns>
-        public static SafeResult Success()
-        {
-            return new SafeResult(true);
-        }
+        public bool IsSuccess { get; set; }
 
         /// <summary>
         ///     Returns a failed command
@@ -62,6 +53,15 @@ namespace GitIssue
         {
             return new SafeResult(e);
         }
+
+        /// <summary>
+        ///     Returns a successful command
+        /// </summary>
+        /// <returns></returns>
+        public static SafeResult Success()
+        {
+            return new SafeResult(true);
+        }
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ namespace GitIssue
         /// <param name="exception"></param>
         public SafeResult(Exception exception) : base(exception)
         {
-            Result = default!;
+            this.Result = default(T?)!;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace GitIssue
         /// </summary>
         public SafeResult(bool success = false) : base(success)
         {
-            Result = default!;
+            this.Result = default(T?)!;
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace GitIssue
         /// <param name="result"></param>
         public SafeResult(T result) : base(true)
         {
-            Result = result;
+            this.Result = result;
         }
 
         /// <summary>
@@ -130,38 +130,45 @@ namespace GitIssue
         }
 
         /// <summary>
+        ///     Gets the result of the command
+        /// </summary>
+        /// <param name="throwIfFailed">throw a <see cref="SafeResultException" /> if the task failed</param>
+        /// <returns></returns>
+        public T GetResult(bool throwIfFailed = true)
+        {
+            if (this.IsSuccess)
+            {
+                return this.Result;
+            }
+
+            if (!throwIfFailed)
+            {
+                return default(T)!;
+            }
+
+            if (this.Exception == null)
+            {
+                throw new SafeResultException("Task execution failed");
+            }
+
+            throw new SafeResultException("Task execution failed", this.Exception);
+        }
+
+        /// <summary>
         ///     Checks it a result was returned from the task
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
         public bool HasResult(out T result)
         {
-            if (IsSuccess)
+            if (this.IsSuccess)
             {
-                result = Result;
+                result = this.Result;
                 return true;
             }
 
-            result = default!;
+            result = default(T)!;
             return false;
-        }
-
-        /// <summary>
-        /// Gets the result of the command
-        /// </summary>
-        /// <param name="throwIfFailed">throw a <see cref="SafeResultException"/> if the task failed</param>
-        /// <returns></returns>
-        public T GetResult(bool throwIfFailed = true)
-        {
-            if (this.IsSuccess)
-                return this.Result;
-
-            if (throwIfFailed == false)
-                return default!;
-
-            if (this.Exception == null)
-                throw new SafeResultException("Task execution failed");
-            throw new SafeResultException("Task execution failed", this.Exception);
         }
     }
 }

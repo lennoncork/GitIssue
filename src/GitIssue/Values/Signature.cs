@@ -21,7 +21,7 @@ namespace GitIssue.Values
         private string Email { get; }
 
         /// <summary>
-        /// An invalid signature
+        ///     An invalid signature
         /// </summary>
         public static Signature Invalid => new Signature(null!, null!);
 
@@ -49,14 +49,15 @@ namespace GitIssue.Values
 
         internal Signature(string signature)
         {
-            Match match = Regex.Match(signature, regex);
-            if (match.Success && match.Groups.Count == 3)
+            Match match = Regex.Match(signature, Signature.regex);
+            if (match.Success && (match.Groups.Count == 3))
             {
                 this.Username = match.Groups[1].Value;
                 this.Email = match.Groups[2].Value;
                 this.IsValid = true;
                 return;
             }
+
             this.Username = null!;
             this.Email = null!;
             this.IsValid = false;
@@ -66,7 +67,7 @@ namespace GitIssue.Values
         {
             this.Username = username;
             this.Email = email;
-            this.IsValid = username != null && email != null;
+            this.IsValid = (username != null) && (email != null);
         }
 
         /// <summary>
@@ -81,7 +82,8 @@ namespace GitIssue.Values
             {
                 return $"{this.Username} <{this.Email}>";
             }
-            return invalid;
+
+            return Signature.invalid;
         }
 
         /// <summary>
@@ -90,8 +92,11 @@ namespace GitIssue.Values
         /// <param name="value"></param>
         public static implicit operator Signature(LibGit2Sharp.Signature value)
         {
-            if (value == null || value.Name == null || value.Email == null)
+            if ((value == null) || (value.Name == null) || (value.Email == null))
+            {
                 return Signature.Invalid;
+            }
+
             return new Signature(value.Name, value.Email);
         }
 
@@ -104,21 +109,24 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public bool Equals(Signature other)
         {
-            return this.Username == other.Username && this.Email == other.Email;
+            return (this.Username == other.Username) && (this.Email == other.Email);
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Signature signature)
+            {
                 return this.Equals(signature);
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return Username.GetHashCode() + Email.GetHashCode();
+            return this.Username.GetHashCode() + this.Email.GetHashCode();
         }
     }
 }

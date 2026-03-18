@@ -14,10 +14,8 @@ namespace GitIssue.Values
     [TypeAlias(nameof(Number))]
     public struct Number : IJsonValue, IEquatable<Number>, IValue<double>
     {
-        private readonly double value;
-
         /// <inheritdoc />
-        public double Item => this.value;
+        public double Item { get; }
 
         /// <summary>
         ///     Tries to parse the number value
@@ -37,25 +35,25 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static bool TryParse(string value, out Number number)
         {
-            if (double.TryParse(value, out var result))
+            if (double.TryParse(value, out double result))
             {
                 number = new Number(result);
                 return true;
             }
 
-            number = default!;
+            number = default(Number)!;
             return false;
         }
 
         internal Number(double value)
         {
-            this.value = value;
+            this.Item = value;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return value.ToString(CultureInfo.InvariantCulture);
+            return this.Item.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -64,7 +62,7 @@ namespace GitIssue.Values
         /// <param name="value"></param>
         public static implicit operator double(Number value)
         {
-            return value.value;
+            return value.Item;
         }
 
         /// <summary>
@@ -79,33 +77,36 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(value);
+            return new JValue(this.Item);
         }
 
         /// <inheritdoc />
         public bool Equals(Number other)
         {
-            return value == other.value;
+            return this.Item == other.Item;
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Number number)
+            {
                 return this.Equals(number);
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return value.GetHashCode();
+            return this.Item.GetHashCode();
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] double other)
         {
-            return value == other;
+            return this.Item == other;
         }
     }
 }

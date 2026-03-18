@@ -21,10 +21,14 @@ namespace GitIssue.Issues
         /// <param name="key">the key string</param>
         private IssueKey(string? key)
         {
-            if (key == null || key == nameof(None))
+            if ((key == null) || (key == nameof(IssueKey.None)))
+            {
                 this.key = string.Empty;
+            }
             else
+            {
                 this.key = key;
+            }
         }
 
         /// <summary>
@@ -53,7 +57,10 @@ namespace GitIssue.Issues
         {
             if (string.IsNullOrEmpty(x.key) &&
                 string.IsNullOrEmpty(y.key))
+            {
                 return true;
+            }
+
             return x.key == y.key;
         }
 
@@ -83,37 +90,37 @@ namespace GitIssue.Issues
         /// <param name="value"></param>
         public static implicit operator IssueKey(string value)
         {
-            return Create(value);
+            return IssueKey.Create(value);
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return string.IsNullOrEmpty(key) ? nameof(None) : key;
+            return string.IsNullOrEmpty(this.key) ? nameof(IssueKey.None) : this.key;
         }
 
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(key);
+            return new JValue(this.key);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return string.IsNullOrEmpty(key) ? nameof(None).GetHashCode() : key.GetHashCode();
+            return string.IsNullOrEmpty(this.key) ? nameof(IssueKey.None).GetHashCode() : this.key.GetHashCode();
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
-            return key.Equals(obj);
+            return this.key.Equals(obj);
         }
 
         /// <inheritdoc />
         public bool Equals(IssueKey other)
         {
-            return key == other.key;
+            return this.key == other.key;
         }
     }
 }

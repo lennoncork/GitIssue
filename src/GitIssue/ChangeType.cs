@@ -7,7 +7,8 @@ namespace GitIssue
     {
         [Description("Created new issue")] Create,
 
-        [Description("Deleted existing issue")] Delete
+        [Description("Deleted existing issue")]
+        Delete,
     }
 #pragma warning restore 1591
 }

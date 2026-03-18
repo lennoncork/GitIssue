@@ -29,7 +29,7 @@ namespace GitIssue.Issues.Json
         ///     Initialized a new instance of the <see cref="JsonValueField{T}" /> class
         /// </summary>
         /// <param name="key">the field key</param>
-        public JsonValueField(FieldKey key) : base(key, default!)
+        public JsonValueField(FieldKey key) : base(key, default(T)!)
         {
         }
 
@@ -49,17 +49,20 @@ namespace GitIssue.Issues.Json
         }
 
         /// <inheritdoc />
-        public override Task<string> ExportAsync()
+        public JToken ToJson()
         {
-            return Task.FromResult(ToString());
+            if (this.Value is IJsonValue value)
+            {
+                return value.ToJson();
+            }
+
+            return new JValue(this.Value);
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public override Task<string> ExportAsync()
         {
-            if (Value is IJsonValue value)
-                return value.ToJson();
-            return new JValue(Value);
+            return Task.FromResult(this.ToString());
         }
     }
 }

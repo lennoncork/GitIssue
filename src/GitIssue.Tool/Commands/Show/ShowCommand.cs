@@ -26,7 +26,7 @@ namespace GitIssue.Tool.Commands.Show
         /// <inheritdoc />
         public override async Task Exec(ShowOptions options)
         {
-            var formatter = new TerminalFormatter("%*");
+            TerminalFormatter formatter = new TerminalFormatter("%*");
 
             IAsyncEnumerable<IIssue> issues;
             switch (options.Show)
@@ -34,19 +34,19 @@ namespace GitIssue.Tool.Commands.Show
                 case ShowSubCommand.tracked:
                 case ShowSubCommand.Tracked:
                     Console.WriteLine("Showing 'tracked' issue");
-                    issues = manager.FindAsync(i => i.Key.ToString() == options.Key);
+                    issues = this.manager.FindAsync(i => i.Key.ToString() == options.Key);
                     break;
 
                 case ShowSubCommand.all:
                 case ShowSubCommand.All:
                     Console.WriteLine("Showing 'all' issues");
-                    issues = manager.FindAsync(i => true);
+                    issues = this.manager.FindAsync(i => true);
                     break;
 
                 case ShowSubCommand.mine:
                 case ShowSubCommand.Mine:
                     Console.WriteLine("Showing 'my' issues");
-                    issues = manager.FindAsync(i => true);
+                    issues = this.manager.FindAsync(i => true);
                     break;
 
                 default:
@@ -55,9 +55,13 @@ namespace GitIssue.Tool.Commands.Show
             }
 
             int count = 0;
-            await foreach (var issue in issues)
+            await foreach (IIssue issue in issues)
             {
-                if (count++ > 0) Console.WriteLine();
+                if (count++ > 0)
+                {
+                    Console.WriteLine();
+                }
+
                 Console.WriteLine(issue.Format(formatter));
             }
 

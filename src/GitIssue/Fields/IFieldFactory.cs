@@ -8,6 +8,14 @@ namespace GitIssue.Fields
     public interface IFieldFactory
     {
         /// <summary>
+        ///     Updates the field with the specified array of values
+        /// </summary>
+        /// <typeparam name="T">the field data type</typeparam>
+        /// <param name="values">the array of values</param>
+        /// <returns>A new field that fulfills the <see cref="IField" /> interface</returns>
+        void WithArray<T>(T[] values) where T : IValue;
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="field"></param>
@@ -20,13 +28,5 @@ namespace GitIssue.Fields
         /// <param name="value">the field value</param>
         /// <returns>A new field that fulfills the <see cref="IField" /> interface</returns>
         void WithValue<T>(T value) where T : IValue;
-
-        /// <summary>
-        ///     Updates the field with the specified array of values
-        /// </summary>
-        /// <typeparam name="T">the field data type</typeparam>
-        /// <param name="values">the array of values</param>
-        /// <returns>A new field that fulfills the <see cref="IField" /> interface</returns>
-        void WithArray<T>(T[] values) where T : IValue;
     }
 }

@@ -13,15 +13,7 @@ namespace GitIssue.Issues
         IEnumerable<IssueKey> Keys { get; }
 
         /// <summary>
-        ///     Tries to get the specified key from a string
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        bool TryGetKey(string value, out IssueKey key);
-
-        /// <summary>
-        /// Gets the path for the issue key
+        ///     Gets the path for the issue key
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
@@ -32,5 +24,13 @@ namespace GitIssue.Issues
         /// </summary>
         /// <returns></returns>
         IssueKey Next();
+
+        /// <summary>
+        ///     Tries to get the specified key from a string
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        bool TryGetKey(string value, out IssueKey key);
     }
 }

@@ -11,7 +11,7 @@ namespace GitIssue.Tool
     public interface IEditor
     {
         /// <summary>
-        /// Edits existing content
+        ///     Edits existing content
         /// </summary>
         /// <param name="header">the header</param>
         /// <param name="content">the content</param>

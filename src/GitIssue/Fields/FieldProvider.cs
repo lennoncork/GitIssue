@@ -29,17 +29,25 @@ namespace GitIssue.Fields
         }
 
         /// <inheritdoc />
-        public T AsValue<T>() where T : IValue
+        public T[] AsArray<T>() where T : IValue
         {
-            if (callback?.Invoke() is ValueField<T> fileField) return fileField.Value;
-            return default!;
+            if (this.callback?.Invoke() is ArrayField<T> fileField)
+            {
+                return fileField.Values;
+            }
+
+            return null!;
         }
 
         /// <inheritdoc />
-        public T[] AsArray<T>() where T : IValue
+        public T AsValue<T>() where T : IValue
         {
-            if (callback?.Invoke() is ArrayField<T> fileField) return fileField.Values;
-            return null!;
+            if (this.callback?.Invoke() is ValueField<T> fileField)
+            {
+                return fileField.Value;
+            }
+
+            return default(T)!;
         }
     }
 }

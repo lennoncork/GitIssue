@@ -30,20 +30,20 @@ namespace GitIssue.Tool.Commands.Import
             switch (Path.GetExtension(options.Import))
             {
                 case ".csv":
-                    await importCsv(options);
+                    await this.importCsv(options);
                     break;
             }
         }
 
         public async Task importCsv(ImportOptions options)
         {
-            if (File.Exists(options.Import) == false)
+            if (!File.Exists(options.Import))
             {
                 this.logger.Error($"Import file {options.Import} does not exist");
                 return;
             }
 
-            await using var stream = new FileStream(options.Import, FileMode.Open, FileAccess.Read);
+            await using FileStream stream = new FileStream(options.Import, FileMode.Open, FileAccess.Read);
             using TextReader reader = new StreamReader(stream);
 
             string? header = await reader.ReadLineAsync();
@@ -52,9 +52,9 @@ namespace GitIssue.Tool.Commands.Import
                 return;
             }
 
-            var fields = header.Split(options.Separator);
-            var mapping = new Dictionary<FieldKey, int>();
-            foreach (var field in manager.Configuration.Fields)
+            string[] fields = header.Split(options.Separator);
+            Dictionary<FieldKey, int> mapping = new Dictionary<FieldKey, int>();
+            foreach (KeyValuePair<FieldKey, FieldInfo> field in this.manager.Configuration.Fields)
             {
                 int? index = fields.Select((f, i) => new { Field = f, Index = i })
                     .Where(x => x.Field == field.Key.ToString())
@@ -67,15 +67,16 @@ namespace GitIssue.Tool.Commands.Import
                 }
             }
 
-            if (mapping.ContainsKey("Key") == false)
+            if (!mapping.ContainsKey("Key"))
             {
                 return;
             }
 
-            foreach (var map in mapping)
+            foreach (KeyValuePair<FieldKey, int> map in mapping)
             {
                 Console.WriteLine($"[{map.Value}] => {map.Key}");
             }
+
             Console.WriteLine();
 
             int count = 0;
@@ -87,23 +88,24 @@ namespace GitIssue.Tool.Commands.Import
                     break;
                 }
 
-                var import = line.Split(options.Separator);
+                string[] import = line.Split(options.Separator);
                 if (import.Length != fields.Length)
                 {
                     continue;
                 }
 
                 IIssue? issue = null;
-                await foreach (var found in manager.FindAsync(i => i.Key == import[mapping["Key"]]))
+                await foreach (IIssue found in this.manager.FindAsync(i => i.Key == import[mapping["Key"]]))
                 {
                     issue = found;
                     Console.WriteLine($"Updating {import[mapping["Key"]]}");
                     break;
                 }
+
                 if (issue == null)
                 {
                     Console.WriteLine($"Creating {import[mapping["Key"]]}");
-                    issue = await manager.CreateAsync(import[mapping["Title"]]);
+                    issue = await this.manager.CreateAsync(import[mapping["Title"]]);
                 }
 
                 count++;

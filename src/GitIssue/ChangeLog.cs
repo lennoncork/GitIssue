@@ -19,47 +19,67 @@ namespace GitIssue
         /// <inheritdoc />
         public Dictionary<IssueKey, List<string>> Log { get; set; } = new Dictionary<IssueKey, List<string>>();
 
-        /// <inheritdoc />
-        public void Clear()
+        /// <summary>
+        ///     Reads the configuration from a file
+        /// </summary>
+        /// <param name="file">the configuration file</param>
+        /// <returns>the <see cref="IssueConfiguration" /></returns>
+        public static ChangeLog Read(string file)
         {
-            hasChanged = true;
-            Log.Clear();
+            if (!File.Exists(file))
+            {
+                return new ChangeLog();
+            }
+
+            try
+            {
+                using FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                using StreamReader reader = new StreamReader(stream);
+                JsonSerializer serializer = new JsonSerializer();
+                ChangeLog? configuration = serializer.Deserialize(reader, typeof(ChangeLog)) as ChangeLog;
+                return configuration ?? new ChangeLog();
+            }
+            catch (Exception ex)
+            {
+                throw new AggregateException($"Unable to deserialize {file} as change log ", ex);
+            }
         }
 
         /// <inheritdoc />
         public void Add(IssueKey key, ChangeType change)
         {
-            Add(key, change, string.Empty);
+            this.Add(key, change, string.Empty);
         }
 
         /// <inheritdoc />
         public void Add(IssueKey key, ChangeType change, string summary)
         {
-            hasChanged = true;
-            if (Log.ContainsKey(key) == false)
-                Log[key] = new List<string>();
+            this.hasChanged = true;
+            if (!this.Log.ContainsKey(key))
+            {
+                this.Log[key] = new List<string>();
+            }
 
-            Log[key].Add($"{DateTime.Now}: {GetChangeDescription(change)}");
+            this.Log[key].Add($"{DateTime.Now}: {ChangeLog.GetChangeDescription(change)}");
         }
 
         /// <inheritdoc />
         public void Add(IIssue issue, ChangeType change)
         {
-            Add(issue.Key, change, string.Empty);
+            this.Add(issue.Key, change, string.Empty);
         }
 
         /// <inheritdoc />
         public void Add(IIssue issue, ChangeType change, string summary)
         {
-            Add(issue.Key, change, string.Empty);
+            this.Add(issue.Key, change, string.Empty);
         }
 
-        private static string GetChangeDescription(ChangeType change)
+        /// <inheritdoc />
+        public void Clear()
         {
-            var attribute = typeof(ChangeType)
-                .GetField(change.ToString())
-                ?.GetCustomAttribute<DescriptionAttribute>();
-            return attribute != null ? attribute.Description : change.ToString();
+            this.hasChanged = true;
+            this.Log.Clear();
         }
 
         /// <summary>
@@ -68,18 +88,16 @@ namespace GitIssue
         /// <param name="file">the configuration file</param>
         public void Save(string file)
         {
-            if (hasChanged == false)
+            if (!this.hasChanged)
+            {
                 return;
+            }
 
             try
             {
-                using var stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                using var writer = new StreamWriter(stream);
-                var serializer = JsonSerializer.Create(new JsonSerializerSettings
-                {
-                    Formatting = Formatting.Indented,
-                    DefaultValueHandling = DefaultValueHandling.Ignore
-                });
+                using FileStream stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
+                using StreamWriter writer = new StreamWriter(stream);
+                JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented, DefaultValueHandling = DefaultValueHandling.Ignore });
                 serializer.Serialize(writer, this, typeof(ChangeLog));
             }
             catch (Exception ex)
@@ -88,28 +106,12 @@ namespace GitIssue
             }
         }
 
-        /// <summary>
-        ///     Reads the configuration from a file
-        /// </summary>
-        /// <param name="file">the configuration file</param>
-        /// <returns>the <see cref="IssueConfiguration" /></returns>
-        public static ChangeLog Read(string file)
+        private static string GetChangeDescription(ChangeType change)
         {
-            if (File.Exists(file) == false)
-                return new ChangeLog();
-
-            try
-            {
-                using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                using var reader = new StreamReader(stream);
-                var serializer = new JsonSerializer();
-                var configuration = serializer.Deserialize(reader, typeof(ChangeLog)) as ChangeLog;
-                return configuration ?? new ChangeLog();
-            }
-            catch (Exception ex)
-            {
-                throw new AggregateException($"Unable to deserialize {file} as change log ", ex);
-            }
+            DescriptionAttribute? attribute = typeof(ChangeType)
+                .GetField(change.ToString())
+                ?.GetCustomAttribute<DescriptionAttribute>();
+            return attribute != null ? attribute.Description : change.ToString();
         }
     }
 }

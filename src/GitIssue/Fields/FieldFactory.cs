@@ -29,29 +29,32 @@ namespace GitIssue.Fields
         }
 
         /// <inheritdoc />
-        public void WithValue<T>(T value) where T : IValue
-        {
-            var field = callback?.Invoke();
-            if (field is ValueField<T> valueField)
-                valueField.Value = value;
-        }
-
-        /// <inheritdoc />
         public void WithArray<T>(T[] values) where T : IValue
         {
-            var field = callback?.Invoke();
-            if (field is ArrayField<T> arrayField) arrayField.Values = values;
+            IField? field = this.callback?.Invoke();
+            if (field is ArrayField<T> arrayField)
+            {
+                arrayField.Values = values;
+            }
         }
 
         /// <inheritdoc />
         public void WithField(IField updated)
         {
-            var field = callback?.Invoke();
+            IField? field = this.callback?.Invoke();
             if (field?.GetType() == updated.GetType())
             {
-
             }
+        }
 
+        /// <inheritdoc />
+        public void WithValue<T>(T value) where T : IValue
+        {
+            IField? field = this.callback?.Invoke();
+            if (field is ValueField<T> valueField)
+            {
+                valueField.Value = value;
+            }
         }
     }
 }

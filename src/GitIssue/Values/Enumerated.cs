@@ -16,7 +16,6 @@ namespace GitIssue.Values
     public struct Enumerated : IJsonValue, IEquatable<Enumerated>, IValue<string>
     {
         private static readonly string regex = @"^\[(([\w]*)[,\s]*)*]$";
-        private readonly string value;
 
         /// <summary>
         ///     Tries to parse the enumerated value
@@ -26,7 +25,7 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static bool TryParse(ValueMetadata meta, out Enumerated enumerated)
         {
-            if (TryParseMetadata(meta, out var values))
+            if (Enumerated.TryParseMetadata(meta, out string[] values))
             {
                 if (values.Contains(meta.Value))
                 {
@@ -34,17 +33,17 @@ namespace GitIssue.Values
                     return true;
                 }
 
-                enumerated = default;
+                enumerated = default(Enumerated);
                 return false;
             }
 
-            enumerated = default;
+            enumerated = default(Enumerated);
             return false;
         }
 
         private static bool TryParseMetadata(ValueMetadata metadata, out string[] values)
         {
-            var match = Regex.Match(metadata.Metadata, regex);
+            Match match = Regex.Match(metadata.Metadata, Enumerated.regex);
             if (match.Success)
             {
                 values = match.Groups[2]
@@ -56,7 +55,7 @@ namespace GitIssue.Values
                 return true;
             }
 
-            values = default!;
+            values = default(string[])!;
             return false;
         }
 
@@ -67,14 +66,14 @@ namespace GitIssue.Values
         /// <param name="values"></param>
         public Enumerated(string value, string[] values)
         {
-            this.value = value;
-            Values = values;
+            this.Item = value;
+            this.Values = values;
         }
 
         /// <summary>
         ///     Gets the enumerated value
         /// </summary>
-        public int Index => string.IsNullOrEmpty(value) ? 0 : Array.IndexOf(Values, value);
+        public int Index => string.IsNullOrEmpty(this.Item) ? 0 : Array.IndexOf(this.Values, this.Item);
 
         /// <summary>
         ///     Gets the set of values
@@ -82,44 +81,47 @@ namespace GitIssue.Values
         public string[] Values { get; }
 
         /// <inheritdoc />
-        public string Item => this.value;
+        public string Item { get; }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return value;
+            return this.Item;
         }
 
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(value);
+            return new JValue(this.Item);
         }
 
         /// <inheritdoc />
         public bool Equals(Enumerated other)
         {
-            return value == other.value;
+            return this.Item == other.Item;
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Enumerated enumerated)
+            {
                 return this.Equals(enumerated);
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return value.GetHashCode();
+            return this.Item.GetHashCode();
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] string other)
         {
-            return value == other;
+            return this.Item == other;
         }
     }
 }

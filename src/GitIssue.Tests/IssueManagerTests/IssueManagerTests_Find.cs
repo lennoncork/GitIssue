@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using GitIssue.Issues;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IssueManagerTests
@@ -13,11 +14,11 @@ namespace GitIssue.Tests.IssueManagerTests
             [TestCase("New Issue")]
             public async Task FindsIssueByTitle(string title)
             {
-                Initialize(TestDirectory);
-                var create = await Sut
+                this.Initialize(this.TestDirectory);
+                SafeResult<IIssue> create = await this.Sut
                     .CreateAsync(title, string.Empty)
                     .WithSafeResultAsync();
-                var find = Sut.Find(i => i.Title == title).ToArray();
+                IIssue[] find = this.Sut.Find(i => i.Title == title).ToArray();
                 Assert.That(find.Count(), Is.EqualTo(1));
                 Assert.That(find[0].Title, Is.EqualTo(title));
             }
@@ -25,11 +26,11 @@ namespace GitIssue.Tests.IssueManagerTests
             [Test]
             public async Task FindsIssueByKey()
             {
-                Initialize(TestDirectory);
-                var create = await Sut
-                    .CreateAsync(nameof(FindsIssueByKey), string.Empty)
+                this.Initialize(this.TestDirectory);
+                SafeResult<IIssue> create = await this.Sut
+                    .CreateAsync(nameof(Find.FindsIssueByKey), string.Empty)
                     .WithSafeResultAsync();
-                var find = Sut.Find(i => i.Key == create.Result.Key).ToArray();
+                IIssue[] find = this.Sut.Find(i => i.Key == create.Result.Key).ToArray();
                 Assert.That(find.Count(), Is.EqualTo(1));
                 Assert.That(find[0].Key, Is.EqualTo(create.Result.Key));
             }

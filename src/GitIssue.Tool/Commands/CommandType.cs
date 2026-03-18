@@ -84,6 +84,6 @@
         /// <summary>
         ///     Shows the current status
         /// </summary>
-        Changes
+        Changes,
     }
 }

@@ -14,13 +14,13 @@ namespace GitIssue.Tests.ValueTests
             [TestCaseSource(typeof(CanConvertTestCases))]
             public bool CanConvert(Type type)
             {
-                return HasConverter(type);
+                return this.HasConverter(type);
             }
 
             [TestCaseSource(typeof(ConvertFromStringTestCases))]
             public Url Convert(object value)
             {
-                return (Url)UseConverter(value);
+                return (Url)this.UseConverter(value);
             }
 
             public class CanConvertTestCases : ValueTestCases
@@ -56,7 +56,7 @@ namespace GitIssue.Tests.ValueTests
             [TestCaseSource(typeof(TryParseTestCases))]
             public bool Test(string value, Url expected)
             {
-                if (Url.TryParse(value, out var result))
+                if (Url.TryParse(value, out Url result))
                 {
                     Assert.That(expected, Is.EqualTo(result));
                     return true;

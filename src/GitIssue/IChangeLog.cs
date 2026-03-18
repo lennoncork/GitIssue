@@ -11,47 +11,47 @@ namespace GitIssue
         /// <summary>
         ///     Gets the dictionary of changes
         /// </summary>
-        public Dictionary<IssueKey, List<string>> Log { get; set; }
+        Dictionary<IssueKey, List<string>> Log { get; set; }
+
+        /// <summary>
+        ///     Records a new change in the log
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="change"></param>
+        void Add(IssueKey key, ChangeType change);
+
+        /// <summary>
+        ///     Records a new change in the log
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="change"></param>
+        /// <param name="summary"></param>
+        void Add(IssueKey key, ChangeType change, string summary);
+
+        /// <summary>
+        ///     Records a new change in the log
+        /// </summary>
+        /// <param name="issue"></param>
+        /// <param name="change"></param>
+        void Add(IIssue issue, ChangeType change);
+
+        /// <summary>
+        ///     Records a new change in the log
+        /// </summary>
+        /// <param name="issue"></param>
+        /// <param name="change"></param>
+        /// <param name="summary"></param>
+        void Add(IIssue issue, ChangeType change, string summary);
 
         /// <summary>
         ///     Clears all changes in the log
         /// </summary>
-        public void Clear();
+        void Clear();
 
         /// <summary>
-        ///     Records a new change in the log
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="change"></param>
-        public void Add(IssueKey key, ChangeType change);
-
-        /// <summary>
-        ///     Records a new change in the log
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="change"></param>
-        /// <param name="summary"></param>
-        public void Add(IssueKey key, ChangeType change, string summary);
-
-        /// <summary>
-        ///     Records a new change in the log
-        /// </summary>
-        /// <param name="issue"></param>
-        /// <param name="change"></param>
-        public void Add(IIssue issue, ChangeType change);
-
-        /// <summary>
-        ///     Records a new change in the log
-        /// </summary>
-        /// <param name="issue"></param>
-        /// <param name="change"></param>
-        /// <param name="summary"></param>
-        public void Add(IIssue issue, ChangeType change, string summary);
-
-        /// <summary>
-        /// Saved the change log to a file
+        ///     Saved the change log to a file
         /// </summary>
         /// <param name="file"></param>
-        public void Save(string file);
+        void Save(string file);
     }
 }

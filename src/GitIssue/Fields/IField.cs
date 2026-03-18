@@ -9,10 +9,16 @@ namespace GitIssue.Fields
     public interface IField : IReadOnlyField
     {
         /// <summary>
-        /// Copy's the field 
+        ///     Copy's the field
         /// </summary>
         /// <param name="other"></param>
         bool Copy([AllowNull] IField other);
+
+        /// <summary>
+        ///     Saves any additional filed data
+        /// </summary>
+        /// <returns></returns>
+        Task<bool> SaveAsync();
 
         /// <summary>
         ///     Parses the input and updates the field if successful
@@ -20,11 +26,5 @@ namespace GitIssue.Fields
         /// <param name="input"></param>
         /// <returns></returns>
         bool Update(string input);
-
-        /// <summary>
-        ///     Saves any additional filed data
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> SaveAsync();
     }
 }

@@ -13,33 +13,13 @@ namespace GitIssue.Tests.IntegrationTests.Bug
         private static readonly FieldKey SeverityKey = FieldKey.Create("Severity");
 
         /// <summary>
-        ///     Sets the fix version of the issue
-        /// </summary>
-        /// <param name="issue">the issue</param>
-        /// <param name="fixVersion">the fix version to set</param>
-        public static void SetFixVersion(this IIssue issue, Version[] fixVersion)
-        {
-            issue.SetField(FixVersionKey).WithArray(fixVersion);
-        }
-
-        /// <summary>
         ///     Gets the fix version of the issue
         /// </summary>
         /// <param name="issue">the issue</param>
         public static Version[] GetFixVersion(this IIssue issue)
         {
-            var fixVersion = issue.GetField(FixVersionKey).AsArray<Version>();
+            Version[] fixVersion = issue.GetField(BugExtensions.FixVersionKey).AsArray<Version>();
             return fixVersion;
-        }
-
-        /// <summary>
-        ///     Sets the severity of the issue
-        /// </summary>
-        /// <param name="issue">the issue</param>
-        /// <param name="severity">the issue's severity</param>
-        public static void SetSeverity(this IIssue issue, Enumerated severity)
-        {
-            issue.SetField(SeverityKey).WithValue(severity);
         }
 
         /// <summary>
@@ -49,8 +29,28 @@ namespace GitIssue.Tests.IntegrationTests.Bug
         /// <returns></returns>
         public static Enumerated GetSeverity(this IIssue issue)
         {
-            var severity = issue.GetField(SeverityKey).AsValue<Enumerated>();
+            Enumerated severity = issue.GetField(BugExtensions.SeverityKey).AsValue<Enumerated>();
             return severity;
+        }
+
+        /// <summary>
+        ///     Sets the fix version of the issue
+        /// </summary>
+        /// <param name="issue">the issue</param>
+        /// <param name="fixVersion">the fix version to set</param>
+        public static void SetFixVersion(this IIssue issue, Version[] fixVersion)
+        {
+            issue.SetField(BugExtensions.FixVersionKey).WithArray(fixVersion);
+        }
+
+        /// <summary>
+        ///     Sets the severity of the issue
+        /// </summary>
+        /// <param name="issue">the issue</param>
+        /// <param name="severity">the issue's severity</param>
+        public static void SetSeverity(this IIssue issue, Enumerated severity)
+        {
+            issue.SetField(BugExtensions.SeverityKey).WithValue(severity);
         }
     }
 }

@@ -39,24 +39,24 @@ namespace GitIssue.Values
 
         internal Version(string version)
         {
-            if (IsMatch(version, regex, out var match) &&
-                match.Groups.Count == 6)
+            if (Version.IsMatch(version, Version.regex, out Match match) &&
+                (match.Groups.Count == 6))
             {
-                MajorVersion = int.Parse(match.Groups[1].ToString());
-                MinorVersion = int.Parse(match.Groups[2].ToString());
-                PatchVersion = int.Parse(match.Groups[3].ToString());
-                PreRelease = match.Groups[4].ToString().TrimStart('-');
-                BuildMetadata = match.Groups[5].ToString().TrimStart('+');
-                IsValid = true;
+                this.MajorVersion = int.Parse(match.Groups[1].ToString());
+                this.MinorVersion = int.Parse(match.Groups[2].ToString());
+                this.PatchVersion = int.Parse(match.Groups[3].ToString());
+                this.PreRelease = match.Groups[4].ToString().TrimStart('-');
+                this.BuildMetadata = match.Groups[5].ToString().TrimStart('+');
+                this.IsValid = true;
             }
             else
             {
-                MajorVersion = 1;
-                MinorVersion = 0;
-                PatchVersion = 0;
-                PreRelease = null;
-                BuildMetadata = null;
-                IsValid = false;
+                this.MajorVersion = 1;
+                this.MinorVersion = 0;
+                this.PatchVersion = 0;
+                this.PreRelease = null;
+                this.BuildMetadata = null;
+                this.IsValid = false;
             }
         }
 
@@ -93,11 +93,17 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public override string ToString()
         {
-            var version = $"{MajorVersion}.{MinorVersion}.{PatchVersion}";
-            if (string.IsNullOrEmpty(PreRelease) == false)
-                version += $"-{PreRelease}";
-            if (string.IsNullOrEmpty(BuildMetadata) == false)
-                version += $"+{BuildMetadata}";
+            string version = $"{this.MajorVersion}.{this.MinorVersion}.{this.PatchVersion}";
+            if (!string.IsNullOrEmpty(this.PreRelease))
+            {
+                version += $"-{this.PreRelease}";
+            }
+
+            if (!string.IsNullOrEmpty(this.BuildMetadata))
+            {
+                version += $"+{this.BuildMetadata}";
+            }
+
             return version;
         }
 
@@ -123,32 +129,35 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(ToString());
+            return new JValue(this.ToString());
         }
 
         /// <inheritdoc />
         public bool Equals(Version other)
         {
             return
-                MajorVersion == other.MajorVersion &&
-                MinorVersion == other.MinorVersion &&
-                PatchVersion == other.PatchVersion &&
-                PreRelease == other.PreRelease &&
-                BuildMetadata == other.BuildMetadata;
+                (this.MajorVersion == other.MajorVersion) &&
+                (this.MinorVersion == other.MinorVersion) &&
+                (this.PatchVersion == other.PatchVersion) &&
+                (this.PreRelease == other.PreRelease) &&
+                (this.BuildMetadata == other.BuildMetadata);
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Version version)
+            {
                 return this.Equals(version);
+            }
+
             return false;
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return ToString().GetHashCode();
+            return this.ToString().GetHashCode();
         }
     }
 }

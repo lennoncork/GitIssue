@@ -10,45 +10,45 @@ namespace GitIssue.Tests.ValueTests
 {
     public abstract class ValueTests<TValue> where TValue : IValue
     {
+        public new virtual bool Equals(object first, object second)
+        {
+            bool objEquals = first.Equals(second);
+            bool hashEquals = first?.GetHashCode() == second?.GetHashCode();
+            Assert.That(objEquals, Is.EqualTo(hashEquals));
+            return objEquals;
+        }
+
         public bool HasConverter(Type type)
         {
-            var converter = TypeDescriptor.GetConverter(typeof(TValue));
+            TypeConverter converter = TypeDescriptor.GetConverter(typeof(TValue));
             return converter.CanConvertFrom(type);
         }
 
         public bool HasConverter<TIn>()
         {
-            return HasConverter(typeof(TIn));
+            return this.HasConverter(typeof(TIn));
         }
 
         public object UseConverter(object input)
         {
-            var converter = TypeDescriptor.GetConverter(typeof(TValue));
+            TypeConverter converter = TypeDescriptor.GetConverter(typeof(TValue));
             if (converter.CanConvertFrom(input.GetType()))
             {
-                var result = converter.ConvertFrom(input);
-                if(result != null)
+                object? result = converter.ConvertFrom(input);
+                if (result != null)
                 {
                     return result;
                 }
             }
+
             Assert.Fail($"Failed to convert from {input.GetType()} to {typeof(TValue)}");
-            return default!;
+            return default(object)!;
         }
 
         public TValue UseConverter<TIn>(TIn input)
         {
-            return (TValue)UseConverter((object)input!);
+            return (TValue)this.UseConverter((object)input!);
         }
-
-        public new virtual bool Equals(object first, object second)
-        {
-            var objEquals = first.Equals(second);
-            var hashEquals = first?.GetHashCode() == second?.GetHashCode();
-            Assert.That(objEquals, Is.EqualTo(hashEquals));
-            return objEquals;
-        }
-
     }
 
     public abstract class ValueTests<TValue, TBacking> : ValueTests<TValue>
@@ -84,7 +84,7 @@ namespace GitIssue.Tests.ValueTests
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
     }
 }

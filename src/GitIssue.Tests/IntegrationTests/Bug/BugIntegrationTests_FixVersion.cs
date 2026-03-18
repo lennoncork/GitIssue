@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using GitIssue.Issues;
 using GitIssue.Values;
 using NUnit.Framework;
 
@@ -14,14 +15,14 @@ namespace GitIssue.Tests.IntegrationTests.Bug
             [Test]
             public async Task CanBeSetFromString()
             {
-                Initialize(TestDirectory);
+                this.Initialize(this.TestDirectory);
 
-                var create = await Issues
-                    .CreateAsync(nameof(CanBeSetFromString), string.Empty)
+                IIssue create = await this.Issues
+                    .CreateAsync(nameof(FixVersion.CanBeSetFromString), string.Empty)
                     .WithSafeResultAsync()
                     .AssertIfNotSuccess();
 
-                var fixVersion = Version.Parse("1.2.3-abs+def");
+                Version fixVersion = Version.Parse("1.2.3-abs+def");
                 create.SetFixVersion(new[] { fixVersion });
 
                 await create
@@ -29,9 +30,9 @@ namespace GitIssue.Tests.IntegrationTests.Bug
                     .WithSafeResultAsync()
                     .AssertIfNotSuccess();
 
-                var find = Issues.Find(i => i.Key == create.Key).ToArray();
+                IIssue[] find = this.Issues.Find(i => i.Key == create.Key).ToArray();
 
-                var issue = find[0];
+                IIssue issue = find[0];
                 Assert.That(issue.GetFixVersion()[0], Is.EqualTo(fixVersion));
             }
         }

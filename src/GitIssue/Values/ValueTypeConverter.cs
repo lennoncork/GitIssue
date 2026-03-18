@@ -15,10 +15,14 @@ namespace GitIssue.Values
             Type sourceType)
         {
             if (sourceType == typeof(string))
+            {
                 return true;
+            }
 
             if (sourceType == typeof(ValueMetadata))
+            {
                 return true;
+            }
 
             return base.CanConvertFrom(context, sourceType);
         }
@@ -28,12 +32,20 @@ namespace GitIssue.Values
             CultureInfo? culture, object value)
         {
             if (value is string str)
-                if (TryParse(str, out var result))
+            {
+                if (this.TryParse(str, out T result))
+                {
                     return result;
+                }
+            }
 
             if (value is ValueMetadata valueMetadata)
-                if (TryParse(valueMetadata, out var result))
+            {
+                if (this.TryParse(valueMetadata, out T result))
+                {
                     return result;
+                }
+            }
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -43,8 +55,12 @@ namespace GitIssue.Values
             CultureInfo? culture, object? value, Type destinationType)
         {
             if (destinationType == typeof(string))
+            {
                 if (value is T result)
+                {
                     return result.ToString();
+                }
+            }
 
             return base.ConvertTo(context, culture, value, destinationType);
         }

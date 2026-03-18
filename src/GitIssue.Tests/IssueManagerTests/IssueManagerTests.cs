@@ -11,8 +11,11 @@ namespace GitIssue.Tests.IssueManagerTests
         {
             get
             {
-                if (sut == null)
+                if (this.sut == null)
+                {
                     return this.Manager;
+                }
+
                 return this.sut;
             }
             set => this.sut = value;

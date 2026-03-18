@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using GitIssue.Issues;
 
@@ -17,7 +18,7 @@ namespace GitIssue.Fields
         /// <inheritdoc />
         public IField CreateField(Issue issue, FieldKey key, FieldInfo info)
         {
-            var method = GetType().GetMethods()
+            MethodInfo? method = GetType().GetMethods()
                 .Where(m => m.IsPublic)
                 .Where(m => m.Name == nameof(CreateField))
                 .Where(m => m.IsGenericMethodDefinition)
@@ -27,7 +28,7 @@ namespace GitIssue.Fields
             if (method != null)
             {
                 object[] args = { issue, key, info };
-                var field = (IField)method.Invoke(this, args)!;
+                IField field = (IField)method.Invoke(this, args)!;
                 return field;
             }
 
@@ -40,7 +41,7 @@ namespace GitIssue.Fields
         /// <inheritdoc />
         public async Task<IField> ReadFieldAsync(Issue issue, FieldKey key, FieldInfo info)
         {
-            var method = GetType().GetMethods()
+            MethodInfo? method = GetType().GetMethods()
                 .Where(m => m.IsPublic)
                 .Where(m => m.Name == nameof(ReadFieldAsync))
                 .Where(m => m.IsGenericMethodDefinition)
@@ -50,9 +51,9 @@ namespace GitIssue.Fields
             if (method != null)
             {
                 object[] args = { issue, key, info };
-                var task = (Task)method.Invoke(this, args)!;
+                Task task = (Task)method.Invoke(this, args)!;
                 await task;
-                var result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
+                IField result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
                 return result;
             }
 

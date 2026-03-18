@@ -4,19 +4,19 @@ using System.Threading.Tasks;
 namespace GitIssue.Syncs
 {
     /// <summary>
-    /// Importing interface
+    ///     Importing interface
     /// </summary>
     public interface IImporter : IAsyncEnumerable<SyncedIssue>
     {
         /// <summary>
-        /// Gets the Root
+        ///     Gets the Root
         /// </summary>
-        public SyncRoot Root { get; }
+        SyncRoot Root { get; }
 
         /// <summary>
-        /// Imports the issues
+        ///     Imports the issues
         /// </summary>
         /// <returns></returns>
-        public Task<bool> Import();
+        Task<bool> Import();
     }
 }

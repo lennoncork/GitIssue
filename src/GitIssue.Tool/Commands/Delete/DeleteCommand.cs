@@ -24,7 +24,7 @@ namespace GitIssue.Tool.Commands.Delete
         /// <inheritdoc />
         public override async Task Exec(DeleteOptions options)
         {
-            var result = await manager.DeleteAsync(options.Key);
+            bool result = await this.manager.DeleteAsync(options.Key);
             if (result)
             {
                 Console.WriteLine($"Deleted issue '{options.Key}'");

@@ -13,7 +13,7 @@ namespace GitIssue.Values
         /// <param name="alias"></param>
         public TypeAliasAttribute(string alias)
         {
-            Alias = alias;
+            this.Alias = alias;
         }
 
         /// <summary>

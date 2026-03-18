@@ -17,13 +17,15 @@ namespace GitIssue.Tool
     {
         private static readonly char CommentChar = '#';
 
+        private static readonly string FieldHeaderRegex = @$"^{Editor.CommentChar}[\s]?([\w]*)[\s]?$";
+
         private static readonly char Newline = '\n';
 
         private static readonly string FieldTemplate =
-            $"{Newline}{CommentChar} Please edit the field with your updates. Lines starting" +
-            $"{Newline}{CommentChar} with '#' will be ignored, leave the file unchanged to abort. ";
+            $"{Editor.Newline}{Editor.CommentChar} Please edit the field with your updates. Lines starting" +
+            $"{Editor.Newline}{Editor.CommentChar} with '#' will be ignored, leave the file unchanged to abort. ";
 
-        private static readonly string FieldHeaderRegex = @$"^{CommentChar}[\s]?([\w]*)[\s]?$";
+
 
         public Editor(Configuration configuration)
         {
@@ -32,9 +34,9 @@ namespace GitIssue.Tool
         }
 
         /// <summary>
-        ///     Gets or sets the successful result
+        ///     Gets or sets the command
         /// </summary>
-        public int Success { get; set; } = 0;
+        public string Arguments { get; set; } = string.Empty;
 
         /// <summary>
         ///     Gets or sets the command
@@ -42,49 +44,37 @@ namespace GitIssue.Tool
         public string Command { get; set; } = string.Empty;
 
         /// <summary>
-        ///     Gets or sets the command
+        ///     Gets or sets the successful result
         /// </summary>
-        public string Arguments { get; set; } = string.Empty;
+        public int Success { get; set; } = 0;
 
         public void UpdateCommand(string command)
         {
-            var result = GetProcessAndArgumentsFromCommand(command);
+            (string, string) result = Editor.GetProcessAndArgumentsFromCommand(command);
             this.Command = result.Item1;
             this.Arguments = result.Item2;
-        }
-
-        private static (string, string) GetProcessAndArgumentsFromCommand(string command)
-        {
-            try
-            {
-                var match = Regex.Match(command, "^\\s?([\\w.]+|\"[\\w\\s.]*\")\\s?(.*)?$");
-                if (match.Success)
-                    if (match.Groups.Count == 3)
-                        return (match.Groups[1].ToString().Trim(), match.Groups[2].ToString().Trim());
-            }
-            catch (Exception)
-            {
-                // Ignored
-            }
-            return (command.Trim(), String.Empty);
         }
 
         /// <inheritdoc />
         public async Task<string> Edit(string header, string content)
         {
-            var temp = GetTempFile();
+            string temp = Editor.GetTempFile();
 
-            await File.AppendAllTextAsync(temp, $"{CommentChar} {header} {Newline}");
+            await File.AppendAllTextAsync(temp, $"{Editor.CommentChar} {header} {Editor.Newline}");
             await File.AppendAllTextAsync(temp, content);
-            await File.AppendAllTextAsync(temp, FieldTemplate);
+            await File.AppendAllTextAsync(temp, Editor.FieldTemplate);
 
-            var created = File.GetLastWriteTime(temp);
+            DateTime created = File.GetLastWriteTime(temp);
 
-            if (await EditFileAsync(this.Command, this.Arguments + " " + temp))
+            if (await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
+            {
                 if (created == File.GetLastWriteTime(temp))
+                {
                     return content;
+                }
+            }
 
-            return RemoveComments(await File.ReadAllTextAsync(temp));
+            return Editor.RemoveComments(await File.ReadAllTextAsync(temp));
         }
 
         /// <inheritdoc />
@@ -97,21 +87,23 @@ namespace GitIssue.Tool
         public async Task Open(IEnumerable<IField> fields)
         {
             // Convert fields to a file
-            var temp = GetTempFile();
-            foreach (var field in fields)
+            string temp = Editor.GetTempFile();
+            foreach (IField field in fields)
             {
-                await File.AppendAllTextAsync(temp, $"{CommentChar} {field.Key} {Newline}");
-                await File.AppendAllTextAsync(temp, $"{await field.ExportAsync()}{Newline}");
+                await File.AppendAllTextAsync(temp, $"{Editor.CommentChar} {field.Key} {Editor.Newline}");
+                await File.AppendAllTextAsync(temp, $"{await field.ExportAsync()}{Editor.Newline}");
             }
 
-            await File.AppendAllTextAsync(temp, FieldTemplate);
+            await File.AppendAllTextAsync(temp, Editor.FieldTemplate);
 
             // Open and modify the file
-            var created = File.GetLastWriteTime(temp);
-            if (await EditFileAsync(this.Command, this.Arguments + " " + temp))
+            DateTime created = File.GetLastWriteTime(temp);
+            if (await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
             {
                 if (created == File.GetLastWriteTime(temp))
+                {
                     return;
+                }
             }
             else
             {
@@ -119,11 +111,12 @@ namespace GitIssue.Tool
             }
 
             // Extract the field updates
-            var key = FieldKey.None;
-            var content = string.Empty;
-            var updates = new Dictionary<FieldKey, string>();
-            await foreach (var line in ReadLinesAsync(temp))
-                if (IsMatch(line, FieldHeaderRegex, out var match))
+            FieldKey key = FieldKey.None;
+            string content = string.Empty;
+            Dictionary<FieldKey, string> updates = new Dictionary<FieldKey, string>();
+            await foreach (string line in Editor.ReadLinesAsync(temp))
+            {
+                if (Editor.IsMatch(line, Editor.FieldHeaderRegex, out Match match))
                 {
                     if (key != FieldKey.None)
                     {
@@ -137,31 +130,65 @@ namespace GitIssue.Tool
                 else if (key != FieldKey.None)
                 {
                     if (string.IsNullOrEmpty(content))
+                    {
                         content = line;
+                    }
                     else
-                        content = content + Newline + line;
+                    {
+                        content = content + Editor.Newline + line;
+                    }
                 }
+            }
 
             // Update the fields
-            foreach (var field in fields)
+            foreach (IField field in fields)
+            {
                 if (updates.ContainsKey(field.Key))
+                {
                     field.Update(updates[field.Key]);
+                }
+            }
         }
 
         /// <inheritdoc />
         public async Task Open(IField field)
         {
-            var content = await field.ExportAsync();
-            var temp = GetTempFile();
+            string content = await field.ExportAsync();
+            string temp = Editor.GetTempFile();
             await File.WriteAllTextAsync(temp, content);
-            await File.AppendAllTextAsync(temp, FieldTemplate);
+            await File.AppendAllTextAsync(temp, Editor.FieldTemplate);
 
-            var created = File.GetLastWriteTime(temp);
-            if (await EditFileAsync(this.Command, this.Arguments + " " + temp))
+            DateTime created = File.GetLastWriteTime(temp);
+            if (await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
+            {
                 if (created == File.GetLastWriteTime(temp))
+                {
                     return;
+                }
+            }
 
-            field.Update(RemoveComments(await File.ReadAllTextAsync(temp)));
+            field.Update(Editor.RemoveComments(await File.ReadAllTextAsync(temp)));
+        }
+
+        private static (string, string) GetProcessAndArgumentsFromCommand(string command)
+        {
+            try
+            {
+                Match match = Regex.Match(command, "^\\s?([\\w.]+|\"[\\w\\s.]*\")\\s?(.*)?$");
+                if (match.Success)
+                {
+                    if (match.Groups.Count == 3)
+                    {
+                        return (match.Groups[1].ToString().Trim(), match.Groups[2].ToString().Trim());
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Ignored
+            }
+
+            return (command.Trim(), string.Empty);
         }
 
         private static string GetTempFile()
@@ -184,8 +211,8 @@ namespace GitIssue.Tool
         private static async IAsyncEnumerable<string> ReadLinesAsync(string file)
         {
             await using Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-            using var reader = new StreamReader(stream);
-            var line = await reader.ReadLineAsync();
+            using StreamReader reader = new StreamReader(stream);
+            string? line = await reader.ReadLineAsync();
             while (line != null)
             {
                 yield return line;
@@ -195,19 +222,19 @@ namespace GitIssue.Tool
 
         private static string RemoveComments(string input)
         {
-            var comments = $@"^{CommentChar}(.*)$";
-            var lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
-                .Where(l => Regex.IsMatch(l, comments) == false)
+            string comments = $@"^{Editor.CommentChar}(.*)$";
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
+                .Where(l => !Regex.IsMatch(l, comments))
                 .ToArray();
-            return string.Join(Newline, lines);
+            return string.Join(Editor.Newline, lines);
         }
 
         private async Task<bool> EditFileAsync(string editor, string arguments)
         {
-            var result = 0;
+            int result = 0;
             await Task.Run(() =>
             {
-                using var process = new Process();
+                using Process process = new Process();
 
                 process.StartInfo.FileName = editor;
                 process.StartInfo.Arguments = arguments;
@@ -222,8 +249,7 @@ namespace GitIssue.Tool
 
                 result = process.ExitCode;
             });
-            return result == Success;
+            return result == this.Success;
         }
-
     }
 }

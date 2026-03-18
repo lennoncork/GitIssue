@@ -18,8 +18,8 @@ namespace GitIssue.Issues
         public IssueRoot(RepositoryRoot root, IssueKey key, string? issuePath)
         {
             this.issuePath = issuePath;
-            Root = root;
-            Key = key;
+            this.Root = root;
+            this.Key = key;
         }
 
         /// <summary>
@@ -35,6 +35,6 @@ namespace GitIssue.Issues
         /// <summary>
         ///     Gets the <see cref="IssuePath" /> for the issue
         /// </summary>
-        public string IssuePath => Path.Combine(Root.IssuesPath, this.issuePath ?? Key.ToString());
+        public string IssuePath => Path.Combine(this.Root.IssuesPath, this.issuePath ?? this.Key.ToString());
     }
 }

@@ -28,7 +28,7 @@ namespace GitIssue.Tool.Commands.Track
             options.Tracked = TrackedIssue.None;
             if (!string.IsNullOrEmpty(options.Key))
             {
-                var find = await manager.FindAsync(i => i.Key.ToString() == options.Key)
+                IIssue? find = await this.manager.FindAsync(i => i.Key.ToString() == options.Key)
                     .FirstOrDefaultAsync();
 
                 if (find != null)

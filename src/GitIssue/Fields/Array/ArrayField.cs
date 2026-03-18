@@ -27,19 +27,61 @@ namespace GitIssue.Fields.Array
         }
 
         /// <inheritdoc />
+        public int Count => this.values.Count;
+
+        /// <inheritdoc />
+        public T this[int index]
+        {
+            get => this.values[index];
+            set => this.values[index] = value;
+        }
+
+        /// <inheritdoc />
+        public T[] Values
+        {
+            get => this.values.ToArray();
+            set => this.values = new List<T>(value);
+        }
+
+        /// <inheritdoc />
         public Type ValueType => typeof(T);
+
+        /// <inheritdoc />
+        int ICollection.Count => ((ICollection)this.values).Count;
+
+        bool IList.IsFixedSize => ((IList)this.values).IsFixedSize;
+
+        /// <inheritdoc />
+        bool IList.IsReadOnly => ((IList)this.values).IsReadOnly;
+
+        bool ICollection<T>.IsReadOnly => ((ICollection<T>)this.values).IsReadOnly;
+
+        /// <inheritdoc />
+        bool ICollection.IsSynchronized => ((ICollection)this.values).IsSynchronized;
+
+        /// <inheritdoc />
+        object? IList.this[int index]
+        {
+            get => ((IList)this.values)[index];
+            set => ((IList)this.values)[index] = value;
+        }
+
+        /// <inheritdoc />
+        object ICollection.SyncRoot => ((ICollection)this.values).SyncRoot;
 
         /// <inheritdoc />
         object[]? IArrayField.Values
         {
-            get => Values.Cast<object>().ToArray();
+            get => this.Values.Cast<object>().ToArray();
             set
             {
                 if (value == null)
+                {
                     return;
+                }
 
                 this.values.Clear();
-                foreach (var v in value)
+                foreach (object v in value)
                 {
                     if (v is T result)
                     {
@@ -50,55 +92,89 @@ namespace GitIssue.Fields.Array
         }
 
         /// <inheritdoc />
-        public T[] Values
+        public override string ToString()
         {
-            get => values.ToArray();
-            set => values = new List<T>(value);
-        }
+            StringBuilder builder = new StringBuilder();
+            builder.Append("[");
+            for (int i = 0; i < this.values.Count; i++)
+            {
+                if (i > 0)
+                {
+                    builder.Append(", ");
+                }
 
-        bool IList.IsFixedSize => ((IList)values).IsFixedSize;
+                builder.Append(this.Values[i]);
+            }
 
-        /// <inheritdoc />
-        bool IList.IsReadOnly => ((IList)values).IsReadOnly;
-
-        /// <inheritdoc />
-        int ICollection.Count => ((ICollection)values).Count;
-
-        /// <inheritdoc />
-        bool ICollection.IsSynchronized => ((ICollection)values).IsSynchronized;
-
-        /// <inheritdoc />
-        object ICollection.SyncRoot => ((ICollection)values).SyncRoot;
-
-        /// <inheritdoc />
-        public int Count => values.Count;
-
-        bool ICollection<T>.IsReadOnly => ((ICollection<T>)values).IsReadOnly;
-
-        /// <inheritdoc />
-        public T this[int index]
-        {
-            get => values[index];
-            set => values[index] = value;
+            builder.Append("]");
+            return builder.ToString();
         }
 
         /// <inheritdoc />
-        object? IList.this[int index]
+        public bool TryParse(string input, out T value)
         {
-            get => ((IList)values)[index];
-            set => ((IList)values)[index] = value;
+            return ValueExtensions.TryParse(input, out value);
+        }
+
+        /// <inheritdoc />
+        public void Add(T item)
+        {
+            this.values.Add(item);
+        }
+
+        /// <inheritdoc />
+        public void Clear()
+        {
+            this.values.Clear();
+        }
+
+        /// <inheritdoc />
+        public bool Contains(T item)
+        {
+            return this.values.Contains(item);
+        }
+
+        /// <inheritdoc />
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            this.values.CopyTo(array, arrayIndex);
+        }
+
+        /// <inheritdoc />
+        public bool Remove(T item)
+        {
+            return this.values.Remove(item);
         }
 
         /// <inheritdoc />
         public IEnumerator<T> GetEnumerator()
         {
-            foreach (var value in Values) yield return value;
+            foreach (T value in this.Values)
+            {
+                yield return value;
+            }
         }
 
         /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator()
+        public override bool Equals([AllowNull] IField other)
         {
-            return GetEnumerator();
+            if (other is IArrayField<T> valueField)
+            {
+                return this.Values?.SequenceEqual(valueField.Values) ?? false;
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override bool Copy([AllowNull] IField other)
+        {
+            if (other is IArrayField<T> valueField)
+            {
+                this.Values = valueField.Values.ToArray();
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
@@ -107,28 +183,45 @@ namespace GitIssue.Fields.Array
             T result;
             if (input.StartsWith('+'))
             {
-                if (TryParse(input.TrimStart('+'), out result))
-                    if (!values.Contains(result))
-                        values.Add(result);
+                if (this.TryParse(input.TrimStart('+'), out result))
+                {
+                    if (!this.values.Contains(result))
+                    {
+                        this.values.Add(result);
+                    }
+                }
+
                 return true;
             }
 
             if (input.StartsWith('-'))
             {
-                if (TryParse(input.TrimStart('-'), out result))
-                    if (values.Contains(result))
-                        values.Remove(result);
+                if (this.TryParse(input.TrimStart('-'), out result))
+                {
+                    if (this.values.Contains(result))
+                    {
+                        this.values.Remove(result);
+                    }
+                }
+
                 return true;
             }
 
             if (input.StartsWith('[') && input.EndsWith(']'))
             {
                 this.values.Clear();
-                var values = input.TrimStart('[').TrimEnd(']').Split(',');
-                foreach (var value in values)
-                    if (TryParse(value.Trim(), out result))
+                string[] values = input.TrimStart('[').TrimEnd(']').Split(',');
+                foreach (string value in values)
+                {
+                    if (this.TryParse(value.Trim(), out result))
+                    {
                         if (!this.values.Contains(result))
+                        {
                             this.values.Add(result);
+                        }
+                    }
+                }
+
                 return true;
             }
 
@@ -136,97 +229,73 @@ namespace GitIssue.Fields.Array
         }
 
         /// <inheritdoc />
-        void IList.RemoveAt(int index)
-        {
-            values.RemoveAt(index);
-        }
-
-        /// <inheritdoc />
-        int IList.Add(object? value)
-        {
-            return ((IList)values).Add(value);
-        }
-
-        /// <inheritdoc />
-        void IList.Clear()
-        {
-            values.Clear();
-        }
-
-        /// <inheritdoc />
-        bool IList.Contains(object? value)
-        {
-            return ((IList)values).Contains(value);
-        }
-
-        /// <inheritdoc />
-        int IList.IndexOf(object? value)
-        {
-            return ((IList)values).IndexOf(value);
-        }
-
-        /// <inheritdoc />
-        void IList.Insert(int index, object? value)
-        {
-            ((IList)values).Insert(index, value);
-        }
-
-        void IList.Remove(object? value)
-        {
-            ((IList)values).Remove(value);
-        }
-
-        void ICollection.CopyTo(System.Array array, int index)
-        {
-            ((IList)values).CopyTo(array, index);
-        }
-
-        /// <inheritdoc />
         public int IndexOf(T item)
         {
-            return values.IndexOf(item);
+            return this.values.IndexOf(item);
         }
 
         /// <inheritdoc />
         public void Insert(int index, T item)
         {
-            values.Insert(index, item);
+            this.values.Insert(index, item);
         }
 
         /// <inheritdoc />
         public void RemoveAt(int index)
         {
-            values.RemoveAt(index);
+            this.values.RemoveAt(index);
         }
 
         /// <inheritdoc />
-        public void Add(T item)
+        int IList.Add(object? value)
         {
-            values.Add(item);
+            return ((IList)this.values).Add(value);
         }
 
         /// <inheritdoc />
-        public bool Contains(T item)
+        void IList.Clear()
         {
-            return values.Contains(item);
+            this.values.Clear();
         }
 
         /// <inheritdoc />
-        public void CopyTo(T[] array, int arrayIndex)
+        bool IList.Contains(object? value)
         {
-            values.CopyTo(array, arrayIndex);
+            return ((IList)this.values).Contains(value);
+        }
+
+        void ICollection.CopyTo(System.Array array, int index)
+        {
+            ((IList)this.values).CopyTo(array, index);
         }
 
         /// <inheritdoc />
-        public bool Remove(T item)
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            return values.Remove(item);
+            return this.GetEnumerator();
         }
 
         /// <inheritdoc />
-        public void Clear()
+        int IList.IndexOf(object? value)
         {
-            values.Clear();
+            return ((IList)this.values).IndexOf(value);
+        }
+
+        /// <inheritdoc />
+        void IList.Insert(int index, object? value)
+        {
+            ((IList)this.values).Insert(index, value);
+        }
+
+        void IList.Remove(object? value)
+        {
+            ((IList)this.values).Remove(value);
+        }
+
+        /// <inheritdoc />
+        void IList.RemoveAt(int index)
+        {
+            this.values.RemoveAt(index);
         }
 
         /// <inheritdoc />
@@ -239,46 +308,6 @@ namespace GitIssue.Fields.Array
             }
 
             value = null;
-            return false;
-        }
-
-        /// <inheritdoc />
-        public bool TryParse(string input, out T value)
-        {
-            return ValueExtensions.TryParse(input, out value);
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-            builder.Append("[");
-            for (var i = 0; i < values.Count; i++)
-            {
-                if (i > 0) builder.Append(", ");
-                builder.Append(Values[i]);
-            }
-            builder.Append("]");
-            return builder.ToString();
-        }
-
-        /// <inheritdoc />
-        public override bool Copy([AllowNull] IField other)
-        {
-            if (other is IArrayField<T> valueField)
-            {
-                this.Values = valueField.Values.ToArray();
-            }
-            return false;
-        }
-
-        /// <inheritdoc />
-        public override bool Equals([AllowNull] IField other)
-        {
-            if (other is IArrayField<T> valueField)
-            {
-                return this.Values?.SequenceEqual(valueField.Values) ?? false;
-            }
             return false;
         }
     }

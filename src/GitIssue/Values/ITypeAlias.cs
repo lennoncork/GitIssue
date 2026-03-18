@@ -13,7 +13,7 @@ namespace GitIssue.Values
         /// <param name="alias">the alias to parse</param>
         /// <param name="type">the type that matches the alias</param>
         /// <returns>true if parsed, false otherwise</returns>
-        public bool TryParse(string alias, out Type type);
+        bool TryParse(string alias, out Type type);
 
         /// <summary>
         ///     Tries to parse the type
@@ -21,6 +21,6 @@ namespace GitIssue.Values
         /// <param name="type">the type to parse</param>
         /// <param name="alias">the alias of the type</param>
         /// <returns>true if parsed, false otherwise</returns>
-        public bool TryParse(Type type, out string alias);
+        bool TryParse(Type type, out string alias);
     }
 }

@@ -25,9 +25,14 @@ namespace GitIssue.Issues
         /// <param name="key">the issue key to track</param>
         public TrackedIssue(IssueKey key)
         {
-            Key = key;
-            Started = DateTime.Now;
+            this.Key = key;
+            this.Started = DateTime.Now;
         }
+
+        /// <summary>
+        ///     Gets the none tracked issue
+        /// </summary>
+        public static TrackedIssue None => new TrackedIssue();
 
         /// <summary>
         ///     Gets the key of the tracked issue
@@ -42,11 +47,6 @@ namespace GitIssue.Issues
         public DateTime Started { get; set; } = DateTime.MinValue;
 
         /// <summary>
-        ///     Gets the none tracked issue
-        /// </summary>
-        public static TrackedIssue None => new TrackedIssue();
-
-        /// <summary>
         ///     Equals
         /// </summary>
         /// <param name="lhs"></param>
@@ -55,9 +55,15 @@ namespace GitIssue.Issues
         public static bool operator ==(TrackedIssue lhs, TrackedIssue rhs)
         {
             if (string.IsNullOrEmpty(lhs?.Key) && string.IsNullOrEmpty(rhs?.Key))
+            {
                 return true;
+            }
+
             if (string.IsNullOrEmpty(lhs?.Key) || string.IsNullOrEmpty(rhs?.Key))
+            {
                 return false;
+            }
+
             return rhs.Equals(lhs);
         }
 
@@ -72,50 +78,6 @@ namespace GitIssue.Issues
             return !(lhs == rhs);
         }
 
-        /// <inheritdoc />
-        public override bool Equals(object? obj)
-        {
-            if (obj is TrackedIssue track)
-            {
-                if (string.IsNullOrEmpty(Key) &&
-                    string.IsNullOrEmpty(track.Key))
-                    return true;
-                return Key == track.Key;
-            }
-
-            return base.Equals(obj);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return Key.GetHashCode();
-        }
-
-        /// <summary>
-        ///     Saves the configuration to a file
-        /// </summary>
-        /// <param name="file">the configuration file</param>
-        /// <param name="logger">the logger</param>
-        public async Task SaveAsync(string file, ILogger? logger = null)
-        {
-            try
-            {
-                await using var stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                await using var writer = new StreamWriter(stream);
-                var serializer = JsonSerializer.Create(new JsonSerializerSettings
-                {
-                    Formatting = Formatting.Indented,
-                    DefaultValueHandling = DefaultValueHandling.Ignore
-                });
-                serializer.Serialize(writer, this, typeof(TrackedIssue));
-            }
-            catch (Exception ex)
-            {
-                logger?.Error($"Unable to serialize {file} as tracked issue file ", ex);
-            }
-        }
-
         /// <summary>
         ///     Reads the configuration from a file
         /// </summary>
@@ -128,10 +90,10 @@ namespace GitIssue.Issues
             {
                 if (System.IO.File.Exists(file))
                 {
-                    using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                    using var reader = new StreamReader(stream);
-                    var serializer = new JsonSerializer();
-                    var tracked = (TrackedIssue)serializer.Deserialize(reader, typeof(TrackedIssue))!;
+                    using FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                    using StreamReader reader = new StreamReader(stream);
+                    JsonSerializer serializer = new JsonSerializer();
+                    TrackedIssue tracked = (TrackedIssue)serializer.Deserialize(reader, typeof(TrackedIssue))!;
                     return tracked;
                 }
             }
@@ -140,7 +102,50 @@ namespace GitIssue.Issues
                 logger?.Error($"Unable to deserialize {file} as tracked issue file ", ex);
             }
 
-            return None;
+            return TrackedIssue.None;
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (obj is TrackedIssue track)
+            {
+                if (string.IsNullOrEmpty(this.Key) &&
+                    string.IsNullOrEmpty(track.Key))
+                {
+                    return true;
+                }
+
+                return this.Key == track.Key;
+            }
+
+            return base.Equals(obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return this.Key.GetHashCode();
+        }
+
+        /// <summary>
+        ///     Saves the configuration to a file
+        /// </summary>
+        /// <param name="file">the configuration file</param>
+        /// <param name="logger">the logger</param>
+        public async Task SaveAsync(string file, ILogger? logger = null)
+        {
+            try
+            {
+                await using FileStream stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
+                await using StreamWriter writer = new StreamWriter(stream);
+                JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented, DefaultValueHandling = DefaultValueHandling.Ignore });
+                serializer.Serialize(writer, this, typeof(TrackedIssue));
+            }
+            catch (Exception ex)
+            {
+                logger?.Error($"Unable to serialize {file} as tracked issue file ", ex);
+            }
         }
     }
 }
