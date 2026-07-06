@@ -6,3 +6,5 @@
 .cake
 *.user
 .issues
+# Coverage results
+coverage/
