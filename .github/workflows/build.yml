@@ -25,6 +25,6 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - name: Build
-        uses: cake-build/cake-action@v1
+        uses: cake-build/cake-action@v2
         with:
           target: Test

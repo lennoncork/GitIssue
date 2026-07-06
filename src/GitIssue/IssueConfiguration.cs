@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using GitIssue.Fields;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
@@ -63,8 +65,8 @@ namespace GitIssue
         {
             try
             {
-                using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                using var reader = new StreamReader(stream);
+                using FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                using StreamReader reader = new StreamReader(stream);
                 JsonSerializer serializer = new JsonSerializer();
                 T configuration = (T)serializer.Deserialize(reader, typeof(T))!;
                 return configuration;
@@ -86,8 +88,8 @@ namespace GitIssue
         {
             try
             {
-                using var stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                using var writer = new StreamWriter(stream);
+                using FileStream stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
+                using StreamWriter writer = new StreamWriter(stream);
                 JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented, DefaultValueHandling = DefaultValueHandling.Ignore });
                 serializer.Serialize(writer, this, typeof(T));
             }
