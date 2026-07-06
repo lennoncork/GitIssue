@@ -29,6 +29,17 @@ namespace GitIssue.Tests.IssueManagerTests
             }
 
             [Test]
+            public void InitWithoutParametersUsesCurrentDirectory()
+            {
+                Repository.Init(this.TestDirectory);
+                using (new Helpers.EnvironmentCurrentDirectory(this.TestDirectory))
+                {
+                    using IIssueManager manager = IssueManager.Init();
+                    Assert.That(manager.Root.RootPath, Is.EqualTo(this.TestDirectory));
+                }
+            }
+
+            [Test]
             public void FailsIfNotAGitRepository()
             {
                 Assert.Throws<DependencyResolutionException>(() => { IssueManager.Init(this.TestDirectory); });

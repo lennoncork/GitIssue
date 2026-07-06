@@ -57,6 +57,27 @@ namespace GitIssue.Tests.IssueManagerTests
                     .WithSafeResultAsync();
                 Assert.That((DateTime)create.Result.Updated, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
             }
+
+            [Test]
+            public void CreatesNewIssueUsingSyncOverload()
+            {
+                this.Initialize(this.TestDirectory);
+                string title = "New Sync Issue";
+                IIssue issue = this.Sut.Create(title);
+                Assert.That(issue.Title, Is.EqualTo(title));
+                Assert.That(issue.Key, Is.Not.EqualTo(IssueKey.None));
+            }
+
+            [Test]
+            public void CreatesNewIssueUsingSyncOverloadWithDescription()
+            {
+                this.Initialize(this.TestDirectory);
+                string title = "New Sync Issue With Description";
+                string description = "This Is A New Sync Issue";
+                IIssue issue = this.Sut.Create(title, description);
+                Assert.That(issue.Title, Is.EqualTo(title));
+                Assert.That(issue.Description, Is.EqualTo(description));
+            }
         }
     }
 }

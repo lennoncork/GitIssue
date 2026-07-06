@@ -13,6 +13,11 @@ namespace GitIssue.Issues
     public interface IIssue : IReadOnlyIssue
     {
         /// <summary>
+        ///     Gets or sets the issue comments
+        /// </summary>
+        new String[] Comments { get; set; }
+
+        /// <summary>
         ///     Gets or sets the Author
         /// </summary>
         new Signature Author { get; set; }

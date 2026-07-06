@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using LibGit2Sharp;
 using NUnit.Framework;
 
@@ -35,7 +36,15 @@ namespace GitIssue.Tests.IntegrationTests.Bug
             this.TestDirectory = Helpers.GetTestDirectory();
             if (Directory.Exists(this.TestDirectory))
             {
-                Directory.Delete(this.TestDirectory, true);
+                try
+                {
+                    Directory.Delete(this.TestDirectory, true);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Ignore if cleanup cannot delete some files; per-test temp
+                    // directories created in Setup() ensure isolation.
+                }
             }
 
             Directory.CreateDirectory(this.TestDirectory);

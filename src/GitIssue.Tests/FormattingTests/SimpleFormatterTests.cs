@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace GitIssue.Tests.Formatting
+namespace GitIssue.Tests.FormattingTests
 {
     [TestFixture]
     public partial class SimpleFormatterTests : TestsBase

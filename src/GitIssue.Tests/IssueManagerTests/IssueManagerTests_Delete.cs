@@ -36,6 +36,39 @@ namespace GitIssue.Tests.IssueManagerTests
                     .WithSafeResultAsync();
                 Assert.IsFalse(delete.IsSuccess);
             }
+
+            [Test]
+            public void DeleteByKey_DeletesExistingIssue()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue issue = this.Sut.Create(nameof(Delete.DeleteByKey_DeletesExistingIssue), string.Empty);
+                string path = Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(issue.Key));
+                Assert.IsTrue(Directory.Exists(path));
+                bool result = this.Sut.Delete(issue.Key);
+                Assert.That(result, Is.True);
+                Assert.IsFalse(Directory.Exists(path));
+            }
+
+            [Test]
+            public void DeleteById_DeletesExistingIssue()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue issue = this.Sut.Create(nameof(Delete.DeleteById_DeletesExistingIssue), string.Empty);
+                string id = this.Sut.KeyProvider.GetIssuePath(issue.Key);
+                string path = Path.Combine(this.IssueDirectory, id);
+                Assert.IsTrue(Directory.Exists(path));
+                bool result = this.Sut.Delete(id);
+                Assert.That(result, Is.True);
+                Assert.IsFalse(Directory.Exists(path));
+            }
+
+            [Test]
+            public void DeleteById_ReturnsFalseWhenKeyNotFound()
+            {
+                this.Initialize(this.TestDirectory);
+                bool result = this.Sut.Delete("invalid-id");
+                Assert.That(result, Is.False);
+            }
         }
     }
 }

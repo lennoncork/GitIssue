@@ -1,3 +1,7 @@
+#addin nuget:?package=Cake.Coverlet&version=6.0.1
+
+#nullable enable
+
 var target = Argument("target", "Default");
 
 var configuration = Argument("configuration", "Release");
@@ -27,6 +31,29 @@ Task("Test")
             Configuration = configuration,
             NoBuild = true,
         });
+    });
+
+Task("Coverage")
+    .IsDependentOn("Build")
+    .Does(() => {
+        
+        var coverageDirectory = MakeAbsolute(Directory(".coverage"));
+        CleanDirectory(coverageDirectory);
+
+        var settings = new DotNetTestSettings {
+            Configuration = configuration,
+            NoBuild = true
+        };
+
+        var coverlet = new CoverletSettings
+        {
+            CollectCoverage = true,
+            CoverletOutputName = $"GitIssue.Tests.coverlet.json",
+            CoverletOutputFormat = CoverletOutputFormat.json,
+            CoverletOutputDirectory = coverageDirectory
+        };
+
+        DotNetTest("./src/GitIssue.Tests/GitIssue.Tests.csproj", settings, coverlet);
     });
 
 Task("Publish")
