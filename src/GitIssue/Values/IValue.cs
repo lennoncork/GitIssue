@@ -7,7 +7,6 @@ namespace GitIssue.Values
     /// </summary>
     public interface IValue
     {
-
     }
 
     /// <summary>
@@ -16,7 +15,7 @@ namespace GitIssue.Values
     public interface IValue<T> : IValue, IEquatable<T>
     {
         /// <summary>
-        /// Gets the item backing the value
+        ///     Gets the item backing the value
         /// </summary>
         T Item { get; }
     }

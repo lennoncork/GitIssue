@@ -29,19 +29,23 @@ namespace GitIssue.Issues.File
         {
         }
 
-        /// <inheritdoc />
-        public override async Task<bool> SaveAsync()
+        /// <summary>
+        ///     Deletes an issue and all it's fields from disk.
+        /// </summary>
+        /// <param name="issueRoot"></param>
+        /// <returns></returns>
+        public new static async Task<bool> DeleteAsync(IssueRoot issueRoot)
         {
-            // Save the json file
-            await base.SaveAsync();
+            bool result = await JsonIssue.DeleteAsync(issueRoot);
+            if (!result)
+            {
+                return false;
+            }
 
-            // Save each modified field
-            foreach (var field in Values)
-                if (modifiedFields.Contains(field.Key))
-                {
-                    await field.SaveAsync();
-                    modifiedFields.Remove(field.Key);
-                }
+            if (Directory.Exists(issueRoot.IssuePath))
+            {
+                Directory.Delete(issueRoot.IssuePath, true);
+            }
 
             return true;
         }
@@ -55,32 +59,36 @@ namespace GitIssue.Issues.File
         public new static async Task<IIssue?> ReadAsync(IssueRoot root,
             IDictionary<FieldKey, FieldInfo> fields)
         {
-            if (Directory.Exists(root.IssuePath) == false)
-                return null;
-
-            var issue = new FileIssue(root, fields);
-            foreach (var key in fields.Keys)
+            if (!Directory.Exists(root.IssuePath))
             {
-                var valueField = await fields[key].ReadFieldAsync(issue, key);
+                return null;
+            }
+
+            FileIssue issue = new FileIssue(root, fields);
+            foreach (FieldKey key in fields.Keys)
+            {
+                IField valueField = await fields[key].ReadFieldAsync(issue, key);
                 issue.fields[key] = valueField;
             }
 
             return issue;
         }
 
-        /// <summary>
-        ///     Deletes an issue and all it's fields from disk.
-        /// </summary>
-        /// <param name="issueRoot"></param>
-        /// <returns></returns>
-        public new static async Task<bool> DeleteAsync(IssueRoot issueRoot)
+        /// <inheritdoc />
+        public override async Task<bool> SaveAsync()
         {
-            bool result = await JsonIssue.DeleteAsync(issueRoot);
-            if (result == false)
-                return false;
+            // Save the json file
+            await base.SaveAsync();
 
-            if (Directory.Exists(issueRoot.IssuePath))
-                Directory.Delete(issueRoot.IssuePath, true);
+            // Save each modified field
+            foreach (IField field in this.Values)
+            {
+                if (this.modifiedFields.Contains(field.Key))
+                {
+                    await field.SaveAsync();
+                    this.modifiedFields.Remove(field.Key);
+                }
+            }
 
             return true;
         }

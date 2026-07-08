@@ -26,7 +26,10 @@ namespace GitIssue.Fields
         public static FieldKey Create(string? key)
         {
             if (string.IsNullOrEmpty(key))
-                return None;
+            {
+                return FieldKey.None;
+            }
+
             return new FieldKey(key);
         }
 
@@ -38,11 +41,13 @@ namespace GitIssue.Fields
         /// <inheritdoc />
         public bool Equals(FieldKey other)
         {
-            if (string.IsNullOrEmpty(key) &&
+            if (string.IsNullOrEmpty(this.key) &&
                 string.IsNullOrEmpty(other.key))
+            {
                 return true;
+            }
 
-            return key == other.key;
+            return this.key == other.key;
         }
 
         /// <summary>
@@ -82,28 +87,35 @@ namespace GitIssue.Fields
         /// <param name="value"></param>
         public static implicit operator FieldKey(string value)
         {
-            return Create(value);
+            return FieldKey.Create(value);
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return key;
+            return this.key;
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is FieldKey fieldKey)
-                return Equals(fieldKey);
-            if (obj is string str) return Equals(Create(str));
+            {
+                return this.Equals(fieldKey);
+            }
+
+            if (obj is string str)
+            {
+                return this.Equals(FieldKey.Create(str));
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return key.GetHashCode();
+            return this.key.GetHashCode();
         }
     }
 }

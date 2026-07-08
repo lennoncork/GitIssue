@@ -14,7 +14,7 @@ namespace GitIssue.Fields
         /// <param name="key">the field key</param>
         protected Field(FieldKey key)
         {
-            Key = key;
+            this.Key = key;
         }
 
         /// <summary>
@@ -23,18 +23,18 @@ namespace GitIssue.Fields
         public FieldKey Key { get; protected set; }
 
         /// <inheritdoc />
-        public abstract bool Update(string input);
-
-        /// <inheritdoc />
-        public abstract Task<bool> SaveAsync();
-
-        /// <inheritdoc />
-        public abstract Task<string> ExportAsync();
+        public abstract bool Equals([AllowNull] IField other);
 
         /// <inheritdoc />
         public abstract bool Copy([AllowNull] IField other);
 
         /// <inheritdoc />
-        public abstract bool Equals([AllowNull] IField other);
+        public abstract Task<bool> SaveAsync();
+
+        /// <inheritdoc />
+        public abstract bool Update(string input);
+
+        /// <inheritdoc />
+        public abstract Task<string> ExportAsync();
     }
 }

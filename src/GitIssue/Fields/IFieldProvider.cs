@@ -8,17 +8,17 @@ namespace GitIssue.Fields
     public interface IFieldProvider
     {
         /// <summary>
-        ///     Extracts the value from the field
-        /// </summary>
-        /// <typeparam name="T">the value data type</typeparam>
-        /// <returns>the field value, or default</returns>
-        T AsValue<T>() where T : IValue;
-
-        /// <summary>
         ///     Extracts the value array from the field
         /// </summary>
         /// <typeparam name="T">the value data type</typeparam>
         /// <returns>the array of field values, or null</returns>
         T[] AsArray<T>() where T : IValue;
+
+        /// <summary>
+        ///     Extracts the value from the field
+        /// </summary>
+        /// <typeparam name="T">the value data type</typeparam>
+        /// <returns>the field value, or default</returns>
+        T AsValue<T>() where T : IValue;
     }
 }

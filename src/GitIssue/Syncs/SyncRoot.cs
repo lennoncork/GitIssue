@@ -12,8 +12,8 @@ namespace GitIssue.Syncs
         /// </summary>
         public SyncRoot(RepositoryRoot root, string source)
         {
-            Root = root;
-            Source = source;
+            this.Root = root;
+            this.Source = source;
         }
 
         /// <summary>
@@ -22,13 +22,13 @@ namespace GitIssue.Syncs
         public RepositoryRoot Root { get; }
 
         /// <summary>
-        ///     Gets the source for the import 
+        ///     Gets the source for the import
         /// </summary>
         public string Source { get; }
 
         /// <summary>
         ///     Gets the <see cref="ImportPath" /> for the issue
         /// </summary>
-        public string ImportPath => Path.Combine(Root.IssuesPath, Source);
+        public string ImportPath => Path.Combine(this.Root.IssuesPath, this.Source);
     }
 }

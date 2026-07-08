@@ -14,24 +14,35 @@ namespace GitIssue.Tests.IssueManagerTests
             [Test]
             public void CreatesConfigFile()
             {
-                CreatesIssueFolder();
-                Assert.IsTrue(File.Exists(ConfigFile));
+                this.CreatesIssueFolder();
+                Assert.IsTrue(File.Exists(this.ConfigFile));
             }
 
             [Test]
             public void CreatesIssueFolder()
             {
-                Repository.Init(TestDirectory);
-                GitIssue.IssueManager.Init(TestDirectory);
-                Assert.That(TestDirectory, Is.Not.Empty);
-                Assert.IsTrue(Directory.Exists(IssueDirectory));
-                Assert.IsTrue(Directory.Exists(GitDirectory));
+                Repository.Init(this.TestDirectory);
+                IssueManager.Init(this.TestDirectory);
+                Assert.That(this.TestDirectory, Is.Not.Empty);
+                Assert.IsTrue(Directory.Exists(this.IssueDirectory));
+                Assert.IsTrue(Directory.Exists(this.GitDirectory));
+            }
+
+            [Test]
+            public void InitWithoutParametersUsesCurrentDirectory()
+            {
+                Repository.Init(this.TestDirectory);
+                using (new Helpers.EnvironmentCurrentDirectory(this.TestDirectory))
+                {
+                    using IIssueManager manager = IssueManager.Init();
+                    Assert.That(manager.Root.RootPath, Is.EqualTo(this.TestDirectory));
+                }
             }
 
             [Test]
             public void FailsIfNotAGitRepository()
             {
-                Assert.Throws<DependencyResolutionException>(() => { GitIssue.IssueManager.Init(TestDirectory); });
+                Assert.Throws<DependencyResolutionException>(() => { IssueManager.Init(this.TestDirectory); });
             }
         }
     }

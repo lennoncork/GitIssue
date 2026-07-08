@@ -13,8 +13,6 @@ namespace GitIssue.Values
     [TypeAlias(nameof(Label))]
     public struct Label : IJsonValue, IValue<string>, IEquatable<Label>
     {
-        private readonly string value;
-
         /// <summary>
         ///     Tries to parse the label value
         /// </summary>
@@ -43,48 +41,51 @@ namespace GitIssue.Values
         /// <param name="value"></param>
         public Label(string value)
         {
-            this.value = !string.IsNullOrWhiteSpace(value) ? value.Trim().Split()[0].ToLowerInvariant() : string.Empty;
+            this.Item = !string.IsNullOrWhiteSpace(value) ? value.Trim().Split()[0].ToLowerInvariant() : string.Empty;
         }
 
         /// <inheritdoc />
         public override string? ToString()
         {
-            return value;
+            return this.Item;
         }
 
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(value);
+            return new JValue(this.Item);
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] Label other)
         {
-            return value == other.value;
+            return this.Item == other.Item;
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] string other)
         {
-            return value == other;
+            return this.Item == other;
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Label label)
+            {
                 return this.Equals(label);
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return value.GetHashCode();
+            return this.Item.GetHashCode();
         }
 
         /// <inheritdoc />
-        public string Item => this.value;
+        public string Item { get; }
     }
 }

@@ -7,21 +7,20 @@ using Newtonsoft.Json;
 namespace GitIssue.Syncs
 {
     /// <summary>
-    /// Base class for importing issues
+    ///     Base class for importing issues
     /// </summary>
     public class SyncConfiguration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SyncConfiguration"/> class
+        ///     Initializes a new instance of the <see cref="SyncConfiguration" /> class
         /// </summary>
         public SyncConfiguration()
         {
-
             this.Mapping = new Dictionary<string, string>();
         }
 
         /// <summary>
-        /// Gets or sets the mapping between issue field and imported JSON
+        ///     Gets or sets the mapping between issue field and imported JSON
         /// </summary>
         [JsonProperty]
         public Dictionary<string, string> Mapping { get; set; }
@@ -33,7 +32,7 @@ namespace GitIssue.Syncs
         /// <returns>the <see cref="SyncConfiguration" /></returns>
         public static Task<SyncConfiguration> ReadAsync(string file)
         {
-            return ReadAsync<SyncConfiguration>(file);
+            return SyncConfiguration.ReadAsync<SyncConfiguration>(file);
         }
 
         /// <summary>
@@ -46,10 +45,10 @@ namespace GitIssue.Syncs
         {
             try
             {
-                await using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                using var reader = new StreamReader(stream);
-                var serializer = new JsonSerializer();
-                var configuration = (T)serializer.Deserialize(reader, typeof(T))!;
+                await using FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                using StreamReader reader = new StreamReader(stream);
+                JsonSerializer serializer = new JsonSerializer();
+                T configuration = (T)serializer.Deserialize(reader, typeof(T))!;
                 return configuration;
             }
             catch (Exception ex)
@@ -59,4 +58,3 @@ namespace GitIssue.Syncs
         }
     }
 }
-

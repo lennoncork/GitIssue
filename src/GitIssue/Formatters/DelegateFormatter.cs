@@ -52,13 +52,13 @@ namespace GitIssue.Formatters
         /// <inheritdoc />
         public string? Format(IField field)
         {
-            return fieldFormatter?.Invoke(field);
+            return this.fieldFormatter?.Invoke(field);
         }
 
         /// <inheritdoc />
         public string? Format(IReadOnlyIssue issue)
         {
-            return issueFormatter?.Invoke(issue);
+            return this.issueFormatter?.Invoke(issue);
         }
     }
 }

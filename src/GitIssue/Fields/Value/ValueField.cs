@@ -17,35 +17,70 @@ namespace GitIssue.Fields.Value
         /// <param name="value">the issue value</param>
         protected ValueField(FieldKey key, T value) : base(key)
         {
-            Value = value;
+            this.Value = value;
         }
-
-        /// <inheritdoc />
-        public Type ValueType => typeof(T);
 
         /// <inheritdoc />
         public T Value { get; set; }
 
+        /// <inheritdoc />
+        public Type ValueType => typeof(T);
+
         object? IValueField.Value
         {
-            get => Value;
+            get => this.Value;
             set
             {
                 if (value is T result)
                 {
-                    Value = result;
+                    this.Value = result;
                 }
             }
         }
 
         /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.Value?.ToString()!;
+        }
+
+        /// <inheritdoc />
+        public bool TryParse(string input, out T value)
+        {
+            return ValueExtensions.TryParse(input, out value);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals([AllowNull] IField other)
+        {
+            if (other is IValueField<T> valueField)
+            {
+                return this.Value?.Equals(valueField.Value) ?? false;
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
+        public override bool Copy([AllowNull] IField other)
+        {
+            if (other is IValueField<T> valueField)
+            {
+                this.Value = valueField.Value;
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc />
         public override bool Update(string input)
         {
-            if (TryParse(input, out var result))
+            if (this.TryParse(input, out T result))
             {
-                Value = result;
+                this.Value = result;
                 return true;
             }
+
             return false;
         }
 
@@ -62,41 +97,9 @@ namespace GitIssue.Fields.Value
             return false;
         }
 
-        /// <inheritdoc />
-        public bool TryParse(string input, out T value)
-        {
-            return ValueExtensions.TryParse(input, out value);
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return Value?.ToString()!;
-        }
-
         bool IValueField<T>.TryParse(string input, out T value)
         {
             throw new NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public override bool Copy([AllowNull] IField other)
-        {
-            if (other is IValueField<T> valueField)
-            {
-                this.Value = valueField.Value;
-            }
-            return false;
-        }
-
-        /// <inheritdoc />
-        public override bool Equals([AllowNull] IField other)
-        {
-            if (other is IValueField<T> valueField)
-            {
-                return this.Value?.Equals(valueField.Value) ?? false;
-            }
-            return false;
         }
     }
 }

@@ -8,16 +8,16 @@ namespace GitIssue.Tool
     public class Configuration : IssueConfiguration
     {
         /// <summary>
-        ///     Gets or sets the editor to use
-        /// </summary>
-        [JsonProperty]
-        public string Editor { get; set; } = "joe";
-
-        /// <summary>
         ///     Gets or sets additional arguments for the editor
         /// </summary>
         [JsonProperty]
         public string Arguments { get; set; } = "-pound_comment -syntax git-commit";
+
+        /// <summary>
+        ///     Gets or sets the editor to use
+        /// </summary>
+        [JsonProperty]
+        public string Editor { get; set; } = "joe";
 
         /// <summary>
         ///     Reads the configuration from a file
@@ -26,7 +26,7 @@ namespace GitIssue.Tool
         /// <returns>the <see cref="Configuration" /></returns>
         public new static Configuration Read(string file)
         {
-            return Read<Configuration>(file);
+            return IssueConfiguration.Read<Configuration>(file);
         }
     }
 }

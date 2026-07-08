@@ -12,7 +12,7 @@ namespace GitIssue.Issues.File
     /// </summary>
     public class FileIssueKeyProvider : IssueKeyProvider
     {
-        private static char separator = '-';
+        private static readonly char separator = '-';
 
         private readonly RepositoryRoot root;
 
@@ -26,79 +26,50 @@ namespace GitIssue.Issues.File
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IssueKey> Keys => FindAll(root.IssuesPath);
+        public override IEnumerable<IssueKey> Keys => this.FindAll(this.root.IssuesPath);
 
         /// <inheritdoc />
         public override string GetIssuePath(IssueKey key)
         {
-            return key.ToString().Replace(separator, Path.DirectorySeparatorChar);
+            return key.ToString().Replace(FileIssueKeyProvider.separator, Path.DirectorySeparatorChar);
         }
 
         /// <inheritdoc />
         public override IssueKey Next()
         {
-            var created = DateTime.Now;
-            string[] values =
-            {
-                created.Year.ToString("D4"),
-                created.Month.ToString("D2"),
-                created.Day.ToString("D2"),
-                GetUniqueId(8)
-            };
-            var key = string.Join(separator, values);
+            DateTime created = DateTime.Now;
+            string[] values = { created.Year.ToString("D4"), created.Month.ToString("D2"), created.Day.ToString("D2"), this.GetUniqueId(8) };
+            string key = string.Join(FileIssueKeyProvider.separator, values);
             return IssueKey.Create(key);
         }
 
-        private string GetUniqueId(int length)
+        /// <summary>
+        ///     Tries to get the commit of the current branch
+        /// </summary>
+        /// <param name="commit"></param>
+        /// <returns></returns>
+        public bool TryGetGitCommit(out string commit)
         {
-            using var sha = SHA256.Create();
-            var checksum = sha.ComputeHash(Guid.NewGuid().ToByteArray());
-            var key = BitConverter.ToString(checksum)
-                .Replace("-", "")
-                .ToUpperInvariant()
-                .Substring(0, length);
-            return key;
-        }
-
-        private IEnumerable<IssueKey> FindAll(string directory)
-        {
-            var keys = new List<IssueKey>();
-
-            if (Directory.Exists(root.IssuesPath) == false)
-                return keys;
-
-            foreach (var year in Directory.EnumerateDirectories(root.IssuesPath)
-                .Select(d => new DirectoryInfo(d)))
-                foreach (var month in Directory.EnumerateDirectories(year.FullName)
-                    .Select(d => new DirectoryInfo(d)))
-                    foreach (var day in Directory.EnumerateDirectories(month.FullName)
-                        .Select(d => new DirectoryInfo(d)))
-                        foreach (var id in Directory.EnumerateDirectories(day.FullName)
-                            .Select(d => new DirectoryInfo(d)))
-                        {
-                            var path = Path.Combine(year.Name, month.Name, day.Name, id.Name);
-                            if (TryGetKey(path, out var key))
-                                keys.Add(key);
-                        }
-
-            return keys;
+            using IRepository repository = this.root.GetRepository();
+            commit = repository.Head.Tip.Sha;
+            return true;
         }
 
         /// <inheritdoc />
         public override bool TryGetKey(string value, out IssueKey key)
         {
-            value = value.Replace(separator, Path.DirectorySeparatorChar);
-            var split = NormalizePath(value).Split('/', '\\');
+            value = value.Replace(FileIssueKeyProvider.separator, Path.DirectorySeparatorChar);
+            string[] split = this.NormalizePath(value).Split('/', '\\');
             if (split.Length == 4)
             {
-                var year = split[0];
-                var month = split[1];
-                var day = split[2];
-                var id = split[3];
+                string year = split[0];
+                string month = split[1];
+                string day = split[2];
+                string id = split[3];
 
-                if (DateTime.TryParse($"{year}/{month}/{day}", out var time))
+                if (DateTime.TryParse($"{year}/{month}/{day}", out DateTime time))
                 {
-                    key = IssueKey.Create(value.Replace(Path.DirectorySeparatorChar, separator));
+                    key = IssueKey.Create(value.Replace(Path.DirectorySeparatorChar, FileIssueKeyProvider.separator));
                     return true;
                 }
             }
@@ -107,27 +78,58 @@ namespace GitIssue.Issues.File
             return false;
         }
 
-        /// <summary>
-        /// Tries to get the commit of the current branch
-        /// </summary>
-        /// <param name="commit"></param>
-        /// <returns></returns>
-        public bool TryGetGitCommit(out string commit)
+        private IEnumerable<IssueKey> FindAll(string directory)
         {
-            using IRepository repository = root.GetRepository();
-            commit = repository.Head.Tip.Sha;
-            return true;
+            List<IssueKey> keys = new List<IssueKey>();
+
+            if (!Directory.Exists(this.root.IssuesPath))
+            {
+                return keys;
+            }
+
+            foreach (DirectoryInfo year in Directory.EnumerateDirectories(this.root.IssuesPath)
+                         .Select(d => new DirectoryInfo(d)))
+            foreach (DirectoryInfo month in Directory.EnumerateDirectories(year.FullName)
+                         .Select(d => new DirectoryInfo(d)))
+            foreach (DirectoryInfo day in Directory.EnumerateDirectories(month.FullName)
+                         .Select(d => new DirectoryInfo(d)))
+            foreach (DirectoryInfo id in Directory.EnumerateDirectories(day.FullName)
+                         .Select(d => new DirectoryInfo(d)))
+            {
+                string path = Path.Combine(year.Name, month.Name, day.Name, id.Name);
+                if (this.TryGetKey(path, out IssueKey key))
+                {
+                    keys.Add(key);
+                }
+            }
+
+            return keys;
+        }
+
+        private string GetUniqueId(int length)
+        {
+            using SHA256 sha = SHA256.Create();
+            byte[] checksum = sha.ComputeHash(Guid.NewGuid().ToByteArray());
+            string key = BitConverter.ToString(checksum)
+                .Replace("-", "")
+                .ToUpperInvariant()
+                .Substring(0, length);
+            return key;
         }
 
         private string NormalizePath(string path)
         {
-            if (Directory.Exists(Path.Combine(root.IssuesPath, path)))
+            if (Directory.Exists(Path.Combine(this.root.IssuesPath, path)))
+            {
                 return path;
+            }
 
-            if (root.IssuesPath.Contains(Path.GetFullPath(path)))
-                return root.IssuesPath
-                    .Remove(0, root.IssuesPath.Length)
+            if (this.root.IssuesPath.Contains(Path.GetFullPath(path)))
+            {
+                return this.root.IssuesPath
+                    .Remove(0, this.root.IssuesPath.Length)
                     .Trim('/', '\\');
+            }
 
             return string.Empty;
         }

@@ -8,14 +8,14 @@ namespace GitIssue.Fields.Value
     public interface IValueField : IField
     {
         /// <summary>
+        ///     Gets or sets the value
+        /// </summary>
+        object? Value { get; set; }
+
+        /// <summary>
         ///     Gets the value type
         /// </summary>
         Type ValueType { get; }
-
-        /// <summary>
-        /// Gets or sets the value
-        /// </summary>
-        object? Value { get; set; }
 
         /// <summary>
         ///     Tries to parse the input into an array value

@@ -13,17 +13,12 @@ namespace GitIssue.Issues
     public interface IIssue : IReadOnlyIssue
     {
         /// <summary>
-        ///     Gets or sets the issue title
+        ///     Gets or sets the issue comments
         /// </summary>
-        new String Title { get; set; }
+        new String[] Comments { get; set; }
 
         /// <summary>
-        ///     Gets or sets the issue description
-        /// </summary>
-        new String Description { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Author
+        ///     Gets or sets the Author
         /// </summary>
         new Signature Author { get; set; }
 
@@ -33,28 +28,38 @@ namespace GitIssue.Issues
         new DateTime Created { get; set; }
 
         /// <summary>
+        ///     Gets or sets the issue description
+        /// </summary>
+        new String Description { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the issue title
+        /// </summary>
+        new String Title { get; set; }
+
+        /// <summary>
         ///     Gets or sets when the issue was last updates
         /// </summary>
         new DateTime Updated { get; set; }
-
-        /// <summary>
-        ///     Gets a <see cref="IFieldFactory" /> for the provided key
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public IFieldFactory SetField([CallerMemberName] string? key = null);
-
-        /// <summary>
-        ///     Gets a <see cref="IFieldFactory" /> for the provided <see cref="FieldKey" />
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public IFieldFactory SetField(FieldKey key);
 
         /// <summary>
         ///     Saves the issue
         /// </summary>
         /// <returns></returns>
         Task<bool> SaveAsync();
+
+        /// <summary>
+        ///     Gets a <see cref="IFieldFactory" /> for the provided key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        IFieldFactory SetField([CallerMemberName] string? key = null);
+
+        /// <summary>
+        ///     Gets a <see cref="IFieldFactory" /> for the provided <see cref="FieldKey" />
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        IFieldFactory SetField(FieldKey key);
     }
 }

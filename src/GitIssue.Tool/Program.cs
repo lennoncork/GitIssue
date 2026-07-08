@@ -29,50 +29,13 @@ namespace GitIssue.Tool
     {
         private static ILogger? logger;
 
-        private static void Main(string[] args)
-        {
-            logger = new LoggerConfiguration()
-                .WriteTo.Console()
-                .MinimumLevel.Debug()
-                .CreateLogger();
-
-            var parser = new Parser(with =>
-            {
-                with.EnableDashDash = true;
-                with.AutoHelp = true;
-                with.CaseSensitive = false;
-                with.HelpWriter = Console.Error;
-            });
-
-            parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
-                    ShowOptions, AddOptions, RemoveOptions, EditOptions, TrackOptions,
-                    FieldsOptions, CommitOptions, ExportOptions, ChangesOptions,
-                    ImportOptions,
-                    CommentOptions>(args)
-                .WithParsed<InitOptions>(o => ExecAsync<InitCommand, InitOptions>(o).Wait())
-                .WithParsed<CreateOptions>(o => ExecAsync<CreateCommand, CreateOptions>(o).Wait())
-                .WithParsed<DeleteOptions>(o => ExecAsync<DeleteCommand, DeleteOptions>(o).Wait())
-                .WithParsed<ImportOptions>(o => ExecAsync<ImportCommand, ImportOptions>(o).Wait())
-                .WithParsed<ExportOptions>(o => ExecAsync<ExportCommand, ExportOptions>(o).Wait())
-                .WithParsed<FindOptions>(o => ExecAsync<FindCommand, FindOptions>(o).Wait())
-                .WithParsed<ShowOptions>(o => ExecAsync<ShowCommand, ShowOptions>(o).Wait())
-                .WithParsed<AddOptions>(o => ExecAsync<AddCommand, AddOptions>(o).Wait())
-                .WithParsed<RemoveOptions>(o => ExecAsync<RemoveCommand, RemoveOptions>(o).Wait())
-                .WithParsed<EditOptions>(o => ExecAsync<EditCommand, EditOptions>(o).Wait())
-                .WithParsed<CommentOptions>(o => ExecAsync<CommentCommand, CommentOptions>(o).Wait())
-                .WithParsed<FieldsOptions>(o => ExecAsync<FieldsCommand, FieldsOptions>(o).Wait())
-                .WithParsed<TrackOptions>(o => ExecAsync<TrackCommand, TrackOptions>(o).Wait())
-                .WithParsed<CommitOptions>(o => ExecAsync<CommitCommand, CommitOptions>(o).Wait())
-                .WithParsed<ChangesOptions>(o => ExecAsync<ChangesCommand, ChangesOptions>(o).Wait());
-        }
-
         private static async Task ExecAsync<TC, T>(T options)
             where TC : Command<T>
             where T : Options
         {
-            var builder = new ContainerBuilder();
+            ContainerBuilder builder = new ContainerBuilder();
 
-            builder.Register(c => logger!)
+            builder.Register(c => Program.logger!)
                 .As<ILogger>()
                 .SingleInstance();
 
@@ -86,8 +49,8 @@ namespace GitIssue.Tool
                     // Initialize the repository root and save the configuration
                     InitCommand.Initializer onInitCommand = () =>
                     {
-                        var config = new IssueConfiguration();
-                        var root = RepositoryRoot.Create(options.Path, options.Name);
+                        IssueConfiguration config = new IssueConfiguration();
+                        RepositoryRoot root = RepositoryRoot.Create(options.Path, options.Name);
                         config.Save(root.ConfigFile);
                     };
                     return onInitCommand;
@@ -107,32 +70,68 @@ namespace GitIssue.Tool
 
             builder.RegisterModule<GitIssueModule>();
 
-            using var container = builder.Build();
+            using IContainer container = builder.Build();
 
             if (options is ITrackedOptions keyOptions)
+            {
                 keyOptions.Tracked = TrackedIssue
-                    .Read(Path.Combine(options.Path, options.Name, options.Tracking), logger);
+                    .Read(Path.Combine(options.Path, options.Name, options.Tracking), Program.logger);
+            }
 
-            var command = container.Resolve<Command<T>>();
-            await ExecAsync(command.Exec, options);
+            Command<T> command = container.Resolve<Command<T>>();
+            await Program.ExecAsync(command.Exec, options);
         }
 
         private static async Task ExecAsync<T>(Func<T, Task> func, T value)
             where T : Options
         {
-            await Task.Run(async () =>
+            try
             {
-                try
-                {
-                    Console.WriteLine();
-                    await func(value);
-                    Console.WriteLine();
-                }
-                catch (Exception e)
-                {
-                    logger?.Error($"Exception caught when executing command: {e.Message}", e);
-                }
+                Console.WriteLine();
+                await func(value);
+                Console.WriteLine();
+            }
+            catch (Exception e)
+            {
+                Program.logger?.Error($"Exception caught when executing command: {e.Message}", e);
+            }
+        }
+
+        private static void Main(string[] args)
+        {
+            Program.logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .MinimumLevel.Debug()
+                .CreateLogger();
+
+            Parser parser = new Parser(with =>
+            {
+                with.EnableDashDash = true;
+                with.AutoHelp = true;
+                with.CaseSensitive = false;
+                with.HelpWriter = Console.Error;
             });
+
+            parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
+                    ShowOptions, AddOptions, RemoveOptions, EditOptions, TrackOptions,
+                    FieldsOptions, CommitOptions, ExportOptions, ChangesOptions,
+                    ImportOptions,
+                    CommentOptions>(args)
+                .WithParsed<InitOptions>(o => Program.ExecAsync<InitCommand, InitOptions>(o).Wait())
+                .WithParsed<CreateOptions>(o => Program.ExecAsync<CreateCommand, CreateOptions>(o).Wait())
+                .WithParsed<DeleteOptions>(o => Program.ExecAsync<DeleteCommand, DeleteOptions>(o).Wait())
+                .WithParsed<ImportOptions>(o => Program.ExecAsync<ImportCommand, ImportOptions>(o).Wait())
+                .WithParsed<ExportOptions>(o => Program.ExecAsync<ExportCommand, ExportOptions>(o).Wait())
+                .WithParsed<FindOptions>(o => Program.ExecAsync<FindCommand, FindOptions>(o).Wait())
+                .WithParsed<ShowOptions>(o => Program.ExecAsync<ShowCommand, ShowOptions>(o).Wait())
+                .WithParsed<AddOptions>(o => Program.ExecAsync<AddCommand, AddOptions>(o).Wait())
+                .WithParsed<RemoveOptions>(o => Program.ExecAsync<RemoveCommand, RemoveOptions>(o).Wait())
+                .WithParsed<EditOptions>(o => Program.ExecAsync<EditCommand, EditOptions>(o).Wait())
+                .WithParsed<CommentOptions>(o => Program.ExecAsync<CommentCommand, CommentOptions>(o).Wait())
+                .WithParsed<FieldsOptions>(o => Program.ExecAsync<FieldsCommand, FieldsOptions>(o).Wait())
+                .WithParsed<TrackOptions>(o => Program.ExecAsync<TrackCommand, TrackOptions>(o).Wait())
+                .WithParsed<CommitOptions>(o => Program.ExecAsync<CommitCommand, CommitOptions>(o).Wait())
+                .WithParsed<ChangesOptions>(o => Program.ExecAsync<ChangesCommand, ChangesOptions>(o).Wait());
         }
     }
 }

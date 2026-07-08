@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using LibGit2Sharp;
 using NUnit.Framework;
 
@@ -10,17 +11,20 @@ namespace GitIssue.Tests.IntegrationTests.Bug
         [SetUp]
         public void Setup()
         {
-            TestDirectory = Helpers.GetTempDirectory();
-            if (Directory.Exists(TestDirectory) == false) Directory.CreateDirectory(TestDirectory);
+            this.TestDirectory = Helpers.GetTempDirectory();
+            if (!Directory.Exists(this.TestDirectory))
+            {
+                Directory.CreateDirectory(this.TestDirectory);
+            }
         }
 
         protected string TestDirectory = Path.GetTempPath();
 
-        protected string GitDirectory => Path.Combine(TestDirectory, Paths.GitFolderName);
+        protected string GitDirectory => Path.Combine(this.TestDirectory, Paths.GitFolderName);
 
-        protected string IssueDirectory => Path.Combine(TestDirectory, Paths.IssueRootFolderName);
+        protected string IssueDirectory => Path.Combine(this.TestDirectory, Paths.IssueRootFolderName);
 
-        protected string ConfigFile => Path.Combine(IssueDirectory, Paths.ConfigFileName);
+        protected string ConfigFile => Path.Combine(this.IssueDirectory, Paths.ConfigFileName);
 
         protected IRepository GitRepository { get; set; } = null!;
 
@@ -29,9 +33,21 @@ namespace GitIssue.Tests.IntegrationTests.Bug
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
-            TestDirectory = Helpers.GetTestDirectory();
-            if (Directory.Exists(TestDirectory)) Directory.Delete(TestDirectory, true);
-            Directory.CreateDirectory(TestDirectory);
+            this.TestDirectory = Helpers.GetTestDirectory();
+            if (Directory.Exists(this.TestDirectory))
+            {
+                try
+                {
+                    Directory.Delete(this.TestDirectory, true);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Ignore if cleanup cannot delete some files; per-test temp
+                    // directories created in Setup() ensure isolation.
+                }
+            }
+
+            Directory.CreateDirectory(this.TestDirectory);
         }
 
         public void Initialize(
@@ -40,10 +56,14 @@ namespace GitIssue.Tests.IntegrationTests.Bug
             bool initIssue = true)
         {
             if (initGit)
-                GitRepository = new Repository(Repository.Init(directory));
+            {
+                this.GitRepository = new Repository(Repository.Init(directory));
+            }
 
             if (initIssue)
-                Issues = GitIssue.IssueManager.Init(new BugConfiguration(), directory);
+            {
+                this.Issues = IssueManager.Init(new BugConfiguration(), directory);
+            }
         }
     }
 }

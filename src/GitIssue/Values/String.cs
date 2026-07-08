@@ -13,10 +13,8 @@ namespace GitIssue.Values
     [TypeAlias(nameof(String))]
     public struct String : IJsonValue, IEquatable<String>, IValue<string>
     {
-        private readonly string value;
-
         /// <summary>
-        /// Parses the string
+        ///     Parses the string
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -39,19 +37,19 @@ namespace GitIssue.Values
 
         internal String(string value)
         {
-            this.value = value;
+            this.Item = value;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return value;
+            return this.Item;
         }
 
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(value);
+            return new JValue(this.Item);
         }
 
         /// <summary>
@@ -60,7 +58,7 @@ namespace GitIssue.Values
         /// <param name="value"></param>
         public static implicit operator string(String value)
         {
-            return value.value;
+            return value.Item;
         }
 
         /// <summary>
@@ -76,29 +74,32 @@ namespace GitIssue.Values
         public override bool Equals(object? obj)
         {
             if (obj is String str)
+            {
                 return this.Equals(str);
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return value.GetHashCode();
+            return this.Item.GetHashCode();
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] String other)
         {
-            return value == other.value;
+            return this.Item == other.Item;
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] string other)
         {
-            return value == other;
+            return this.Item == other;
         }
 
         /// <inheritdoc />
-        public string Item => this.value;
+        public string Item { get; }
     }
 }

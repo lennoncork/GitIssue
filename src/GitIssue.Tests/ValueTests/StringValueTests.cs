@@ -15,13 +15,13 @@ namespace GitIssue.Tests.ValueTests
             [TestCaseSource(typeof(CanConvertTestCases))]
             public bool CanConvert(Type type)
             {
-                return HasConverter(type);
+                return this.HasConverter(type);
             }
 
             [TestCaseSource(typeof(ConvertFromStringTestCases))]
             public String Convert(object value)
             {
-                return (String)UseConverter(value);
+                return (String)this.UseConverter(value);
             }
 
             public class CanConvertTestCases : ValueTestCases
@@ -57,7 +57,7 @@ namespace GitIssue.Tests.ValueTests
             [TestCaseSource(typeof(TryParseTestCases))]
             public bool Test(string value, String expected)
             {
-                if (String.TryParse(value, out var result))
+                if (String.TryParse(value, out String result))
                 {
                     Assert.That(expected, Is.EqualTo(result));
                     return true;
@@ -80,7 +80,7 @@ namespace GitIssue.Tests.ValueTests
         [TestFixture]
         public class Item : StringValueTests
         {
-            [TestCaseSource(typeof(Item.GetItemTestCases))]
+            [TestCaseSource(typeof(GetItemTestCases))]
             public string Tests(String str)
             {
                 return base.GetItem(str);
@@ -100,7 +100,7 @@ namespace GitIssue.Tests.ValueTests
         [TestFixture]
         public class ToJson : StringValueTests
         {
-            [TestCaseSource(typeof(ToJson.ConvertToJsonTestCases))]
+            [TestCaseSource(typeof(ConvertToJsonTestCases))]
             public string Tests(String str)
             {
                 return base.ConvertToJson(str);
@@ -120,7 +120,7 @@ namespace GitIssue.Tests.ValueTests
         [TestFixture]
         public new class Equals : StringValueTests
         {
-            [TestCaseSource(typeof(Equals.EqualsTestCases))]
+            [TestCaseSource(typeof(EqualsTestCases))]
             public bool Tests(object first, object second)
             {
                 return base.Equals(first, second);

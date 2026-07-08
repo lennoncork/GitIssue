@@ -14,24 +14,38 @@ namespace GitIssue.Issues.Json
         /// <inheritdoc />
         public override bool CanCreateField(FieldInfo info)
         {
-            if (IsValueField(info) || IsArrayField(info))
+            if (JsonFieldReader.IsValueField(info) || JsonFieldReader.IsArrayField(info))
+            {
                 return true;
+            }
+
             return false;
         }
 
         /// <inheritdoc />
         public override bool CanReadField(FieldInfo info)
         {
-            if (IsValueField(info) || IsArrayField(info))
+            if (JsonFieldReader.IsValueField(info) || JsonFieldReader.IsArrayField(info))
+            {
                 return true;
+            }
+
             return false;
         }
 
         /// <inheritdoc />
         public override IField CreateField<T>(Issue issue, FieldKey key, FieldInfo info)
         {
-            if (IsValueField(info)) return new JsonValueField<T>(key);
-            if (IsArrayField(info)) return new JsonArrayField<T>(key, new T[0]);
+            if (JsonFieldReader.IsValueField(info))
+            {
+                return new JsonValueField<T>(key);
+            }
+
+            if (JsonFieldReader.IsArrayField(info))
+            {
+                return new JsonArrayField<T>(key, new T[0]);
+            }
+
             return null!;
         }
 
@@ -40,19 +54,23 @@ namespace GitIssue.Issues.Json
         {
             if (issue is IJsonIssue jsonIssue)
             {
-                var json = await JsonIssueExtensions.ReadJsonFieldsAsync(jsonIssue.Json);
-                if (json.TryGetValue(key.ToString(), out var token))
+                JObject json = await JsonIssueExtensions.ReadJsonFieldsAsync(jsonIssue.Json);
+                if (json.TryGetValue(key.ToString(), out JToken? token))
                 {
-                    if (IsValueField(info) && token is JValue jValue)
-                        if (TryGetValue(jValue, info, out T value))
-                            return new JsonValueField<T>(key, value);
-
-                    if (IsArrayField(info) && token is JArray jArray)
+                    if (JsonFieldReader.IsValueField(info) && token is JValue jValue)
                     {
-                        var values = jArray
+                        if (this.TryGetValue(jValue, info, out T value))
+                        {
+                            return new JsonValueField<T>(key, value);
+                        }
+                    }
+
+                    if (JsonFieldReader.IsArrayField(info) && token is JArray jArray)
+                    {
+                        T[] values = jArray
                             .Select(t => t as JValue)
                             .Where(t => t != null)
-                            .Select(t => (s: TryGetValue(t!, info, out T v), r: v))
+                            .Select(t => (s: this.TryGetValue(t!, info, out T v), r: v))
                             .Where(t => t.s)
                             .Select(t => t.r)
                             .ToArray();
@@ -61,15 +79,10 @@ namespace GitIssue.Issues.Json
                     }
                 }
 
-                return CreateField<T>(issue, key, info);
+                return this.CreateField<T>(issue, key, info);
             }
 
             return null!;
-        }
-
-        private static bool IsValueField(FieldInfo info)
-        {
-            return info.FieldType.Type == typeof(JsonValueField);
         }
 
         private static bool IsArrayField(FieldInfo info)
@@ -77,10 +90,18 @@ namespace GitIssue.Issues.Json
             return info.FieldType.Type == typeof(JsonArrayField);
         }
 
+        private static bool IsValueField(FieldInfo info)
+        {
+            return info.FieldType.Type == typeof(JsonValueField);
+        }
+
         private bool TryGetValue<T>(JValue jValue, FieldInfo info, out T value)
         {
             if (string.IsNullOrEmpty(info.ValueMetadata))
+            {
                 return ValueExtensions.TryParse(jValue.Value, out value);
+            }
+
             return ValueExtensions.TryParse(jValue.Value, out value, info.ValueMetadata);
         }
     }

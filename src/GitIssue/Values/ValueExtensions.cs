@@ -18,12 +18,12 @@ namespace GitIssue.Values
 
             try
             {
-                var converter = TypeDescriptor.GetConverter(typeof(T2));
+                TypeConverter converter = TypeDescriptor.GetConverter(typeof(T2));
                 if (converter.CanConvertFrom(typeof(T1)))
                 {
-                    if(input != null)
+                    if (input != null)
                     {
-                        var converted = converter.ConvertFrom(input);
+                        object? converted = converter.ConvertFrom(input);
                         if (converted != null)
                         {
                             value = (T2)converted;
@@ -34,16 +34,16 @@ namespace GitIssue.Values
 
                 if (converter.CanConvertFrom(typeof(string)))
                 {
-                    var strvalue = input?.ToString();
-                    if(strvalue != null)
+                    string? strvalue = input?.ToString();
+                    if (strvalue != null)
                     {
-                        var converted = converter.ConvertFrom(strvalue);
+                        object? converted = converter.ConvertFrom(strvalue);
                         if (converted != null)
                         {
                             value = (T2)converted;
                             return true;
                         }
-                    }                    
+                    }
                 }
             }
             catch (Exception)
@@ -51,7 +51,7 @@ namespace GitIssue.Values
                 // ignored conversion errors
             }
 
-            value = default!;
+            value = default(T2)!;
             return false;
         }
 
@@ -63,14 +63,14 @@ namespace GitIssue.Values
                 return true;
             }
 
-            var str = input?.ToString();
-            if (str != null && TryParse(new ValueMetadata(str, metadata), out T2 converted))
+            string? str = input?.ToString();
+            if ((str != null) && ValueExtensions.TryParse(new ValueMetadata(str, metadata), out T2 converted))
             {
                 value = converted;
                 return true;
             }
 
-            value = default!;
+            value = default(T2)!;
             return false;
         }
     }

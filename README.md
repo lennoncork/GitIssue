@@ -51,7 +51,7 @@ git issue help
 
 # Compatibility
 
-This project runs on .NET 5 and is compatible with both Windows and Linux. 
+This project runs on .NET 10 and is compatible with both Windows and Linux. 
 
 ## Configuration
 

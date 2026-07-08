@@ -14,8 +14,6 @@ namespace GitIssue.Values
     [TypeAlias(nameof(Email))]
     public struct Email : IJsonValue, IEquatable<Email>, IValue<string>
     {
-        private readonly string value;
-
         /// <summary>
         ///     Parses the value as an email address
         /// </summary>
@@ -42,14 +40,14 @@ namespace GitIssue.Values
         {
             try
             {
-                var parsed = new MailAddress(email);
-                value = parsed.ToString();
-                IsValid = true;
+                MailAddress parsed = new MailAddress(email);
+                this.Item = parsed.ToString();
+                this.IsValid = true;
             }
             catch (FormatException)
             {
-                value = string.Empty;
-                IsValid = false;
+                this.Item = string.Empty;
+                this.IsValid = false;
             }
         }
 
@@ -61,42 +59,45 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public override string ToString()
         {
-            return value;
+            return this.Item;
         }
 
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(value);
+            return new JValue(this.Item);
         }
 
         /// <inheritdoc />
         public bool Equals(Email other)
         {
-            return value == other.value;
+            return this.Item == other.Item;
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Email email)
+            {
                 return this.Equals(email);
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return value.GetHashCode();
+            return this.Item.GetHashCode();
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] string other)
         {
-            return value == other;
+            return this.Item == other;
         }
 
         /// <inheritdoc />
-        public string Item => this.value;
+        public string Item { get; }
     }
 }

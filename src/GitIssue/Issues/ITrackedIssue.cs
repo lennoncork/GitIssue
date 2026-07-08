@@ -5,7 +5,7 @@ using Serilog;
 namespace GitIssue.Issues
 {
     /// <summary>
-    /// Interface for the tracked issue
+    ///     Interface for the tracked issue
     /// </summary>
     public interface ITrackedIssue
     {

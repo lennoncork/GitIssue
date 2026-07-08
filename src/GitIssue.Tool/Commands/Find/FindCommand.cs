@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using GitIssue.Formatters;
 using GitIssue.Issues;
@@ -29,7 +30,7 @@ namespace GitIssue.Tool.Commands.Find
             Func<IIssue, bool> issueFilter;
             try
             {
-                var script = ScriptOptions.Default.AddReferences(typeof(Issue).Assembly);
+                ScriptOptions script = ScriptOptions.Default.AddReferences(typeof(Issue).Assembly);
                 issueFilter = await CSharpScript.EvaluateAsync<Func<IIssue, bool>>(options.Linq, script);
             }
             catch (Exception e)
@@ -38,9 +39,12 @@ namespace GitIssue.Tool.Commands.Find
                 return;
             }
 
-            var formatter = new TerminalFormatter(options.Format);
-            var find = manager.FindAsync(i => issueFilter.Invoke(i));
-            await foreach (var issue in find) Console.WriteLine(issue.Format(formatter));
+            TerminalFormatter formatter = new TerminalFormatter(options.Format);
+            IAsyncEnumerable<IIssue> find = this.manager.FindAsync(i => issueFilter.Invoke(i));
+            await foreach (IIssue issue in find)
+            {
+                Console.WriteLine(issue.Format(formatter));
+            }
         }
     }
 }

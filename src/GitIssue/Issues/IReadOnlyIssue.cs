@@ -13,19 +13,9 @@ namespace GitIssue.Issues
     public interface IReadOnlyIssue : IReadOnlyDictionary<FieldKey, IField>
     {
         /// <summary>
-        ///     Gets the Issue Key
+        ///     Gets the issue comments
         /// </summary>
-        IssueKey Key { get; }
-
-        /// <summary>
-        ///     Gets or sets the issue title
-        /// </summary>
-        String Title { get; }
-
-        /// <summary>
-        ///     Gets or sets the issue description
-        /// </summary>
-        String Description { get; }
+        String[] Comments { get; }
 
         /// <summary>
         ///     Gets or sets when the issue was created
@@ -38,6 +28,21 @@ namespace GitIssue.Issues
         DateTime Created { get; }
 
         /// <summary>
+        ///     Gets or sets the issue description
+        /// </summary>
+        String Description { get; }
+
+        /// <summary>
+        ///     Gets the Issue Key
+        /// </summary>
+        IssueKey Key { get; }
+
+        /// <summary>
+        ///     Gets or sets the issue title
+        /// </summary>
+        String Title { get; }
+
+        /// <summary>
         ///     Gets or sets when the issue was last updates
         /// </summary>
         DateTime Updated { get; }
@@ -47,13 +52,13 @@ namespace GitIssue.Issues
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public IFieldProvider GetField([CallerMemberName] string? key = null);
+        IFieldProvider GetField([CallerMemberName] string? key = null);
 
         /// <summary>
         ///     Gets a <see cref="IFieldProvider" /> for the provided <see cref="FieldKey" />
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public IFieldProvider GetField(FieldKey key);
+        IFieldProvider GetField(FieldKey key);
     }
 }

@@ -11,9 +11,9 @@ namespace GitIssue.Tool.Commands.Init
     {
         public delegate void Initializer();
 
-        private readonly ILogger logger;
-
         private readonly Func<IIssueManager> factory;
+
+        private readonly ILogger logger;
 
         private readonly Action onInit;
 
@@ -28,7 +28,7 @@ namespace GitIssue.Tool.Commands.Init
         public override Task Exec(InitOptions options)
         {
             this.onInit();
-            var manager = factory.Invoke();
+            IIssueManager manager = this.factory.Invoke();
             Console.WriteLine($"Initialized empty 'Issue' repository in {manager.Root.IssuesPath}");
             return Task.CompletedTask;
         }

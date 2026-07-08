@@ -22,10 +22,10 @@ namespace GitIssue.Tool.Commands.Commit
         /// <inheritdoc />
         public override async Task Exec(CommitOptions options)
         {
-            var result = await manager.CommitAsync();
+            bool result = await this.manager.CommitAsync();
             if (result)
             {
-                Console.WriteLine($"Committed changes in {manager.Root.Name}, see log for details");
+                Console.WriteLine($"Committed changes in {this.manager.Root.Name}, see log for details");
             }
         }
     }

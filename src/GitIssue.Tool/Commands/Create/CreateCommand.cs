@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GitIssue.Fields;
 using GitIssue.Fields.Value;
 using GitIssue.Formatters;
 using GitIssue.Issues;
@@ -15,15 +16,14 @@ namespace GitIssue.Tool.Commands.Create
     /// </summary>
     public class CreateCommand : Command<CreateOptions>
     {
-        private Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => IssueFormatter.Detailed);
-
-        private readonly ILogger logger;
+        private readonly IIssueConfiguration configuration;
 
         private readonly IEditor editor;
 
-        private readonly IIssueManager manager;
+        private readonly ILogger logger;
 
-        private readonly IIssueConfiguration configuration;
+        private readonly IIssueManager manager;
+        private Lazy<IIssueFormatter> formatter = new Lazy<IIssueFormatter>(() => IssueFormatter.Detailed);
 
         public CreateCommand(IIssueManager manager, IIssueConfiguration configuration, IEditor editor, ILogger logger)
         {
@@ -39,18 +39,18 @@ namespace GitIssue.Tool.Commands.Create
             IIssue issue;
             if (string.IsNullOrEmpty(options.Title))
             {
-                var fields = this.configuration.Fields
-                    .Where(f => f.Key != nameof(IIssue.Key))
+                IField[] fields = this.configuration.Fields
+                    .Where(f => f.Key != nameof(IReadOnlyIssue.Key))
                     .Where(f => f.Key != nameof(IIssue.Created))
                     .Where(f => f.Key != nameof(IIssue.Updated))
                     .Select(f => f.Value.CreateField(null!, f.Key))
                     .ToArray();
 
-                await editor.Open(fields);
+                await this.editor.Open(fields);
 
                 if (!(fields.FirstOrDefault(f => f.Key == nameof(IIssue.Title)) is IValueField title))
                 {
-                    this.logger.Error($"Title is not a valid value field");
+                    this.logger.Error("Title is not a valid value field");
                     return;
                 }
 
@@ -62,21 +62,21 @@ namespace GitIssue.Tool.Commands.Create
 
                 if (string.IsNullOrEmpty(value.Item))
                 {
-                    this.logger.Error($"A valid title must be provided");
+                    this.logger.Error("A valid title must be provided");
                 }
 
-                issue = await manager.CreateAsync(value.Item);
-                foreach (var field in fields)
+                issue = await this.manager.CreateAsync(value.Item);
+                foreach (IField field in fields)
                 {
                     issue.SetField(field.Key).WithField(field);
                 }
             }
             else
             {
-                issue = await manager.CreateAsync(options.Title, options.Description);
+                issue = await this.manager.CreateAsync(options.Title, options.Description);
             }
 
-            if (options.Track || options.Tracked == TrackedIssue.None)
+            if (options.Track || (options.Tracked == TrackedIssue.None))
             {
                 options.Tracked = new TrackedIssue(issue.Key);
                 await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);

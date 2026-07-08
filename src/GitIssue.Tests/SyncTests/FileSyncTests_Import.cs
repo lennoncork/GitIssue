@@ -14,18 +14,14 @@ namespace GitIssue.Tests.SyncTests
             [Test]
             public async Task ImportsIssue()
             {
-                var issue_file = Path.Combine(TestContext.CurrentContext.TestDirectory,
+                string issue_file = Path.Combine(TestContext.CurrentContext.TestDirectory,
                     "SyncTests", "ImportFiles", "jira-issue.json");
 
-                var config_file = Path.Combine(TestContext.CurrentContext.TestDirectory,
+                string config_file = Path.Combine(TestContext.CurrentContext.TestDirectory,
                     "SyncTests", "ImportFiles", "jira-config.json");
 
-                Initialize(TestDirectory);
-                var importer = new FileImporter(this.Sut)
-                {
-                    Configuration = await SyncConfiguration.ReadAsync(config_file),
-                    ImportPath = issue_file,
-                };
+                this.Initialize(this.TestDirectory);
+                FileImporter importer = new FileImporter(this.Sut) { Configuration = await SyncConfiguration.ReadAsync(config_file), ImportPath = issue_file };
                 await importer.Import();
             }
         }

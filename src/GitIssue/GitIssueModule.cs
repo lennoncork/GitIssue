@@ -9,11 +9,11 @@ using Serilog.Core;
 namespace GitIssue
 {
     /// <summary>
-    /// Dependency Injection Registrations
+    ///     Dependency Injection Registrations
     /// </summary>
     public class GitIssueModule : Module
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Load(ContainerBuilder builder)
         {
             // Issue manager
@@ -58,7 +58,7 @@ namespace GitIssue
                     RepositoryRoot root = c.Resolve<RepositoryRoot>();
                     IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
-                    IssueCreation creation = (key) => new FileIssue(new IssueRoot(root, key, provider.GetIssuePath(key)), configuration.Fields);
+                    IssueCreation creation = key => new FileIssue(new IssueRoot(root, key, provider.GetIssuePath(key)), configuration.Fields);
                     return creation;
                 })
                 .AsSelf()
@@ -68,7 +68,7 @@ namespace GitIssue
                 {
                     RepositoryRoot root = c.Resolve<RepositoryRoot>();
                     IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
-                    IssueDeletion deletion = (key) => FileIssue.DeleteAsync(new IssueRoot(root, key, provider.GetIssuePath(key)));
+                    IssueDeletion deletion = key => FileIssue.DeleteAsync(new IssueRoot(root, key, provider.GetIssuePath(key)));
                     return deletion;
                 })
                 .AsSelf()
@@ -79,7 +79,7 @@ namespace GitIssue
                     RepositoryRoot root = c.Resolve<RepositoryRoot>();
                     IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
-                    IssueLoading read = (key) => FileIssue.ReadAsync(new IssueRoot(root, key, provider.GetIssuePath(key)), configuration.Fields);
+                    IssueLoading read = key => FileIssue.ReadAsync(new IssueRoot(root, key, provider.GetIssuePath(key)), configuration.Fields);
                     return read;
                 })
                 .AsSelf()

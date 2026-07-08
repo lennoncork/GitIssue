@@ -13,8 +13,6 @@ namespace GitIssue.Values
     [TypeAlias(nameof(Markdown))]
     public struct Markdown : IJsonValue, IEquatable<Markdown>, IValue<string>
     {
-        private readonly string value;
-
         /// <summary>
         ///     Tries to parse the markdown value
         /// </summary>
@@ -29,48 +27,51 @@ namespace GitIssue.Values
 
         internal Markdown(string value)
         {
-            this.value = value;
+            this.Item = value;
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Markdown str)
+            {
                 return this.Equals(str);
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return value.GetHashCode();
+            return this.Item.GetHashCode();
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] Markdown other)
         {
-            return value == other.value;
+            return this.Item == other.Item;
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] string other)
         {
-            return value == other;
+            return this.Item == other;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return value;
+            return this.Item;
         }
 
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(value);
+            return new JValue(this.Item);
         }
 
         /// <inheritdoc />
-        public string Item => this.value;
+        public string Item { get; }
     }
 }

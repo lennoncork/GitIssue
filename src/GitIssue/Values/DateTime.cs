@@ -31,20 +31,20 @@ namespace GitIssue.Values
         internal DateTime(System.DateTime value)
         {
             this.value = value;
-            IsValid = true;
+            this.IsValid = true;
         }
 
         internal DateTime(string datetime)
         {
             try
             {
-                value = System.DateTime.Parse(datetime);
-                IsValid = true;
+                this.value = System.DateTime.Parse(datetime);
+                this.IsValid = true;
             }
             catch (FormatException)
             {
-                value = System.DateTime.MinValue;
-                IsValid = false;
+                this.value = System.DateTime.MinValue;
+                this.IsValid = false;
             }
         }
 
@@ -56,7 +56,7 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public override string ToString()
         {
-            return value.ToString(CultureInfo.InvariantCulture);
+            return this.value.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -80,33 +80,36 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(value);
+            return new JValue(this.value);
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is DateTime datetime)
+            {
                 return this.Equals(datetime);
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return value.GetHashCode();
+            return this.value.GetHashCode();
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] DateTime other)
         {
-            return value == other.value;
+            return this.value == other.value;
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] System.DateTime other)
         {
-            return value == other;
+            return this.value == other;
         }
 
         /// <inheritdoc />

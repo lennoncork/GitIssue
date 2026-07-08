@@ -10,14 +10,14 @@ namespace GitIssue
     public interface IIssueConfiguration
     {
         /// <summary>
-        /// Gets or sets the key provider
-        /// </summary>
-        TypeValue KeyProvider { get; set; }
-
-        /// <summary>
         ///     Gets or sets the dictionary of fields
         /// </summary>
         Dictionary<FieldKey, FieldInfo> Fields { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the key provider
+        /// </summary>
+        TypeValue KeyProvider { get; set; }
 
         /// <summary>
         ///     Saves the configuration to a file

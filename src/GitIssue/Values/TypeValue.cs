@@ -21,18 +21,18 @@ namespace GitIssue.Values
 
         private TypeValue(Type type)
         {
-            Type = type;
+            this.Type = type;
         }
 
         /// <summary>
-        /// Tries to create the type
+        ///     Tries to create the type
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public bool TryCreate<T>(out T result, params object[] args)
             where T : class
         {
-            if (typeof(T).IsAssignableFrom(this.Type) == false)
+            if (!typeof(T).IsAssignableFrom(this.Type))
             {
                 result = null!;
                 return false;
@@ -40,17 +40,19 @@ namespace GitIssue.Values
 
             try
             {
-                var info = this.Type.GetConstructor(
+                ConstructorInfo? info = this.Type.GetConstructor(
                     BindingFlags.Instance | BindingFlags.Public,
                     null,
                     args.Select(o => o.GetType()).ToArray(),
                     null);
 
-                var create = info?.Invoke(args) as T;
+                T? create = info?.Invoke(args) as T;
                 result = create!;
 
                 if (create == null)
+                {
                     return false;
+                }
 
                 return true;
             }
@@ -71,13 +73,13 @@ namespace GitIssue.Values
         {
             try
             {
-                var type = GetType(value);
-                fieldType = type != null ? Create(type) : default!;
+                Type? type = TypeValue.GetType(value);
+                fieldType = type != null ? TypeValue.Create(type) : default(TypeValue)!;
                 return true;
             }
             catch (Exception)
             {
-                fieldType = default;
+                fieldType = default(TypeValue);
             }
 
             return false;
@@ -90,9 +92,14 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static Type? GetType(string value)
         {
-            foreach (var fieldType in TypeAlias.Aliases)
-                if (fieldType.TryParse(value, out var type))
+            foreach (ITypeAlias fieldType in TypeAlias.Aliases)
+            {
+                if (fieldType.TryParse(value, out Type type))
+                {
                     return type;
+                }
+            }
+
             return Type.GetType(value);
         }
 
@@ -128,14 +135,20 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public override string? ToString()
         {
-            if (TypeAlias.TryGetAliasAttribute(Type, out var attribute))
+            if (TypeAlias.TryGetAliasAttribute(this.Type, out TypeAliasAttribute attribute))
+            {
                 return attribute.Alias;
+            }
 
-            if (TypeAlias.TryGetAlias(Type, out var alias))
-                if (alias.TryParse(Type, out var result))
+            if (TypeAlias.TryGetAlias(this.Type, out ITypeAlias alias))
+            {
+                if (alias.TryParse(this.Type, out string result))
+                {
                     return result;
+                }
+            }
 
-            return Type.FullName;
+            return this.Type.FullName;
         }
     }
 }

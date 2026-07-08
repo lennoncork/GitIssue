@@ -12,92 +12,12 @@ namespace GitIssue.Tests
         public static string TestData = "TestData";
 
         /// <summary>
-        ///     Gets a random unique string, max length 64
-        /// </summary>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        public static string GetRandomString(int length = 8)
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-
-        /// <summary>
-        ///     Gets the test directory
-        /// </summary>
-        /// <returns></returns>
-        public static string GetTestDirectory()
-        {
-            return Path.Combine(TestContext.CurrentContext.TestDirectory, TestData);
-        }
-
-        /// <summary>
-        ///     Gets the path of a new temp file, using the default temp directory
-        /// </summary>
-        /// <returns></returns>
-        public static string GetTempFile()
-        {
-            return GetTempFile(GetTestDirectory());
-        }
-
-        /// <summary>
-        ///     Gets the path of a new temp file
-        /// </summary>
-        /// <param name="path">the parent path for the file</param>
-        /// <returns></returns>
-        public static string GetTempFile(string path)
-        {
-            return Path.Combine(path, $"{GetRandomString()}.txt");
-        }
-
-        /// <summary>
-        ///     Creates a new Temporary File, using the default temp directory
-        /// </summary>
-        /// <returns></returns>
-        public static string CreateTempFile()
-        {
-            return CreateTempFile(GetTestDirectory());
-        }
-
-        /// <summary>
-        ///     Creates a new Temporary File
-        /// </summary>
-        /// <param name="path">the parent path for the directory</param>
-        /// <returns></returns>
-        public static string CreateTempFile(string path)
-        {
-            var file = GetTempFile(path);
-            File.Create(file).Dispose();
-            return file;
-        }
-
-        /// <summary>
-        ///     Gets the path of a new temp directory, using the default temp directory
-        /// </summary>
-        /// <returns></returns>
-        public static string GetTempDirectory()
-        {
-            return GetTempDirectory(GetTestDirectory());
-        }
-
-        /// <summary>
-        ///     Gets the path of a new temp directory
-        /// </summary>
-        /// <param name="path">the parent path for the directory</param>
-        /// <returns></returns>
-        public static string GetTempDirectory(string path)
-        {
-            return Path.Combine(path, GetRandomString());
-        }
-
-        /// <summary>
         ///     Creates a new temporary directory, using the default temp directory
         /// </summary>
         /// <returns></returns>
         public static string CreateTempDirectory()
         {
-            return CreateTempDirectory(GetTestDirectory());
+            return Helpers.CreateTempDirectory(Helpers.GetTestDirectory());
         }
 
         /// <summary>
@@ -107,9 +27,89 @@ namespace GitIssue.Tests
         /// <returns></returns>
         public static string CreateTempDirectory(string path)
         {
-            var directory = GetTempDirectory(path);
+            string directory = Helpers.GetTempDirectory(path);
             Directory.CreateDirectory(directory);
             return directory;
+        }
+
+        /// <summary>
+        ///     Creates a new Temporary File, using the default temp directory
+        /// </summary>
+        /// <returns></returns>
+        public static string CreateTempFile()
+        {
+            return Helpers.CreateTempFile(Helpers.GetTestDirectory());
+        }
+
+        /// <summary>
+        ///     Creates a new Temporary File
+        /// </summary>
+        /// <param name="path">the parent path for the directory</param>
+        /// <returns></returns>
+        public static string CreateTempFile(string path)
+        {
+            string file = Helpers.GetTempFile(path);
+            File.Create(file).Dispose();
+            return file;
+        }
+
+        /// <summary>
+        ///     Gets a random unique string, max length 64
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static string GetRandomString(int length = 8)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[Helpers.random.Next(s.Length)]).ToArray());
+        }
+
+        /// <summary>
+        ///     Gets the path of a new temp directory, using the default temp directory
+        /// </summary>
+        /// <returns></returns>
+        public static string GetTempDirectory()
+        {
+            return Helpers.GetTempDirectory(Helpers.GetTestDirectory());
+        }
+
+        /// <summary>
+        ///     Gets the path of a new temp directory
+        /// </summary>
+        /// <param name="path">the parent path for the directory</param>
+        /// <returns></returns>
+        public static string GetTempDirectory(string path)
+        {
+            return Path.Combine(path, Helpers.GetRandomString());
+        }
+
+        /// <summary>
+        ///     Gets the path of a new temp file, using the default temp directory
+        /// </summary>
+        /// <returns></returns>
+        public static string GetTempFile()
+        {
+            return Helpers.GetTempFile(Helpers.GetTestDirectory());
+        }
+
+        /// <summary>
+        ///     Gets the path of a new temp file
+        /// </summary>
+        /// <param name="path">the parent path for the file</param>
+        /// <returns></returns>
+        public static string GetTempFile(string path)
+        {
+            return Path.Combine(path, $"{Helpers.GetRandomString()}.txt");
+        }
+
+        /// <summary>
+        ///     Gets the test directory
+        /// </summary>
+        /// <returns></returns>
+        public static string GetTestDirectory()
+        {
+            return Path.Combine(TestContext.CurrentContext.TestDirectory, Helpers.TestData);
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace GitIssue.Tests
             {
                 if (Directory.Exists(directory))
                 {
-                    environment = Environment.CurrentDirectory;
+                    this.environment = Environment.CurrentDirectory;
                     Environment.CurrentDirectory = directory;
                 }
             }
@@ -135,8 +135,10 @@ namespace GitIssue.Tests
             /// <inheritdoc cref="IDisposable" />
             public void Dispose()
             {
-                if (environment != null)
-                    Environment.CurrentDirectory = environment;
+                if (this.environment != null)
+                {
+                    Environment.CurrentDirectory = this.environment;
+                }
             }
         }
     }

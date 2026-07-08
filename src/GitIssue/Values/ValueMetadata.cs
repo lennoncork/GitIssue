@@ -12,8 +12,8 @@
         /// <param name="metadata"></param>
         public ValueMetadata(string value, string metadata)
         {
-            Value = value;
-            Metadata = metadata;
+            this.Value = value;
+            this.Metadata = metadata;
         }
 
         /// <summary>

@@ -14,13 +14,13 @@ namespace GitIssue.Tests.ValueTests
             [TestCaseSource(typeof(CanConvertTestCases))]
             public bool CanConvert(Type type)
             {
-                return HasConverter(type);
+                return this.HasConverter(type);
             }
 
             [TestCaseSource(typeof(ConvertFromStringTestCases))]
             public Email Convert(object value)
             {
-                return (Email)UseConverter(value);
+                return (Email)this.UseConverter(value);
             }
 
             public class CanConvertTestCases : ValueTestCases
@@ -56,7 +56,7 @@ namespace GitIssue.Tests.ValueTests
             [TestCaseSource(typeof(TryParseTestCases))]
             public bool Test(string value, Email expected)
             {
-                if (Email.TryParse(value, out var result))
+                if (Email.TryParse(value, out Email result))
                 {
                     Assert.That(expected, Is.EqualTo(result));
                     return true;

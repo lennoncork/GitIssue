@@ -13,8 +13,6 @@ namespace GitIssue.Values
     [TypeConverter(typeof(UrlTypeConverter))]
     public struct Url : IJsonValue, IEquatable<Url>, IValue<string>
     {
-        private readonly string value;
-
         /// <summary>
         ///     Parse a string to the url
         /// </summary>
@@ -42,14 +40,17 @@ namespace GitIssue.Values
             try
             {
                 if (url.StartsWith("www."))
+                {
                     url = "http://" + url;
-                value = new Uri(url).ToString();
-                IsValid = true;
+                }
+
+                this.Item = new Uri(url).ToString();
+                this.IsValid = true;
             }
             catch (UriFormatException)
             {
-                value = string.Empty;
-                IsValid = false;
+                this.Item = string.Empty;
+                this.IsValid = false;
             }
         }
 
@@ -61,43 +62,46 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public override string ToString()
         {
-            return value;
+            return this.Item;
         }
 
         /// <inheritdoc />
         public JToken ToJson()
         {
-            return new JValue(value);
+            return new JValue(this.Item);
         }
 
         /// <inheritdoc />
         public bool Equals([AllowNull] Url other)
         {
-            return value == other.value;
+            return this.Item == other.Item;
         }
 
 
         /// <inheritdoc />
         public bool Equals([AllowNull] string other)
         {
-            return value == other;
+            return this.Item == other;
         }
 
         /// <inheritdoc />
         public override bool Equals(object? obj)
         {
             if (obj is Url url)
+            {
                 return this.Equals(url);
+            }
+
             return base.Equals(obj);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return value.GetHashCode();
+            return this.Item.GetHashCode();
         }
 
         /// <inheritdoc />
-        public string Item => this.value;
+        public string Item { get; }
     }
 }

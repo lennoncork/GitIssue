@@ -6,14 +6,14 @@ using GitIssue.Issues;
 namespace GitIssue.Syncs
 {
     /// <summary>
-    /// Maps issues and imports
+    ///     Maps issues and imports
     /// </summary>
     public struct SyncedIssue
     {
         private readonly IImporter importer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SyncedIssue"/> class
+        ///     Initializes a new instance of the <see cref="SyncedIssue" /> class
         /// </summary>
         /// <param name="importer"></param>
         /// <param name="kvp"></param>
@@ -25,7 +25,7 @@ namespace GitIssue.Syncs
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SyncedIssue"/> class
+        ///     Initializes a new instance of the <see cref="SyncedIssue" /> class
         /// </summary>
         /// <param name="importer"></param>
         /// <param name="key"></param>
@@ -38,7 +38,7 @@ namespace GitIssue.Syncs
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SyncedIssue"/> class
+        ///     Initializes a new instance of the <see cref="SyncedIssue" /> class
         /// </summary>
         /// <param name="importer"></param>
         /// <param name="key"></param>
@@ -51,19 +51,19 @@ namespace GitIssue.Syncs
         }
 
         /// <summary>
-        /// Gets the issue key
+        ///     Gets the issue key
         /// </summary>
         public IssueKey IssueKey { get; }
 
         /// <summary>
-        /// Gets the import key
+        ///     Gets the import key
         /// </summary>
         public IssueKey ImportKey { get; }
 
         /// <summary>
-        /// Gets a value indicating if this issue key is valid
+        ///     Gets a value indicating if this issue key is valid
         /// </summary>
-        public bool IsValid => this.IssueKey != IssueKey.None || this.ImportKey != IssueKey.None;
+        public bool IsValid => (this.IssueKey != IssueKey.None) || (this.ImportKey != IssueKey.None);
 
         /// <summary>
         ///     Implicit cast to string
@@ -75,32 +75,36 @@ namespace GitIssue.Syncs
         }
 
         /// <summary>
-        /// Reads the imported mapping
+        ///     Reads the imported mapping
         /// </summary>
         /// <param name="importer"></param>
         /// <param name="path"></param>
         /// <returns></returns>
         public static async Task<SyncedIssue> ReadAsync(IImporter importer, string path)
         {
-            if (File.Exists(path) == false)
-                return default!;
+            if (!File.Exists(path))
+            {
+                return default(SyncedIssue)!;
+            }
 
-            var import = Path.GetFileNameWithoutExtension(path);
-            var key = await File.ReadAllTextAsync(path);
+            string import = Path.GetFileNameWithoutExtension(path);
+            string key = await File.ReadAllTextAsync(path);
             return new SyncedIssue(importer, key, import);
         }
 
         /// <summary>
-        /// Saves the imported file
+        ///     Saves the imported file
         /// </summary>
         /// <returns></returns>
         public async Task<bool> SaveAsync()
         {
-            if (Directory.Exists(importer.Root.ImportPath) == false)
-                Directory.CreateDirectory(importer.Root.ImportPath);
+            if (!Directory.Exists(this.importer.Root.ImportPath))
+            {
+                Directory.CreateDirectory(this.importer.Root.ImportPath);
+            }
 
-            var path = Path.Combine(importer.Root.ImportPath, this.ImportKey.ToString());
-            var key = this.IssueKey.ToString();
+            string path = Path.Combine(this.importer.Root.ImportPath, this.ImportKey.ToString());
+            string key = this.IssueKey.ToString();
             await File.WriteAllTextAsync(path, key);
             return true;
         }

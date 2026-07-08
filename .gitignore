@@ -6,3 +6,4 @@
 .cake
 *.user
 .issues
+*.coverlet.json

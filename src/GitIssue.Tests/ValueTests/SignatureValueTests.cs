@@ -14,13 +14,13 @@ namespace GitIssue.Tests.ValueTests
             [TestCaseSource(typeof(CanConvertTestCases))]
             public bool CanConvert(Type type)
             {
-                return HasConverter(type);
+                return this.HasConverter(type);
             }
 
             [TestCaseSource(typeof(ConvertFromStringTestCases))]
             public Signature Convert(object value)
             {
-                return (Signature)UseConverter(value);
+                return (Signature)this.UseConverter(value);
             }
 
             public class CanConvertTestCases : ValueTestCases
@@ -56,7 +56,7 @@ namespace GitIssue.Tests.ValueTests
             [TestCaseSource(typeof(TryParseTestCases))]
             public bool Test(string value, Signature expected)
             {
-                if (Signature.TryParse(value, out var result))
+                if (Signature.TryParse(value, out Signature result))
                 {
                     Assert.That(expected, Is.EqualTo(result));
                     return true;
