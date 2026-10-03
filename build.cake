@@ -36,8 +36,7 @@ Task("Test")
 Task("Coverage")
     .IsDependentOn("Build")
     .Does(() => {
-        
-        var coverageDirectory = MakeAbsolute(Directory(".coverage"));
+        var coverageDirectory = MakeAbsolute(Directory("./coverage"));
         CleanDirectory(coverageDirectory);
 
         var settings = new DotNetTestSettings {

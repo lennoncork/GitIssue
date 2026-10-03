@@ -67,6 +67,7 @@ namespace GitIssue.Fields.Value
             if (other is IValueField<T> valueField)
             {
                 this.Value = valueField.Value;
+                return true;
             }
 
             return false;

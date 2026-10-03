@@ -172,6 +172,7 @@ namespace GitIssue.Fields.Array
             if (other is IArrayField<T> valueField)
             {
                 this.Values = valueField.Values.ToArray();
+                return true;
             }
 
             return false;

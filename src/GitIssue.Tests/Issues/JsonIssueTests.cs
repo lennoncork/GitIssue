@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -5,7 +6,9 @@ using GitIssue.Exceptions;
 using GitIssue.Fields;
 using GitIssue.Issues;
 using GitIssue.Issues.Json;
+using Moq;
 using NUnit.Framework;
+using StringValue = GitIssue.Values.String;
 
 namespace GitIssue.Tests.Issues
 {
@@ -66,6 +69,40 @@ namespace GitIssue.Tests.Issues
                 }
 
                 Assert.That(enumeratedKeys, Is.EquivalentTo(new[] { key1, key2 }));
+            }
+
+            [Test]
+            public void SetField_WithField_CopiesTheUpdatedValue()
+            {
+                string repoDir = Helpers.CreateTempDirectory();
+                RepositoryRoot repoRoot = RepositoryRoot.Open(repoDir, null);
+                TestJsonIssue issue = new TestJsonIssue(new IssueRoot(repoRoot, IssueKey.Create("issue"), "issue"));
+                FieldKey key = FieldKey.Create("field");
+                JsonValueField<StringValue> existing = new JsonValueField<StringValue>(key, StringValue.Parse("before"));
+                issue.AddField(key, existing);
+
+                issue.SetField(key).WithField(new JsonValueField<StringValue>(key, StringValue.Parse("after")));
+
+                Assert.That(existing.Value, Is.EqualTo(StringValue.Parse("after")));
+            }
+
+            [Test]
+            public void SaveAsJsonAsync_PreservesExistingFileWhenSerializationFails()
+            {
+                string repoDir = Helpers.CreateTempDirectory();
+                RepositoryRoot repoRoot = RepositoryRoot.Open(repoDir, null);
+                TestJsonIssue issue = new TestJsonIssue(new IssueRoot(repoRoot, IssueKey.Create("issue"), "issue"));
+                FieldKey key = FieldKey.Create("field");
+                Mock<IJsonField> field = new Mock<IJsonField>(MockBehavior.Strict);
+                field.SetupGet(value => value.Key).Returns(key);
+                field.Setup(value => value.ToJson()).Throws<InvalidOperationException>();
+                issue.AddField(key, field.Object);
+                string path = Path.Combine(repoDir, "issue.json");
+                File.WriteAllText(path, "preserve");
+
+                Assert.That(async () => await issue.SaveAsJsonAsync(path),
+                    Throws.TypeOf<InvalidOperationException>());
+                Assert.That(File.ReadAllText(path), Is.EqualTo("preserve"));
             }
 
             [Test]

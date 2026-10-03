@@ -183,6 +183,11 @@ namespace GitIssue.Issues.Json
             return new FieldFactory(this, key, () =>
             {
                 this.fields.TryGetValue(key, out IField? field);
+                if (field != null)
+                {
+                    this.modifiedFields.Add(key);
+                }
+
                 return field;
             });
         }

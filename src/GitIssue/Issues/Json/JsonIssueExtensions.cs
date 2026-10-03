@@ -33,12 +33,8 @@ namespace GitIssue.Issues.Json
         /// <returns></returns>
         public static async Task SaveAsJsonAsync(this IJsonIssue issue, string path)
         {
-            // Save the json
-            await using FileStream stream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite);
-            using JsonWriter writer = new JsonTextWriter(new StreamWriter(stream));
-            JsonSerializer serializer = new JsonSerializer();
-            serializer.Formatting = Formatting.Indented;
-            serializer.Serialize(writer, issue.ToJson());
+            string json = issue.ToJson().ToString(Formatting.Indented);
+            await Paths.WriteAllTextAsync(path, json);
         }
     }
 }

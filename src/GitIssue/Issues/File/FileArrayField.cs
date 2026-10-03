@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -93,7 +94,9 @@ namespace GitIssue.Issues.File
                 }
 
                 List<T> values = new List<T>();
-                foreach (string fieldFile in Directory.EnumerateFiles(directory))
+                foreach (string fieldFile in Directory.EnumerateFiles(directory)
+                             .OrderBy(path => int.TryParse(Path.GetFileName(path), out int index) ? index : int.MaxValue)
+                             .ThenBy(path => path, StringComparer.Ordinal))
                 {
                     string content = await System.IO.File.ReadAllTextAsync(fieldFile);
                     if (field.TryParse(content, out T result))
@@ -124,12 +127,21 @@ namespace GitIssue.Issues.File
                 }
 
                 int count = 0;
+                HashSet<string> savedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (T value in this.Values)
                 {
                     string file = Path.Combine(this.DirectoryPath, count.ToString());
-                    await using FileStream stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                    await using StreamWriter writer = new StreamWriter(stream);
-                    await writer.WriteAsync(value?.ToString());
+                    await Paths.WriteAllTextAsync(file, value?.ToString());
+                    savedFiles.Add(Path.GetFullPath(file));
+                    count++;
+                }
+
+                foreach (string file in Directory.EnumerateFiles(this.DirectoryPath))
+                {
+                    if (!savedFiles.Contains(Path.GetFullPath(file)))
+                    {
+                        System.IO.File.Delete(file);
+                    }
                 }
 
                 return true;

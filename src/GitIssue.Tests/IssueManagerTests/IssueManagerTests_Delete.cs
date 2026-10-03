@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Issues;
 using NUnit.Framework;
@@ -68,6 +69,18 @@ namespace GitIssue.Tests.IssueManagerTests
                 this.Initialize(this.TestDirectory);
                 bool result = this.Sut.Delete("invalid-id");
                 Assert.That(result, Is.False);
+            }
+
+            [Test]
+            public void DeleteByKey_RejectsPathOutsideIssueDirectory()
+            {
+                this.Initialize(this.TestDirectory);
+                string sentinel = Path.Combine(this.TestDirectory, "sentinel.txt");
+                File.WriteAllText(sentinel, "preserve");
+
+                Assert.ThrowsAsync<ArgumentException>(async () =>
+                    await this.Sut.DeleteAsync(IssueKey.Create("..")));
+                Assert.That(File.ReadAllText(sentinel), Is.EqualTo("preserve"));
             }
         }
     }

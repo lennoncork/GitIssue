@@ -62,6 +62,7 @@ namespace GitIssue.Issues.File
                 if (field.TryParse(content, out T value))
                 {
                     field.Value = value;
+                    return field;
                 }
 
                 throw new SerializationException($"Unable to convert field content to type {typeof(T)}");
@@ -77,9 +78,7 @@ namespace GitIssue.Issues.File
         {
             try
             {
-                await using FileStream stream = new FileStream(this.FilePath, FileMode.Create, FileAccess.ReadWrite);
-                await using StreamWriter writer = new StreamWriter(stream);
-                await writer.WriteAsync(this.Value?.ToString());
+                await Paths.WriteAllTextAsync(this.FilePath, this.Value?.ToString());
                 return true;
             }
             catch (Exception e)

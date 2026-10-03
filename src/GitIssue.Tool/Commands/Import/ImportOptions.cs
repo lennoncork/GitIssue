@@ -6,7 +6,7 @@ namespace GitIssue.Tool.Commands.Import
     [Verb(nameof(CommandType.Import), HelpText = "Imports issues from a JSON or CSV file")]
     public class ImportOptions : Options
     {
-        [Value(1, MetaName = "File", HelpText = "The file to import issues from", Required = false)]
+        [Value(0, MetaName = "File", HelpText = "The file to import issues from", Required = false)]
         public string Import { get; set; } = "export.json";
 
         [Option("Update", HelpText = "Enables updating of existing issues", Required = false)]

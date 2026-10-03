@@ -9,7 +9,7 @@ namespace GitIssue.Tool.Commands.Find
         [Option("Format", HelpText = "The format to output in", Required = false)]
         public string Format { get; set; } = "%Key %Title %Delta";
 
-        [Value(1, MetaName = "LINQ", HelpText = "The LINQ expression to use when matching", Required = false)]
+        [Value(0, MetaName = "LINQ", HelpText = "The LINQ expression to use when matching", Required = false)]
         public string Linq { get; set; } = "i => true";
 
         [Option("LinqName", HelpText = "The name of the issue in the linq expression", Required = false)]

@@ -35,6 +35,6 @@ namespace GitIssue.Issues
         /// <summary>
         ///     Gets the <see cref="IssuePath" /> for the issue
         /// </summary>
-        public string IssuePath => Path.Combine(this.Root.IssuesPath, this.issuePath ?? this.Key.ToString());
+        public string IssuePath => Paths.GetContainedPath(this.Root.IssuesPath, this.issuePath ?? this.Key.ToString());
     }
 }

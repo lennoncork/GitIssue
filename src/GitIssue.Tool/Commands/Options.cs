@@ -29,7 +29,15 @@ namespace GitIssue.Tool.Commands
         string Tracking { get; set; }
     }
 
-    public class KeyOptions : Options, ITrackedOptions
+    public class TrackedOptions : Options, ITrackedOptions
+    {
+        /// <summary>
+        ///     Gets or sets the tracked issue
+        /// </summary>
+        public TrackedIssue Tracked { get; set; } = TrackedIssue.None;
+    }
+
+    public class KeyOptions : TrackedOptions
     {
         private static readonly HashSet<string?> tracking = new HashSet<string?>
         {
@@ -42,7 +50,7 @@ namespace GitIssue.Tool.Commands
 
         private string key = string.Empty;
 
-        [Value(1, MetaName = "Issue Key", HelpText = "The issue key (use '.', 'T', or 'Tracked' to refernce the tracked issue)", Required = false)]
+        [Value(0, MetaName = "Issue Key", HelpText = "The issue key (use '.', 'T', or 'Tracked' to reference the tracked issue)", Required = false)]
         public string Key
         {
             get
@@ -57,10 +65,6 @@ namespace GitIssue.Tool.Commands
             set => this.key = value;
         }
 
-        /// <summary>
-        ///     Gets or sets the traced issue
-        /// </summary>
-        public TrackedIssue Tracked { get; set; } = TrackedIssue.None;
     }
 
     public class EditorOptions : KeyOptions
