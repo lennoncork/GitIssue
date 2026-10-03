@@ -108,7 +108,7 @@ namespace GitIssue.Tool
             }
         }
 
-        private static int Main(string[] args)
+        internal static int Main(string[] args)
         {
             Program.logger = new LoggerConfiguration()
                 .WriteTo.Console()

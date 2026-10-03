@@ -37,4 +37,8 @@
     <ProjectReference Include="..\GitIssue\GitIssue.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="GitIssue.Tool.Tests" />
+  </ItemGroup>
+
 </Project>
