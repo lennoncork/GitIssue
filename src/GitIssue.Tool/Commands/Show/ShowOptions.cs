@@ -7,10 +7,10 @@ namespace GitIssue.Tool.Commands.Show
     [Verb(nameof(CommandType.Show), HelpText = "Shows the details of an issue")]
     public class ShowOptions : TrackedOptions
     {
+        public string Key => this.Tracked?.Key.ToString() ?? IssueKey.None.ToString();
+
         [Value(0, MetaName = "Show What", HelpText = "Show issues", Required = false)]
         public ShowSubCommand Show { get; set; } = ShowSubCommand.Tracked;
-
-        public string Key => this.Tracked?.Key.ToString() ?? IssueKey.None.ToString();
     }
 #pragma warning restore 1591
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.ComponentModel;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
 using NUnit.Framework;
@@ -72,7 +72,7 @@ namespace GitIssue.Tests.ValueTests
 
         public virtual string ConvertToJson(TValue value)
         {
-            return value.ToJson()?.ToJsonString(JsonOptions) ?? "null";
+            return value.ToJson()?.ToJsonString(JsonValueTests<TValue>.JsonOptions) ?? "null";
         }
     }
 
@@ -86,7 +86,7 @@ namespace GitIssue.Tests.ValueTests
 
         public virtual string ConvertToJson(TValue value)
         {
-            return value.ToJson()?.ToJsonString(JsonOptions) ?? "null";
+            return value.ToJson()?.ToJsonString(JsonValueTests<TValue, TBacking>.JsonOptions) ?? "null";
         }
     }
 

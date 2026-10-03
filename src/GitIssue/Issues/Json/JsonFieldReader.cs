@@ -99,7 +99,7 @@ namespace GitIssue.Issues.Json
         {
             if (!JsonSerialization.TryGetScalar(jsonValue, out object? scalar))
             {
-                value = default!;
+                value = default(T)!;
                 return false;
             }
 

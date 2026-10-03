@@ -12,17 +12,13 @@ namespace GitIssue.Tests.Issues
     [TestFixture]
     public class FileIssueFieldTests
     {
-        [Test]
-        public async Task ValueField_RoundTrips()
+        private IssueRoot CreateIssueRoot()
         {
-            IssueRoot root = this.CreateIssueRoot();
-            FieldKey key = FieldKey.Create("value");
-            FileValueField<StringValue> field = new FileValueField<StringValue>(root, key, StringValue.Parse("saved"));
-
-            await field.SaveAsync();
-            IField result = await FileValueField<StringValue>.ReadAsync(root, key, new FieldInfo());
-
-            Assert.That(((FileValueField<StringValue>)result).Value, Is.EqualTo(StringValue.Parse("saved")));
+            string repository = Helpers.CreateTempDirectory();
+            RepositoryRoot repositoryRoot = RepositoryRoot.Open(repository, null);
+            IssueRoot issueRoot = new IssueRoot(repositoryRoot, IssueKey.Create("issue"), "issue");
+            Directory.CreateDirectory(issueRoot.IssuePath);
+            return issueRoot;
         }
 
         [Test]
@@ -43,13 +39,17 @@ namespace GitIssue.Tests.Issues
             Assert.That(Directory.EnumerateFiles(field.DirectoryPath).Count(), Is.EqualTo(1));
         }
 
-        private IssueRoot CreateIssueRoot()
+        [Test]
+        public async Task ValueField_RoundTrips()
         {
-            string repository = Helpers.CreateTempDirectory();
-            RepositoryRoot repositoryRoot = RepositoryRoot.Open(repository, null);
-            IssueRoot issueRoot = new IssueRoot(repositoryRoot, IssueKey.Create("issue"), "issue");
-            Directory.CreateDirectory(issueRoot.IssuePath);
-            return issueRoot;
+            IssueRoot root = this.CreateIssueRoot();
+            FieldKey key = FieldKey.Create("value");
+            FileValueField<StringValue> field = new FileValueField<StringValue>(root, key, StringValue.Parse("saved"));
+
+            await field.SaveAsync();
+            IField result = await FileValueField<StringValue>.ReadAsync(root, key, new FieldInfo());
+
+            Assert.That(((FileValueField<StringValue>)result).Value, Is.EqualTo(StringValue.Parse("saved")));
         }
     }
 }

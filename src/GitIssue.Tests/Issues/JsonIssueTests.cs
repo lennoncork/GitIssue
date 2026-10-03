@@ -72,18 +72,18 @@ namespace GitIssue.Tests.Issues
             }
 
             [Test]
-            public void SetField_WithField_CopiesTheUpdatedValue()
+            public void Json_Property_Returns_Expected_Path()
             {
                 string repoDir = Helpers.CreateTempDirectory();
                 RepositoryRoot repoRoot = RepositoryRoot.Open(repoDir, null);
-                TestJsonIssue issue = new TestJsonIssue(new IssueRoot(repoRoot, IssueKey.Create("issue"), "issue"));
-                FieldKey key = FieldKey.Create("field");
-                JsonValueField<StringValue> existing = new JsonValueField<StringValue>(key, StringValue.Parse("before"));
-                issue.AddField(key, existing);
+                IssueKey issueKey = IssueKey.Create("ISS-JSON-2");
+                IssueRoot issueRoot = new IssueRoot(repoRoot, issueKey, null);
 
-                issue.SetField(key).WithField(new JsonValueField<StringValue>(key, StringValue.Parse("after")));
+                TestJsonIssue issue = new TestJsonIssue(issueRoot);
 
-                Assert.That(existing.Value, Is.EqualTo(StringValue.Parse("after")));
+                string expected = JsonIssue.GetJsonFile(issueRoot);
+
+                Assert.That(issue.Json, Is.EqualTo(expected));
             }
 
             [Test]
@@ -106,18 +106,18 @@ namespace GitIssue.Tests.Issues
             }
 
             [Test]
-            public void Json_Property_Returns_Expected_Path()
+            public void SetField_WithField_CopiesTheUpdatedValue()
             {
                 string repoDir = Helpers.CreateTempDirectory();
                 RepositoryRoot repoRoot = RepositoryRoot.Open(repoDir, null);
-                IssueKey issueKey = IssueKey.Create("ISS-JSON-2");
-                IssueRoot issueRoot = new IssueRoot(repoRoot, issueKey, null);
+                TestJsonIssue issue = new TestJsonIssue(new IssueRoot(repoRoot, IssueKey.Create("issue"), "issue"));
+                FieldKey key = FieldKey.Create("field");
+                JsonValueField<StringValue> existing = new JsonValueField<StringValue>(key, StringValue.Parse("before"));
+                issue.AddField(key, existing);
 
-                TestJsonIssue issue = new TestJsonIssue(issueRoot);
+                issue.SetField(key).WithField(new JsonValueField<StringValue>(key, StringValue.Parse("after")));
 
-                string expected = JsonIssue.GetJsonFile(issueRoot);
-
-                Assert.That(issue.Json, Is.EqualTo(expected));
+                Assert.That(existing.Value, Is.EqualTo(StringValue.Parse("after")));
             }
         }
 

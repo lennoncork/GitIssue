@@ -64,7 +64,6 @@ namespace GitIssue.Tool.Commands
             }
             set => this.key = value;
         }
-
     }
 
     public class EditorOptions : KeyOptions

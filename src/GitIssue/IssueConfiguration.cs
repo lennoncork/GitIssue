@@ -63,8 +63,7 @@ namespace GitIssue
             try
             {
                 string json = File.ReadAllText(file);
-                return JsonSerializer.Deserialize<T>(json, JsonSerialization.Options)
-                    ?? throw new JsonException($"Unable to deserialize {file} as config file");
+                return JsonSerializer.Deserialize<T>(json, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
             }
             catch (Exception ex)
             {

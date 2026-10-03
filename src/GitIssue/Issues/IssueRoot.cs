@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace GitIssue.Issues
+﻿namespace GitIssue.Issues
 {
     /// <summary>
     ///     Specifies the location on disk of a given issue

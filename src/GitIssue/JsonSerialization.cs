@@ -13,9 +13,8 @@ namespace GitIssue
 {
     internal static class JsonSerialization
     {
-        public static JsonSerializerOptions Options { get; } = CreateOptions(false);
-
-        public static JsonSerializerOptions IndentedOptions { get; } = CreateOptions(true);
+        public static JsonSerializerOptions IndentedOptions { get; } = JsonSerialization.CreateOptions(true);
+        public static JsonSerializerOptions Options { get; } = JsonSerialization.CreateOptions(false);
 
         public static JsonNode? ToNode(object? value)
         {
@@ -26,7 +25,7 @@ namespace GitIssue
 
             return value == null
                 ? null
-                : JsonSerializer.SerializeToNode(value, value.GetType(), Options);
+                : JsonSerializer.SerializeToNode(value, value.GetType(), JsonSerialization.Options);
         }
 
         public static bool TryGetScalar(JsonValue value, out object? result)
@@ -77,8 +76,8 @@ namespace GitIssue
 
                 foreach (JsonPropertyInfo property in typeInfo.Properties)
                 {
-                    if (property.Name == nameof(FieldInfo.FieldMetadata) ||
-                        property.Name == nameof(FieldInfo.ValueMetadata))
+                    if ((property.Name == nameof(FieldInfo.FieldMetadata)) ||
+                        (property.Name == nameof(FieldInfo.ValueMetadata)))
                     {
                         property.ShouldSerialize = (_, value) => value is string text && !string.IsNullOrEmpty(text);
                     }
@@ -106,14 +105,14 @@ namespace GitIssue
                 return FieldKey.Create(reader.GetString());
             }
 
-            public override void Write(Utf8JsonWriter writer, FieldKey value, JsonSerializerOptions options)
-            {
-                writer.WriteStringValue(value.ToString());
-            }
-
             public override FieldKey ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 return FieldKey.Create(reader.GetString());
+            }
+
+            public override void Write(Utf8JsonWriter writer, FieldKey value, JsonSerializerOptions options)
+            {
+                writer.WriteStringValue(value.ToString());
             }
 
             public override void WriteAsPropertyName(Utf8JsonWriter writer, FieldKey value, JsonSerializerOptions options)
@@ -129,14 +128,14 @@ namespace GitIssue
                 return IssueKey.Create(reader.GetString());
             }
 
-            public override void Write(Utf8JsonWriter writer, IssueKey value, JsonSerializerOptions options)
-            {
-                writer.WriteStringValue(value.ToString());
-            }
-
             public override IssueKey ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 return IssueKey.Create(reader.GetString());
+            }
+
+            public override void Write(Utf8JsonWriter writer, IssueKey value, JsonSerializerOptions options)
+            {
+                writer.WriteStringValue(value.ToString());
             }
 
             public override void WriteAsPropertyName(Utf8JsonWriter writer, IssueKey value, JsonSerializerOptions options)
@@ -150,7 +149,7 @@ namespace GitIssue
             public override TypeValue Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
                 string? value = reader.GetString();
-                if (value == null || !TypeValue.TryParse(value, out TypeValue result) || result.Type == null)
+                if ((value == null) || !TypeValue.TryParse(value, out TypeValue result) || (result.Type == null))
                 {
                     throw new JsonException($"Unable to resolve type '{value}'.");
                 }

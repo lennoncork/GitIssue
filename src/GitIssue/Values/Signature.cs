@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using GitIssue.Issues.Json;
-using System.Text.Json.Nodes;
 
 namespace GitIssue.Values
 {

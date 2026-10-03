@@ -13,14 +13,14 @@ namespace GitIssue.Issues
     public interface IReadOnlyIssue : IReadOnlyDictionary<FieldKey, IField>
     {
         /// <summary>
-        ///     Gets the issue comments
-        /// </summary>
-        String[] Comments { get; }
-
-        /// <summary>
         ///     Gets or sets when the issue was created
         /// </summary>
         Signature Author { get; }
+
+        /// <summary>
+        ///     Gets the issue comments
+        /// </summary>
+        String[] Comments { get; }
 
         /// <summary>
         ///     Gets or sets when the issue was created

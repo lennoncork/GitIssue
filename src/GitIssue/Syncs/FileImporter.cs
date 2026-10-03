@@ -32,8 +32,7 @@ namespace GitIssue.Syncs
             }
 
             string content = await File.ReadAllTextAsync(this.ImportPath);
-            JsonObject json = JsonNode.Parse(content) as JsonObject
-                ?? throw new JsonException($"Unable to deserialize {this.ImportPath} as a JSON object.");
+            JsonObject json = JsonNode.Parse(content) as JsonObject ?? throw new JsonException($"Unable to deserialize {this.ImportPath} as a JSON object.");
             return await this.Import(json);
         }
     }

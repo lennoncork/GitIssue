@@ -1,5 +1,5 @@
-﻿using GitIssue.Fields;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
+using GitIssue.Fields;
 
 namespace GitIssue.Issues.Json
 {

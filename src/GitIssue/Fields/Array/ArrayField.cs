@@ -37,14 +37,14 @@ namespace GitIssue.Fields.Array
         }
 
         /// <inheritdoc />
+        public Type ValueType => typeof(T);
+
+        /// <inheritdoc />
         public T[] Values
         {
             get => this.values.ToArray();
             set => this.values = new List<T>(value);
         }
-
-        /// <inheritdoc />
-        public Type ValueType => typeof(T);
 
         /// <inheritdoc />
         int ICollection.Count => ((ICollection)this.values).Count;

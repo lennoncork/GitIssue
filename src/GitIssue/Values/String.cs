@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using GitIssue.Issues.Json;
 using System.Text.Json.Nodes;
+using GitIssue.Issues.Json;
 
 namespace GitIssue.Values
 {

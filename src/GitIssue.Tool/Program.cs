@@ -147,8 +147,8 @@ namespace GitIssue.Tool
                 .WithNotParsed(errors =>
                 {
                     if (errors.Any(error => error is HelpRequestedError ||
-                                            error is HelpVerbRequestedError ||
-                                            error is VersionRequestedError))
+                            error is HelpVerbRequestedError ||
+                            error is VersionRequestedError))
                     {
                         exitCode = 0;
                     }

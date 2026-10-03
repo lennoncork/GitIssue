@@ -45,8 +45,7 @@ namespace GitIssue.Syncs
             try
             {
                 await using FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                return await JsonSerializer.DeserializeAsync<T>(stream, JsonSerialization.Options)
-                    ?? throw new JsonException($"Unable to deserialize {file} as config file");
+                return await JsonSerializer.DeserializeAsync<T>(stream, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
             }
             catch (Exception ex)
             {

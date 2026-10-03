@@ -2,9 +2,9 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using GitIssue.Issues.Json;
-using System.Text.Json.Nodes;
 
 namespace GitIssue.Values
 {

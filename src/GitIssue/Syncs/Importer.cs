@@ -87,6 +87,83 @@ namespace GitIssue.Syncs
             return await this.Import(tokens);
         }
 
+        private static JsonNode? SelectNode(JsonNode node, string path)
+        {
+            JsonNode? current = node;
+            foreach (string segment in path.TrimStart('$', '.').Split('.', StringSplitOptions.RemoveEmptyEntries))
+            {
+                int bracket = segment.IndexOf('[');
+                string property = bracket >= 0 ? segment.Substring(0, bracket) : segment;
+                if (!string.IsNullOrEmpty(property))
+                {
+                    current = (current as JsonObject)?[property];
+                }
+
+                while ((current != null) && (bracket >= 0))
+                {
+                    int endBracket = segment.IndexOf(']', bracket + 1);
+                    if ((endBracket < 0) ||
+                        !int.TryParse(segment.Substring(bracket + 1, endBracket - bracket - 1), out int index) ||
+                        current is not JsonArray array ||
+                        (index < 0) ||
+                        (index >= array.Count))
+                    {
+                        return null;
+                    }
+
+                    current = array[index];
+                    bracket = segment.IndexOf('[', endBracket + 1);
+                }
+            }
+
+            return current;
+        }
+
+        private static bool TryConvert(JsonValue value, Type targetType, out object? result)
+        {
+            if (!JsonSerialization.TryGetScalar(value, out object? scalar) || (scalar == null))
+            {
+                result = null;
+                return false;
+            }
+
+            if (targetType.IsInstanceOfType(scalar))
+            {
+                result = scalar;
+                return true;
+            }
+
+            try
+            {
+                TypeConverter converter = TypeDescriptor.GetConverter(targetType);
+                if (converter.CanConvertFrom(scalar.GetType()))
+                {
+                    result = converter.ConvertFrom(null, CultureInfo.InvariantCulture, scalar);
+                    return result != null;
+                }
+
+                if (converter.CanConvertFrom(typeof(string)))
+                {
+                    string? text = Convert.ToString(scalar, CultureInfo.InvariantCulture);
+                    if (text == null)
+                    {
+                        result = null;
+                        return false;
+                    }
+
+                    result = converter.ConvertFromInvariantString(text);
+                    return result != null;
+                }
+            }
+            catch (Exception)
+            {
+                // Conversion failures leave the existing field unchanged.
+            }
+
+            result = null;
+            return false;
+        }
+
         private async Task<bool> Import(Dictionary<FieldKey, JsonNode> tokens)
         {
             IssueKey importKey;
@@ -201,83 +278,6 @@ namespace GitIssue.Syncs
             }
 
             result = default(T)!;
-            return false;
-        }
-
-        private static JsonNode? SelectNode(JsonNode node, string path)
-        {
-            JsonNode? current = node;
-            foreach (string segment in path.TrimStart('$', '.').Split('.', StringSplitOptions.RemoveEmptyEntries))
-            {
-                int bracket = segment.IndexOf('[');
-                string property = bracket >= 0 ? segment.Substring(0, bracket) : segment;
-                if (!string.IsNullOrEmpty(property))
-                {
-                    current = (current as JsonObject)?[property];
-                }
-
-                while (current != null && bracket >= 0)
-                {
-                    int endBracket = segment.IndexOf(']', bracket + 1);
-                    if (endBracket < 0 ||
-                        !int.TryParse(segment.Substring(bracket + 1, endBracket - bracket - 1), out int index) ||
-                        current is not JsonArray array ||
-                        index < 0 ||
-                        index >= array.Count)
-                    {
-                        return null;
-                    }
-
-                    current = array[index];
-                    bracket = segment.IndexOf('[', endBracket + 1);
-                }
-            }
-
-            return current;
-        }
-
-        private static bool TryConvert(JsonValue value, Type targetType, out object? result)
-        {
-            if (!JsonSerialization.TryGetScalar(value, out object? scalar) || scalar == null)
-            {
-                result = null;
-                return false;
-            }
-
-            if (targetType.IsInstanceOfType(scalar))
-            {
-                result = scalar;
-                return true;
-            }
-
-            try
-            {
-                TypeConverter converter = TypeDescriptor.GetConverter(targetType);
-                if (converter.CanConvertFrom(scalar.GetType()))
-                {
-                    result = converter.ConvertFrom(null, CultureInfo.InvariantCulture, scalar);
-                    return result != null;
-                }
-
-                if (converter.CanConvertFrom(typeof(string)))
-                {
-                    string? text = Convert.ToString(scalar, CultureInfo.InvariantCulture);
-                    if (text == null)
-                    {
-                        result = null;
-                        return false;
-                    }
-
-                    result = converter.ConvertFromInvariantString(text);
-                    return result != null;
-                }
-            }
-            catch (Exception)
-            {
-                // Conversion failures leave the existing field unchanged.
-            }
-
-            result = null;
             return false;
         }
     }

@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
@@ -18,8 +17,7 @@ namespace GitIssue.Issues.Json
         public static async Task<JsonObject> ReadJsonFieldsAsync(string path)
         {
             string json = await System.IO.File.ReadAllTextAsync(path);
-            return JsonNode.Parse(json) as JsonObject
-                ?? throw new JsonException($"Unable to deserialize {path} as a JSON object.");
+            return JsonNode.Parse(json) as JsonObject ?? throw new JsonException($"Unable to deserialize {path} as a JSON object.");
         }
 
         /// <summary>
