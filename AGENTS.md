@@ -20,7 +20,7 @@ Quick commands (from the repository root):
 
 ```bash
 dotnet tool restore
-dotnet restore src/GitIssue.sln --source https://api.nuget.org/v3/index.json
+dotnet restore src/GitIssue.slnx --source https://api.nuget.org/v3/index.json
 dotnet cake --target=Build
 dotnet cake --target=Test
 ```

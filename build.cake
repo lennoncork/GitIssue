@@ -16,7 +16,7 @@ Task("Build")
     .IsDependentOn("Clean")
     .Does(() =>
     {
-        DotNetBuild("./src/GitIssue.sln", new DotNetBuildSettings
+        DotNetBuild("./src/GitIssue.slnx", new DotNetBuildSettings
         {
             Configuration = configuration,
         });
@@ -26,7 +26,7 @@ Task("Test")
     .IsDependentOn("Build")
     .Does(() =>
     {
-        DotNetTest("./src/GitIssue.sln", new DotNetTestSettings
+        DotNetTest("./src/GitIssue.slnx", new DotNetTestSettings
         {
             Configuration = configuration,
             NoBuild = true,
@@ -76,7 +76,7 @@ Task("Package")
     .IsDependentOn("Build")
     .Does(() =>
     {
-        DotNetPack("src/GitIssue.sln", new DotNetPackSettings
+        DotNetPack("src/GitIssue.slnx", new DotNetPackSettings
         {
             Configuration = "Release",
             OutputDirectory = "./.packages/",

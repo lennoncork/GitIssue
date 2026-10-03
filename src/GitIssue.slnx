@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="../LICENSE.md" />
+    <File Path="../README.md" />
+  </Folder>
+  <Project Path="GitIssue.Tests/GitIssue.Tests.csproj" />
+  <Project Path="GitIssue.Tool.Tests/GitIssue.Tool.Tests.csproj" />
+  <Project Path="GitIssue.Tool/GitIssue.Tool.csproj" />
+  <Project Path="GitIssue/GitIssue.csproj" />
+</Solution>
