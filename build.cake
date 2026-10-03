@@ -1,10 +1,17 @@
 #addin nuget:?package=Cake.Coverlet&version=6.0.1
+#tool dotnet:?package=dotnet-reportgenerator-globaltool&version=5.5.11
 
 #nullable enable
 
 var target = Argument("target", "Default");
 
 var configuration = Argument("configuration", "Release");
+
+var coverageDirectory = MakeAbsolute(Directory("./coverage"));
+
+var coreCoverageThreshold = 80U;
+
+var toolCoverageThreshold = 60U;
 
 Task("Clean")
     .Does(() =>
@@ -24,35 +31,55 @@ Task("Build")
 
 Task("Test")
     .IsDependentOn("Build")
-    .Does(() =>
+    .DoesForEach(() => GetFiles("./src/**/*Tests.csproj"), testProject =>
     {
-        DotNetTest("./src/GitIssue.slnx", new DotNetTestSettings
+        DotNetTest(testProject.FullPath, new DotNetTestSettings
         {
             Configuration = configuration,
             NoBuild = true,
         });
     });
 
-Task("Coverage")
+Task("CoverageTests")
     .IsDependentOn("Build")
-    .Does(() => {
-        var coverageDirectory = MakeAbsolute(Directory("./coverage"));
+    .Does(() =>
+    {
         CleanDirectory(coverageDirectory);
-
-        var settings = new DotNetTestSettings {
-            Configuration = configuration,
-            NoBuild = true
-        };
-
-        var coverlet = new CoverletSettings
+    })
+    .DoesForEach(() => GetFiles("./src/**/*Tests.csproj"), testProject =>
+    {
+        bool isCoreTestProject = testProject.GetFilenameWithoutExtension() == "GitIssue.Tests";
+        string module = isCoreTestProject ? "GitIssue" : "GitIssue.Tool";
+        uint threshold = isCoreTestProject ? coreCoverageThreshold : toolCoverageThreshold;
+        CoverletSettings coverlet = new CoverletSettings
         {
             CollectCoverage = true,
-            CoverletOutputName = $"GitIssue.Tests.coverlet.json",
-            CoverletOutputFormat = CoverletOutputFormat.json,
-            CoverletOutputDirectory = coverageDirectory
-        };
+            CoverletOutputName = $"Coverage.{testProject.GetFilenameWithoutExtension()}.coverlet",
+            CoverletOutputFormat = CoverletOutputFormat.json | CoverletOutputFormat.cobertura,
+            CoverletOutputDirectory = coverageDirectory,
+            Threshold = threshold,
+        }
+            .WithInclusion($"[{module}]*")
+            .WithThresholdType(ThresholdType.Line);
 
-        DotNetTest("./src/GitIssue.Tests/GitIssue.Tests.csproj", settings, coverlet);
+        DotNetTest(testProject.FullPath, new DotNetTestSettings
+        {
+            Configuration = configuration,
+            NoBuild = true,
+        }, coverlet);
+    });
+
+Task("Coverage")
+    .IsDependentOn("CoverageTests")
+    .Does(() =>
+    {
+        ReportGenerator(
+            GetFiles($"{coverageDirectory}/Coverage.*.coverlet"),
+            coverageDirectory.Combine("CoverageReport"),
+            new ReportGeneratorSettings
+            {
+                ReportTypes = new[] { ReportGeneratorReportType.MarkdownSummary },
+            });
     });
 
 Task("Publish")

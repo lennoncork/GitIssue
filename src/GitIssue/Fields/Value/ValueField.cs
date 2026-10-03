@@ -100,7 +100,7 @@ namespace GitIssue.Fields.Value
 
         bool IValueField<T>.TryParse(string input, out T value)
         {
-            throw new NotImplementedException();
+            return this.TryParse(input, out value);
         }
     }
 }

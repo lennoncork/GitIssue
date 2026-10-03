@@ -67,6 +67,10 @@ namespace GitIssue.Tool
                 builder.RegisterType<TC>()
                     .As<Command<T>>();
 
+                builder.RegisterType<ProcessRunner>()
+                    .As<IProcessRunner>()
+                    .SingleInstance();
+
                 builder.RegisterType<Editor>()
                     .As<IEditor>()
                     .AsSelf();

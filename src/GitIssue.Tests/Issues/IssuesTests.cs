@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GitIssue.Fields;
+using GitIssue.Fields.Array;
+using GitIssue.Fields.Value;
 using GitIssue.Issues;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
@@ -110,6 +112,45 @@ namespace GitIssue.Tests.Issues
                 issue.Comments = comments;
 
                 Assert.That(issue.Comments, Is.EquivalentTo(comments));
+            }
+        }
+
+        [TestFixture]
+        public class DynamicMembers : IssuesTests
+        {
+            [Test]
+            public async Task SetAndGetMember_UpdatesConfiguredDynamicFields()
+            {
+                JsonIssue issue = (JsonIssue)await IssuesTests.CreateIssueAsync(typeof(JsonIssue));
+                dynamic dynamicIssue = issue;
+
+                dynamicIssue.Labels = new[] { Label.Parse("release") };
+                object labels = dynamicIssue.Labels;
+                object? missing = dynamicIssue.Missing;
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(((IArrayField)issue[FieldKey.Create("Labels")]).Values,
+                        Is.EqualTo(new object[] { Label.Parse("release") }));
+                    Assert.That(labels, Is.SameAs(issue[FieldKey.Create("Labels")]));
+                    Assert.That(missing, Is.Null);
+                });
+            }
+
+            [Test]
+            public async Task SetMember_UpdatesDynamicValueFieldWhenTypesMatch()
+            {
+                string repository = Helpers.CreateTempDirectory();
+                RepositoryRoot root = RepositoryRoot.Open(repository, null);
+                IssueConfiguration configuration = new IssueConfiguration();
+                FieldKey priorityKey = FieldKey.Create("Priority");
+                configuration.Fields.Add(priorityKey, new FieldInfo<String, JsonValueField>(false));
+                JsonIssue issue = new JsonIssue(new IssueRoot(root, IssueKey.Create("ISS-DYNAMIC-1"), "issue"), configuration.Fields);
+                dynamic dynamicIssue = issue;
+
+                dynamicIssue.Priority = String.Parse("high");
+
+                Assert.That(((IValueField)issue[priorityKey]).Value?.ToString(), Is.EqualTo("high"));
             }
         }
     }

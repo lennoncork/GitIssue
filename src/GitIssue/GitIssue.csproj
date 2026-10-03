@@ -17,4 +17,8 @@
     <PackageReference Include="System.Linq.Async" Version="7.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="GitIssue.Tests" />
+  </ItemGroup>
+
 </Project>

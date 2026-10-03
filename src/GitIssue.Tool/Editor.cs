@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -25,12 +24,13 @@ namespace GitIssue.Tool
             $"{Editor.Newline}{Editor.CommentChar} Please edit the field with your updates. Lines starting" +
             $"{Editor.Newline}{Editor.CommentChar} with '#' will be ignored, leave the file unchanged to abort. ";
 
+        private readonly IProcessRunner processRunner;
 
-
-        public Editor(Configuration configuration)
+        public Editor(Configuration configuration, IProcessRunner processRunner)
         {
             this.Command = configuration.Editor;
             this.Arguments = configuration.Arguments;
+            this.processRunner = processRunner;
         }
 
         /// <summary>
@@ -66,12 +66,14 @@ namespace GitIssue.Tool
 
             DateTime created = File.GetLastWriteTime(temp);
 
-            if (await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
+            if (!await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
             {
-                if (created == File.GetLastWriteTime(temp))
-                {
-                    return content;
-                }
+                return content;
+            }
+
+            if (created == File.GetLastWriteTime(temp))
+            {
+                return content;
             }
 
             return Editor.RemoveComments(await File.ReadAllTextAsync(temp));
@@ -231,24 +233,7 @@ namespace GitIssue.Tool
 
         private async Task<bool> EditFileAsync(string editor, string arguments)
         {
-            int result = 0;
-            await Task.Run(() =>
-            {
-                using Process process = new Process();
-
-                process.StartInfo.FileName = editor;
-                process.StartInfo.Arguments = arguments;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.RedirectStandardError = true;
-
-                process.Start();
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-                process.WaitForExit();
-
-                result = process.ExitCode;
-            });
+            int result = await this.processRunner.RunAsync(editor, arguments);
             return result == this.Success;
         }
     }

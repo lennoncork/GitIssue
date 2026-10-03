@@ -40,6 +40,34 @@ namespace GitIssue.Tests.Issues
         }
 
         [Test]
+        public async Task ArrayField_StaticReader_UsesConfiguredValueType()
+        {
+            IssueRoot root = this.CreateIssueRoot();
+            FieldKey key = FieldKey.Create("values");
+            FileArrayField<StringValue> field = new FileArrayField<StringValue>(root, key,
+                new[] { StringValue.Parse("saved") });
+            await field.SaveAsync();
+
+            IField result = await FileArrayField.ReadAsync(
+                root,
+                key,
+                new FieldInfo<StringValue, FileArrayField<StringValue>>());
+
+            Assert.That(((FileArrayField<StringValue>)result).Values, Is.EqualTo(new[] { StringValue.Parse("saved") }));
+        }
+
+        [Test]
+        public async Task ArrayField_ReadAsync_ReturnsEmptyWhenFieldDirectoryDoesNotExist()
+        {
+            IssueRoot root = this.CreateIssueRoot();
+            FieldKey key = FieldKey.Create("values");
+
+            IField result = await FileArrayField<StringValue>.ReadAsync(root, key, new FieldInfo());
+
+            Assert.That(((FileArrayField<StringValue>)result).Values, Is.Empty);
+        }
+
+        [Test]
         public async Task ValueField_RoundTrips()
         {
             IssueRoot root = this.CreateIssueRoot();
