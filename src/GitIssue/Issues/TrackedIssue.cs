@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Serilog;
 
 namespace GitIssue.Issues
@@ -9,7 +9,6 @@ namespace GitIssue.Issues
     /// <summary>
     ///     Tracked issue metadata
     /// </summary>
-    [JsonObject]
     public class TrackedIssue : ITrackedIssue
     {
         /// <summary>
@@ -37,13 +36,11 @@ namespace GitIssue.Issues
         /// <summary>
         ///     Gets the key of the tracked issue
         /// </summary>
-        [JsonProperty]
         public IssueKey Key { get; set; } = IssueKey.None;
 
         /// <summary>
         ///     Gets the started date of the tracking
         /// </summary>
-        [JsonProperty]
         public DateTime Started { get; set; } = DateTime.MinValue;
 
         /// <summary>
@@ -90,11 +87,9 @@ namespace GitIssue.Issues
             {
                 if (System.IO.File.Exists(file))
                 {
-                    using FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                    using StreamReader reader = new StreamReader(stream);
-                    JsonSerializer serializer = new JsonSerializer();
-                    TrackedIssue tracked = (TrackedIssue)serializer.Deserialize(reader, typeof(TrackedIssue))!;
-                    return tracked;
+                    string json = System.IO.File.ReadAllText(file);
+                    return JsonSerializer.Deserialize<TrackedIssue>(json, JsonSerialization.Options)
+                        ?? TrackedIssue.None;
                 }
             }
             catch (Exception ex)
@@ -137,10 +132,8 @@ namespace GitIssue.Issues
         {
             try
             {
-                await using FileStream stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                await using StreamWriter writer = new StreamWriter(stream);
-                JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented, DefaultValueHandling = DefaultValueHandling.Ignore });
-                serializer.Serialize(writer, this, typeof(TrackedIssue));
+                string json = JsonSerializer.Serialize(this, JsonSerialization.IndentedOptions);
+                await Paths.WriteAllTextAsync(file, json);
             }
             catch (Exception ex)
             {

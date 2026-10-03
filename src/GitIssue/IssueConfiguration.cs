@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using GitIssue.Fields;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
-using Newtonsoft.Json;
 using DateTime = GitIssue.Values.DateTime;
 using String = GitIssue.Values.String;
 
@@ -15,7 +15,6 @@ namespace GitIssue
     /// <summary>
     ///     Class defining the configuration of all issues in a repository
     /// </summary>
-    [JsonObject]
     public class IssueConfiguration : IIssueConfiguration
     {
         /// <summary>
@@ -38,11 +37,9 @@ namespace GitIssue
         }
 
         /// <inheritdoc />
-        [JsonProperty]
         public Dictionary<FieldKey, FieldInfo> Fields { get; set; }
 
         /// <inheritdoc />
-        [JsonProperty]
         public TypeValue KeyProvider { get; set; }
 
         /// <summary>
@@ -65,11 +62,9 @@ namespace GitIssue
         {
             try
             {
-                using FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                using StreamReader reader = new StreamReader(stream);
-                JsonSerializer serializer = new JsonSerializer();
-                T configuration = (T)serializer.Deserialize(reader, typeof(T))!;
-                return configuration;
+                string json = File.ReadAllText(file);
+                return JsonSerializer.Deserialize<T>(json, JsonSerialization.Options)
+                    ?? throw new JsonException($"Unable to deserialize {file} as config file");
             }
             catch (Exception ex)
             {
@@ -88,10 +83,8 @@ namespace GitIssue
         {
             try
             {
-                using FileStream stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                using StreamWriter writer = new StreamWriter(stream);
-                JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented, DefaultValueHandling = DefaultValueHandling.Ignore });
-                serializer.Serialize(writer, this, typeof(T));
+                string json = JsonSerializer.Serialize(this, typeof(T), JsonSerialization.IndentedOptions);
+                Paths.WriteAllTextAsync(file, json).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {

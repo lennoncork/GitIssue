@@ -2,8 +2,8 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using GitIssue.Fields;
-using Newtonsoft.Json;
 
 namespace GitIssue.Values
 {

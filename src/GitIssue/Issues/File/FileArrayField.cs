@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
 using GitIssue.Issues.Json;
-using Newtonsoft.Json.Linq;
 using FieldInfo = GitIssue.Fields.FieldInfo;
 
 namespace GitIssue.Issues.File
@@ -153,9 +153,15 @@ namespace GitIssue.Issues.File
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public JsonNode ToJson()
         {
-            return new JArray(this.Values);
+            JsonArray array = new JsonArray();
+            foreach (T value in this.Values)
+            {
+                array.Add(JsonSerialization.ToNode(value));
+            }
+
+            return array;
         }
 
         /// <inheritdoc />

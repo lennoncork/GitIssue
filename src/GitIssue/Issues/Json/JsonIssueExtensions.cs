@@ -1,7 +1,7 @@
 ﻿using System.IO;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues.Json
 {
@@ -15,14 +15,11 @@ namespace GitIssue.Issues.Json
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static async Task<JObject> ReadJsonFieldsAsync(string path)
+        public static async Task<JsonObject> ReadJsonFieldsAsync(string path)
         {
-            // Read the json
-            await using FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Read);
-            using JsonReader reader = new JsonTextReader(new StreamReader(stream));
-            JsonSerializer serializer = new JsonSerializer();
-            JObject json = (JObject)serializer.Deserialize(reader)!;
-            return json;
+            string json = await System.IO.File.ReadAllTextAsync(path);
+            return JsonNode.Parse(json) as JsonObject
+                ?? throw new JsonException($"Unable to deserialize {path} as a JSON object.");
         }
 
         /// <summary>
@@ -33,7 +30,7 @@ namespace GitIssue.Issues.Json
         /// <returns></returns>
         public static async Task SaveAsJsonAsync(this IJsonIssue issue, string path)
         {
-            string json = issue.ToJson().ToString(Formatting.Indented);
+            string json = issue.ToJson().ToJsonString(JsonSerialization.IndentedOptions);
             await Paths.WriteAllTextAsync(path, json);
         }
     }

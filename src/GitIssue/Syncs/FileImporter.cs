@@ -1,6 +1,7 @@
 ﻿using System.IO;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Syncs
 {
@@ -31,7 +32,8 @@ namespace GitIssue.Syncs
             }
 
             string content = await File.ReadAllTextAsync(this.ImportPath);
-            JObject json = JObject.Parse(content);
+            JsonObject json = JsonNode.Parse(content) as JsonObject
+                ?? throw new JsonException($"Unable to deserialize {this.ImportPath} as a JSON object.");
             return await this.Import(json);
         }
     }

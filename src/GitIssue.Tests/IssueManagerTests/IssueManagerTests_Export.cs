@@ -1,8 +1,8 @@
 ﻿using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using GitIssue.Issues;
 using GitIssue.Issues.Json;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IssueManagerTests
@@ -38,7 +38,7 @@ namespace GitIssue.Tests.IssueManagerTests
 
                 await this.Sut.ExportAsJsonAsync(path);
 
-                Assert.DoesNotThrow(() => JObject.Parse(File.ReadAllText(path)));
+                Assert.DoesNotThrow(() => JsonDocument.Parse(File.ReadAllText(path)));
             }
         }
     }

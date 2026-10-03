@@ -1,19 +1,18 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using GitIssue.Exceptions;
 using GitIssue.Issues;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
-using Newtonsoft.Json;
 
 namespace GitIssue.Fields
 {
     /// <summary>
     ///     FieldInfo Class
     /// </summary>
-    [JsonObject]
     public class FieldInfo
     {
         private static IFieldReader[]? readers;
@@ -37,14 +36,12 @@ namespace GitIssue.Fields
         /// <summary>
         ///     Gets or sets the metadata for the field
         /// </summary>
-        [JsonProperty]
         [DefaultValue("")]
         public virtual string FieldMetadata { get; set; } = string.Empty;
 
         /// <summary>
         ///     Gets or sets the data type for the field
         /// </summary>
-        [JsonProperty]
         public virtual TypeValue FieldType { get; set; } = TypeValue.Create<JsonValueField>();
 
         /// <summary>
@@ -65,21 +62,18 @@ namespace GitIssue.Fields
         /// <summary>
         ///     Gets or sets if the field is required on a given issue
         /// </summary>
-        [JsonProperty]
         [DefaultValue(false)]
         public bool Required { get; set; }
 
         /// <summary>
         ///     Gets or sets the metadata for the values
         /// </summary>
-        [JsonProperty]
         [DefaultValue("")]
         public virtual string ValueMetadata { get; set; } = string.Empty;
 
         /// <summary>
         ///     Gets or sets the value type for the field
         /// </summary>
-        [JsonProperty]
         public virtual TypeValue ValueType { get; set; } = TypeValue.Create<string>();
 
         /// <summary>
@@ -134,7 +128,6 @@ namespace GitIssue.Fields
     /// <summary>
     ///     FieldInfo Class
     /// </summary>
-    [JsonObject]
     public class FieldInfo<T> : FieldInfo
     {
         /// <summary>
@@ -156,7 +149,6 @@ namespace GitIssue.Fields
         /// <summary>
         ///     Gets or sets the data type
         /// </summary>
-        [JsonProperty]
         public override TypeValue ValueType
         {
             get => TypeValue.Create<T>();
@@ -167,7 +159,6 @@ namespace GitIssue.Fields
     /// <summary>
     ///     FieldInfo Class
     /// </summary>
-    [JsonObject]
     public class FieldInfo<T1, T2> : FieldInfo<T1>
     {
         /// <summary>
@@ -189,7 +180,6 @@ namespace GitIssue.Fields
         /// <summary>
         ///     Gets or sets the field type
         /// </summary>
-        [JsonProperty]
         public override TypeValue FieldType
         {
             get => TypeValue.Create<T2>();

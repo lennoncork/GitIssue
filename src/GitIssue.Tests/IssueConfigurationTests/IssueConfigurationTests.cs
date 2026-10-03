@@ -42,6 +42,9 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 config.Save(file);
 
                 Assert.That(File.Exists(file), Is.True);
+                string json = File.ReadAllText(file);
+                Assert.That(json, Does.Not.Contain(nameof(FieldInfo.FieldMetadata)));
+                Assert.That(json, Does.Not.Contain(nameof(FieldInfo.ValueMetadata)));
 
                 IssueConfiguration loaded = IssueConfiguration.Read(file);
 

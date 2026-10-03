@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Value;
 using GitIssue.Issues.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues.File
 {
@@ -88,9 +88,9 @@ namespace GitIssue.Issues.File
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public JsonNode? ToJson()
         {
-            return new JValue(this.Value);
+            return JsonSerialization.ToNode(this.Value);
         }
 
         /// <inheritdoc />

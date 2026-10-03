@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
 using GitIssue.Values;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues.Json
 {
@@ -41,18 +41,12 @@ namespace GitIssue.Issues.Json
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public JsonNode ToJson()
         {
-            JArray array = new JArray();
+            JsonArray array = new JsonArray();
             foreach (T value in this.Values)
             {
-                if (value is IJsonValue jValue)
-                {
-                    array.Add(jValue.ToJson());
-                    continue;
-                }
-
-                array.Add(new JValue(value));
+                array.Add(JsonSerialization.ToNode(value));
             }
 
             return array;

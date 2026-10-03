@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using GitIssue.Exceptions;
 using GitIssue.Fields;
 using GitIssue.Issues.File;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues.Json
 {
@@ -193,9 +193,9 @@ namespace GitIssue.Issues.Json
         }
 
         /// <inheritdoc />
-        public JObject ToJson()
+        public JsonObject ToJson()
         {
-            JObject json = new JObject();
+            JsonObject json = new JsonObject();
             foreach (KeyValuePair<FieldKey, IField> kvp in this.fields)
             {
                 if (kvp.Value is IJsonField field)

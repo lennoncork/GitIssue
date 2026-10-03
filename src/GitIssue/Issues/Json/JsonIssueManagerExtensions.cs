@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues.Json
 {
@@ -35,7 +33,7 @@ namespace GitIssue.Issues.Json
         public static async Task ExportAsJsonAsync(this IIssueManager manager, string path,
             Func<IIssue, bool> predicate)
         {
-            JObject json = new JObject();
+            JsonObject json = new JsonObject();
             await foreach (IIssue issue in manager.FindAsync(predicate))
             {
                 if (issue is IJsonIssue jsonIssue)
@@ -44,7 +42,7 @@ namespace GitIssue.Issues.Json
                 }
             }
 
-            await Paths.WriteAllTextAsync(path, json.ToString(Formatting.Indented));
+            await Paths.WriteAllTextAsync(path, json.ToJsonString(JsonSerialization.IndentedOptions));
         }
     }
 }

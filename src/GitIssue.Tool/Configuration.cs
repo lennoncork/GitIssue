@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace GitIssue.Tool
+﻿namespace GitIssue.Tool
 {
     /// <summary>
     ///     Configuration for the issue
@@ -10,13 +8,11 @@ namespace GitIssue.Tool
         /// <summary>
         ///     Gets or sets additional arguments for the editor
         /// </summary>
-        [JsonProperty]
         public string Arguments { get; set; } = "-pound_comment -syntax git-commit";
 
         /// <summary>
         ///     Gets or sets the editor to use
         /// </summary>
-        [JsonProperty]
         public string Editor { get; set; } = "joe";
 
         /// <summary>

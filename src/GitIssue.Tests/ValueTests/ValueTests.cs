@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.ComponentModel;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
@@ -63,18 +65,28 @@ namespace GitIssue.Tests.ValueTests
     public abstract class JsonValueTests<TValue> : ValueTests<TValue>
         where TValue : IValue, IJsonValue
     {
+        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+
         public virtual string ConvertToJson(TValue value)
         {
-            return value.ToJson().ToString(Newtonsoft.Json.Formatting.None);
+            return value.ToJson()?.ToJsonString(JsonOptions) ?? "null";
         }
     }
 
     public abstract class JsonValueTests<TValue, TBacking> : ValueTests<TValue, TBacking>
         where TValue : IValue, IValue<TBacking>, IJsonValue
     {
+        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+
         public virtual string ConvertToJson(TValue value)
         {
-            return value.ToJson().ToString(Newtonsoft.Json.Formatting.None);
+            return value.ToJson()?.ToJsonString(JsonOptions) ?? "null";
         }
     }
 
