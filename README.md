@@ -1,8 +1,8 @@
 # GitIssue
 
-An 'in-source' issue management system built on GIT. Inspired by the great work of the [git-issue](https://github.com/dspinellis/git-issue) project. This project implements a similar concept in a .NET core application with a flexible issue schema. 
+An 'in-source' issue management system built on GIT. Inspired by the great work of the [git-issue](https://github.com/dspinellis/git-issue) project. This project implements a similar concept in a .NET application with a flexible issue schema. 
 
-![build](https://github.com/lennoncork/GitIssue/workflows/build/badge.svg?branch=master)
+![build](https://github.com/lennoncork/GitIssue/actions/workflows/build.yml/badge.svg?branch=main)
 
 # Quick Start
 
@@ -12,7 +12,7 @@ To get the latest version as a dotnet tool
 
 1) Install the tool
 ```
-dotnet tool install gitissue.tool
+dotnet tool install GitIssue.Tool
 ```
 
 2) Try it out
@@ -43,6 +43,8 @@ dotnet cake
 ./scripts/config-alias.sh
 ```
 
+The alias runs `.publish/GitIssue.Tool.exe`, which the Cake publish target builds for `win-x64`.
+
 4) Try it out
 
 ```
@@ -65,18 +67,24 @@ The issue configuration is contained in the config.json file checked into source
 
 ### Work with an issue
 
-* `git issue create`: Create a new open issue.
+* `git issue create`: Creates a new issue.
 * `git issue track`: Tracks an existing issue, simplifies subsequent commands.
-* `git issue delete`: Create a specified or tracked issue.
-* `git issue show`: Showa a specified (or tracked) issue.
+* `git issue delete`: Deletes a specified (or tracked) issue.
+* `git issue show`: Shows the tracked issue, all issues, or mine.
 * `git issue edit`: Edits a specified (or tracked) issue.
-* `git issue commit`: Commits an issue to the repository.
+* `git issue add`: Adds a value to a field on a specified (or tracked) issue.
+* `git issue remove`: Removes a value from a field on a specified (or tracked) issue.
+* `git issue comment`: Adds a comment to a specified (or tracked) issue.
+* `git issue find`: Finds an existing issue.
+* `git issue commit`: Commits the issues to the repository.
 
 ### Help and debug
 
 * `git issue help`: Display help information about git issue.
 * `git issue fields`: Display the fields available in the issue repository.
-* `git issue export`: Dump the whole database in json format to stdout.
+* `git issue export`: Exports issues to a JSON or CSV file.
+* `git issue import`: Imports issues from a CSV file.
+* `git issue changes`: Shows the change log.
 * `git issue version`: Displays the version of the tool.
 
 ## Contributing
