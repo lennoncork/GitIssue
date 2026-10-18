@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Value;
 using GitIssue.Issues.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues.File
 {
@@ -62,6 +62,7 @@ namespace GitIssue.Issues.File
                 if (field.TryParse(content, out T value))
                 {
                     field.Value = value;
+                    return field;
                 }
 
                 throw new SerializationException($"Unable to convert field content to type {typeof(T)}");
@@ -77,9 +78,7 @@ namespace GitIssue.Issues.File
         {
             try
             {
-                await using FileStream stream = new FileStream(this.FilePath, FileMode.Create, FileAccess.ReadWrite);
-                await using StreamWriter writer = new StreamWriter(stream);
-                await writer.WriteAsync(this.Value?.ToString());
+                await Paths.WriteAllTextAsync(this.FilePath, this.Value?.ToString());
                 return true;
             }
             catch (Exception e)
@@ -89,9 +88,9 @@ namespace GitIssue.Issues.File
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public JsonNode? ToJson()
         {
-            return new JValue(this.Value);
+            return JsonSerialization.ToNode(this.Value);
         }
 
         /// <inheritdoc />

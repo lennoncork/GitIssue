@@ -6,7 +6,7 @@ namespace GitIssue.Tool.Commands.Export
     [Verb(nameof(CommandType.Export), HelpText = "Exports issues into a JSON or CSV file")]
     public class ExportOptions : Options
     {
-        [Value(1, MetaName = "File", HelpText = "The file to export issues to", Required = false)]
+        [Value(0, MetaName = "File", HelpText = "The file to export issues to", Required = false)]
         public string Export { get; set; } = "export.json";
 
         [Option("Overwrite", HelpText = "Enable overwrite of the export file", Required = false)]

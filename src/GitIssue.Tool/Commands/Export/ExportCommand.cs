@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues;
 using GitIssue.Issues.Json;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Serilog;
 
 namespace GitIssue.Tool.Commands.Export
@@ -17,6 +18,12 @@ namespace GitIssue.Tool.Commands.Export
     /// </summary>
     public class ExportCommand : Command<ExportOptions>
     {
+        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = true,
+        };
+
         private readonly ILogger logger;
 
         private readonly IIssueManager manager;
@@ -95,7 +102,7 @@ namespace GitIssue.Tool.Commands.Export
                 return;
             }
 
-            JObject json = new JObject();
+            JsonObject json = new JsonObject();
             await foreach (IIssue issue in this.manager.FindAsync(i => true))
             {
                 if (issue is IJsonIssue jsonIssue)
@@ -104,11 +111,7 @@ namespace GitIssue.Tool.Commands.Export
                 }
             }
 
-            await using FileStream stream = new FileStream(options.Export, FileMode.Create, FileAccess.ReadWrite);
-            using JsonWriter writer = new JsonTextWriter(new StreamWriter(stream));
-            JsonSerializer serializer = new JsonSerializer();
-            serializer.Formatting = Formatting.Indented;
-            serializer.Serialize(writer, json);
+            await File.WriteAllTextAsync(options.Export, json.ToJsonString(ExportCommand.JsonOptions));
 
             Console.WriteLine($"Exported {json.Count} issues to {options.Export}");
         }

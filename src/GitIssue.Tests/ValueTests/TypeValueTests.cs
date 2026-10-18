@@ -93,7 +93,7 @@ namespace GitIssue.Tests.ValueTests
 
                 public override bool Equals(IField? other)
                 {
-                    return object.ReferenceEquals(this, other);
+                    return ReferenceEquals(this, other);
                 }
 
                 public override Task<string> ExportAsync()

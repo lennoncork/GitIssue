@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace GitIssue.Syncs
 {
@@ -22,7 +22,6 @@ namespace GitIssue.Syncs
         /// <summary>
         ///     Gets or sets the mapping between issue field and imported JSON
         /// </summary>
-        [JsonProperty]
         public Dictionary<string, string> Mapping { get; set; }
 
         /// <summary>
@@ -46,10 +45,7 @@ namespace GitIssue.Syncs
             try
             {
                 await using FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                using StreamReader reader = new StreamReader(stream);
-                JsonSerializer serializer = new JsonSerializer();
-                T configuration = (T)serializer.Deserialize(reader, typeof(T))!;
-                return configuration;
+                return await JsonSerializer.DeserializeAsync<T>(stream, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
             }
             catch (Exception ex)
             {

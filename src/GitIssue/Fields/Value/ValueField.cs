@@ -67,6 +67,7 @@ namespace GitIssue.Fields.Value
             if (other is IValueField<T> valueField)
             {
                 this.Value = valueField.Value;
+                return true;
             }
 
             return false;
@@ -99,7 +100,7 @@ namespace GitIssue.Fields.Value
 
         bool IValueField<T>.TryParse(string input, out T value)
         {
-            throw new NotImplementedException();
+            return this.TryParse(input, out value);
         }
     }
 }

@@ -2,9 +2,9 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using GitIssue.Issues.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Values
 {
@@ -90,9 +90,9 @@ namespace GitIssue.Values
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public JsonNode? ToJson()
         {
-            return new JValue(this.Item);
+            return JsonValue.Create(this.Item);
         }
 
         /// <inheritdoc />

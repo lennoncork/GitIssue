@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Issues;
 using NUnit.Framework;
@@ -11,6 +12,51 @@ namespace GitIssue.Tests.IssueManagerTests
         [TestFixture]
         public class Delete : IssueManagerTests
         {
+            [Test]
+            public void DeleteById_DeletesExistingIssue()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue issue = this.Sut.Create(nameof(Delete.DeleteById_DeletesExistingIssue), string.Empty);
+                string id = this.Sut.KeyProvider.GetIssuePath(issue.Key);
+                string path = Path.Combine(this.IssueDirectory, id);
+                Assert.IsTrue(Directory.Exists(path));
+                bool result = this.Sut.Delete(id);
+                Assert.That(result, Is.True);
+                Assert.IsFalse(Directory.Exists(path));
+            }
+
+            [Test]
+            public void DeleteById_ReturnsFalseWhenKeyNotFound()
+            {
+                this.Initialize(this.TestDirectory);
+                bool result = this.Sut.Delete("invalid-id");
+                Assert.That(result, Is.False);
+            }
+
+            [Test]
+            public void DeleteByKey_DeletesExistingIssue()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue issue = this.Sut.Create(nameof(Delete.DeleteByKey_DeletesExistingIssue), string.Empty);
+                string path = Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(issue.Key));
+                Assert.IsTrue(Directory.Exists(path));
+                bool result = this.Sut.Delete(issue.Key);
+                Assert.That(result, Is.True);
+                Assert.IsFalse(Directory.Exists(path));
+            }
+
+            [Test]
+            public void DeleteByKey_RejectsPathOutsideIssueDirectory()
+            {
+                this.Initialize(this.TestDirectory);
+                string sentinel = Path.Combine(this.TestDirectory, "sentinel.txt");
+                File.WriteAllText(sentinel, "preserve");
+
+                Assert.ThrowsAsync<ArgumentException>(async () =>
+                    await this.Sut.DeleteAsync(IssueKey.Create("..")));
+                Assert.That(File.ReadAllText(sentinel), Is.EqualTo("preserve"));
+            }
+
             [Test]
             public async Task DeletesExistingIssue()
             {
@@ -35,39 +81,6 @@ namespace GitIssue.Tests.IssueManagerTests
                     .DeleteAsync(this.Sut.KeyProvider.Next())
                     .WithSafeResultAsync();
                 Assert.IsFalse(delete.IsSuccess);
-            }
-
-            [Test]
-            public void DeleteByKey_DeletesExistingIssue()
-            {
-                this.Initialize(this.TestDirectory);
-                IIssue issue = this.Sut.Create(nameof(Delete.DeleteByKey_DeletesExistingIssue), string.Empty);
-                string path = Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(issue.Key));
-                Assert.IsTrue(Directory.Exists(path));
-                bool result = this.Sut.Delete(issue.Key);
-                Assert.That(result, Is.True);
-                Assert.IsFalse(Directory.Exists(path));
-            }
-
-            [Test]
-            public void DeleteById_DeletesExistingIssue()
-            {
-                this.Initialize(this.TestDirectory);
-                IIssue issue = this.Sut.Create(nameof(Delete.DeleteById_DeletesExistingIssue), string.Empty);
-                string id = this.Sut.KeyProvider.GetIssuePath(issue.Key);
-                string path = Path.Combine(this.IssueDirectory, id);
-                Assert.IsTrue(Directory.Exists(path));
-                bool result = this.Sut.Delete(id);
-                Assert.That(result, Is.True);
-                Assert.IsFalse(Directory.Exists(path));
-            }
-
-            [Test]
-            public void DeleteById_ReturnsFalseWhenKeyNotFound()
-            {
-                this.Initialize(this.TestDirectory);
-                bool result = this.Sut.Delete("invalid-id");
-                Assert.That(result, Is.False);
             }
         }
     }

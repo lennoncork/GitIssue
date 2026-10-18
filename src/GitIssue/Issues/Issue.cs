@@ -127,6 +127,7 @@ namespace GitIssue.Issues
                     if (value?.GetType() == valueField.ValueType)
                     {
                         valueField.Value = value;
+                        return true;
                     }
                 }
                 else if (field is IArrayField arrayField)
@@ -134,6 +135,7 @@ namespace GitIssue.Issues
                     if (value is IEnumerable enumerable)
                     {
                         arrayField.Values = enumerable.Cast<object>().ToArray();
+                        return true;
                     }
                 }
                 else if (value?.GetType() == typeof(string))

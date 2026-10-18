@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Value;
 using GitIssue.Values;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues.Json
 {
@@ -49,14 +49,14 @@ namespace GitIssue.Issues.Json
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public JsonNode? ToJson()
         {
             if (this.Value is IJsonValue value)
             {
                 return value.ToJson();
             }
 
-            return new JValue(this.Value);
+            return JsonSerialization.ToNode(this.Value);
         }
 
         /// <inheritdoc />

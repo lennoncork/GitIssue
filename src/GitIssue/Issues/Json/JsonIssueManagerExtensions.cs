@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues.Json
 {
@@ -35,22 +33,16 @@ namespace GitIssue.Issues.Json
         public static async Task ExportAsJsonAsync(this IIssueManager manager, string path,
             Func<IIssue, bool> predicate)
         {
-            await using Stream stream = System.IO.File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            await using StreamWriter writer = new StreamWriter(stream);
-            using JsonTextWriter text = new JsonTextWriter(writer);
+            JsonObject json = new JsonObject();
+            await foreach (IIssue issue in manager.FindAsync(predicate))
             {
-                JObject json = new JObject();
-                await foreach (IIssue issue in manager.FindAsync(predicate))
+                if (issue is IJsonIssue jsonIssue)
                 {
-                    if (issue is IJsonIssue jsonIssue)
-                    {
-                        json[issue.Key.ToString()] = jsonIssue.ToJson();
-                    }
+                    json[issue.Key.ToString()] = jsonIssue.ToJson();
                 }
-
-                text.Formatting = Formatting.Indented;
-                await json.WriteToAsync(text);
             }
+
+            await Paths.WriteAllTextAsync(path, json.ToJsonString(JsonSerialization.IndentedOptions));
         }
     }
 }

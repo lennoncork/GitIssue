@@ -25,18 +25,6 @@ namespace GitIssue.Tests.IssueManagerTests
             }
 
             [Test]
-            public async Task FindsIssueByKey()
-            {
-                this.Initialize(this.TestDirectory);
-                SafeResult<IIssue> create = await this.Sut
-                    .CreateAsync(nameof(Find.FindsIssueByKey), string.Empty)
-                    .WithSafeResultAsync();
-                IIssue[] find = this.Sut.Find(i => i.Key == create.Result.Key).ToArray();
-                Assert.That(find.Count(), Is.EqualTo(1));
-                Assert.That(find[0].Key, Is.EqualTo(create.Result.Key));
-            }
-
-            [Test]
             public async Task FindAsync_EnumeratesMatchingIssues()
             {
                 this.Initialize(this.TestDirectory);
@@ -54,6 +42,18 @@ namespace GitIssue.Tests.IssueManagerTests
 
                 Assert.That(issues.Count, Is.EqualTo(1));
                 Assert.That(issues[0].Title, Is.EqualTo(title));
+            }
+
+            [Test]
+            public async Task FindsIssueByKey()
+            {
+                this.Initialize(this.TestDirectory);
+                SafeResult<IIssue> create = await this.Sut
+                    .CreateAsync(nameof(Find.FindsIssueByKey), string.Empty)
+                    .WithSafeResultAsync();
+                IIssue[] find = this.Sut.Find(i => i.Key == create.Result.Key).ToArray();
+                Assert.That(find.Count(), Is.EqualTo(1));
+                Assert.That(find[0].Key, Is.EqualTo(create.Result.Key));
             }
         }
     }

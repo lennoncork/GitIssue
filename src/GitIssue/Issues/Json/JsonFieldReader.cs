@@ -1,8 +1,8 @@
 ﻿using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Values;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues.Json
 {
@@ -54,21 +54,21 @@ namespace GitIssue.Issues.Json
         {
             if (issue is IJsonIssue jsonIssue)
             {
-                JObject json = await JsonIssueExtensions.ReadJsonFieldsAsync(jsonIssue.Json);
-                if (json.TryGetValue(key.ToString(), out JToken? token))
+                JsonObject json = await JsonIssueExtensions.ReadJsonFieldsAsync(jsonIssue.Json);
+                if (json.TryGetPropertyValue(key.ToString(), out JsonNode? token))
                 {
-                    if (JsonFieldReader.IsValueField(info) && token is JValue jValue)
+                    if (JsonFieldReader.IsValueField(info) && token is JsonValue jsonValue)
                     {
-                        if (this.TryGetValue(jValue, info, out T value))
+                        if (this.TryGetValue(jsonValue, info, out T value))
                         {
                             return new JsonValueField<T>(key, value);
                         }
                     }
 
-                    if (JsonFieldReader.IsArrayField(info) && token is JArray jArray)
+                    if (JsonFieldReader.IsArrayField(info) && token is JsonArray jsonArray)
                     {
-                        T[] values = jArray
-                            .Select(t => t as JValue)
+                        T[] values = jsonArray
+                            .Select(node => node as JsonValue)
                             .Where(t => t != null)
                             .Select(t => (s: this.TryGetValue(t!, info, out T v), r: v))
                             .Where(t => t.s)
@@ -95,14 +95,20 @@ namespace GitIssue.Issues.Json
             return info.FieldType.Type == typeof(JsonValueField);
         }
 
-        private bool TryGetValue<T>(JValue jValue, FieldInfo info, out T value)
+        private bool TryGetValue<T>(JsonValue jsonValue, FieldInfo info, out T value)
         {
-            if (string.IsNullOrEmpty(info.ValueMetadata))
+            if (!JsonSerialization.TryGetScalar(jsonValue, out object? scalar))
             {
-                return ValueExtensions.TryParse(jValue.Value, out value);
+                value = default(T)!;
+                return false;
             }
 
-            return ValueExtensions.TryParse(jValue.Value, out value, info.ValueMetadata);
+            if (string.IsNullOrEmpty(info.ValueMetadata))
+            {
+                return ValueExtensions.TryParse(scalar, out value);
+            }
+
+            return ValueExtensions.TryParse(scalar, out value, info.ValueMetadata);
         }
     }
 }

@@ -98,12 +98,13 @@ namespace GitIssue.Syncs
         /// <returns></returns>
         public async Task<bool> SaveAsync()
         {
+            string path = Paths.GetContainedPath(this.importer.Root.ImportPath, this.ImportKey.ToString());
+
             if (!Directory.Exists(this.importer.Root.ImportPath))
             {
                 Directory.CreateDirectory(this.importer.Root.ImportPath);
             }
 
-            string path = Path.Combine(this.importer.Root.ImportPath, this.ImportKey.ToString());
             string key = this.IssueKey.ToString();
             await File.WriteAllTextAsync(path, key);
             return true;

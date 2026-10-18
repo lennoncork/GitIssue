@@ -6,4 +6,5 @@
 .cake
 *.user
 .issues
+coverage
 *.coverlet.json

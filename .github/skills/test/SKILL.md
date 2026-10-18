@@ -20,7 +20,7 @@ From the repository root (the directory containing `build.cake`):
 
 ```bash
 dotnet tool restore
-dotnet restore src/GitIssue.sln --source https://api.nuget.org/v3/index.json
+dotnet restore src/GitIssue.slnx --source https://api.nuget.org/v3/index.json
 dotnet cake --target=Test
 ```
 

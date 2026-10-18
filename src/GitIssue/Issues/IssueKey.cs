@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.Json.Nodes;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Issues
 {
@@ -100,9 +100,9 @@ namespace GitIssue.Issues
         }
 
         /// <inheritdoc />
-        public JToken ToJson()
+        public JsonNode? ToJson()
         {
-            return new JValue(this.key);
+            return JsonValue.Create(this.key);
         }
 
         /// <inheritdoc />

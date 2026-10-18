@@ -1,5 +1,5 @@
-﻿using GitIssue.Fields;
-using Newtonsoft.Json.Linq;
+﻿using System.Text.Json.Nodes;
+using GitIssue.Fields;
 
 namespace GitIssue.Issues.Json
 {
@@ -12,6 +12,6 @@ namespace GitIssue.Issues.Json
         ///     Converts the field to a JSON token for serialization
         /// </summary>
         /// <returns></returns>
-        JToken ToJson();
+        JsonNode? ToJson();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Text.Json.Nodes;
 
 namespace GitIssue.Issues.Json
 {
@@ -16,6 +16,6 @@ namespace GitIssue.Issues.Json
         ///     Converts the field to a JSON object for serialization
         /// </summary>
         /// <returns></returns>
-        JObject ToJson();
+        JsonObject ToJson();
     }
 }

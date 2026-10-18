@@ -42,9 +42,7 @@ namespace GitIssue.Fields
         public void WithField(IField updated)
         {
             IField? field = this.callback?.Invoke();
-            if (field?.GetType() == updated.GetType())
-            {
-            }
+            field?.Copy(updated);
         }
 
         /// <inheritdoc />

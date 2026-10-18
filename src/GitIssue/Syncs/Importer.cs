@@ -1,13 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
 using GitIssue.Fields.Value;
 using GitIssue.Issues;
-using Newtonsoft.Json.Linq;
 
 namespace GitIssue.Syncs
 {
@@ -65,15 +68,15 @@ namespace GitIssue.Syncs
         /// </summary>
         /// <param name="json"></param>
         /// <returns></returns>
-        protected async Task<bool> Import(JObject json)
+        protected async Task<bool> Import(JsonObject json)
         {
-            Dictionary<FieldKey, JToken> tokens = new Dictionary<FieldKey, JToken>();
+            Dictionary<FieldKey, JsonNode> tokens = new Dictionary<FieldKey, JsonNode>();
             foreach (KeyValuePair<string, string> kvp in this.Configuration.Mapping)
             {
                 FieldKey key = FieldKey.Create(kvp.Key);
                 if (this.manager.Configuration.Fields.ContainsKey(key))
                 {
-                    JToken? token = json.SelectToken(kvp.Value);
+                    JsonNode? token = Importer.SelectNode(json, kvp.Value);
                     if (token != null)
                     {
                         tokens[key] = token;
@@ -84,7 +87,84 @@ namespace GitIssue.Syncs
             return await this.Import(tokens);
         }
 
-        private async Task<bool> Import(Dictionary<FieldKey, JToken> tokens)
+        private static JsonNode? SelectNode(JsonNode node, string path)
+        {
+            JsonNode? current = node;
+            foreach (string segment in path.TrimStart('$', '.').Split('.', StringSplitOptions.RemoveEmptyEntries))
+            {
+                int bracket = segment.IndexOf('[');
+                string property = bracket >= 0 ? segment.Substring(0, bracket) : segment;
+                if (!string.IsNullOrEmpty(property))
+                {
+                    current = (current as JsonObject)?[property];
+                }
+
+                while ((current != null) && (bracket >= 0))
+                {
+                    int endBracket = segment.IndexOf(']', bracket + 1);
+                    if ((endBracket < 0) ||
+                        !int.TryParse(segment.Substring(bracket + 1, endBracket - bracket - 1), out int index) ||
+                        current is not JsonArray array ||
+                        (index < 0) ||
+                        (index >= array.Count))
+                    {
+                        return null;
+                    }
+
+                    current = array[index];
+                    bracket = segment.IndexOf('[', endBracket + 1);
+                }
+            }
+
+            return current;
+        }
+
+        private static bool TryConvert(JsonValue value, Type targetType, out object? result)
+        {
+            if (!JsonSerialization.TryGetScalar(value, out object? scalar) || (scalar == null))
+            {
+                result = null;
+                return false;
+            }
+
+            if (targetType.IsInstanceOfType(scalar))
+            {
+                result = scalar;
+                return true;
+            }
+
+            try
+            {
+                TypeConverter converter = TypeDescriptor.GetConverter(targetType);
+                if (converter.CanConvertFrom(scalar.GetType()))
+                {
+                    result = converter.ConvertFrom(null, CultureInfo.InvariantCulture, scalar);
+                    return result != null;
+                }
+
+                if (converter.CanConvertFrom(typeof(string)))
+                {
+                    string? text = Convert.ToString(scalar, CultureInfo.InvariantCulture);
+                    if (text == null)
+                    {
+                        result = null;
+                        return false;
+                    }
+
+                    result = converter.ConvertFromInvariantString(text);
+                    return result != null;
+                }
+            }
+            catch (Exception)
+            {
+                // Conversion failures leave the existing field unchanged.
+            }
+
+            result = null;
+            return false;
+        }
+
+        private async Task<bool> Import(Dictionary<FieldKey, JsonNode> tokens)
         {
             IssueKey importKey;
             if (this.TryGetFieldValue(tokens, nameof(IReadOnlyIssue.Key), out string importKeyValue))
@@ -144,30 +224,35 @@ namespace GitIssue.Syncs
             return false;
         }
 
-        private async Task<bool> Import(IIssue issue, Dictionary<FieldKey, JToken> tokens)
+        private async Task<bool> Import(IIssue issue, Dictionary<FieldKey, JsonNode> tokens)
         {
-            foreach (KeyValuePair<FieldKey, JToken> token in tokens)
+            foreach (KeyValuePair<FieldKey, JsonNode> token in tokens)
             {
                 if (issue.TryGetValue(token.Key, out IField? field))
                 {
-                    if (token.Value is JValue value)
+                    if (token.Value is JsonValue value)
                     {
                         if (field is IValueField valueField)
                         {
-                            object? converted = value.ToObject(valueField.ValueType);
-                            valueField.Value = converted;
+                            if (Importer.TryConvert(value, valueField.ValueType, out object? converted))
+                            {
+                                valueField.Value = converted;
+                            }
                         }
                     }
 
-                    if (token.Value is JArray array)
+                    if (token.Value is JsonArray array)
                     {
                         if (field is IArrayField arrayField)
                         {
                             arrayField.Clear();
-                            foreach (JToken item in array)
+                            foreach (JsonNode? item in array)
                             {
-                                object? converted = item.ToObject(arrayField.ValueType);
-                                arrayField.Add(converted);
+                                if (item is JsonValue itemValue &&
+                                    Importer.TryConvert(itemValue, arrayField.ValueType, out object? converted))
+                                {
+                                    arrayField.Add(converted);
+                                }
                             }
                         }
                     }
@@ -178,13 +263,13 @@ namespace GitIssue.Syncs
             return true;
         }
 
-        private bool TryGetFieldValue<T>(Dictionary<FieldKey, JToken> tokens, string field, out T result)
+        private bool TryGetFieldValue<T>(Dictionary<FieldKey, JsonNode> tokens, string field, out T result)
         {
-            if (tokens.TryGetValue(FieldKey.Create(field), out JToken? token))
+            if (tokens.TryGetValue(FieldKey.Create(field), out JsonNode? token))
             {
-                if (token is JValue value)
+                if (token is JsonValue value && JsonSerialization.TryGetScalar(value, out object? scalar))
                 {
-                    if (value.Value is T output)
+                    if (scalar is T output)
                     {
                         result = output;
                         return true;

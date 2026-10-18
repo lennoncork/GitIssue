@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Issues;
 using NUnit.Framework;
@@ -22,9 +23,9 @@ namespace GitIssue.Tests.IssueManagerTests
                 bool firstResult = await this.Sut.TrackAsync(create.Result.Key);
 
                 Assert.That(firstResult, Is.False);
-                Assert.That(System.IO.File.Exists(this.Sut.Root.Tracked), Is.True);
+                Assert.That(File.Exists(this.Sut.Root.Tracked), Is.True);
 
-                TrackedIssue tracked = TrackedIssue.Read(this.Sut.Root.Tracked, null);
+                TrackedIssue tracked = TrackedIssue.Read(this.Sut.Root.Tracked);
                 Assert.That(tracked.Key, Is.EqualTo(create.Result.Key));
             }
 

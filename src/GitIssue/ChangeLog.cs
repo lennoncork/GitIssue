@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using GitIssue.Issues;
-using Newtonsoft.Json;
 
 namespace GitIssue
 {
     /// <summary>
     ///     Records the changes made by the issue manager
     /// </summary>
-    [JsonObject]
     public class ChangeLog : IChangeLog
     {
         private bool hasChanged;
@@ -33,10 +32,8 @@ namespace GitIssue
 
             try
             {
-                using FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                using StreamReader reader = new StreamReader(stream);
-                JsonSerializer serializer = new JsonSerializer();
-                ChangeLog? configuration = serializer.Deserialize(reader, typeof(ChangeLog)) as ChangeLog;
+                string json = File.ReadAllText(file);
+                ChangeLog? configuration = JsonSerializer.Deserialize<ChangeLog>(json, JsonSerialization.Options);
                 return configuration ?? new ChangeLog();
             }
             catch (Exception ex)
@@ -95,10 +92,8 @@ namespace GitIssue
 
             try
             {
-                using FileStream stream = new FileStream(file, FileMode.Create, FileAccess.ReadWrite);
-                using StreamWriter writer = new StreamWriter(stream);
-                JsonSerializer serializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented, DefaultValueHandling = DefaultValueHandling.Ignore });
-                serializer.Serialize(writer, this, typeof(ChangeLog));
+                string json = JsonSerializer.Serialize(this, JsonSerialization.IndentedOptions);
+                Paths.WriteAllTextAsync(file, json).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {

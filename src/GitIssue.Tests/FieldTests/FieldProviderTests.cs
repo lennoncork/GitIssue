@@ -106,5 +106,19 @@ namespace GitIssue.Tests.FieldTests
                 Assert.That(result, Is.EqualTo(StringValue.Parse("one")));
             }
         }
+
+        [Test]
+        public void GenericValueField_TryParse_UsesTheFieldValueType()
+        {
+            IValueField<StringValue> field = new StringValueField(FieldKey.Create("field"), StringValue.Parse("initial"));
+
+            bool success = field.TryParse("parsed", out StringValue value);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(success, Is.True);
+                Assert.That(value, Is.EqualTo(StringValue.Parse("parsed")));
+            });
+        }
     }
 }

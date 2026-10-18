@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace GitIssue.Issues
+﻿namespace GitIssue.Issues
 {
     /// <summary>
     ///     Specifies the location on disk of a given issue
@@ -35,6 +33,6 @@ namespace GitIssue.Issues
         /// <summary>
         ///     Gets the <see cref="IssuePath" /> for the issue
         /// </summary>
-        public string IssuePath => Path.Combine(this.Root.IssuesPath, this.issuePath ?? this.Key.ToString());
+        public string IssuePath => Paths.GetContainedPath(this.Root.IssuesPath, this.issuePath ?? this.Key.ToString());
     }
 }
