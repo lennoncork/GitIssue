@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GitIssue.Exceptions;
 using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Issues.File;
 using GitIssue.Issues.Json;
 using Moq;
 using NUnit.Framework;
@@ -118,6 +119,43 @@ namespace GitIssue.Tests.Issues
                 issue.SetField(key).WithField(new JsonValueField<StringValue>(key, StringValue.Parse("after")));
 
                 Assert.That(existing.Value, Is.EqualTo(StringValue.Parse("after")));
+            }
+        }
+
+        [TestFixture]
+        public class Read : JsonIssueTests
+        {
+            [Test]
+            public async Task ReadAsync_Parses_The_Issue_File_Once()
+            {
+                string repoDir = Helpers.CreateTempDirectory();
+                RepositoryRoot repoRoot = RepositoryRoot.Open(repoDir, null);
+                IssueRoot issueRoot = new IssueRoot(repoRoot, IssueKey.Create("ISS-JSON-READ"), "read-once");
+                IssueConfiguration configuration = new IssueConfiguration();
+                StringValue title = StringValue.Parse("Read once");
+                StringValue description = StringValue.Parse("Parsed a single time");
+
+                JsonIssue created = new JsonIssue(issueRoot, configuration.Fields);
+                created.Title = title;
+                created.Description = description;
+                await created.SaveAsync();
+
+                JsonIssueExtensions.ResetFileReadCount();
+                IIssue? fromJson = await JsonIssue.ReadAsync(issueRoot, configuration.Fields);
+                int jsonReads = JsonIssueExtensions.FileReadCount;
+
+                JsonIssueExtensions.ResetFileReadCount();
+                IIssue? fromFile = await FileIssue.ReadAsync(issueRoot, configuration.Fields);
+                int fileReads = JsonIssueExtensions.FileReadCount;
+
+                Assert.That(jsonReads, Is.EqualTo(1));
+                Assert.That(fileReads, Is.EqualTo(1));
+                Assert.That(fromJson, Is.Not.Null);
+                Assert.That(fromFile, Is.Not.Null);
+                Assert.That(fromJson!.Title, Is.EqualTo(title));
+                Assert.That(fromJson.Description, Is.EqualTo(description));
+                Assert.That(fromFile!.Title, Is.EqualTo(title));
+                Assert.That(fromFile.Description, Is.EqualTo(description));
             }
         }
 

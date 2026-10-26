@@ -15,7 +15,7 @@ namespace GitIssue
         /// <returns></returns>
         public static SafeResult WithSafeResult(this Task task)
         {
-            return Task.Run(task.WithSafeResultAsync).Result;
+            return task.WithSafeResultAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace GitIssue
         /// <returns></returns>
         public static SafeResult<T> WithSafeResult<T>(this Task<T> task)
         {
-            return Task.Run(task.WithSafeResultAsync).Result;
+            return task.WithSafeResultAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>
