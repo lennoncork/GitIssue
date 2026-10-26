@@ -32,6 +32,9 @@ namespace GitIssue.Tool.Commands.Import
                 case ".csv":
                     await this.importCsv(options);
                     break;
+                default:
+                    this.Fail(ImportCommand.UnsupportedImportMessage(options.Import));
+                    break;
             }
         }
 
@@ -67,10 +70,7 @@ namespace GitIssue.Tool.Commands.Import
                 }
             }
 
-            if (!mapping.ContainsKey("Key"))
-            {
-                return;
-            }
+            this.EnsureRequiredColumns(mapping);
 
             foreach (KeyValuePair<FieldKey, int> map in mapping)
             {
@@ -94,18 +94,34 @@ namespace GitIssue.Tool.Commands.Import
                     continue;
                 }
 
+                string sourceKey = import[mapping["Key"]];
                 IIssue? issue = null;
-                await foreach (IIssue found in this.manager.FindAsync(i => i.Key == import[mapping["Key"]]))
+                await foreach (IIssue found in this.manager.FindAsync(i => i.Key == sourceKey))
                 {
                     issue = found;
-                    Console.WriteLine($"Updating {import[mapping["Key"]]}");
                     break;
                 }
 
-                if (issue == null)
+                if (issue != null)
                 {
-                    Console.WriteLine($"Creating {import[mapping["Key"]]}");
+                    if (!options.Overwrite)
+                    {
+                        Console.WriteLine($"Skipping {issue.Key}; it already exists. Use --Update to overwrite.");
+                        continue;
+                    }
+
+                    Console.WriteLine($"Updating {issue.Key}");
+                    this.ApplyFields(issue, mapping, import);
+                    issue.Updated = DateTime.Now;
+                    await issue.SaveAsync();
+                }
+                else
+                {
+                    Console.WriteLine($"Creating {sourceKey}");
                     issue = await this.manager.CreateAsync(import[mapping["Title"]]);
+                    this.ApplyFields(issue, mapping, import);
+                    issue.Updated = DateTime.Now;
+                    await issue.SaveAsync();
                 }
 
                 count++;
@@ -114,6 +130,68 @@ namespace GitIssue.Tool.Commands.Import
             Console.WriteLine();
 
             Console.WriteLine($"Imported {count} issues from {options.Import}");
+        }
+
+        private void ApplyFields(IIssue issue, IReadOnlyDictionary<FieldKey, int> mapping, string[] values)
+        {
+            foreach (KeyValuePair<FieldKey, int> map in mapping)
+            {
+                if (map.Key == "Key")
+                {
+                    continue;
+                }
+
+                if (!issue.ContainsKey(map.Key))
+                {
+                    this.logger.Error($"Field \"{map.Key}\" does not exist on issue \"{issue.Key}\"");
+                    continue;
+                }
+
+                if (!issue[map.Key].Update(values[map.Value]))
+                {
+                    this.logger.Error($"Failed to update field \"{map.Key}\" on issue \"{issue.Key}\"");
+                }
+            }
+        }
+
+        private void EnsureRequiredColumns(IReadOnlyDictionary<FieldKey, int> mapping)
+        {
+            List<string> missing = new List<string>();
+            if (!mapping.ContainsKey("Key"))
+            {
+                missing.Add("Key");
+            }
+
+            if (!mapping.ContainsKey("Title"))
+            {
+                missing.Add("Title");
+            }
+
+            if (missing.Count == 0)
+            {
+                return;
+            }
+
+            string columnList = missing.Count == 1 ? missing[0] : string.Join(" and ", missing);
+            string suffix = missing.Count == 1 ? "column" : "columns";
+            this.Fail($"CSV import requires the {columnList} {suffix}.");
+        }
+
+        private void Fail(string message)
+        {
+            this.logger.Error(message);
+            throw new InvalidOperationException(message);
+        }
+
+        private static string UnsupportedImportMessage(string path)
+        {
+            string extension = Path.GetExtension(path);
+            if (string.IsNullOrEmpty(extension))
+            {
+                return $"Import file \"{path}\" is not supported. Only .csv files can be imported.";
+            }
+
+            return $"Import of \"{extension}\" files is not supported. Only .csv files can be imported.";
         }
     }
 }
