@@ -15,7 +15,7 @@ namespace GitIssue.Values
     {
         private static readonly string invalid = "Unknown";
 
-        private static readonly string regex = @"^([\w\s\d]*) <([\w\d.]*@[\w\d.]*)>$";
+        private static readonly string regex = @"^([\w\s\d]*) <([\w\d.-]*@[\w\d.-]*)>$";
         private string Username { get; }
 
         private string Email { get; }
