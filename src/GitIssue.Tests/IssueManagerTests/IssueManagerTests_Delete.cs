@@ -2,7 +2,10 @@
 using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Issues;
+using LibGit2Sharp;
+using Moq;
 using NUnit.Framework;
+using Serilog;
 
 namespace GitIssue.Tests.IssueManagerTests
 {
@@ -26,10 +29,64 @@ namespace GitIssue.Tests.IssueManagerTests
             }
 
             [Test]
+            public async Task DeleteAsyncById_ReturnsTrueWhenDeletionSucceeds()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue issue = this.Sut.Create(nameof(Delete.DeleteAsyncById_ReturnsTrueWhenDeletionSucceeds), string.Empty);
+                string id = this.Sut.KeyProvider.GetIssuePath(issue.Key);
+                string path = Path.Combine(this.IssueDirectory, id);
+                Assert.IsTrue(Directory.Exists(path));
+                bool result = await this.Sut.DeleteAsync(id);
+                Assert.That(result, Is.True);
+                Assert.IsFalse(Directory.Exists(path));
+            }
+
+            [Test]
             public void DeleteById_ReturnsFalseWhenKeyNotFound()
             {
                 this.Initialize(this.TestDirectory);
                 bool result = this.Sut.Delete("invalid-id");
+                Assert.That(result, Is.False);
+            }
+
+            [Test]
+            public async Task DeleteAsyncById_ReturnsFalseWhenDeletionDelegateReturnsFalse()
+            {
+                string directory = this.TestDirectory;
+                RepositoryRoot root = RepositoryRoot.Create(directory, Paths.IssueRootFolderName);
+
+                Mock<ILogger> logger = new Mock<ILogger>();
+                Mock<IRepository> repository = new Mock<IRepository>();
+                Mock<IIssueKeyProvider> keyProvider = new Mock<IIssueKeyProvider>();
+                Mock<IIssueConfiguration> configuration = new Mock<IIssueConfiguration>();
+                Mock<IChangeLog> changeLog = new Mock<IChangeLog>();
+                Mock<ITrackedIssue> tracked = new Mock<ITrackedIssue>();
+
+                IssueKey key = IssueKey.Create("issue-1");
+                keyProvider
+                    .Setup(provider => provider.TryGetKey("issue-1", out key))
+                    .Returns(true);
+
+                bool deletionInvoked = false;
+                IssueManager manager = new IssueManager(
+                    logger.Object,
+                    root,
+                    repository.Object,
+                    keyProvider.Object,
+                    configuration.Object,
+                    changeLog.Object,
+                    tracked.Object,
+                    _ => Mock.Of<IIssue>(),
+                    _ =>
+                    {
+                        deletionInvoked = true;
+                        return Task.FromResult(false);
+                    },
+                    _ => Task.FromResult<IIssue?>(null));
+
+                bool result = await manager.DeleteAsync("issue-1");
+
+                Assert.That(deletionInvoked, Is.True);
                 Assert.That(result, Is.False);
             }
 
