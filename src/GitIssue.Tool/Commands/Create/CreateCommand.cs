@@ -63,6 +63,7 @@ namespace GitIssue.Tool.Commands.Create
                 if (string.IsNullOrEmpty(value.Item))
                 {
                     this.logger.Error("A valid title must be provided");
+                    return;
                 }
 
                 issue = await this.manager.CreateAsync(value.Item);
@@ -70,6 +71,8 @@ namespace GitIssue.Tool.Commands.Create
                 {
                     issue.SetField(field.Key).WithField(field);
                 }
+
+                await issue.SaveAsync();
             }
             else
             {
