@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using GitIssue.Issues;
-using GitIssue.Values;
 using NUnit.Framework;
+using Signature = GitIssue.Values.Signature;
 
 namespace GitIssue.Tests.IssueManagerTests
 {
