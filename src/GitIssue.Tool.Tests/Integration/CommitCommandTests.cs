@@ -38,7 +38,7 @@ namespace GitIssue.Tool.Tests.Integration
             File.WriteAllText(stagedFile, "staged");
             using (Repository repository = new Repository(this.TestDirectory))
             {
-                Commands.Stage(repository, stagedFile);
+                LibGit2Sharp.Commands.Stage(repository, stagedFile);
             }
 
             int exitCode = this.Run("Commit");
