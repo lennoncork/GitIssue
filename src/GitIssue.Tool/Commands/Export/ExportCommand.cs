@@ -59,7 +59,6 @@ namespace GitIssue.Tool.Commands.Export
             if (File.Exists(options.Export) && !options.Overwrite)
             {
                 this.logger.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
-                this.ExitCode = 1;
                 return;
             }
 
@@ -105,7 +104,6 @@ namespace GitIssue.Tool.Commands.Export
             if (File.Exists(options.Export) && !options.Overwrite)
             {
                 this.logger.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
-                this.ExitCode = 1;
                 return;
             }
 

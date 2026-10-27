@@ -34,11 +34,15 @@ namespace GitIssue.Tool.Tests.Integration
         public void Commit_ReturnsNonZeroWhenIndexAlreadyHasStagedChanges()
         {
             this.InitializeRepository();
-            string stagedFile = Path.Combine(this.TestDirectory, "staged.txt");
-            File.WriteAllText(stagedFile, "staged");
+            string trackedFile = Path.Combine(this.TestDirectory, "tracked.txt");
+            File.WriteAllText(trackedFile, "initial");
+            Signature signature = new Signature("GitIssue Tool Tests", "gitissue-tool-tests@example.com", DateTimeOffset.Now);
             using (Repository repository = new Repository(this.TestDirectory))
             {
-                LibGit2Sharp.Commands.Stage(repository, stagedFile);
+                LibGit2Sharp.Commands.Stage(repository, "tracked.txt");
+                repository.Commit("initial", signature, signature);
+                File.WriteAllText(trackedFile, "changed");
+                LibGit2Sharp.Commands.Stage(repository, "tracked.txt");
             }
 
             int exitCode = this.Run("Commit");
@@ -47,8 +51,10 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.Multiple(() =>
             {
                 Assert.That(exitCode, Is.Not.Zero);
-                Assert.That(after.Head.Tip, Is.Null);
+                Assert.That(after.Head.Tip, Is.Not.Null);
+                Assert.That(after.Head.Tip!.Message, Does.Contain("initial"));
                 Assert.That(this.Output, Does.Not.Contain("Committed changes"));
+                Assert.That(this.Output + this.Error, Does.Contain("another commit is in progress"));
             });
         }
     }
