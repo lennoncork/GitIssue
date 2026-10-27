@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -57,9 +58,13 @@ namespace GitIssue.Tests.IssueManagerTests
                 this.Sut.Repository.Config.Set("user.email", "tester@example.com");
 
                 string outsideFile = Path.Combine(this.TestDirectory, "outside.txt");
-                File.WriteAllText(outsideFile, "staged outside the issues directory");
-                this.Sut.Repository.Index.Add("outside.txt");
-                this.Sut.Repository.Index.Write();
+                File.WriteAllText(outsideFile, "tracked outside the issues directory");
+                Signature signature = new Signature("Tester", "tester@example.com", DateTimeOffset.Now);
+                Commands.Stage(this.Sut.Repository, outsideFile);
+                this.Sut.Repository.Commit("Track a file outside the issues directory", signature, signature);
+
+                File.WriteAllText(outsideFile, "staged modification");
+                Commands.Stage(this.Sut.Repository, outsideFile);
                 Assert.That(this.Sut.Repository.RetrieveStatus().Staged.Any(), Is.True);
 
                 SafeResult<IIssue> create = await this.Sut
