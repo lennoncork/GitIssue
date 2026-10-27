@@ -384,8 +384,7 @@ namespace GitIssue
         {
             if (this.KeyProvider.TryGetKey(id, out IssueKey key))
             {
-                await this.DeleteAsync(key);
-                return true;
+                return await this.DeleteAsync(key);
             }
 
             this.logger?.Error($"Failed to get issue key from {id}");
