@@ -266,7 +266,12 @@ namespace GitIssue
                 return Task.FromResult(false);
             }
 
-            if (this.Repository.RetrieveStatus().Staged.Any())
+            string issuesPathSpec = $"{Path.GetRelativePath(this.Root.RootPath, this.Root.IssuesPath)}/*";
+
+            if (this.Repository.RetrieveStatus(new StatusOptions
+                {
+                    PathSpec = new[] { issuesPathSpec },
+                }).Staged.Any())
             {
                 this.logger?.Error("Cannot commit, another commit is in progress");
                 return Task.FromResult(false);
@@ -274,14 +279,13 @@ namespace GitIssue
 
             foreach (StatusEntry? item in this.Repository.RetrieveStatus(new StatusOptions
                      {
-                         PathSpec = new[] { $"{Path.GetRelativePath(this.Root.RootPath, this.Root.IssuesPath)}/*" },
+                         PathSpec = new[] { issuesPathSpec },
                          IncludeIgnored = true,
                          IncludeUntracked = true,
                          RecurseIgnoredDirs = true,
                          RecurseUntrackedDirs = true,
                      }))
             {
-                bool ignored = this.Repository.Ignore.IsPathIgnored(item.FilePath);
                 string? relative = item.FilePath;
 
                 if (Path.GetFullPath(relative).Equals(Path.GetFullPath(this.Root.ChangeLog)))
@@ -294,14 +298,10 @@ namespace GitIssue
                     continue;
                 }
 
-                if (ignored && ((item.State & FileStatus.Ignored) != 0))
+                if (this.Repository.Ignore.IsPathIgnored(item.FilePath) &&
+                    ((item.State & FileStatus.Ignored) != 0))
                 {
-                    if (Directory.Exists(Path.GetFullPath(item.FilePath)))
-                    {
-                        continue;
-                    }
-
-                    this.Repository.Index.Add(item.FilePath);
+                    continue;
                 }
 
                 if (((item.State & FileStatus.NewInWorkdir) != 0) ||
@@ -323,6 +323,7 @@ namespace GitIssue
             Signature? author = config.BuildSignature(DateTimeOffset.Now);
             this.Repository.Commit(comments, author, author);
             this.Changes.Clear();
+            this.Changes.Save(this.Root.ChangeLog);
             return Task.FromResult(true);
         }
 
