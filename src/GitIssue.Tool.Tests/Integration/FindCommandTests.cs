@@ -1,3 +1,4 @@
+using LibGit2Sharp;
 using NUnit.Framework;
 
 namespace GitIssue.Tool.Tests.Integration
@@ -66,14 +67,21 @@ namespace GitIssue.Tool.Tests.Integration
         public void Find_MatchesAuthor()
         {
             this.InitializeRepository();
+            using (Repository repository = new Repository(this.TestDirectory))
+            {
+                repository.Config.Set("user.name", "Ada Lovelace");
+                repository.Config.Set("user.email", "ada@example.com");
+            }
+
             string matchingKey = this.CreateIssue("Matching issue");
             this.CreateIssue("Other issue");
             string author = this.ReadIssue(matchingKey)["Author"]!.GetValue<string>();
 
-            int exitCode = this.Run("Find", $"author={author}");
+            int exitCode = this.Run("Find", "author=Ada Lovelace <ada@example.com>");
 
             Assert.Multiple(() =>
             {
+                Assert.That(author, Is.EqualTo("Ada Lovelace <ada@example.com>"));
                 Assert.That(exitCode, Is.Zero, this.Error);
                 Assert.That(this.Output, Does.Contain("Matching issue"));
                 Assert.That(this.Output, Does.Contain("Other issue"));
