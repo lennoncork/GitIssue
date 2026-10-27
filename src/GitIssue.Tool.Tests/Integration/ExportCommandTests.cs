@@ -61,7 +61,7 @@ namespace GitIssue.Tool.Tests.Integration
 
             Assert.Multiple(() =>
             {
-                Assert.That(exitCode, Is.Zero, this.Error);
+                Assert.That(exitCode, Is.Not.Zero);
                 this.AssertFileContents(exportFile, "preserve");
                 Assert.That(this.Output, Does.Not.Contain("Exported"));
             });
