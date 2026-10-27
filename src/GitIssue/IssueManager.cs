@@ -354,7 +354,9 @@ namespace GitIssue
             IIssue issue = this.issueCreation(this.KeyProvider.Next());
             issue.Title = title;
             issue.Description = description;
-            issue.Author = this.Repository.Config.BuildSignature(issue.Created.Item);
+            DateTimeOffset created = DateTimeOffset.Now;
+            issue.Created = created.LocalDateTime;
+            issue.Author = this.Repository.Config.BuildSignature(created);
             await issue.SaveAsync();
             this.Changes.Add(issue, ChangeType.Create);
             return issue;

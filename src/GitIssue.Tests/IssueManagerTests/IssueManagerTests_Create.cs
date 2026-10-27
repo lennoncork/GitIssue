@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using GitIssue.Issues;
+using GitIssue.Values;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IssueManagerTests
@@ -57,6 +58,20 @@ namespace GitIssue.Tests.IssueManagerTests
                     .WithSafeResultAsync();
                 Assert.IsTrue(create2.IsSuccess);
                 Assert.That(create1.Result.Key, Is.Not.EqualTo(create2.Result.Key));
+            }
+
+            [Test]
+            public async Task SetsAuthorFromRepositoryConfig()
+            {
+                this.Initialize(this.TestDirectory);
+                this.Sut.Repository.Config.Set("user.name", "Tester");
+                this.Sut.Repository.Config.Set("user.email", "tester@example.com");
+
+                SafeResult<IIssue> create = await this.Sut
+                    .CreateAsync(nameof(Create.SetsAuthorFromRepositoryConfig), string.Empty)
+                    .WithSafeResultAsync();
+                Assert.That(create.Result.Author, Is.EqualTo(Signature.Parse("Tester <tester@example.com>")));
+                Assert.That((DateTime)create.Result.Created, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
             }
 
             [Test]
