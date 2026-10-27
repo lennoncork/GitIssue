@@ -14,6 +14,10 @@ namespace GitIssue.Tool.Commands.Edit
     /// </summary>
     public class EditCommand : Command<EditOptions>
     {
+        private static readonly string DefaultEditor = new EditorOptions().Editor;
+
+        private static readonly string IssuesEditorKey = "issues.editor";
+
         private readonly IEditor editor;
         private readonly ILogger logger;
 
@@ -41,10 +45,7 @@ namespace GitIssue.Tool.Commands.Edit
                 return;
             }
 
-            if (EditCommand.TryGetEditor(this.manager.Repository, "issues.editor", out string config))
-            {
-                options.Editor = config;
-            }
+            this.SelectEditor(options);
 
             bool updated = false;
             if (string.IsNullOrEmpty(options.Field))
@@ -91,9 +92,28 @@ namespace GitIssue.Tool.Commands.Edit
             }
         }
 
+        private void SelectEditor(EditOptions options)
+        {
+            if (EditCommand.HasExplicitEditor(options.Editor))
+            {
+                this.editor.UpdateCommand(options.Editor);
+                return;
+            }
+
+            if (EditCommand.TryGetEditor(this.manager.Repository, EditCommand.IssuesEditorKey, out string config))
+            {
+                this.editor.UpdateCommand(config);
+            }
+        }
+
+        private static bool HasExplicitEditor(string editor)
+        {
+            return !string.IsNullOrWhiteSpace(editor) && editor != EditCommand.DefaultEditor;
+        }
+
         private static bool TryGetEditor(IRepository repository, string key, out string config)
         {
-            config = repository.Config.GetValueOrDefault<string>(key);
+            config = repository.Config.GetValueOrDefault<string>(key) ?? string.Empty;
             return !string.IsNullOrEmpty(config);
         }
     }

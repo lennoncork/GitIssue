@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GitIssue.Fields;
@@ -48,6 +49,7 @@ namespace GitIssue.Tool
         /// </summary>
         public int Success { get; set; } = 0;
 
+        /// <inheritdoc />
         public void UpdateCommand(string command)
         {
             (string, string) result = Editor.GetProcessAndArgumentsFromCommand(command);
@@ -66,7 +68,7 @@ namespace GitIssue.Tool
 
             DateTime created = File.GetLastWriteTime(temp);
 
-            if (!await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
+            if (!await this.EditFileAsync(this.Command, this.Arguments, temp))
             {
                 return content;
             }
@@ -100,7 +102,7 @@ namespace GitIssue.Tool
 
             // Open and modify the file
             DateTime created = File.GetLastWriteTime(temp);
-            if (await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
+            if (await this.EditFileAsync(this.Command, this.Arguments, temp))
             {
                 if (created == File.GetLastWriteTime(temp))
                 {
@@ -161,7 +163,7 @@ namespace GitIssue.Tool
             await File.AppendAllTextAsync(temp, Editor.FieldTemplate);
 
             DateTime created = File.GetLastWriteTime(temp);
-            if (await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
+            if (await this.EditFileAsync(this.Command, this.Arguments, temp))
             {
                 if (created == File.GetLastWriteTime(temp))
                 {
@@ -231,9 +233,50 @@ namespace GitIssue.Tool
             return string.Join(Editor.Newline, lines);
         }
 
-        private async Task<bool> EditFileAsync(string editor, string arguments)
+        private static string[] SplitArguments(string arguments)
         {
-            int result = await this.processRunner.RunAsync(editor, arguments);
+            if (string.IsNullOrWhiteSpace(arguments))
+            {
+                return Array.Empty<string>();
+            }
+
+            List<string> result = new List<string>();
+            StringBuilder current = new StringBuilder();
+            bool quoted = false;
+            foreach (char character in arguments)
+            {
+                if (character == '"')
+                {
+                    quoted = !quoted;
+                    continue;
+                }
+
+                if (!quoted && char.IsWhiteSpace(character))
+                {
+                    if (current.Length > 0)
+                    {
+                        result.Add(current.ToString());
+                        current.Clear();
+                    }
+
+                    continue;
+                }
+
+                current.Append(character);
+            }
+
+            if (current.Length > 0)
+            {
+                result.Add(current.ToString());
+            }
+
+            return result.ToArray();
+        }
+
+        private async Task<bool> EditFileAsync(string editor, string arguments, string file)
+        {
+            string[] processArguments = Editor.SplitArguments(arguments).Append(file).ToArray();
+            int result = await this.processRunner.RunAsync(editor, processArguments);
             return result == this.Success;
         }
     }
