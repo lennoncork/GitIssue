@@ -121,6 +121,18 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.That(values.Select(value => value?.GetValue<string>()), Does.Contain(expected));
         }
 
+        protected void AssertJsonArrayCount(JsonObject json, string property, int expected)
+        {
+            JsonArray? values = json[property] as JsonArray;
+            Assert.That(values, Is.Not.Null, $"Expected '{property}' to be an array.");
+            if (values == null)
+            {
+                return;
+            }
+
+            Assert.That(values.Count, Is.EqualTo(expected));
+        }
+
         protected void AssertJsonArrayDoesNotContain(JsonObject json, string property, string expected)
         {
             JsonArray? values = json[property] as JsonArray;
