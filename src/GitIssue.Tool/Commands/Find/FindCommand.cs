@@ -36,6 +36,7 @@ namespace GitIssue.Tool.Commands.Find
             catch (Exception e)
             {
                 this.logger.Error($"Unable to parse expression {e.Message}", e);
+                this.ExitCode = 1;
                 return;
             }
 

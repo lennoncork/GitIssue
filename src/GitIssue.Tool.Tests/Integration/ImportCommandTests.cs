@@ -28,5 +28,39 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(this.Output, Does.Contain("Imported 1 issues"));
             });
         }
+
+        [Test]
+        public void Import_ReturnsNonZeroWhenFileDoesNotExist()
+        {
+            this.InitializeRepository();
+            string importFile = Path.Combine(this.TestDirectory, "missing.csv");
+
+            int exitCode = this.Run("Import", importFile);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(this.Output + this.Error, Does.Contain($"Import file {importFile} does not exist"));
+                Assert.That(this.GetIssueKeys(), Is.Empty);
+            });
+        }
+
+        [Test]
+        public void Import_ReturnsNonZeroWhenExtensionIsNotSupported()
+        {
+            this.InitializeRepository();
+            string importFile = Path.Combine(this.TestDirectory, "issues.txt");
+            File.WriteAllText(importFile, "not a csv");
+
+            int exitCode = this.Run("Import", importFile);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(this.Output + this.Error, Does.Contain("is not supported"));
+                Assert.That(this.GetIssueKeys(), Is.Empty);
+                this.AssertFileContents(importFile, "not a csv");
+            });
+        }
     }
 }

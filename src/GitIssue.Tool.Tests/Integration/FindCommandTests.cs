@@ -27,5 +27,21 @@ namespace GitIssue.Tool.Tests.Integration
                 this.AssertFileContents(this.GetIssueFile(otherKey), otherIssue);
             });
         }
+
+        [Test]
+        public void Find_ReturnsZeroWhenNothingMatches()
+        {
+            this.InitializeRepository();
+            string key = this.CreateIssue("Unmatched issue");
+
+            int exitCode = this.Run("Find", "i => i.Title.ToString() == \"Missing issue\"");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Zero, this.Error);
+                Assert.That(this.Output, Does.Not.Contain("Unmatched issue"));
+                this.AssertIssueExists(key);
+            });
+        }
     }
 }

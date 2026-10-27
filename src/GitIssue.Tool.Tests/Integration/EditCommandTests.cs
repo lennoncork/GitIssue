@@ -21,5 +21,20 @@ namespace GitIssue.Tool.Tests.Integration
                 this.AssertJsonValue(issue, "Title", "Updated title");
             });
         }
+
+        [Test]
+        public void Edit_ReturnsNonZeroWhenIssueIsNotFound()
+        {
+            this.InitializeRepository();
+
+            int exitCode = this.Run("Edit", "MISSING-1", "Title", "Updated title");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(this.Output + this.Error, Does.Contain("not found"));
+                Assert.That(this.GetIssueKeys(), Is.Empty);
+            });
+        }
     }
 }

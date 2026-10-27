@@ -38,6 +38,7 @@ namespace GitIssue.Tool.Commands.Edit
             if (issue == null)
             {
                 this.logger.Error($"Issue \"{options.Key}\" not found");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -68,6 +69,7 @@ namespace GitIssue.Tool.Commands.Edit
             if (!issue.ContainsKey(key))
             {
                 this.logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
+                this.ExitCode = 1;
                 return;
             }
 

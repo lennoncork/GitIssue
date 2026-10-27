@@ -1,3 +1,4 @@
+using System.IO;
 using LibGit2Sharp;
 using NUnit.Framework;
 
@@ -26,6 +27,28 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(repository.Head.Tip.Tree[".issues"], Is.Not.Null);
                 Assert.That(changes["Log"]!.AsObject(), Is.Empty);
                 Assert.That(this.Output, Does.Contain("Committed changes"));
+            });
+        }
+
+        [Test]
+        public void Commit_ReturnsNonZeroWhenIndexAlreadyHasStagedChanges()
+        {
+            this.InitializeRepository();
+            string stagedFile = Path.Combine(this.TestDirectory, "staged.txt");
+            File.WriteAllText(stagedFile, "staged");
+            using (Repository repository = new Repository(this.TestDirectory))
+            {
+                Commands.Stage(repository, stagedFile);
+            }
+
+            int exitCode = this.Run("Commit");
+
+            using Repository after = new Repository(this.TestDirectory);
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(after.Head.Tip, Is.Null);
+                Assert.That(this.Output, Does.Not.Contain("Committed changes"));
             });
         }
     }

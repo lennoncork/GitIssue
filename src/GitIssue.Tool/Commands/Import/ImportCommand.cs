@@ -32,6 +32,11 @@ namespace GitIssue.Tool.Commands.Import
                 case ".csv":
                     await this.importCsv(options);
                     break;
+
+                default:
+                    this.logger.Error($"Import of '{Path.GetExtension(options.Import)}' files is not supported");
+                    this.ExitCode = 1;
+                    break;
             }
         }
 
@@ -40,6 +45,7 @@ namespace GitIssue.Tool.Commands.Import
             if (!File.Exists(options.Import))
             {
                 this.logger.Error($"Import file {options.Import} does not exist");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -49,6 +55,8 @@ namespace GitIssue.Tool.Commands.Import
             string? header = await reader.ReadLineAsync();
             if (header == null)
             {
+                this.logger.Error($"Import file {options.Import} is empty");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -69,6 +77,8 @@ namespace GitIssue.Tool.Commands.Import
 
             if (!mapping.ContainsKey("Key"))
             {
+                this.logger.Error($"Import file {options.Import} does not contain a Key column");
+                this.ExitCode = 1;
                 return;
             }
 

@@ -46,6 +46,11 @@ namespace GitIssue.Tool.Commands.Export
                 case ".csv":
                     await this.exportCsv(options);
                     break;
+
+                default:
+                    this.logger.Error($"Export of '{Path.GetExtension(options.Export)}' files is not supported");
+                    this.ExitCode = 1;
+                    break;
             }
         }
 
@@ -54,6 +59,7 @@ namespace GitIssue.Tool.Commands.Export
             if (File.Exists(options.Export) && !options.Overwrite)
             {
                 this.logger.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -99,6 +105,7 @@ namespace GitIssue.Tool.Commands.Export
             if (File.Exists(options.Export) && !options.Overwrite)
             {
                 this.logger.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
+                this.ExitCode = 1;
                 return;
             }
 

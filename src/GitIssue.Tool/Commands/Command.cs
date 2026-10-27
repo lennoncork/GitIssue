@@ -8,6 +8,11 @@ namespace GitIssue.Tool.Commands
     public abstract class Command<T> where T : Options
     {
         /// <summary>
+        ///     Gets the process exit code for this command. Defaults to <c>0</c>.
+        /// </summary>
+        public int ExitCode { get; protected set; }
+
+        /// <summary>
         ///     Executes the command
         /// </summary>
         /// <param name="options">the command options</param>

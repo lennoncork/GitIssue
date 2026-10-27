@@ -86,7 +86,7 @@ namespace GitIssue.Tool
                 }
 
                 Command<T> command = container.Resolve<Command<T>>();
-                return await Program.ExecAsync(command.Exec, options);
+                return await Program.ExecAsync(command, options);
             }
             catch (Exception e)
             {
@@ -95,15 +95,15 @@ namespace GitIssue.Tool
             }
         }
 
-        private static async Task<int> ExecAsync<T>(Func<T, Task> func, T value)
+        private static async Task<int> ExecAsync<T>(Command<T> command, T value)
             where T : Options
         {
             try
             {
                 Console.WriteLine();
-                await func(value);
+                await command.Exec(value);
                 Console.WriteLine();
-                return 0;
+                return command.ExitCode;
             }
             catch (Exception e)
             {

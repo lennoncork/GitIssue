@@ -51,18 +51,22 @@ namespace GitIssue.Tool.Commands.Create
                 if (!(fields.FirstOrDefault(f => f.Key == nameof(IIssue.Title)) is IValueField title))
                 {
                     this.logger.Error("Title is not a valid value field");
+                    this.ExitCode = 1;
                     return;
                 }
 
                 if (!(title.Value is IValue<string> value))
                 {
                     this.logger.Error($"Title {title} is not a valid string, {title.GetType()}");
+                    this.ExitCode = 1;
                     return;
                 }
 
                 if (string.IsNullOrEmpty(value.Item))
                 {
                     this.logger.Error("A valid title must be provided");
+                    this.ExitCode = 1;
+                    return;
                 }
 
                 issue = await this.manager.CreateAsync(value.Item);
