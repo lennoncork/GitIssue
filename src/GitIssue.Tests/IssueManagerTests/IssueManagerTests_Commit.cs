@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Issues;
+using LibGit2Sharp;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IssueManagerTests
