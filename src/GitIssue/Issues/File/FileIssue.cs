@@ -65,12 +65,7 @@ namespace GitIssue.Issues.File
             }
 
             FileIssue issue = new FileIssue(root, fields);
-            foreach (FieldKey key in fields.Keys)
-            {
-                IField valueField = await fields[key].ReadFieldAsync(issue, key);
-                issue.fields[key] = valueField;
-            }
-
+            await issue.ReadFieldsFromDiskAsync(fields);
             return issue;
         }
 

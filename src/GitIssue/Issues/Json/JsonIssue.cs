@@ -32,6 +32,11 @@ namespace GitIssue.Issues.Json
         protected readonly HashSet<FieldKey> modifiedFields;
 
         /// <summary>
+        ///     The document parsed for the current load. Null when no load is in progress.
+        /// </summary>
+        private JsonObject? loadedDocument;
+
+        /// <summary>
         ///     Initializes a new instance of a <see cref="JsonIssue" /> class
         /// </summary>
         /// <param name="root">the issue root</param>
@@ -68,6 +73,11 @@ namespace GitIssue.Issues.Json
         ///     Gets the Json path for the issue
         /// </summary>
         public string Json => JsonIssue.GetJsonFile(this.Root);
+
+        /// <summary>
+        ///     Gets the document loaded for the current read, when a load is in progress.
+        /// </summary>
+        internal JsonObject? LoadedDocument => this.loadedDocument;
 
         /// <inheritdoc />
         public override IEnumerable<FieldKey> Keys => this.fields.Keys;
@@ -129,13 +139,29 @@ namespace GitIssue.Issues.Json
             }
 
             JsonIssue issue = new JsonIssue(root, fields);
-            foreach (FieldKey key in fields.Keys)
-            {
-                IField valueField = await fields[key].ReadFieldAsync(issue, key);
-                issue.fields[key] = valueField;
-            }
-
+            await issue.ReadFieldsFromDiskAsync(fields);
             return issue;
+        }
+
+        /// <summary>
+        ///     Reads each configured field from the issue JSON file.
+        ///     The file is parsed once and reused for every field.
+        /// </summary>
+        /// <param name="fieldInfos">the expected fields</param>
+        internal async Task ReadFieldsFromDiskAsync(IDictionary<FieldKey, FieldInfo> fieldInfos)
+        {
+            this.loadedDocument = await JsonIssueExtensions.ReadJsonFieldsAsync(this.Json);
+            try
+            {
+                foreach (FieldKey key in fieldInfos.Keys)
+                {
+                    this.fields[key] = await fieldInfos[key].ReadFieldAsync(this, key);
+                }
+            }
+            finally
+            {
+                this.loadedDocument = null;
+            }
         }
 
         /// <inheritdoc />

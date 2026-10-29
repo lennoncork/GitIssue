@@ -87,8 +87,15 @@ namespace GitIssue
                 return;
             }
 
-            this.Changes.Save(this.Root.ChangeLog);
             this.disposed = true;
+            try
+            {
+                this.Changes.Save(this.Root.ChangeLog);
+            }
+            finally
+            {
+                this.Repository.Dispose();
+            }
         }
 
         /// <inheritdoc />
@@ -408,14 +415,17 @@ namespace GitIssue
         /// <inheritdoc />
         public IEnumerable<IIssue> Find(Func<IIssue, bool> predicate)
         {
+            return this.CollectMatches(predicate).GetAwaiter().GetResult();
+        }
+
+        private async Task<List<IIssue>> CollectMatches(Func<IIssue, bool> predicate)
+        {
             List<IIssue> issues = new List<IIssue>();
-            Task.Run(async () =>
+            await foreach (IIssue issue in this.FindAsync(predicate))
             {
-                await foreach (IIssue issue in this.FindAsync(predicate))
-                {
-                    issues.Add(issue);
-                }
-            }).Wait();
+                issues.Add(issue);
+            }
+
             return issues;
         }
 
