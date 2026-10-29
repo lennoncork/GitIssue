@@ -20,6 +20,7 @@ using GitIssue.Tool.Commands.Import;
 using GitIssue.Tool.Commands.Init;
 using GitIssue.Tool.Commands.Remove;
 using GitIssue.Tool.Commands.Show;
+using GitIssue.Tool.Commands.Sync;
 using GitIssue.Tool.Commands.Track;
 using Serilog;
 using CommitOptions = GitIssue.Tool.Commands.Commit.CommitOptions;
@@ -131,12 +132,13 @@ namespace GitIssue.Tool
             parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
                     ShowOptions, AddOptions, RemoveOptions, EditOptions, TrackOptions,
                     FieldsOptions, CommitOptions, ExportOptions, ChangesOptions,
-                    ImportOptions,
+                    ImportOptions, SyncOptions,
                     CommentOptions>(args)
                 .WithParsed<InitOptions>(o => exitCode = Program.ExecAsync<InitCommand, InitOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<CreateOptions>(o => exitCode = Program.ExecAsync<CreateCommand, CreateOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<DeleteOptions>(o => exitCode = Program.ExecAsync<DeleteCommand, DeleteOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<ImportOptions>(o => exitCode = Program.ExecAsync<ImportCommand, ImportOptions>(o).GetAwaiter().GetResult())
+                .WithParsed<SyncOptions>(o => exitCode = Program.ExecAsync<SyncCommand, SyncOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<ExportOptions>(o => exitCode = Program.ExecAsync<ExportCommand, ExportOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<FindOptions>(o => exitCode = Program.ExecAsync<FindCommand, FindOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<ShowOptions>(o => exitCode = Program.ExecAsync<ShowCommand, ShowOptions>(o).GetAwaiter().GetResult())

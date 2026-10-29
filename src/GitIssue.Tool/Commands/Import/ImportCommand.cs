@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Syncs;
 using Serilog;
 
 namespace GitIssue.Tool.Commands.Import
 {
     /// <summary>
-    ///     Edit command
+    ///     Import command
     /// </summary>
     public class ImportCommand : Command<ImportOptions>
     {
@@ -32,7 +35,77 @@ namespace GitIssue.Tool.Commands.Import
                 case ".csv":
                     await this.importCsv(options);
                     break;
+
+                case ".json":
+                    await this.importJson(options.Import);
+                    break;
+
+                default:
+                    string message = $"Unsupported import file '{options.Import}'. Use a .json or .csv file.";
+                    this.logger.Error(message);
+                    throw new InvalidOperationException(message);
             }
+        }
+
+        public async Task importJson(string path)
+        {
+            FileImporter importer = new FileImporter(this.manager)
+            {
+                ImportPath = path,
+            };
+            await ImportCommand.applyDefaultMappingAsync(importer);
+
+            bool imported = await importer.Import();
+            int count = imported ? 1 : 0;
+            Console.WriteLine($"Imported {count} issues from {path}");
+            if (imported)
+            {
+                return;
+            }
+
+            string message = File.Exists(path)
+                ? $"Failed to import issues from {path}. The JSON object must include Key and Title."
+                : $"Import file {path} does not exist";
+            this.logger.Error(message);
+            throw new InvalidOperationException(message);
+        }
+
+        private static async Task applyDefaultMappingAsync(FileImporter importer)
+        {
+            string key = "Key";
+            string title = "Title";
+            string description = "Description";
+            if (File.Exists(importer.ImportPath))
+            {
+                try
+                {
+                    string content = await File.ReadAllTextAsync(importer.ImportPath);
+                    if (JsonNode.Parse(content) is JsonObject json)
+                    {
+                        key = ImportCommand.mapProperty(json, "Key", "key");
+                        title = ImportCommand.mapProperty(json, "Title", "title");
+                        description = ImportCommand.mapProperty(json, "Description", "description");
+                    }
+                }
+                catch (JsonException)
+                {
+                    // FileImporter reports JSON that it cannot read.
+                }
+            }
+
+            importer.Configuration.Mapping["Key"] = key;
+            importer.Configuration.Mapping["Title"] = title;
+            importer.Configuration.Mapping["Description"] = description;
+        }
+
+        private static string mapProperty(JsonObject json, string name, string alias)
+        {
+            if (json.ContainsKey(name) || !json.ContainsKey(alias))
+            {
+                return name;
+            }
+
+            return alias;
         }
 
         public async Task importCsv(ImportOptions options)

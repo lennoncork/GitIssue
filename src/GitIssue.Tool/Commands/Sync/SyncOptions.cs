@@ -3,11 +3,11 @@
 namespace GitIssue.Tool.Commands.Sync
 {
 #pragma warning disable 1591
-    [Verb(nameof(CommandType.Export), HelpText = "Exports all issues into a JSON file")]
+    [Verb(nameof(CommandType.Sync), HelpText = "Imports issues from a JSON file")]
     public class SyncOptions : Options
     {
-        [Value(0, MetaName = "Import Name", HelpText = "The name of the sync to use", Required = false)]
-        public string Import { get; set; } = "disk";
+        [Value(0, MetaName = "File", HelpText = "The JSON file to import", Required = false)]
+        public string Import { get; set; } = "import.json";
     }
 #pragma warning restore 1591
 }
