@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Fields;
@@ -22,19 +21,19 @@ namespace GitIssue.Tool.Tests
                 this.updateFile = updateFile;
             }
 
-            public string Arguments { get; private set; } = string.Empty;
+            public string[] Arguments { get; private set; } = Array.Empty<string>();
 
             public string FileName { get; private set; } = string.Empty;
 
             public int ExitCode { get; }
 
-            public async Task<int> RunAsync(string fileName, string arguments)
+            public async Task<int> RunAsync(string fileName, params string[] arguments)
             {
                 this.FileName = fileName;
                 this.Arguments = arguments;
                 if (this.updateFile != null)
                 {
-                    await this.updateFile(arguments.Trim());
+                    await this.updateFile(arguments[arguments.Length - 1]);
                 }
 
                 return this.ExitCode;
@@ -57,7 +56,8 @@ namespace GitIssue.Tool.Tests
             {
                 Assert.That(result, Is.EqualTo("updated"));
                 Assert.That(runner.FileName, Is.EqualTo("test-editor"));
-                Assert.That(File.Exists(runner.Arguments.Trim()), Is.True);
+                Assert.That(runner.Arguments, Has.Length.EqualTo(1));
+                Assert.That(File.Exists(runner.Arguments[0]), Is.True);
             });
         }
 
@@ -69,6 +69,33 @@ namespace GitIssue.Tool.Tests
             string result = await editor.Edit("Update title", "original");
 
             Assert.That(result, Is.EqualTo("original"));
+        }
+
+        [Test]
+        public async Task Edit_PassesTempPathAsSeparateArgument()
+        {
+            TestProcessRunner runner = new TestProcessRunner(0);
+            Editor editor = new Editor(new Configuration
+            {
+                Editor = "test-editor",
+                Arguments = "-pound_comment -syntax git-commit \"arg with spaces\"",
+            }, runner);
+
+            string result = await editor.Edit("Update title", "original");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.EqualTo("original"));
+                Assert.That(runner.FileName, Is.EqualTo("test-editor"));
+                Assert.That(runner.Arguments, Has.Length.EqualTo(5));
+                Assert.That(runner.Arguments[0], Is.EqualTo("-pound_comment"));
+                Assert.That(runner.Arguments[1], Is.EqualTo("-syntax"));
+                Assert.That(runner.Arguments[2], Is.EqualTo("git-commit"));
+                Assert.That(runner.Arguments[3], Is.EqualTo("arg with spaces"));
+                Assert.That(File.Exists(runner.Arguments[4]), Is.True);
+                Assert.That(runner.Arguments[4], Does.Not.Contain("git-commit"));
+                Assert.That(runner.Arguments[4], Does.Not.Contain("arg with spaces"));
+            });
         }
 
         [Test]

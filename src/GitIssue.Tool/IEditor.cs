@@ -11,6 +11,12 @@ namespace GitIssue.Tool
     public interface IEditor
     {
         /// <summary>
+        ///     Updates the command used to open the editor
+        /// </summary>
+        /// <param name="command">the editor command</param>
+        void UpdateCommand(string command);
+
+        /// <summary>
         ///     Edits existing content
         /// </summary>
         /// <param name="header">the header</param>
