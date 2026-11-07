@@ -13,8 +13,8 @@ namespace GitIssue
 {
     internal static class JsonSerialization
     {
-        public static JsonSerializerOptions IndentedOptions { get; } = JsonSerialization.CreateOptions(true);
-        public static JsonSerializerOptions Options { get; } = JsonSerialization.CreateOptions(false);
+        public static JsonSerializerOptions IndentedOptions { get; } = JsonSerialization.createOptions(true);
+        public static JsonSerializerOptions Options { get; } = JsonSerialization.createOptions(false);
 
         public static JsonNode? ToNode(object? value)
         {
@@ -64,7 +64,7 @@ namespace GitIssue
             return false;
         }
 
-        private static JsonSerializerOptions CreateOptions(bool writeIndented)
+        private static JsonSerializerOptions createOptions(bool writeIndented)
         {
             DefaultJsonTypeInfoResolver resolver = new DefaultJsonTypeInfoResolver();
             resolver.Modifiers.Add(typeInfo =>

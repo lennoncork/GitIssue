@@ -22,9 +22,11 @@ From the repository root (the directory containing `build.cake`):
 dotnet tool restore
 dotnet restore src/GitIssue.slnx --source https://api.nuget.org/v3/index.json
 dotnet cake --target=Build
+dotnet cake --target=Analyzers
 ```
 
 ## Guidance
 - Prefer the `dotnet cake` `Build` target to mirror CI.
+- Run the `Analyzers` target to verify third-party analyzer diagnostics through `info` severity without applying fixes.
 - Use explicit Cake targets such as `Build` and `Push` rather than calling `dotnet build` directly, except for one-off debugging.
 - If package restore fails against internal feeds, add `https://api.nuget.org/v3/index.json` as a fallback source.
