@@ -5,7 +5,7 @@ GitIssue reads issue-repository configuration from `config.json` in the issue-da
 Use the fields command to inspect the fields recognized by the current repository:
 
 ```shell
-dotnet gitissue fields
+gitissue fields
 ```
 
 ## Default fields
@@ -28,8 +28,8 @@ Required fields are part of the default schema. Array fields support `add` and `
 Initialization and later commands must use the same issue-data directory name:
 
 ```shell
-dotnet gitissue init --name work-items
-dotnet gitissue create "Example issue" "Created in the custom directory." --name work-items
+gitissue init --name work-items
+gitissue create "Example issue" "Created in the custom directory." --name work-items
 ```
 
 The `--path` option selects the working directory, and `--tracking` changes the tracked-issue file name. These options are available on commands that use the shared options.

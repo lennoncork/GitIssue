@@ -1,6 +1,6 @@
 # Command Reference
 
-Run commands from the root of the Git repository containing the issue data. The examples use `dotnet gitissue`; if you have configured the optional `git issue` alias, you can use that command prefix instead.
+Run commands from the root of the Git repository containing the issue data. The examples use `gitissue`, the command from a global install. A local install is invoked as `dotnet gitissue`. If you have configured the optional `git issue` alias, you can use that prefix instead.
 
 Most commands accept these shared options:
 
@@ -10,7 +10,7 @@ Most commands accept these shared options:
 | `--path` | Current directory | Path to the working directory. |
 | `--tracking` | `tracking.json` | Name of the tracked-issue file. |
 
-Options are case-insensitive. Run `dotnet gitissue <command> --help` for parser-generated usage.
+Options are case-insensitive. Run `gitissue <command> --help` for parser-generated usage.
 
 ## Initialize and create
 
@@ -31,8 +31,8 @@ Options are case-insensitive. Run `dotnet gitissue <command> --help` for parser-
 Example:
 
 ```shell
-dotnet gitissue find 'i => i.Title.Contains("guide")'
-dotnet gitissue find 'i => i.Title.Contains("guide")' --Format "%Key %Title"
+gitissue find 'i => i.Title.ToString().Contains("guide")'
+gitissue find 'i => i.Title.ToString().Contains("guide")' --Format "%Key %Title"
 ```
 
 The default find format is `%Key %Title %Delta`. The expression parameter is evaluated by the tool; only run expressions you trust.
@@ -52,11 +52,11 @@ For commands that accept an issue key, `.`, `T`, and `Tracked` refer to the curr
 Examples:
 
 ```shell
-dotnet gitissue edit ISSUE_KEY Title "Improve first-run experience"
-dotnet gitissue add ISSUE_KEY Labels documentation
-dotnet gitissue remove ISSUE_KEY Labels documentation
-dotnet gitissue comment ISSUE_KEY "Validated on Windows and Linux."
-dotnet gitissue delete ISSUE_KEY
+gitissue edit ISSUE_KEY Title "Improve first-run experience"
+gitissue add ISSUE_KEY Labels documentation
+gitissue remove ISSUE_KEY Labels documentation
+gitissue comment ISSUE_KEY "Validated on Windows and Linux."
+gitissue delete ISSUE_KEY
 ```
 
 ## Git and data exchange
@@ -72,11 +72,11 @@ dotnet gitissue delete ISSUE_KEY
 Examples:
 
 ```shell
-dotnet gitissue export issues.json
-dotnet gitissue export issues.csv --Separator ";"
-dotnet gitissue import issues.json
-dotnet gitissue import issues.csv --Separator ";"
-dotnet gitissue commit
+gitissue export issues.json
+gitissue export issues.csv --Separator ";"
+gitissue import issues.json
+gitissue import issues.csv --Separator ";"
+gitissue commit
 ```
 
 CSV import/export uses a simple separator-based format with a header row. The header names must match configured field names (for example `Key;Title;Description`). The parser splits on the specified separator; it is not a full quoted-CSV parser. CSV import currently uses `Key` to find an issue and `Title` to create a new issue; it does not import the other CSV field values. The `--Update` option is accepted, but is not currently applied by the command implementation.
@@ -94,8 +94,8 @@ JSON import reads one JSON object representing an issue and requires `Key` and `
 ## Help
 
 ```shell
-dotnet gitissue help
-dotnet gitissue --help
-dotnet gitissue <command> --help
-dotnet gitissue version
+gitissue help
+gitissue --help
+gitissue <command> --help
+gitissue version
 ```
