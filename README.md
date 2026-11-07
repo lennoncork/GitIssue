@@ -42,7 +42,7 @@ Contributions are welcome. See the [user guide](docs/README.md) for project usag
 
 ## Releasing
 
-After the build workflow passes on `main`, create and publish a GitHub Release from a stable `vMAJOR.MINOR.PATCH` tag, such as `v0.3.0`. Configure `NUGET_API_KEY` as a secret in the repository's `nuget.org` environment before publishing. The deployment workflow builds, tests, and packages both NuGet projects; GitVersion derives their versions from the release tag. The workflow saves the packages as an artifact and publishes them to NuGet.org.
+After the build workflow passes on `main`, create and publish a GitHub Release from a stable `vMAJOR.MINOR.PATCH` tag, such as `v0.3.0`. Configure NuGet Trusted Publishing for the `lennoncork/GitIssue` repository and the `deploy.yaml` workflow before publishing. The deployment workflow uses GitHub OIDC to obtain a short-lived NuGet API key, builds, tests, and packages both NuGet projects, saves the packages as an artifact, and publishes them to NuGet.org. GitVersion derives package versions from the release tag.
 
 ## Thanks
 Thank you to [JetBrains](https://www.jetbrains.com/) for providing developers with an Open Source License for [ReSharper](https://www.jetbrains.com/resharper/).
