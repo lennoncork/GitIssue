@@ -42,7 +42,7 @@ The solution is organized into four projects under `src/`:
 - `GitIssue` is the core library. It defines issue and field contracts,
   configuration, serialization, repository discovery, issue management,
   change tracking, and import/sync abstractions.
-- `GitIssue.Tool` is the executable .NET tool, exposed as `dotnet gitissue`.
+- `GitIssue.Tool` is the executable .NET tool, exposed as the `gitissue` command.
   It parses command options, wires dependencies, invokes library operations,
   and formats terminal output.
 - `GitIssue.Tests` tests the library, including issue persistence, fields,
