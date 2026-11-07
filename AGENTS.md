@@ -22,6 +22,7 @@ Quick commands (from the repository root):
 dotnet tool restore
 dotnet restore src/GitIssue.slnx --source https://api.nuget.org/v3/index.json
 dotnet cake --target=Build
+dotnet cake --target=Analyzers
 dotnet cake --target=Test
 ```
 

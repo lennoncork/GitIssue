@@ -25,7 +25,7 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static bool TryParse(ValueMetadata meta, out Enumerated enumerated)
         {
-            if (Enumerated.TryParseMetadata(meta, out string[] values))
+            if (Enumerated.tryParseMetadata(meta, out string[] values))
             {
                 if (values.Contains(meta.Value))
                 {
@@ -41,7 +41,7 @@ namespace GitIssue.Values
             return false;
         }
 
-        private static bool TryParseMetadata(ValueMetadata metadata, out string[] values)
+        private static bool tryParseMetadata(ValueMetadata metadata, out string[] values)
         {
             Match match = Regex.Match(metadata.Metadata, Enumerated.regex);
             if (match.Success)

@@ -33,11 +33,11 @@ namespace GitIssue.Tool.Commands.Import
             switch (Path.GetExtension(options.Import))
             {
                 case ".csv":
-                    await this.importCsv(options);
+                    await this.ImportCsv(options);
                     break;
 
                 case ".json":
-                    await this.importJson(options.Import);
+                    await this.ImportJson(options.Import);
                     break;
 
                 default:
@@ -47,7 +47,7 @@ namespace GitIssue.Tool.Commands.Import
             }
         }
 
-        public async Task importJson(string path)
+        public async Task ImportJson(string path)
         {
             FileImporter importer = new FileImporter(this.manager)
             {
@@ -108,7 +108,7 @@ namespace GitIssue.Tool.Commands.Import
             return alias;
         }
 
-        public async Task importCsv(ImportOptions options)
+        public async Task ImportCsv(ImportOptions options)
         {
             if (!File.Exists(options.Import))
             {
