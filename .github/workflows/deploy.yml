@@ -30,6 +30,7 @@ jobs:
         with:
           name: nuget-packages-${{ github.event.release.tag_name }}
           path: .packages/*.nupkg
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 30
       - name: Publish to NuGet.org
