@@ -1,95 +1,42 @@
 # GitIssue
 
-An 'in-source' issue management system built on GIT. Inspired by the great work of the [git-issue](https://github.com/dspinellis/git-issue) project. This project implements a similar concept in a .NET application with a flexible issue schema. 
+GitIssue is an in-source issue management system built on Git. It stores issues in your repository and supports a flexible issue schema.
 
 ![build](https://github.com/lennoncork/GitIssue/actions/workflows/build.yml/badge.svg?branch=main)
 
-# Quick Start
+## Quick start
 
-## Using the dotnet tool
+Install the .NET tool and initialize issue data from the root of a Git repository:
 
-To get the latest version as a dotnet tool
-
-1) Install the tool
-```
-dotnet tool install GitIssue.Tool
-```
-
-2) Try it out
-```
+```shell
+dotnet tool install --global GitIssue.Tool
+dotnet gitissue init
+dotnet gitissue create "Example issue" "Describe the work to be done."
 dotnet gitissue help
 ```
 
+See the [GitIssue User Guide](docs/README.md) for installation, workflows, commands, and configuration.
+
 ## Building from source
 
-To build from source, clone this repository, build and configure an alias in GIT. 
+To build from source, clone this repository, build, and configure the optional Git alias.
 
-1) Clone the repository
-
-```
+```shell
 git clone git@github.com:lennoncork/GitIssue.git
-```
-
-2) Build the GitIssue Tool
-
-```
 dotnet tool restore
 dotnet cake
-```
-
-3) Configure the git alias
-```
-
 ./scripts/config-alias.sh
 ```
 
 The alias runs `.publish/GitIssue.Tool.exe`, which the Cake publish target builds for `win-x64`.
 
-4) Try it out
+## Compatibility
 
-```
-git issue help
-```
-
-# Compatibility
-
-This project runs on .NET 10 and is compatible with both Windows and Linux. 
-
-## Configuration
-
-The issue configuration is contained in the config.json file checked into source. This config file describes the set of fields, their types, and expected values. The config file is created automatically using the `init` command. 
-
-## Help
-
-### Initialization
-
-* `git issue init`: Create a new issues repository in the current directory.
-
-### Work with an issue
-
-* `git issue create`: Creates a new issue.
-* `git issue track`: Tracks an existing issue, simplifies subsequent commands.
-* `git issue delete`: Deletes a specified (or tracked) issue.
-* `git issue show`: Shows the tracked issue, all issues, or mine.
-* `git issue edit`: Edits a specified (or tracked) issue.
-* `git issue add`: Adds a value to a field on a specified (or tracked) issue.
-* `git issue remove`: Removes a value from a field on a specified (or tracked) issue.
-* `git issue comment`: Adds a comment to a specified (or tracked) issue.
-* `git issue find`: Finds an existing issue.
-* `git issue commit`: Commits the issues to the repository.
-
-### Help and debug
-
-* `git issue help`: Display help information about git issue.
-* `git issue fields`: Display the fields available in the issue repository.
-* `git issue export`: Exports issues to a JSON or CSV file.
-* `git issue import`: Imports issues from a CSV file.
-* `git issue changes`: Shows the change log.
-* `git issue version`: Displays the version of the tool.
+The tool targets .NET 10 and supports Windows and Linux.
 
 ## Contributing
 
-This project is in it's early phases of development and contributions are very welcome. 
+Contributions are welcome. See the [user guide](docs/README.md) for project usage and the repository's contribution process.
 
 ## Thanks
 Thank you to [JetBrains](https://www.jetbrains.com/) for providing developers with an Open Source License for [ReSharper](https://www.jetbrains.com/resharper/).
