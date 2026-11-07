@@ -12,6 +12,7 @@ Task("Clean")
     .Does(() =>
     {
         CleanDirectory($"./src/GitIssue/.output/");
+        CleanDirectory("./.packages/");
     });
 
 Task("Build")
@@ -44,6 +45,7 @@ Task("Analyzers")
     });
 
 Task("Test")
+    .IsDependentOn("Build")
     .DoesForEach(() => GetFiles("./src/**/*Tests.csproj"), testProject =>
     {
         DotNetTest(testProject.FullPath, new DotNetTestSettings
@@ -157,7 +159,7 @@ Task("Publish")
     });
 
 Task("Package")
-    .IsDependentOn("Build")
+    .IsDependentOn("Test")
     .Does(() =>
     {
         DotNetPack("src/GitIssue.slnx", new DotNetPackSettings
@@ -166,6 +168,44 @@ Task("Package")
             OutputDirectory = "./.packages/",
             NoBuild = true,
         });
+    });
+
+Task("PushRelease")
+    .Does(() =>
+    {
+        var packageFiles = GetFiles("./.packages/*.nupkg").ToArray();
+        if (packageFiles.Length == 0)
+        {
+            throw new CakeException("No NuGet packages were produced.");
+        }
+
+        var apiKey = EnvironmentVariable("NUGET_API_KEY");
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            throw new CakeException("Configure the NUGET_API_KEY secret in the nuget.org GitHub environment.");
+        }
+
+        foreach (var package in packageFiles)
+        {
+            Information("Publishing {0}...", package.FullPath);
+            var arguments = new ProcessArgumentBuilder()
+                .Append("nuget")
+                .Append("push")
+                .AppendQuoted(package.FullPath)
+                .Append("--api-key")
+                .AppendQuoted(apiKey)
+                .Append("--source")
+                .AppendQuoted("https://api.nuget.org/v3/index.json")
+                .Append("--skip-duplicate");
+            var exitCode = StartProcess("dotnet", new ProcessSettings
+            {
+                Arguments = arguments,
+            });
+            if (exitCode != 0)
+            {
+                throw new CakeException($"Publishing '{package.GetFilename()}' failed with exit code {exitCode}.");
+            }
+        }
     });
 
 Task("Push")

@@ -38,5 +38,9 @@ The tool targets .NET 10 and supports Windows and Linux.
 
 Contributions are welcome. See the [user guide](docs/README.md) for project usage and the repository's contribution process.
 
+## Releasing
+
+After the build workflow passes on `main`, create and publish a GitHub Release from a stable `vMAJOR.MINOR.PATCH` tag, such as `v0.3.0`. Configure `NUGET_API_KEY` as a secret in the repository's `nuget.org` environment before publishing. The deployment workflow builds, tests, and packages both NuGet projects; GitVersion derives their versions from the release tag. The workflow saves the packages as an artifact and publishes them to NuGet.org.
+
 ## Thanks
 Thank you to [JetBrains](https://www.jetbrains.com/) for providing developers with an Open Source License for [ReSharper](https://www.jetbrains.com/resharper/).
