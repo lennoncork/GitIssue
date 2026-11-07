@@ -83,7 +83,8 @@ The issue configuration is contained in the config.json file checked into source
 * `git issue help`: Display help information about git issue.
 * `git issue fields`: Display the fields available in the issue repository.
 * `git issue export`: Exports issues to a JSON or CSV file.
-* `git issue import`: Imports issues from a CSV file.
+* `git issue import`: Imports issues from a JSON or CSV file.
+* `git issue sync`: Imports issues from a JSON file.
 * `git issue changes`: Shows the change log.
 * `git issue version`: Displays the version of the tool.
 
