@@ -56,6 +56,12 @@ Task("Test")
 Task("Coverage")
     .Does(() =>
     {
+        var restore = StartProcess("dotnet", "tool restore");
+        if (restore != 0)
+        {
+            throw new CakeException($"dotnet tool restore failed with exit code {restore}.");
+        }
+
         CleanDirectory(coverageDirectory);
     })
     .DoesForEach(() => GetFiles("./src/**/*Tests.csproj"), testProject =>
