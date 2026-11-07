@@ -80,9 +80,12 @@ The tracked issue and the issue change log are persisted separately from the
 issue fields. The tracked-issue file supports the CLI's current-issue shortcut;
 the change log records issue operations for display and commit messaging.
 `IssueManager.CommitAsync` stages issue-data changes and creates a Git commit
-through LibGit2Sharp. It checks for an in-progress merge or staged changes
-before committing, and excludes the tracking and change-log files from the
-issue-data commit.
+through LibGit2Sharp. It refuses the commit when a merge is in progress or when
+index changes already exist under the issues directory. Staged adds, edits,
+deletions, and renames outside that directory stay in the index and are left
+out of the issue commit. Ignored files under the issues directory are not
+added. The tracking file and change log are excluded from the commit, and the
+cleared change log is written before the method returns.
 
 ### Command-line layer
 
