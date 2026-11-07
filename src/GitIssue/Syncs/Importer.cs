@@ -204,7 +204,7 @@ namespace GitIssue.Syncs
             if (synced.IsValid)
             {
                 issue = await this.manager
-                    .FindAsync(i => i.Key == importKey)
+                    .FindAsync(i => i.Key == synced.IssueKey)
                     .FirstOrDefaultAsync();
             }
 
