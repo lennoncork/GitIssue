@@ -41,9 +41,9 @@ namespace GitIssue.Tool.Commands.Import
                     break;
 
                 default:
-                    string message = $"Unsupported import file '{options.Import}'. Use a .json or .csv file.";
-                    this.logger.Error(message);
-                    throw new InvalidOperationException(message);
+                    this.logger.Error($"Unsupported import file '{options.Import}'. Use a .json or .csv file.");
+                    this.ExitCode = 1;
+                    break;
             }
         }
 
@@ -67,7 +67,7 @@ namespace GitIssue.Tool.Commands.Import
                 ? $"Failed to import issues from {path}. The JSON object must include Key and Title."
                 : $"Import file {path} does not exist";
             this.logger.Error(message);
-            throw new InvalidOperationException(message);
+            this.ExitCode = 1;
         }
 
         private static async Task applyDefaultMappingAsync(FileImporter importer)
@@ -113,6 +113,7 @@ namespace GitIssue.Tool.Commands.Import
             if (!File.Exists(options.Import))
             {
                 this.logger.Error($"Import file {options.Import} does not exist");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -122,6 +123,8 @@ namespace GitIssue.Tool.Commands.Import
             string? header = await reader.ReadLineAsync();
             if (header == null)
             {
+                this.logger.Error($"Import file {options.Import} is empty");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -142,6 +145,8 @@ namespace GitIssue.Tool.Commands.Import
 
             if (!mapping.ContainsKey("Key"))
             {
+                this.logger.Error($"Import file {options.Import} does not contain a Key column");
+                this.ExitCode = 1;
                 return;
             }
 
