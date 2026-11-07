@@ -10,10 +10,12 @@ Install the .NET tool and initialize issue data from the root of a Git repositor
 
 ```shell
 dotnet tool install --global GitIssue.Tool
-dotnet gitissue init
-dotnet gitissue create "Example issue" "Describe the work to be done."
-dotnet gitissue help
+gitissue init
+gitissue create "Example issue" "Describe the work to be done."
+gitissue help
 ```
+
+A global install runs as `gitissue`. A local tool install runs as `dotnet gitissue`.
 
 See the [GitIssue User Guide](docs/README.md) for installation, workflows, commands, and configuration.
 
