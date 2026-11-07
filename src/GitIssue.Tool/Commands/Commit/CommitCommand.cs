@@ -26,7 +26,10 @@ namespace GitIssue.Tool.Commands.Commit
             if (result)
             {
                 Console.WriteLine($"Committed changes in {this.manager.Root.Name}, see log for details");
+                return;
             }
+
+            this.ExitCode = 1;
         }
     }
 }

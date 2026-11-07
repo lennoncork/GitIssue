@@ -30,6 +30,22 @@ namespace GitIssue.Tool.Tests.Integration
         }
 
         [Test]
+        public void Import_ReturnsNonZeroWhenFileDoesNotExist()
+        {
+            this.InitializeRepository();
+            string importFile = Path.Combine(this.TestDirectory, "missing.csv");
+
+            int exitCode = this.Run("Import", importFile);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(this.Output + this.Error, Does.Contain($"Import file {importFile} does not exist"));
+                Assert.That(this.GetIssueKeys(), Is.Empty);
+            });
+        }
+
+        [Test]
         public void Import_CreatesIssueFromJson()
         {
             this.InitializeRepository();
@@ -73,6 +89,22 @@ namespace GitIssue.Tool.Tests.Integration
         }
 
         [Test]
+        public void Import_ReturnsNonZeroWhenJsonFileDoesNotExist()
+        {
+            this.InitializeRepository();
+            string importFile = Path.Combine(this.TestDirectory, "missing.json");
+
+            int exitCode = this.Run("Import", importFile);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(this.Output + this.Error, Does.Contain($"Import file {importFile} does not exist"));
+                Assert.That(this.GetIssueKeys(), Is.Empty);
+            });
+        }
+
+        [Test]
         public void Import_UnknownExtensionExitsNonZero()
         {
             this.InitializeRepository();
@@ -84,7 +116,9 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.Multiple(() =>
             {
                 Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(this.Output + this.Error, Does.Contain($"Unsupported import file '{importFile}'. Use a .json or .csv file."));
                 Assert.That(this.GetIssueKeys(), Is.Empty);
+                this.AssertFileContents(importFile, "not an import");
             });
         }
 
@@ -107,6 +141,22 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(this.GetIssueKeys(), Has.Length.EqualTo(1));
                 Assert.That(this.Output, Does.Contain("Imported 1 issues"));
                 Assert.That(this.Output, Does.Not.Contain("Exported"));
+            });
+        }
+
+        [Test]
+        public void Sync_ReturnsNonZeroWhenImportFails()
+        {
+            this.InitializeRepository();
+            string importFile = Path.Combine(this.TestDirectory, "missing.json");
+
+            int exitCode = this.Run("Sync", importFile);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(this.Output + this.Error, Does.Contain($"Import file {importFile} does not exist"));
+                Assert.That(this.GetIssueKeys(), Is.Empty);
             });
         }
     }

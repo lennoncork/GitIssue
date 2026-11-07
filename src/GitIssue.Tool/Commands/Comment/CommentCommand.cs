@@ -41,6 +41,7 @@ namespace GitIssue.Tool.Commands.Comment
             if (issue == null)
             {
                 this.logger?.Error($"Issue \"{options.Key}\" not found");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -52,6 +53,7 @@ namespace GitIssue.Tool.Commands.Comment
             if (string.IsNullOrEmpty(options.Comment))
             {
                 this.logger?.Error($"Comment \"{options.Comment}\" is not valid");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -69,6 +71,7 @@ namespace GitIssue.Tool.Commands.Comment
                     else
                     {
                         this.logger?.Error($"Comment \"{options.Comment}\" is not valid");
+                        this.ExitCode = 1;
                     }
 
                     arrayField.Add(String.Parse(options.Comment));

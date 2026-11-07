@@ -9,7 +9,7 @@ version: 1.0
 
 ## Description
 
-This skill runs the repository's Coverage Cake task to execute the unit tests, include only the `GitIssue` and `GitIssue.Tool` assemblies as configured in `coverage.settings`, and produce a merged Cobertura report at `./artifacts/combined.xml` plus a Markdown summary in `./coverage/CoverageReport`. Validation requires at least 80% line coverage for each assembly.
+This skill runs the repository's Coverage Cake task to execute the unit tests and include only the `GitIssue` and `GitIssue.Tool` assemblies as configured in `coverage.settings`. The Validate target merges those results to `./artifacts/combined.xml` and requires at least 80% line coverage for `GitIssue` and 60% line coverage for `GitIssue.Tool`. The Report target writes a Markdown summary in `./coverage/CoverageReport`.
 
 ## Prerequisites
 - Install a compatible .NET SDK (see `dotnet --info`).

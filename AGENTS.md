@@ -9,6 +9,14 @@ Agents should:
 - Use the commands in the sections below when validating changes.
 - Prefer running tests frequently to ensure changes remain safe.
 
+## User documentation
+
+User-facing documentation is maintained as plain Markdown under `docs/`; no site generator or documentation deployment workflow is required. The [user guide](docs/README.md) is the entry point, with the [command reference](docs/commands.md) and [configuration guide](docs/configuration.md) as supporting pages. The repository [README](README.md) should remain a concise project overview and link to the guide.
+
+When a change affects installation, CLI commands or options, defaults, configuration, file formats, or user workflows, update the relevant documentation in the same change. Verify examples and option names against the implementation or `dotnet gitissue <command> --help`; do not document planned or unsupported behavior as current. Keep links between Markdown pages relative, and keep the docs readable directly in GitHub without requiring a generated site.
+
+Keep the repository's [design document](DESIGN.md) aligned with the implementation. Update it in the same change whenever project vision, requirements, architecture, validation practices, or documentation structure materially changes. Describe the current code and supported workflows, not planned behavior, and avoid duplicating detailed user instructions already maintained under `docs/`.
+
 ## Build and Test skills
 
 Build and test instructions are maintained as reusable skills in the repository. See the skill files for canonical steps and guidance:

@@ -20,13 +20,14 @@ namespace GitIssue.Tool.Commands.Sync
         }
 
         /// <inheritdoc />
-        public override Task Exec(SyncOptions options)
+        public override async Task Exec(SyncOptions options)
         {
             ImportCommand import = new ImportCommand(this.manager, this.logger);
-            return import.Exec(new ImportOptions
+            await import.Exec(new ImportOptions
             {
                 Import = options.Import,
             });
+            this.ExitCode = import.ExitCode;
         }
     }
 }
