@@ -44,7 +44,7 @@ namespace GitIssue.Tool.Tests.Integration
             this.AssertJsonArrayContains(this.ReadIssue(primaryKey), "Comments", "Include the compatibility notes.");
 
             // Search the backlog to confirm the updated task is discoverable.
-            this.RunSuccessfully("Find", "i => i.Title.ToString() == \"Publish release notes\"");
+            this.RunSuccessfully("Find", "title=Publish release notes");
             Assert.That(this.Output, Does.Contain(updatedTitle));
             Assert.That(this.Output, Does.Not.Contain(importedTitle));
 

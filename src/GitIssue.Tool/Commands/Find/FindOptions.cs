@@ -9,10 +9,10 @@ namespace GitIssue.Tool.Commands.Find
         [Option("Format", HelpText = "The format to output in", Required = false)]
         public string Format { get; set; } = "%Key %Title %Delta";
 
-        [Value(0, MetaName = "LINQ", HelpText = "The LINQ expression to use when matching", Required = false)]
-        public string Linq { get; set; } = "i => true";
+        [Value(0, MetaName = "Predicate", HelpText = "Matches title=, description=, author=, label=, or text=. The value is the remainder after the first =. An empty predicate matches every issue.", Required = false)]
+        public string Linq { get; set; } = string.Empty;
 
-        [Option("LinqName", HelpText = "The name of the issue in the linq expression", Required = false)]
+        [Option("LinqName", HelpText = "Ignored. Predicates match issue fields directly and do not bind a variable name.", Required = false)]
         public string LinqName { get; set; } = "i";
     }
 #pragma warning restore 1591
