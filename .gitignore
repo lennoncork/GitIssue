@@ -6,6 +6,6 @@
 .cake
 *.user
 .issues
-coverage
+/coverage
 artifacts
 *.coverlet.json
