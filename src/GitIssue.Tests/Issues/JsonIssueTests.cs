@@ -53,7 +53,7 @@ namespace GitIssue.Tests.Issues
                 Assert.That(issue[key1], Is.SameAs(field1));
                 Assert.That(issue.ContainsKey(key1), Is.True);
 
-                bool found = issue.TryGetValue(key2, out IField foundField);
+                bool found = issue.TryGetValue(key2, out IField? foundField);
                 Assert.That(found, Is.True);
                 Assert.That(foundField, Is.SameAs(field2));
 

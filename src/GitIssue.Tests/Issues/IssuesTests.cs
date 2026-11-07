@@ -16,12 +16,15 @@ namespace GitIssue.Tests.Issues
     [TestFixture]
     public class IssuesTests
     {
-        private static IEnumerable<Type> IssueTypes()
+        public static IEnumerable<Type> IssueTypes
         {
-            yield return typeof(JsonIssue);
+            get
+            {
+                yield return typeof(JsonIssue);
+            }
         }
 
-        private static async Task<IIssue> CreateIssueAsync(Type issueType)
+        public static async Task<IIssue> CreateIssueAsync(Type issueType)
         {
             string repoDir = Helpers.CreateTempDirectory();
             RepositoryRoot repoRoot = RepositoryRoot.Open(repoDir, null);

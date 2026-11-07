@@ -26,7 +26,7 @@ namespace GitIssue.Issues.File
         }
 
         /// <inheritdoc />
-        public override IEnumerable<IssueKey> Keys => this.FindAll(this.root.IssuesPath);
+        public override IEnumerable<IssueKey> Keys => this.findAll(this.root.IssuesPath);
 
         /// <inheritdoc />
         public override string GetIssuePath(IssueKey key)
@@ -38,7 +38,7 @@ namespace GitIssue.Issues.File
         public override IssueKey Next()
         {
             DateTime created = DateTime.Now;
-            string[] values = { created.Year.ToString("D4"), created.Month.ToString("D2"), created.Day.ToString("D2"), this.GetUniqueId(8) };
+            string[] values = { created.Year.ToString("D4"), created.Month.ToString("D2"), created.Day.ToString("D2"), this.getUniqueId(8) };
             string key = string.Join(FileIssueKeyProvider.separator, values);
             return IssueKey.Create(key);
         }
@@ -59,7 +59,7 @@ namespace GitIssue.Issues.File
         public override bool TryGetKey(string value, out IssueKey key)
         {
             value = value.Replace(FileIssueKeyProvider.separator, Path.DirectorySeparatorChar);
-            string[] split = this.NormalizePath(value).Split('/', '\\');
+            string[] split = this.normalizePath(value).Split('/', '\\');
             if (split.Length == 4)
             {
                 string year = split[0];
@@ -78,7 +78,7 @@ namespace GitIssue.Issues.File
             return false;
         }
 
-        private IEnumerable<IssueKey> FindAll(string directory)
+        private IEnumerable<IssueKey> findAll(string directory)
         {
             List<IssueKey> keys = new List<IssueKey>();
 
@@ -89,24 +89,24 @@ namespace GitIssue.Issues.File
 
             foreach (DirectoryInfo year in Directory.EnumerateDirectories(this.root.IssuesPath)
                          .Select(d => new DirectoryInfo(d)))
-            foreach (DirectoryInfo month in Directory.EnumerateDirectories(year.FullName)
-                         .Select(d => new DirectoryInfo(d)))
-            foreach (DirectoryInfo day in Directory.EnumerateDirectories(month.FullName)
-                         .Select(d => new DirectoryInfo(d)))
-            foreach (DirectoryInfo id in Directory.EnumerateDirectories(day.FullName)
-                         .Select(d => new DirectoryInfo(d)))
-            {
-                string path = Path.Combine(year.Name, month.Name, day.Name, id.Name);
-                if (this.TryGetKey(path, out IssueKey key))
-                {
-                    keys.Add(key);
-                }
-            }
+                foreach (DirectoryInfo month in Directory.EnumerateDirectories(year.FullName)
+                             .Select(d => new DirectoryInfo(d)))
+                    foreach (DirectoryInfo day in Directory.EnumerateDirectories(month.FullName)
+                                 .Select(d => new DirectoryInfo(d)))
+                        foreach (DirectoryInfo id in Directory.EnumerateDirectories(day.FullName)
+                                     .Select(d => new DirectoryInfo(d)))
+                        {
+                            string path = Path.Combine(year.Name, month.Name, day.Name, id.Name);
+                            if (this.TryGetKey(path, out IssueKey key))
+                            {
+                                keys.Add(key);
+                            }
+                        }
 
             return keys;
         }
 
-        private string GetUniqueId(int length)
+        private string getUniqueId(int length)
         {
             using SHA256 sha = SHA256.Create();
             byte[] checksum = sha.ComputeHash(Guid.NewGuid().ToByteArray());
@@ -117,7 +117,7 @@ namespace GitIssue.Issues.File
             return key;
         }
 
-        private string NormalizePath(string path)
+        private string normalizePath(string path)
         {
             if (Directory.Exists(Path.Combine(this.root.IssuesPath, path)))
             {

@@ -23,5 +23,19 @@ namespace GitIssue.Tool.Tests.Integration
                 this.AssertFileContents(this.GetIssueFile(key), issue);
             });
         }
+
+        [Test]
+        public void Show_ReturnsZeroWhenNoIssuesExist()
+        {
+            this.InitializeRepository();
+
+            int exitCode = this.Run("Show", "all");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Zero, this.Error);
+                Assert.That(this.Output, Does.Contain("No issues to show"));
+            });
+        }
     }
 }
