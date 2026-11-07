@@ -45,7 +45,7 @@ namespace GitIssue.Tool.Tests.Integration
         {
             this.InitializeRepository();
 
-            string log = await this.ExecInteractiveAsync(new ScriptedEditor(new Dictionary<string, string>
+            string log = await this.execInteractiveAsync(new ScriptedEditor(new Dictionary<string, string>
             {
                 ["Title"] = string.Empty,
             }));
@@ -63,7 +63,7 @@ namespace GitIssue.Tool.Tests.Integration
         {
             this.InitializeRepository();
 
-            await this.ExecInteractiveAsync(new ScriptedEditor(new Dictionary<string, string>
+            await this.execInteractiveAsync(new ScriptedEditor(new Dictionary<string, string>
             {
                 ["Title"] = "Editor title",
                 ["Description"] = "Editor description",
@@ -88,7 +88,7 @@ namespace GitIssue.Tool.Tests.Integration
             });
         }
 
-        private async Task<string> ExecInteractiveAsync(IEditor editor)
+        private async Task<string> execInteractiveAsync(IEditor editor)
         {
             CollectingSink sink = new CollectingSink();
             using IIssueManager manager = IssueManager.Open(this.TestDirectory);

@@ -26,5 +26,6 @@ dotnet cake --target=Test
 
 ## Guidance
 - Prefer the `dotnet cake` `Test` target to mirror CI.
+- The `Test` target also runs the `Formatting` check.
 - Run the `Test` target after making significant changes.
 - Use `dotnet test` only for quick, isolated tests when debugging a single project.

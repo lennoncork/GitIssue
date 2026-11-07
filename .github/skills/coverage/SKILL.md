@@ -9,7 +9,7 @@ version: 1.0
 
 ## Description
 
-This skill runs the repository's Coverage Cake task to execute the unit tests and produce a coverage report in the `./coverage` directory.
+This skill runs the repository's Coverage Cake task to execute the unit tests and include only the `GitIssue` and `GitIssue.Tool` assemblies as configured in `coverage.settings`. The Validate target merges those results to `./artifacts/combined.xml` and requires at least 80% line coverage for `GitIssue` and 60% line coverage for `GitIssue.Tool`. The Report target writes a Markdown summary in `./coverage/CoverageReport`.
 
 ## Prerequisites
 - Install a compatible .NET SDK (see `dotnet --info`).
@@ -26,5 +26,5 @@ dotnet cake --target=Coverage
 
 ## Guidance
 - Prefer the `dotnet cake` `Coverage` target when you need coverage output for the test suite.
-- Review the generated reports in `./coverage` after the task completes.
+- Review `./artifacts/combined.xml` and the generated summary in `./coverage/CoverageReport` after the task completes.
 - Use the test skill for standard test execution when coverage output is not needed.

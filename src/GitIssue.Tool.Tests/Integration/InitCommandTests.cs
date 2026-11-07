@@ -27,5 +27,13 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(this.Output, Does.Contain("Initialized empty 'Issue' repository"));
             });
         }
+
+        [Test]
+        public void Help_ReturnsZero()
+        {
+            int exitCode = this.Run("--help");
+
+            Assert.That(exitCode, Is.Zero);
+        }
     }
 }

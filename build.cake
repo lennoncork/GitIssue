@@ -1,4 +1,3 @@
-#addin nuget:?package=Cake.Coverlet&version=6.0.1
 #tool dotnet:?package=dotnet-reportgenerator-globaltool&version=5.5.11
 
 #nullable enable
@@ -8,10 +7,6 @@ var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
 
 var coverageDirectory = MakeAbsolute(Directory("./coverage"));
-
-var coreCoverageThreshold = 80U;
-
-var toolCoverageThreshold = 60U;
 
 Task("Clean")
     .Does(() =>
@@ -29,8 +24,26 @@ Task("Build")
         });
     });
 
+Task("Format")
+    .Does(() =>
+    {
+        DotNetFormat("./src/GitIssue.slnx", new DotNetFormatSettings
+        {
+            VerifyNoChanges = true,
+        });
+    });
+
+Task("Analyzers")
+    .Does(() =>
+    {
+        DotNetFormat("./src/GitIssue.slnx", new DotNetFormatSettings
+        {
+            ArgumentCustomization = args => args.Append("analyzers").Append("--severity").Append("info"),
+            VerifyNoChanges = true,
+        });
+    });
+
 Task("Test")
-    .IsDependentOn("Build")
     .DoesForEach(() => GetFiles("./src/**/*Tests.csproj"), testProject =>
     {
         DotNetTest(testProject.FullPath, new DotNetTestSettings
@@ -40,41 +53,85 @@ Task("Test")
         });
     });
 
-Task("CoverageTests")
-    .IsDependentOn("Build")
+Task("Coverage")
     .Does(() =>
     {
+        var restore = StartProcess("dotnet", "tool restore");
+        if (restore != 0)
+        {
+            throw new CakeException($"dotnet tool restore failed with exit code {restore}.");
+        }
+
         CleanDirectory(coverageDirectory);
     })
     .DoesForEach(() => GetFiles("./src/**/*Tests.csproj"), testProject =>
     {
-        bool isCoreTestProject = testProject.GetFilenameWithoutExtension() == "GitIssue.Tests";
-        string module = isCoreTestProject ? "GitIssue" : "GitIssue.Tool";
-        uint threshold = isCoreTestProject ? coreCoverageThreshold : toolCoverageThreshold;
-        CoverletSettings coverlet = new CoverletSettings
-        {
-            CollectCoverage = true,
-            CoverletOutputName = $"Coverage.{testProject.GetFilenameWithoutExtension()}.coverlet",
-            CoverletOutputFormat = CoverletOutputFormat.json | CoverletOutputFormat.cobertura,
-            CoverletOutputDirectory = coverageDirectory,
-            Threshold = threshold,
-        }
-            .WithInclusion($"[{module}]*")
-            .WithThresholdType(ThresholdType.Line);
+        var coverageFile = coverageDirectory.Combine($"{testProject.GetFilenameWithoutExtension()}.cobertura.xml");
+        var arguments = new ProcessArgumentBuilder()
+            .Append("collect")
+            .Append("--settings")
+            .AppendQuoted(MakeAbsolute(File("./coverage.settings")).FullPath)
+            .Append("dotnet")
+            .Append("test")
+            .AppendQuoted(testProject.FullPath)
+            .Append("--configuration")
+            .Append(configuration)
+            .Append("--no-build")
+            .Append("--output-format")
+            .Append("cobertura")
+            .Append("--output")
+            .AppendQuoted(coverageFile.FullPath);
 
-        DotNetTest(testProject.FullPath, new DotNetTestSettings
-        {
-            Configuration = configuration,
-            NoBuild = true,
-        }, coverlet);
+        DotNetTool("./", "dotnet-coverage", arguments);
     });
 
-Task("Coverage")
-    .IsDependentOn("CoverageTests")
+Task("Validate")
+    .IsDependentOn("Coverage")
     .Does(() =>
     {
+        MergeCoverageReports();
+        var combined = MakeAbsolute(File("./artifacts/combined.xml"));
+        if (!FileExists(combined))
+        {
+            throw new CakeException($"Merged coverage file {combined} was not created.");
+        }
+
+        var rates = ReadPackageLineRates(combined);
+        var thresholds = new Dictionary<string, double>
+        {
+            { "GitIssue", 0.80 },
+            { "GitIssue.Tool", 0.60 },
+        };
+
+        foreach (var threshold in thresholds)
+        {
+            if (!rates.TryGetValue(threshold.Key, out var rate))
+            {
+                throw new CakeException($"Coverage for {threshold.Key} was not reported.");
+            }
+
+            var percent = rate * 100;
+            var required = threshold.Value * 100;
+            Information($"{threshold.Key} line coverage is {percent:0.0}% (required {required:0}%).");
+            if (rate < threshold.Value)
+            {
+                throw new CakeException($"{threshold.Key} line coverage {percent:0.0}% is below the required {required:0}%.");
+            }
+        }
+    });
+
+Task("Report")
+    .IsDependentOn("Coverage")
+    .Does(() =>
+    {
+        var coverageFiles = GetFiles($"{coverageDirectory}/*.cobertura.xml");
+        if (!coverageFiles.Any())
+        {
+            throw new CakeException($"No coverage files were generated in {coverageDirectory}.");
+        }
+
         ReportGenerator(
-            GetFiles($"{coverageDirectory}/Coverage.*.coverlet"),
+            coverageFiles,
             coverageDirectory.Combine("CoverageReport"),
             new ReportGeneratorSettings
             {
@@ -134,8 +191,66 @@ Task("Push")
 Task("Default")
     .IsDependentOn("Clean")
     .IsDependentOn("Build")
+    .IsDependentOn("Format")
+    .IsDependentOn("Analyzers")
     .IsDependentOn("Test")
+    .IsDependentOn("Coverage")
+    .IsDependentOn("Report")
+    .IsDependentOn("Validate")
     .IsDependentOn("Package")
     .IsDependentOn("Publish");
+
+void MergeCoverageReports()
+{
+    var coverageFiles = GetFiles($"{coverageDirectory}/*.cobertura.xml").ToList();
+    if (coverageFiles.Count == 0)
+    {
+        throw new CakeException($"No coverage files were generated in {coverageDirectory}.");
+    }
+
+    var artifactsDirectory = MakeAbsolute(Directory("./artifacts"));
+    EnsureDirectoryExists(artifactsDirectory);
+    var combined = artifactsDirectory.CombineWithFilePath("combined.xml");
+
+    if (coverageFiles.Count == 1)
+    {
+        CopyFile(coverageFiles[0], combined);
+        return;
+    }
+
+    var arguments = new ProcessArgumentBuilder()
+        .Append("merge");
+    foreach (var coverageFile in coverageFiles)
+    {
+        arguments.AppendQuoted(coverageFile.FullPath);
+    }
+
+    arguments
+        .Append("--output")
+        .AppendQuoted(combined.FullPath)
+        .Append("--output-format")
+        .Append("cobertura");
+
+    DotNetTool("./", "dotnet-coverage", arguments);
+}
+
+Dictionary<string, double> ReadPackageLineRates(FilePath coverageFile)
+{
+    var document = System.Xml.Linq.XDocument.Load(coverageFile.FullPath);
+    var rates = new Dictionary<string, double>();
+    foreach (var package in document.Descendants("package"))
+    {
+        var name = (string?)package.Attribute("name");
+        var rate = (string?)package.Attribute("line-rate");
+        if (name == null || rate == null)
+        {
+            continue;
+        }
+
+        rates[name] = double.Parse(rate, System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    return rates;
+}
 
 RunTarget(target);
