@@ -9,8 +9,8 @@ namespace GitIssue.Tests.IntegrationTests.Bug
     /// </summary>
     public static class BugExtensions
     {
-        private static readonly FieldKey FixVersionKey = FieldKey.Create("FixVersion");
-        private static readonly FieldKey SeverityKey = FieldKey.Create("Severity");
+        private static readonly FieldKey fixVersionKey = FieldKey.Create("FixVersion");
+        private static readonly FieldKey severityKey = FieldKey.Create("Severity");
 
         /// <summary>
         ///     Gets the fix version of the issue
@@ -18,7 +18,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
         /// <param name="issue">the issue</param>
         public static Version[] GetFixVersion(this IIssue issue)
         {
-            Version[] fixVersion = issue.GetField(BugExtensions.FixVersionKey).AsArray<Version>();
+            Version[] fixVersion = issue.GetField(BugExtensions.fixVersionKey).AsArray<Version>();
             return fixVersion;
         }
 
@@ -29,7 +29,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
         /// <returns></returns>
         public static Enumerated GetSeverity(this IIssue issue)
         {
-            Enumerated severity = issue.GetField(BugExtensions.SeverityKey).AsValue<Enumerated>();
+            Enumerated severity = issue.GetField(BugExtensions.severityKey).AsValue<Enumerated>();
             return severity;
         }
 
@@ -40,7 +40,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
         /// <param name="fixVersion">the fix version to set</param>
         public static void SetFixVersion(this IIssue issue, Version[] fixVersion)
         {
-            issue.SetField(BugExtensions.FixVersionKey).WithArray(fixVersion);
+            issue.SetField(BugExtensions.fixVersionKey).WithArray(fixVersion);
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace GitIssue.Tests.IntegrationTests.Bug
         /// <param name="severity">the issue's severity</param>
         public static void SetSeverity(this IIssue issue, Enumerated severity)
         {
-            issue.SetField(BugExtensions.SeverityKey).WithValue(severity);
+            issue.SetField(BugExtensions.severityKey).WithValue(severity);
         }
     }
 }

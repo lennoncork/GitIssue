@@ -14,7 +14,7 @@ namespace GitIssue.Tool.Commands.Comment
     /// </summary>
     public class CommentCommand : Command<CommentOptions>
     {
-        private static readonly string CommentField = "Comments";
+        private static readonly string commentField = "Comments";
 
         private readonly IEditor editor;
 
@@ -57,7 +57,7 @@ namespace GitIssue.Tool.Commands.Comment
                 return;
             }
 
-            FieldKey key = FieldKey.Create(CommentCommand.CommentField);
+            FieldKey key = FieldKey.Create(CommentCommand.commentField);
             if (issue.TryGetValue(key, out IField? field))
             {
                 if (field is IArrayField arrayField)

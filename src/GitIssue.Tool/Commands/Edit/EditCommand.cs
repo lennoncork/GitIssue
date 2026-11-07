@@ -42,7 +42,7 @@ namespace GitIssue.Tool.Commands.Edit
                 return;
             }
 
-            if (EditCommand.TryGetEditor(this.manager.Repository, "issues.editor", out string config))
+            if (EditCommand.tryGetEditor(this.manager.Repository, "issues.editor", out string config))
             {
                 options.Editor = config;
             }
@@ -93,7 +93,7 @@ namespace GitIssue.Tool.Commands.Edit
             }
         }
 
-        private static bool TryGetEditor(IRepository repository, string key, out string config)
+        private static bool tryGetEditor(IRepository repository, string key, out string config)
         {
             config = repository.Config.GetValueOrDefault<string>(key);
             return !string.IsNullOrEmpty(config);

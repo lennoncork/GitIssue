@@ -7,4 +7,5 @@
 *.user
 .issues
 coverage
+artifacts
 *.coverlet.json

@@ -74,6 +74,8 @@ namespace GitIssue.Tool.Commands.Create
                 {
                     issue.SetField(field.Key).WithField(field);
                 }
+
+                await issue.SaveAsync();
             }
             else
             {

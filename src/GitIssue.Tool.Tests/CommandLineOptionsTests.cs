@@ -10,7 +10,7 @@ namespace GitIssue.Tool.Tests
     [TestFixture]
     public class CommandLineOptionsTests
     {
-        private static T Parse<T>(params string[] arguments)
+        private static T parse<T>(params string[] arguments)
         {
             T? options = default;
             ParserResult<T> result = new Parser(settings => settings.HelpWriter = null)
@@ -24,7 +24,7 @@ namespace GitIssue.Tool.Tests
         [Test]
         public void Create_BindsTitleAndDescription()
         {
-            CreateOptions options = CommandLineOptionsTests.Parse<CreateOptions>("title", "description");
+            CreateOptions options = CommandLineOptionsTests.parse<CreateOptions>("title", "description");
 
             Assert.That(options.Title, Is.EqualTo("title"));
             Assert.That(options.Description, Is.EqualTo("description"));
@@ -33,7 +33,7 @@ namespace GitIssue.Tool.Tests
         [Test]
         public void Edit_BindsKeyFieldAndValue()
         {
-            EditOptions options = CommandLineOptionsTests.Parse<EditOptions>("issue-key", "Title", "updated");
+            EditOptions options = CommandLineOptionsTests.parse<EditOptions>("issue-key", "Title", "updated");
 
             Assert.That(options.Key, Is.EqualTo("issue-key"));
             Assert.That(options.Field, Is.EqualTo("Title"));
@@ -43,7 +43,7 @@ namespace GitIssue.Tool.Tests
         [Test]
         public void Export_BindsFile()
         {
-            ExportOptions options = CommandLineOptionsTests.Parse<ExportOptions>("issues.json");
+            ExportOptions options = CommandLineOptionsTests.parse<ExportOptions>("issues.json");
 
             Assert.That(options.Export, Is.EqualTo("issues.json"));
         }
@@ -51,7 +51,7 @@ namespace GitIssue.Tool.Tests
         [Test]
         public void Show_BindsSubcommandWithoutAKeyCollision()
         {
-            ShowOptions options = CommandLineOptionsTests.Parse<ShowOptions>("all");
+            ShowOptions options = CommandLineOptionsTests.parse<ShowOptions>("all");
 
             Assert.That(options.Show, Is.EqualTo(ShowSubCommand.all));
         }

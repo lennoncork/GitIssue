@@ -9,8 +9,11 @@ using NUnit.Framework;
 namespace GitIssue.Tool.Tests.Integration
 {
     [NonParallelizable]
-    public abstract class IntegrationTestBase
+    public abstract partial class IntegrationTestBase
     {
+        [GeneratedRegex(@"\u001B\[[0-9;]*m")]
+        private static partial Regex AnsiEscapeSequenceRegex();
+
         protected string Error { get; private set; } = string.Empty;
 
         protected string ChangesFile => Path.Combine(this.IssuesDirectory, Paths.ChangeLogFileName);
@@ -228,7 +231,7 @@ namespace GitIssue.Tool.Tests.Integration
             {
                 Console.SetOut(originalOut);
                 Console.SetError(originalError);
-                this.Output = Regex.Replace(output.ToString(), "\u001B\\[[0-9;]*m", string.Empty);
+                this.Output = IntegrationTestBase.AnsiEscapeSequenceRegex().Replace(output.ToString(), string.Empty);
                 this.Error = error.ToString();
             }
         }

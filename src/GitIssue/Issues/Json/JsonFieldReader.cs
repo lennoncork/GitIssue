@@ -14,7 +14,7 @@ namespace GitIssue.Issues.Json
         /// <inheritdoc />
         public override bool CanCreateField(FieldInfo info)
         {
-            if (JsonFieldReader.IsValueField(info) || JsonFieldReader.IsArrayField(info))
+            if (JsonFieldReader.isValueField(info) || JsonFieldReader.isArrayField(info))
             {
                 return true;
             }
@@ -25,7 +25,7 @@ namespace GitIssue.Issues.Json
         /// <inheritdoc />
         public override bool CanReadField(FieldInfo info)
         {
-            if (JsonFieldReader.IsValueField(info) || JsonFieldReader.IsArrayField(info))
+            if (JsonFieldReader.isValueField(info) || JsonFieldReader.isArrayField(info))
             {
                 return true;
             }
@@ -36,12 +36,12 @@ namespace GitIssue.Issues.Json
         /// <inheritdoc />
         public override IField CreateField<T>(Issue issue, FieldKey key, FieldInfo info)
         {
-            if (JsonFieldReader.IsValueField(info))
+            if (JsonFieldReader.isValueField(info))
             {
                 return new JsonValueField<T>(key);
             }
 
-            if (JsonFieldReader.IsArrayField(info))
+            if (JsonFieldReader.isArrayField(info))
             {
                 return new JsonArrayField<T>(key, new T[0]);
             }
@@ -57,20 +57,20 @@ namespace GitIssue.Issues.Json
                 JsonObject json = await JsonIssueExtensions.ReadJsonFieldsAsync(jsonIssue.Json);
                 if (json.TryGetPropertyValue(key.ToString(), out JsonNode? token))
                 {
-                    if (JsonFieldReader.IsValueField(info) && token is JsonValue jsonValue)
+                    if (JsonFieldReader.isValueField(info) && token is JsonValue jsonValue)
                     {
-                        if (this.TryGetValue(jsonValue, info, out T value))
+                        if (this.tryGetValue(jsonValue, info, out T value))
                         {
                             return new JsonValueField<T>(key, value);
                         }
                     }
 
-                    if (JsonFieldReader.IsArrayField(info) && token is JsonArray jsonArray)
+                    if (JsonFieldReader.isArrayField(info) && token is JsonArray jsonArray)
                     {
                         T[] values = jsonArray
                             .Select(node => node as JsonValue)
                             .Where(t => t != null)
-                            .Select(t => (s: this.TryGetValue(t!, info, out T v), r: v))
+                            .Select(t => (s: this.tryGetValue(t!, info, out T v), r: v))
                             .Where(t => t.s)
                             .Select(t => t.r)
                             .ToArray();
@@ -85,17 +85,17 @@ namespace GitIssue.Issues.Json
             return null!;
         }
 
-        private static bool IsArrayField(FieldInfo info)
+        private static bool isArrayField(FieldInfo info)
         {
             return info.FieldType.Type == typeof(JsonArrayField);
         }
 
-        private static bool IsValueField(FieldInfo info)
+        private static bool isValueField(FieldInfo info)
         {
             return info.FieldType.Type == typeof(JsonValueField);
         }
 
-        private bool TryGetValue<T>(JsonValue jsonValue, FieldInfo info, out T value)
+        private bool tryGetValue<T>(JsonValue jsonValue, FieldInfo info, out T value)
         {
             if (!JsonSerialization.TryGetScalar(jsonValue, out object? scalar))
             {

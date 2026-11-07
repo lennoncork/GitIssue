@@ -273,13 +273,13 @@ namespace GitIssue
             }
 
             foreach (StatusEntry? item in this.Repository.RetrieveStatus(new StatusOptions
-                     {
-                         PathSpec = new[] { $"{Path.GetRelativePath(this.Root.RootPath, this.Root.IssuesPath)}/*" },
-                         IncludeIgnored = true,
-                         IncludeUntracked = true,
-                         RecurseIgnoredDirs = true,
-                         RecurseUntrackedDirs = true,
-                     }))
+            {
+                PathSpec = new[] { $"{Path.GetRelativePath(this.Root.RootPath, this.Root.IssuesPath)}/*" },
+                IncludeIgnored = true,
+                IncludeUntracked = true,
+                RecurseIgnoredDirs = true,
+                RecurseUntrackedDirs = true,
+            }))
             {
                 bool ignored = this.Repository.Ignore.IsPathIgnored(item.FilePath);
                 string? relative = item.FilePath;
