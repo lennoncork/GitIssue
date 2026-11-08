@@ -8,6 +8,19 @@ namespace GitIssue.Tool.Tests.Integration
     public class MarkdownStorageTests : IntegrationTestBase
     {
         [Test]
+        public void Init_DefaultsToMarkdownStorage()
+        {
+            Assert.That(this.Run("Init"), Is.Zero, this.Error);
+            Assert.That(this.ReadJsonObject(this.ConfigurationFile)["Storage"]?.GetValue<string>(), Is.EqualTo("Markdown"));
+
+            Assert.That(this.Run("Create", "Default storage", "Stored as markdown."), Is.Zero, this.Error);
+            string key = this.findMarkdownKey("Default storage");
+
+            this.AssertFileExists(this.getMarkdownFile(key));
+            this.AssertFileDoesNotExist(this.GetIssueFile(key));
+        }
+
+        [Test]
         public void InitCreateValidateAndConvert_RoundTripsMarkdownStorage()
         {
             Assert.That(this.Run("Init", "--storage", "markdown"), Is.Zero, this.Error);

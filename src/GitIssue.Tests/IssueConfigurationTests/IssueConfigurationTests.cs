@@ -17,7 +17,7 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 IssueConfiguration config = new IssueConfiguration();
 
                 Assert.That(config.KeyProvider.Type, Is.EqualTo(typeof(FileIssueKeyProvider)));
-                Assert.That(config.Storage, Is.EqualTo(IssueStorage.Json));
+                Assert.That(config.Storage, Is.EqualTo(IssueStorage.Markdown));
                 Assert.That(config.Fields.ContainsKey(FieldKey.Create("Key")), Is.True);
                 Assert.That(config.Fields.ContainsKey(FieldKey.Create("Title")), Is.True);
                 Assert.That(config.Fields.ContainsKey(FieldKey.Create("Description")), Is.True);
@@ -51,8 +51,26 @@ namespace GitIssue.Tests.IssueConfigurationTests
 
                 Assert.That(loaded.Fields.Keys, Is.EquivalentTo(config.Fields.Keys));
                 Assert.That(loaded.KeyProvider.Type, Is.EqualTo(config.KeyProvider.Type));
-                Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Json));
+                Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Markdown));
+                Assert.That(json, Does.Contain("\"Storage\": \"Markdown\""));
+            }
+
+            [Test]
+            public void Read_TreatsOmittedStorageAsJson()
+            {
+                string directory = Helpers.CreateTempDirectory();
+                string file = Path.Combine(directory, "config.json");
+                IssueConfiguration config = new IssueConfiguration
+                {
+                    Storage = IssueStorage.Json,
+                };
+
+                config.Save(file);
+                string json = File.ReadAllText(file);
+                IssueConfiguration loaded = IssueConfiguration.Read(file);
+
                 Assert.That(json, Does.Not.Contain("\"Storage\""));
+                Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Json));
             }
         }
     }

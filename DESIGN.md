@@ -71,9 +71,10 @@ converters provide serialization and parsing for the supported domain values.
 `RepositoryRoot` identifies the working tree and the issue-data directory
 (`.issues` by default, or a name supplied by the user). The directory contains
 the JSON configuration and issue data. `IssueConfiguration.Storage` selects
-the issue document. `Json` keeps the default `FileIssue`/`JsonIssue` document.
-`Markdown` stores the same fields in one Markdown file, read and written with
-Markdig. `IssueValidator` checks each field against its configured type,
+the issue document and defaults to `Markdown`. `Json` keeps the
+`FileIssue`/`JsonIssue` document, including when an existing configuration
+omits `Storage`. `Markdown` stores the same fields in one Markdown file, read
+and written with Markdig. `IssueValidator` checks each field against its configured type,
 metadata, and required flag. `gitissue validate` reports those errors, and
 save, edit, and convert refuse to write an invalid document. The library also
 contains file-backed field implementations, allowing an individual field to be

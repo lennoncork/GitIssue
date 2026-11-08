@@ -36,10 +36,11 @@ The `--path` option selects the working directory, and `--tracking` changes the 
 
 ## Issue storage
 
-`Storage` selects the file written for each issue. When the property is omitted, GitIssue uses `Json`: one `.json` document per issue. Set it to `Markdown` to store that document as Markdown instead.
+`Storage` selects the file written for each issue. New repositories use `Markdown`: one `.md` document per issue. `gitissue init --storage json` selects one `.json` document per issue. A configuration that omits `Storage` stays on JSON so an existing repository keeps its current files.
 
 ```shell
-gitissue init --storage markdown
+gitissue init
+gitissue init --storage json
 ```
 
 A Markdown issue is `.issues/<key-path>/<key>.md`. Markdig parses the document. Each configured field is a level-2 heading, in the order stored in `config.json`. The level-1 heading repeats the issue key. Labels and other single-value arrays are bullet lists. Comments are level-3 blocks. `config.json`, `tracking.json`, and `changes.json` stay JSON, and `export` / `import` still use JSON or CSV.

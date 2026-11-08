@@ -56,11 +56,10 @@ namespace GitIssue.Tool
                         InitCommand.Initializer onInitCommand = () =>
                         {
                             IssueConfiguration config = new IssueConfiguration();
-                            if ((options is InitOptions initOptions) &&
-                                !string.IsNullOrWhiteSpace(initOptions.Storage) &&
-                                !initOptions.Storage.Equals(nameof(IssueStorage.Json), StringComparison.OrdinalIgnoreCase))
+                            if (options is InitOptions initOptions)
                             {
-                                if (!Enum.TryParse(initOptions.Storage, true, out IssueStorage storage))
+                                if (string.IsNullOrWhiteSpace(initOptions.Storage) ||
+                                    !Enum.TryParse(initOptions.Storage, true, out IssueStorage storage))
                                 {
                                     throw new ArgumentException($"Storage '{initOptions.Storage}' is not Json or Markdown.");
                                 }
