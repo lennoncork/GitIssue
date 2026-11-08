@@ -53,6 +53,65 @@ namespace GitIssue.Tool
         /// </summary>
         public int Success { get; set; } = 0;
 
+        private static (string, string) getProcessAndArgumentsFromCommand(string command)
+        {
+            try
+            {
+                Match match = Editor.ProcessCommandRegex().Match(command);
+                if (match.Success)
+                {
+                    if (match.Groups.Count == 3)
+                    {
+                        return (match.Groups[1].ToString().Trim(), match.Groups[2].ToString().Trim());
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Ignored
+            }
+
+            return (command.Trim(), string.Empty);
+        }
+
+        private static string getTempFile()
+        {
+            return Path.GetTempFileName();
+        }
+
+        private static bool isMatch(string input, string pattern, out Match match)
+        {
+            if (!string.IsNullOrEmpty(input))
+            {
+                match = Regex.Match(input, pattern);
+                return match.Success;
+            }
+
+            match = null!;
+            return false;
+        }
+
+        private static async IAsyncEnumerable<string> readLinesAsync(string file)
+        {
+            await using Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
+            using StreamReader reader = new StreamReader(stream);
+            string? line = await reader.ReadLineAsync();
+            while (line != null)
+            {
+                yield return line;
+                line = await reader.ReadLineAsync();
+            }
+        }
+
+        private static string removeComments(string input)
+        {
+            string comments = $@"^{Editor.commentChar}(.*)$";
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
+                .Where(l => !Regex.IsMatch(l, comments))
+                .ToArray();
+            return string.Join(Editor.newline, lines);
+        }
+
         public void UpdateCommand(string command)
         {
             (string, string) result = Editor.getProcessAndArgumentsFromCommand(command);
@@ -207,65 +266,6 @@ namespace GitIssue.Tool
             }
 
             issue.Apply(read);
-        }
-
-        private static (string, string) getProcessAndArgumentsFromCommand(string command)
-        {
-            try
-            {
-                Match match = Editor.ProcessCommandRegex().Match(command);
-                if (match.Success)
-                {
-                    if (match.Groups.Count == 3)
-                    {
-                        return (match.Groups[1].ToString().Trim(), match.Groups[2].ToString().Trim());
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // Ignored
-            }
-
-            return (command.Trim(), string.Empty);
-        }
-
-        private static string getTempFile()
-        {
-            return Path.GetTempFileName();
-        }
-
-        private static bool isMatch(string input, string pattern, out Match match)
-        {
-            if (!string.IsNullOrEmpty(input))
-            {
-                match = Regex.Match(input, pattern);
-                return match.Success;
-            }
-
-            match = null!;
-            return false;
-        }
-
-        private static async IAsyncEnumerable<string> readLinesAsync(string file)
-        {
-            await using Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-            using StreamReader reader = new StreamReader(stream);
-            string? line = await reader.ReadLineAsync();
-            while (line != null)
-            {
-                yield return line;
-                line = await reader.ReadLineAsync();
-            }
-        }
-
-        private static string removeComments(string input)
-        {
-            string comments = $@"^{Editor.commentChar}(.*)$";
-            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
-                .Where(l => !Regex.IsMatch(l, comments))
-                .ToArray();
-            return string.Join(Editor.newline, lines);
         }
 
         private async Task<bool> editFileAsync(string editor, string arguments)
