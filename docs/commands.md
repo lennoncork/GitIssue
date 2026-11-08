@@ -16,9 +16,10 @@ Options are case-insensitive. Run `gitissue <command> --help` for parser-generat
 
 | Command | Usage | Description |
 | --- | --- | --- |
-| `init` | `init` | Initialize issue data in the current repository. The default directory is `.issues`. |
+| `init` | `init [--storage markdown\|json]` | Initialize issue data in the current repository. The default directory is `.issues`. Each issue is saved as Markdown unless `--storage json` is set. |
 | `create` | `create [Title] [Description]` | Create an issue. If no title is given, the default editor opens. A new issue is tracked if no issue is currently tracked; `--Track` forces tracking of the new issue. |
 | `fields` | `fields` | List configured fields and their types. |
+| `validate` | `validate [Issue Key]` | Check issue documents against the configured fields. Omit the key to check every issue. `.`, `T`, and `Tracked` select the tracked issue. The command exits with code 1 when any field is invalid. |
 
 ## View, search, and track
 
@@ -68,6 +69,7 @@ gitissue delete ISSUE_KEY
 | `export` | `export [File] [--Overwrite] [--Separator VALUE]` | Export issues to a `.json` or `.csv` file. Existing output files are not overwritten unless `--Overwrite` is specified. |
 | `import` | `import [File] [--Update] [--Separator VALUE]` | Import issues from a `.json` or `.csv` file. JSON import expects `Key` and `Title` properties; `Description` is optional. |
 | `sync` | `sync [File]` | Import issues from a JSON file. |
+| `convert` | `convert --to json\|markdown` | Rewrite every issue into the selected storage format and update `config.json`. |
 
 Examples:
 

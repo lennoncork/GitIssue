@@ -72,6 +72,16 @@ namespace GitIssue.Tool.Commands.Create
                 issue = await this.manager.CreateAsync(value.Item);
                 foreach (IField field in fields)
                 {
+                    if (!this.configuration.Fields.TryGetValue(field.Key, out FieldInfo? info))
+                    {
+                        continue;
+                    }
+
+                    if (!info.IsValid(field) && issue.TryGetValue(field.Key, out IField? current) && info.IsValid(current))
+                    {
+                        continue;
+                    }
+
                     issue.SetField(field.Key).WithField(field);
                 }
 

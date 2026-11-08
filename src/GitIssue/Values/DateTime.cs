@@ -38,7 +38,10 @@ namespace GitIssue.Values
         {
             try
             {
-                this.value = System.DateTime.Parse(datetime);
+                this.value = System.DateTime.Parse(
+                    datetime,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind);
                 this.IsValid = true;
             }
             catch (FormatException)

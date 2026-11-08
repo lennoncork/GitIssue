@@ -31,8 +31,21 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static bool TryParse(string value, out Label label)
         {
-            label = new Label(value);
-            return true;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                label = default(Label);
+                return false;
+            }
+
+            string token = value.Trim();
+            if (token.IndexOfAny(new[] { ' ', '\t', '\r', '\n' }) >= 0)
+            {
+                label = default(Label);
+                return false;
+            }
+
+            label = new Label(token);
+            return !string.IsNullOrEmpty(label.Item);
         }
 
         /// <summary>
