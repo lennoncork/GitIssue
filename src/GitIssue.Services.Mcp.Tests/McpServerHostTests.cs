@@ -2,13 +2,14 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GitIssue.Mcp.Tools;
+using GitIssue.Services;
+using GitIssue.Services.Mcp.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ModelContextProtocol.Server;
 using NUnit.Framework;
 
-namespace GitIssue.Mcp.Tests
+namespace GitIssue.Services.Mcp.Tests
 {
     [TestFixture]
     [NonParallelizable]
@@ -69,7 +70,7 @@ namespace GitIssue.Mcp.Tests
         {
             IssueTools tools = new IssueTools(new IssueSession(() => throw new InvalidOperationException("missing config")));
 
-            McpOperationException? exception = Assert.Throws<McpOperationException>(() => tools.ListFields());
+            IssueOperationException? exception = Assert.Throws<IssueOperationException>(() => tools.ListFields());
 
             Assert.That(exception!.Message, Does.Contain("gitissue init"));
         }

@@ -1,9 +1,10 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using GitIssue.Services;
 using ModelContextProtocol.Server;
 
-namespace GitIssue.Mcp.Tools
+namespace GitIssue.Services.Mcp.Tools
 {
     /// <summary>
     ///     MCP resources for the issue schema and one issue document

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Exceptionable;
 
-namespace GitIssue.Mcp
+namespace GitIssue.Services.Mcp
 {
     /// <summary>
     ///     An mcp subcommand

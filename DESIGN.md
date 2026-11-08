@@ -37,11 +37,18 @@ For the project to fulfill that vision, it must:
 
 ### Solution structure
 
-The solution is organized into four projects under `src/`:
+The solution is organized under `src/`:
 
 - `GitIssue` is the core library. It defines issue and field contracts,
   configuration, serialization, repository discovery, issue management,
   change tracking, and import/sync abstractions.
+- `GitIssue.Services` is the shared application library. `IssueWorkspace`
+  lists, finds, creates, updates, comments, and tracks issues for every host.
+- `GitIssue.Services.Mcp` hosts the stdio MCP server and the Visual Studio Code
+  installer. `gitissue mcp serve` does not commit.
+- `GitIssue.Services.Web` hosts the local website. `gitissue web serve` starts
+  it with `dotnet exec` so the tool itself does not take an ASP.NET framework
+  reference.
 - `GitIssue.Tool` is the executable .NET tool, exposed as the `gitissue` command.
   It parses command options, wires dependencies, invokes library operations,
   and formats terminal output.
@@ -49,6 +56,9 @@ The solution is organized into four projects under `src/`:
   configuration, Git operations, and import/sync behavior.
 - `GitIssue.Tool.Tests` tests CLI command parsing and end-to-end command
   workflows against temporary repositories.
+- `GitIssue.Services.Tests`, `GitIssue.Services.Mcp.Tests`, and
+  `GitIssue.Services.Web.Tests` test the shared workspace, the MCP host, and
+  the website.
 
 ### Core issue model and schema
 

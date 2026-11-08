@@ -2,21 +2,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GitIssue.Mcp.Tools;
+using GitIssue.Services;
+using GitIssue.Services.Mcp.Tools;
 using LibGit2Sharp;
 using NUnit.Framework;
 
-namespace GitIssue.Mcp.Tests
+namespace GitIssue.Services.Mcp.Tests
 {
     [TestFixture]
     [NonParallelizable]
-    public class IssueMcpServiceTests
+    public class IssueWorkspaceTests
     {
         [Test]
         public async Task Create_PersistsIssueWithoutCommitting()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            using IssueMcpService service = fixture.Open();
+            using IssueWorkspace service = fixture.Open();
 
             IssueDocument created = await service.CreateIssueAsync("MCP title", "MCP description", CancellationToken.None);
             IssueDocument loaded = await service.GetIssueAsync(created.Key, CancellationToken.None);
@@ -37,7 +38,7 @@ namespace GitIssue.Mcp.Tests
         public async Task FindAndUpdate_RoundTripsConfiguredFields()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            using IssueMcpService service = fixture.Open();
+            using IssueWorkspace service = fixture.Open();
             IssueDocument created = await service.CreateIssueAsync("Feature work", "Expose issues.", CancellationToken.None);
 
             IssueDocument updated = await service.UpdateIssueAsync(created.Key, "Labels", "+feature", CancellationToken.None);
@@ -66,18 +67,18 @@ namespace GitIssue.Mcp.Tests
         public void GetIssue_MissingKey_Throws()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            using IssueMcpService service = fixture.Open();
+            using IssueWorkspace service = fixture.Open();
 
             Assert.That(
                 async () => await service.GetIssueAsync("MISSING-1", CancellationToken.None),
-                Throws.TypeOf<McpOperationException>());
+                Throws.TypeOf<IssueOperationException>());
         }
 
         [Test]
         public async Task Tools_ReadAndWriteThroughTheSession()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            using IssueMcpService service = fixture.Open();
+            using IssueWorkspace service = fixture.Open();
             IssueTools tools = new IssueTools(new IssueSession(() => service));
             IssueResources resources = new IssueResources(new IssueSession(() => service));
 
@@ -108,41 +109,41 @@ namespace GitIssue.Mcp.Tests
         public async Task Mutations_RejectInvalidInput()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            using IssueMcpService service = fixture.Open();
+            using IssueWorkspace service = fixture.Open();
             IssueDocument created = await service.CreateIssueAsync("Valid", null, CancellationToken.None);
 
             Assert.Multiple(() =>
             {
                 Assert.That(
                     async () => await service.CreateIssueAsync("  ", "Body", CancellationToken.None),
-                    Throws.TypeOf<McpOperationException>());
+                    Throws.TypeOf<IssueOperationException>());
                 Assert.That(
                     async () => await service.ListIssuesAsync(0, CancellationToken.None),
-                    Throws.TypeOf<McpOperationException>());
+                    Throws.TypeOf<IssueOperationException>());
                 Assert.That(
                     async () => await service.GetIssueAsync(" ", CancellationToken.None),
-                    Throws.TypeOf<McpOperationException>());
+                    Throws.TypeOf<IssueOperationException>());
                 Assert.That(
                     async () => await service.UpdateIssueAsync(created.Key, " ", "value", CancellationToken.None),
-                    Throws.TypeOf<McpOperationException>());
+                    Throws.TypeOf<IssueOperationException>());
                 Assert.That(
                     async () => await service.UpdateIssueAsync(created.Key, "Missing", "value", CancellationToken.None),
-                    Throws.TypeOf<McpOperationException>());
+                    Throws.TypeOf<IssueOperationException>());
                 Assert.That(
                     async () => await service.UpdateIssueAsync(created.Key, "Labels", "feature", CancellationToken.None),
-                    Throws.TypeOf<McpOperationException>());
+                    Throws.TypeOf<IssueOperationException>());
                 Assert.That(
                     async () => await service.AddCommentAsync(created.Key, " ", CancellationToken.None),
-                    Throws.TypeOf<McpOperationException>());
+                    Throws.TypeOf<IssueOperationException>());
             });
         }
 
         [Test]
-        public void IssueSession_RethrowsMcpOperationException()
+        public void IssueSession_RethrowsIssueOperationException()
         {
-            IssueSession session = new IssueSession(() => throw new McpOperationException("already reported"));
+            IssueSession session = new IssueSession(() => throw new IssueOperationException("already reported"));
 
-            McpOperationException? exception = Assert.Throws<McpOperationException>(() => session.Open());
+            IssueOperationException? exception = Assert.Throws<IssueOperationException>(() => session.Open());
 
             Assert.That(exception!.Message, Is.EqualTo("already reported"));
         }
@@ -151,12 +152,12 @@ namespace GitIssue.Mcp.Tests
         public async Task UpdateIssue_RejectsReadOnlyKey()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            using IssueMcpService service = fixture.Open();
+            using IssueWorkspace service = fixture.Open();
             IssueDocument created = await service.CreateIssueAsync("Keep the key", "Body", CancellationToken.None);
 
             Assert.That(
                 async () => await service.UpdateIssueAsync(created.Key, "Key", "OTHER-1", CancellationToken.None),
-                Throws.TypeOf<McpOperationException>());
+                Throws.TypeOf<IssueOperationException>());
         }
     }
 }

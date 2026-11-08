@@ -75,6 +75,16 @@ gitissue mcp install
 
 Reload the window and trust the `gitissue` server when Visual Studio Code asks. Copilot can then list and update issues in the working tree. The server does not commit. See the [command reference](commands.md#mcp-server).
 
+### Open the local website
+
+From the repository root:
+
+```shell
+gitissue web serve
+```
+
+The site listens on `http://127.0.0.1:5080`. Add `--open` to launch a browser. This is separate from `gitissue mcp serve`.
+
 ## Everyday workflows
 
 Commands that accept an issue key can use the key printed when the issue was created. For commands that support tracking, `.` (or `T` / `Tracked`) means the currently tracked issue.

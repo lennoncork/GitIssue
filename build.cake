@@ -102,7 +102,9 @@ Task("Validate")
         var thresholds = new Dictionary<string, double>
         {
             { "GitIssue", 0.80 },
-            { "GitIssue.Mcp", 0.80 },
+            { "GitIssue.Services", 0.80 },
+            { "GitIssue.Services.Mcp", 0.80 },
+            { "GitIssue.Services.Web", 0.80 },
             { "GitIssue.Tool", 0.60 },
         };
 

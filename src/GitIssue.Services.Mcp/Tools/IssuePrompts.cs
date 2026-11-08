@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using ModelContextProtocol.Server;
 
-namespace GitIssue.Mcp.Tools
+namespace GitIssue.Services.Mcp.Tools
 {
     /// <summary>
     ///     Prompt templates for working with GitIssue

@@ -2,9 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Nodes;
+using GitIssue.Services;
 using NUnit.Framework;
 
-namespace GitIssue.Mcp.Tests
+namespace GitIssue.Services.Mcp.Tests
 {
     [TestFixture]
     public class McpConfigurationInstallerTests
@@ -91,7 +92,7 @@ namespace GitIssue.Mcp.Tests
             McpConfigurationInstaller installer = new McpConfigurationInstaller();
             Assert.That(
                 () => installer.Install(new McpInstallRequest { ConfigurationFile = path }),
-                Throws.TypeOf<McpOperationException>());
+                Throws.TypeOf<IssueOperationException>());
         }
 
         [Test]
@@ -113,7 +114,7 @@ namespace GitIssue.Mcp.Tests
                 Assert.That(written, Does.Contain("gitissue"));
                 Assert.That(
                     () => installer.Install(new McpInstallRequest { ConfigurationFile = path }),
-                    Throws.TypeOf<McpOperationException>());
+                    Throws.TypeOf<IssueOperationException>());
                 Assert.That(installer.Uninstall(new McpInstallRequest
                 {
                     ConfigurationFile = Path.Combine(directory.Path, "absent.json"),

@@ -10,22 +10,22 @@ using GitIssue.Fields;
 using GitIssue.Fields.Array;
 using GitIssue.Issues;
 
-namespace GitIssue.Mcp
+namespace GitIssue.Services
 {
     /// <summary>
-    ///     Issue operations exposed to MCP tools
+    ///     Issue operations shared by the MCP server and the web server
     /// </summary>
-    public sealed class IssueMcpService : IDisposable
+    public sealed class IssueWorkspace : IDisposable
     {
         private readonly SemaphoreSlim gate = new SemaphoreSlim(1, 1);
 
         private readonly IIssueManager manager;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="IssueMcpService" /> class
+        ///     Initializes a new instance of the <see cref="IssueWorkspace" /> class
         /// </summary>
         /// <param name="manager">the issue manager</param>
-        public IssueMcpService(IIssueManager manager)
+        public IssueWorkspace(IIssueManager manager)
         {
             this.manager = manager;
         }
@@ -49,7 +49,7 @@ namespace GitIssue.Mcp
         {
             if (limit < 1)
             {
-                throw new McpOperationException("Limit must be at least 1.");
+                throw new IssueOperationException("Limit must be at least 1.");
             }
 
             return Math.Min(limit, 200);
@@ -57,8 +57,8 @@ namespace GitIssue.Mcp
 
         private static bool matches(IssueDocument document, IssueQuery query)
         {
-            if (!IssueMcpService.contains(document.Title, query.TitleContains) ||
-                !IssueMcpService.contains(document.Description, query.DescriptionContains))
+            if (!IssueWorkspace.contains(document.Title, query.TitleContains) ||
+                !IssueWorkspace.contains(document.Description, query.DescriptionContains))
             {
                 return false;
             }
@@ -68,7 +68,7 @@ namespace GitIssue.Mcp
                 return true;
             }
 
-            if (!IssueMcpService.tryGetField(document, query.Field, out JsonElement field))
+            if (!IssueWorkspace.tryGetField(document, query.Field, out JsonElement field))
             {
                 return false;
             }
@@ -78,7 +78,7 @@ namespace GitIssue.Mcp
                 return true;
             }
 
-            return IssueMcpService.equals(field, query.FieldEquals);
+            return IssueWorkspace.equals(field, query.FieldEquals);
         }
 
         private static bool contains(string text, string? expected)
@@ -117,7 +117,7 @@ namespace GitIssue.Mcp
             {
                 foreach (JsonElement item in element.EnumerateArray())
                 {
-                    if (IssueMcpService.equals(item, expected))
+                    if (IssueWorkspace.equals(item, expected))
                     {
                         return true;
                     }
@@ -155,7 +155,7 @@ namespace GitIssue.Mcp
         /// <param name="key">the issue key</param>
         /// <param name="cancellationToken">the cancellation token</param>
         /// <returns>the issue document</returns>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public Task<IssueDocument> GetIssueAsync(string key, CancellationToken cancellationToken)
         {
             return this.withLockAsync(
@@ -210,7 +210,7 @@ namespace GitIssue.Mcp
         /// <param name="description">the issue description</param>
         /// <param name="cancellationToken">the cancellation token</param>
         /// <returns>the created document</returns>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public Task<IssueDocument> CreateIssueAsync(string title, string? description, CancellationToken cancellationToken)
         {
             return this.withLockAsync(
@@ -226,7 +226,7 @@ namespace GitIssue.Mcp
         /// <param name="value">the field value, using the CLI field syntax</param>
         /// <param name="cancellationToken">the cancellation token</param>
         /// <returns>the updated document</returns>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public Task<IssueDocument> UpdateIssueAsync(string key, string field, string value, CancellationToken cancellationToken)
         {
             return this.withLockAsync(
@@ -241,7 +241,7 @@ namespace GitIssue.Mcp
         /// <param name="comment">the comment text</param>
         /// <param name="cancellationToken">the cancellation token</param>
         /// <returns>the updated document</returns>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public Task<IssueDocument> AddCommentAsync(string key, string comment, CancellationToken cancellationToken)
         {
             return this.withLockAsync(
@@ -255,7 +255,7 @@ namespace GitIssue.Mcp
         /// <param name="key">the issue key</param>
         /// <param name="cancellationToken">the cancellation token</param>
         /// <returns>the tracked issue</returns>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public Task<TrackedIssueDocument> TrackIssueAsync(string key, CancellationToken cancellationToken)
         {
             return this.withLockAsync(
@@ -265,7 +265,7 @@ namespace GitIssue.Mcp
 
         private async Task<IReadOnlyList<IssueSummary>> listAsync(int limit, CancellationToken cancellationToken)
         {
-            int take = IssueMcpService.normalizeLimit(limit);
+            int take = IssueWorkspace.normalizeLimit(limit);
             List<IssueSummary> summaries = new List<IssueSummary>();
             await foreach (IIssue issue in this.manager.FindAsync(candidate => true).WithCancellation(cancellationToken))
             {
@@ -286,12 +286,12 @@ namespace GitIssue.Mcp
 
         private async Task<IReadOnlyList<IssueDocument>> findAsync(IssueQuery query, CancellationToken cancellationToken)
         {
-            int take = IssueMcpService.normalizeLimit(query.Limit);
+            int take = IssueWorkspace.normalizeLimit(query.Limit);
             List<IssueDocument> documents = new List<IssueDocument>();
             await foreach (IIssue issue in this.manager.FindAsync(candidate => true).WithCancellation(cancellationToken))
             {
                 IssueDocument document = IssueDocumentMapper.FromIssue(issue);
-                if (!IssueMcpService.matches(document, query))
+                if (!IssueWorkspace.matches(document, query))
                 {
                     continue;
                 }
@@ -352,7 +352,7 @@ namespace GitIssue.Mcp
             cancellationToken.ThrowIfCancellationRequested();
             if (string.IsNullOrWhiteSpace(title))
             {
-                throw new McpOperationException("A title is required.");
+                throw new IssueOperationException("A title is required.");
             }
 
             IIssue issue = await this.manager.CreateAsync(title.Trim(), description ?? string.Empty);
@@ -363,23 +363,23 @@ namespace GitIssue.Mcp
         {
             if (string.IsNullOrWhiteSpace(field))
             {
-                throw new McpOperationException("A field name is required.");
+                throw new IssueOperationException("A field name is required.");
             }
 
             if (string.Equals(field, "Key", StringComparison.OrdinalIgnoreCase))
             {
-                throw new McpOperationException("The Key field is read-only.");
+                throw new IssueOperationException("The Key field is read-only.");
             }
 
             IIssue issue = await this.requireAsync(key, cancellationToken);
-            if (!IssueMcpService.tryResolveField(issue, field, out FieldKey fieldKey))
+            if (!IssueWorkspace.tryResolveField(issue, field, out FieldKey fieldKey))
             {
-                throw new McpOperationException($"Field \"{field}\" is not configured.");
+                throw new IssueOperationException($"Field \"{field}\" is not configured.");
             }
 
             if (!issue[fieldKey].Update(value))
             {
-                throw new McpOperationException($"Value \"{value}\" is not valid for field \"{field}\".");
+                throw new IssueOperationException($"Value \"{value}\" is not valid for field \"{field}\".");
             }
 
             await issue.SaveAsync();
@@ -390,19 +390,19 @@ namespace GitIssue.Mcp
         {
             if (string.IsNullOrWhiteSpace(comment))
             {
-                throw new McpOperationException("A comment is required.");
+                throw new IssueOperationException("A comment is required.");
             }
 
             IIssue issue = await this.requireAsync(key, cancellationToken);
             FieldKey comments = FieldKey.Create("Comments");
             if (!issue.TryGetValue(comments, out IField? field) || (field is not IArrayField array))
             {
-                throw new McpOperationException("The Comments field is not configured.");
+                throw new IssueOperationException("The Comments field is not configured.");
             }
 
             if (!array.TryParse(comment, out object? value) || (value is null))
             {
-                throw new McpOperationException("The comment text is not valid.");
+                throw new IssueOperationException("The comment text is not valid.");
             }
 
             IList values = array;
@@ -422,7 +422,7 @@ namespace GitIssue.Mcp
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new McpOperationException("An issue key is required.");
+                throw new IssueOperationException("An issue key is required.");
             }
 
             await foreach (IIssue issue in this.manager.FindAsync(candidate => candidate.Key.ToString() == key).WithCancellation(cancellationToken))
@@ -430,7 +430,7 @@ namespace GitIssue.Mcp
                 return issue;
             }
 
-            throw new McpOperationException($"Issue \"{key}\" was not found.");
+            throw new IssueOperationException($"Issue \"{key}\" was not found.");
         }
 
         private async Task<T> withLockAsync<T>(Func<Task<T>> action, CancellationToken cancellationToken)
