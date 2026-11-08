@@ -20,6 +20,12 @@ gitissue help
 
 A global install runs as `gitissue`. A local tool install runs as `dotnet gitissue`.
 
+To expose issues to GitHub Copilot in Visual Studio Code:
+
+```shell
+gitissue mcp install
+```
+
 See the [GitIssue User Guide](docs/README.md) for installation, workflows, commands, and configuration.
 
 ## Building from source
