@@ -88,11 +88,17 @@ namespace GitIssue.Tests.Issues
             IssueConfiguration configuration = new IssueConfiguration();
             IssueKey key = IssueKey.Create("ISSUE-1");
             string markdown = MarkdownIssueTests.document(key, "Body", "Ada Lovelace <ada@example.com>")
-                .Replace("- documentation\n", "- hello world\n", System.StringComparison.Ordinal);
+                .Replace("- documentation", "- hello world", System.StringComparison.Ordinal);
+            string windowsMarkdown = markdown.Replace("\r\n", "\n", System.StringComparison.Ordinal).Replace("\n", "\r\n", System.StringComparison.Ordinal);
 
             MarkdownRead read = MarkdownIssueFormat.Read(markdown, key, configuration.Fields);
+            MarkdownRead windowsRead = MarkdownIssueFormat.Read(windowsMarkdown, key, configuration.Fields);
 
-            Assert.That(read.Errors.Select(error => error.ToString()), Has.Some.Contains("not a valid Label"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(read.Errors.Select(error => error.ToString()), Has.Some.Contains("not a valid Label"));
+                Assert.That(windowsRead.Errors.Select(error => error.ToString()), Has.Some.Contains("not a valid Label"));
+            });
         }
 
         [Test]
