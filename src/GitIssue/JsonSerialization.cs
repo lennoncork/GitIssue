@@ -14,6 +14,7 @@ namespace GitIssue
     internal static class JsonSerialization
     {
         public static JsonSerializerOptions IndentedOptions { get; } = JsonSerialization.createOptions(true);
+
         public static JsonSerializerOptions Options { get; } = JsonSerialization.createOptions(false);
 
         public static JsonNode? ToNode(object? value)

@@ -12,7 +12,7 @@ indent_style = space
 tab_width = 4
 
 # New line preferences
-insert_final_newline = false
+insert_final_newline = true
 
 #### .NET Coding Conventions ####
 
@@ -113,6 +113,23 @@ csharp_style_unused_value_assignment_preference = discard_variable
 csharp_style_unused_value_expression_statement_preference = discard_variable
 
 # 'using' directive preferences
+
+# File layout
+# Keep using directives outside namespaces with System directives first. The
+# ReSharper layout pattern is more specific than StyleCop's generic member order.
+dotnet_analyzer_diagnostic.severity = none
+csharp_using_directive_placement = outside_namespace
+dotnet_diagnostic.IDE0065.severity = suggestion
+dotnet_diagnostic.SA1200.severity = suggestion
+dotnet_diagnostic.SA1208.severity = suggestion
+dotnet_diagnostic.SA1210.severity = suggestion
+dotnet_diagnostic.SA1203.severity = suggestion
+dotnet_diagnostic.SA1204.severity = suggestion
+dotnet_diagnostic.SA1214.severity = suggestion
+dotnet_diagnostic.SA1516.severity = suggestion
+dotnet_diagnostic.SA1518.severity = suggestion
+dotnet_diagnostic.SA0001.severity = none
+dotnet_diagnostic.SA1633.severity = none
 
 #### C# Formatting Rules ####
 
@@ -355,6 +372,8 @@ resharper_suggest_var_or_type_elsewhere_highlighting = warning
 indent_style = tab
 indent_size = tab
 tab_width = 4
+
+[*.cs]
 
 # Microsoft .NET properties
 csharp_new_line_before_members_in_object_initializers = false

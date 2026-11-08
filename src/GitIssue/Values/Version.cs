@@ -90,23 +90,6 @@ namespace GitIssue.Values
         /// </summary>
         public string? BuildMetadata { get; }
 
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            string version = $"{this.MajorVersion}.{this.MinorVersion}.{this.PatchVersion}";
-            if (!string.IsNullOrEmpty(this.PreRelease))
-            {
-                version += $"-{this.PreRelease}";
-            }
-
-            if (!string.IsNullOrEmpty(this.BuildMetadata))
-            {
-                version += $"+{this.BuildMetadata}";
-            }
-
-            return version;
-        }
-
         /// <summary>
         ///     Matches a string and patter, returning the Match
         /// </summary>
@@ -124,6 +107,23 @@ namespace GitIssue.Values
 
             match = null!;
             return false;
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            string version = $"{this.MajorVersion}.{this.MinorVersion}.{this.PatchVersion}";
+            if (!string.IsNullOrEmpty(this.PreRelease))
+            {
+                version += $"-{this.PreRelease}";
+            }
+
+            if (!string.IsNullOrEmpty(this.BuildMetadata))
+            {
+                version += $"+{this.BuildMetadata}";
+            }
+
+            return version;
         }
 
         /// <inheritdoc />

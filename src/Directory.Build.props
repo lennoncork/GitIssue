@@ -1,6 +1,10 @@
 <Project>
 
     <PropertyGroup>
+        <StyleCopAnalyzersVersion>1.1.118</StyleCopAnalyzersVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <DirectoryBuildPath>$(MSBuildThisFileDirectory)</DirectoryBuildPath>
         <SolutionOutputPath>$(MSBuildThisFileDirectory).output</SolutionOutputPath>
         <ProjectOutputPath>$(SolutionOutputPath)\$(MSBuildProjectName)</ProjectOutputPath>
@@ -31,6 +35,17 @@
         <RepositoryType>GIT</RepositoryType>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference
+            Include="StyleCop.Analyzers"
+            Version="$(StyleCopAnalyzersVersion)"
+            PrivateAssets="all" />
+    </ItemGroup>
 
     <ItemGroup>
         <None

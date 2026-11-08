@@ -25,45 +25,6 @@ namespace GitIssue.Values
         }
 
         /// <summary>
-        ///     Tries to create the type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public bool TryCreate<T>(out T result, params object[] args)
-            where T : class
-        {
-            if (!typeof(T).IsAssignableFrom(this.Type))
-            {
-                result = null!;
-                return false;
-            }
-
-            try
-            {
-                ConstructorInfo? info = this.Type.GetConstructor(
-                    BindingFlags.Instance | BindingFlags.Public,
-                    null,
-                    args.Select(o => o.GetType()).ToArray(),
-                    null);
-
-                T? create = info?.Invoke(args) as T;
-                result = create!;
-
-                if (create == null)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception)
-            {
-                result = null!;
-                return false;
-            }
-        }
-
-        /// <summary>
         ///     Tries to parse the label value
         /// </summary>
         /// <param name="value"></param>
@@ -130,6 +91,45 @@ namespace GitIssue.Values
         public static explicit operator Type(TypeValue fieldType)
         {
             return fieldType.Type;
+        }
+
+        /// <summary>
+        ///     Tries to create the type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool TryCreate<T>(out T result, params object[] args)
+            where T : class
+        {
+            if (!typeof(T).IsAssignableFrom(this.Type))
+            {
+                result = null!;
+                return false;
+            }
+
+            try
+            {
+                ConstructorInfo? info = this.Type.GetConstructor(
+                    BindingFlags.Instance | BindingFlags.Public,
+                    null,
+                    args.Select(o => o.GetType()).ToArray(),
+                    null);
+
+                T? create = info?.Invoke(args) as T;
+                result = create!;
+
+                if (create == null)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                result = null!;
+                return false;
+            }
         }
 
         /// <inheritdoc />

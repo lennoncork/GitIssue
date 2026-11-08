@@ -1,5 +1,9 @@
 <Project>
 
+    <PropertyGroup>
+        <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    </PropertyGroup>
+
     <ItemGroup>
         <None
             Include="$(MSBuildThisFileFullPath)"

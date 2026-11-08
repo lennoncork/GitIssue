@@ -42,6 +42,13 @@ namespace GitIssue
     /// </summary>
     public class IssueManager : IIssueManager
     {
+        private const FileStatus indexChangeFlags =
+            FileStatus.NewInIndex |
+            FileStatus.ModifiedInIndex |
+            FileStatus.DeletedFromIndex |
+            FileStatus.RenamedInIndex |
+            FileStatus.TypeChangeInIndex;
+
         private readonly IssueCreation issueCreation;
 
         private readonly IssueDeletion issueDeletion;
@@ -423,12 +430,10 @@ namespace GitIssue
             return true;
         }
 
-        private const FileStatus indexChangeFlags =
-            FileStatus.NewInIndex |
-            FileStatus.ModifiedInIndex |
-            FileStatus.DeletedFromIndex |
-            FileStatus.RenamedInIndex |
-            FileStatus.TypeChangeInIndex;
+        private static bool isIndexChange(StatusEntry entry)
+        {
+            return (entry.State & IssueManager.indexChangeFlags) != 0;
+        }
 
         private List<PreservedIndexChange> captureIndexChangesOutsideIssues(string issuesRelativePath)
         {
@@ -512,11 +517,6 @@ namespace GitIssue
             string fullPath = this.getFullPath(relativePath);
             return fullPath.Equals(Path.GetFullPath(this.Root.ChangeLog), StringComparison.Ordinal) ||
                 fullPath.Equals(Path.GetFullPath(this.Root.Tracked), StringComparison.Ordinal);
-        }
-
-        private static bool isIndexChange(StatusEntry entry)
-        {
-            return (entry.State & IssueManager.indexChangeFlags) != 0;
         }
 
         private bool isUnderIssues(string relativePath, string issuesRelativePath)

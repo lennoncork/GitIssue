@@ -16,6 +16,7 @@ namespace GitIssue.Values
         private static readonly string invalid = "Unknown";
 
         private static readonly string regex = @"^([^<>]+?) <([^<>\s@]+@[^<>\s]+)>$";
+        
         private string Username { get; }
 
         private string Email { get; }
