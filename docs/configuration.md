@@ -34,6 +34,36 @@ gitissue create "Example issue" "Created in the custom directory." --name work-i
 
 The `--path` option selects the working directory, and `--tracking` changes the tracked-issue file name. These options are available on commands that use the shared options.
 
+## Issue storage
+
+`Storage` selects the file written for each issue. When the property is omitted, GitIssue uses `Json`: one `.json` document per issue. Set it to `Markdown` to store that document as Markdown instead.
+
+```shell
+gitissue init --storage markdown
+```
+
+A Markdown issue is `.issues/<key-path>/<key>.md`. Markdig parses the document. Each configured field is a level-2 heading, in the order stored in `config.json`. The level-1 heading repeats the issue key. Labels and other single-value arrays are bullet lists. Comments are level-3 blocks. `config.json`, `tracking.json`, and `changes.json` stay JSON, and `export` / `import` still use JSON or CSV.
+
+```markdown
+# 2026-11-08-ABCD1234
+
+## Title
+
+Save issues as markdown
+
+## Description
+
+Issue text, including nested markdown.
+
+## Author
+
+Ada Lovelace <ada@example.com>
+```
+
+`gitissue validate` checks every field against the schema. A required field must be present. Text other than `Description` must not be empty. Signatures, dates, emails, URLs, versions, numbers, labels, and enumerated values must parse. A label is one token. An unknown `##` heading, a duplicate field, or list text that is not a list is an error. Save, edit, and convert refuse to write a document that fails these checks.
+
+`gitissue convert --to markdown` and `gitissue convert --to json` rewrite every issue and update `Storage`. The command stops when one issue already has both a `.json` and a `.md` file.
+
 ## Editing `config.json`
 
 The configuration defines the key provider and each field's field/value types, metadata, and required status. Make a backup before editing it manually: changing a field's type or name can make existing issue data unreadable or prevent commands from working. Use the `fields` command afterward to confirm that the repository still loads and reports the expected schema.

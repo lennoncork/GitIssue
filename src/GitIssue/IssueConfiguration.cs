@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using GitIssue.Fields;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
@@ -41,6 +42,10 @@ namespace GitIssue
 
         /// <inheritdoc />
         public TypeValue KeyProvider { get; set; }
+
+        /// <inheritdoc />
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public IssueStorage Storage { get; set; } = IssueStorage.Json;
 
         /// <summary>
         ///     Reads the configuration from a file

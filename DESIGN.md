@@ -70,11 +70,14 @@ converters provide serialization and parsing for the supported domain values.
 
 `RepositoryRoot` identifies the working tree and the issue-data directory
 (`.issues` by default, or a name supplied by the user). The directory contains
-the JSON configuration and issue data. The default file-backed issue
-implementation (`FileIssue`/`JsonIssue`) reads and writes configured fields
-using JSON serialization. The library also contains file-backed field
-implementations, allowing field storage to be selected by the configured field
-type.
+the JSON configuration and issue data. `IssueConfiguration.Storage` selects
+the issue document. `Json` keeps the default `FileIssue`/`JsonIssue` document.
+`Markdown` stores the same fields in one Markdown file, read and written with
+Markdig. `IssueValidator` checks each field against its configured type,
+metadata, and required flag. `gitissue validate` reports those errors, and
+save, edit, and convert refuse to write an invalid document. The library also
+contains file-backed field implementations, allowing an individual field to be
+stored as its own file when that field type is configured.
 
 The tracked issue and the issue change log are persisted separately from the
 issue fields. The tracked-issue file supports the CLI's current-issue shortcut;

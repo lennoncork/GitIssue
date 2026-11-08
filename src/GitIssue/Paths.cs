@@ -52,7 +52,13 @@ namespace GitIssue
             return candidatePath;
         }
 
-        internal static async Task WriteAllTextAsync(string path, string? content)
+        /// <summary>
+        ///     Writes text to a file by replacing it atomically
+        /// </summary>
+        /// <param name="path">the destination path</param>
+        /// <param name="content">the file content</param>
+        /// <returns>the write task</returns>
+        public static async Task WriteAllTextAsync(string path, string? content)
         {
             string destinationPath = Path.GetFullPath(path);
             string directory = Path.GetDirectoryName(destinationPath) ?? throw new ArgumentException($"Path '{path}' does not have a parent directory.", nameof(path));

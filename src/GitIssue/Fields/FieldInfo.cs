@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GitIssue.Exceptions;
 using GitIssue.Issues;
 using GitIssue.Issues.Json;
+using GitIssue.Validation;
 using GitIssue.Values;
 
 namespace GitIssue.Fields
@@ -102,7 +103,7 @@ namespace GitIssue.Fields
         /// <returns></returns>
         public virtual bool IsValid(IField field)
         {
-            return false;
+            return IssueValidator.IsValidField(this, field.Key, field);
         }
 
         /// <summary>

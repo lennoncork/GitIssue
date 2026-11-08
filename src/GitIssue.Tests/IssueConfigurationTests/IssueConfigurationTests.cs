@@ -17,6 +17,7 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 IssueConfiguration config = new IssueConfiguration();
 
                 Assert.That(config.KeyProvider.Type, Is.EqualTo(typeof(FileIssueKeyProvider)));
+                Assert.That(config.Storage, Is.EqualTo(IssueStorage.Json));
                 Assert.That(config.Fields.ContainsKey(FieldKey.Create("Key")), Is.True);
                 Assert.That(config.Fields.ContainsKey(FieldKey.Create("Title")), Is.True);
                 Assert.That(config.Fields.ContainsKey(FieldKey.Create("Description")), Is.True);
@@ -50,6 +51,8 @@ namespace GitIssue.Tests.IssueConfigurationTests
 
                 Assert.That(loaded.Fields.Keys, Is.EquivalentTo(config.Fields.Keys));
                 Assert.That(loaded.KeyProvider.Type, Is.EqualTo(config.KeyProvider.Type));
+                Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Json));
+                Assert.That(json, Does.Not.Contain("\"Storage\""));
             }
         }
     }
