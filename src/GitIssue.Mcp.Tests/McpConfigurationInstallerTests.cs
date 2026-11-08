@@ -129,7 +129,11 @@ namespace GitIssue.Mcp.Tests
             string? previous = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
             try
             {
-                Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", directory.Path);
+                if (OperatingSystem.IsLinux())
+                {
+                    Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", directory.Path);
+                }
+
                 string userPath = McpConfigurationPaths.Resolve(new McpInstallRequest
                 {
                     Scope = McpInstallScope.User,
@@ -146,7 +150,7 @@ namespace GitIssue.Mcp.Tests
                         McpConfigurationPaths.Resolve(new McpInstallRequest { ConfigurationFile = explicitPath }),
                         Is.EqualTo(explicitPath));
                     Assert.That(workspacePath, Is.EqualTo(Path.Combine(directory.Path, ".vscode", "mcp.json")));
-                    Assert.That(userPath, Does.StartWith(directory.Path));
+                    Assert.That(userPath, Is.EqualTo(McpConfigurationPaths.UserConfigurationFile(false)));
                 });
             }
             finally
