@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Exceptionable;
 using GitIssue.Exceptions;
 using GitIssue.Fields;
 using GitIssue.Issues.File;
@@ -67,6 +68,7 @@ namespace GitIssue.Issues.Json
         /// <summary>
         ///     Gets the Json path for the issue
         /// </summary>
+        [Throws<ArgumentException>]
         public string Json => JsonIssue.GetJsonFile(this.Root);
 
         /// <inheritdoc />
@@ -80,6 +82,8 @@ namespace GitIssue.Issues.Json
         /// </summary>
         /// <param name="issueRoot"></param>
         /// <returns></returns>
+        [Throws<ArgumentException>]
+        [Throws<IssueNotFoundException>]
         public static Task<bool> DeleteAsync(IssueRoot issueRoot)
         {
             // Issue should exist before attempting to delete
@@ -109,6 +113,7 @@ namespace GitIssue.Issues.Json
         /// </summary>
         /// <param name="root"></param>
         /// <returns></returns>
+        [Throws<ArgumentException>]
         public static string GetJsonFile(IssueRoot root)
         {
             return Path.Combine(root.IssuePath, $"{Path.GetFileName(root.Key.ToString())}.json");

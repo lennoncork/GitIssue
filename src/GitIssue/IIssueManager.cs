@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Exceptionable;
 using GitIssue.Issues;
 using LibGit2Sharp;
 
@@ -50,6 +51,7 @@ namespace GitIssue
         ///     Commits the changes
         /// </summary>
         /// <returns></returns>
+        [Throws<SafeResultException>]
         bool Commit();
 
         /// <summary>
@@ -63,6 +65,7 @@ namespace GitIssue
         /// </summary>
         /// <param name="title">the issue title</param>
         /// <returns></returns>
+        [Throws<SafeResultException>]
         IIssue Create(string title);
 
         /// <summary>
@@ -71,6 +74,7 @@ namespace GitIssue
         /// <param name="title">the issue title</param>
         /// <param name="description">the issue description</param>
         /// <returns></returns>
+        [Throws<SafeResultException>]
         IIssue Create(string title, string description);
 
         /// <summary>
@@ -92,12 +96,14 @@ namespace GitIssue
         ///     Deletes an existing issue
         /// </summary>
         /// <param name="id">the id to search</param>
+        [Throws<SafeResultException>]
         bool Delete(string id);
 
         /// <summary>
         ///     Deletes an existing issue
         /// </summary>
         /// <param name="key">the issue key</param>
+        [Throws<SafeResultException>]
         bool Delete(IssueKey key);
 
         /// <summary>
@@ -133,6 +139,7 @@ namespace GitIssue
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
+        [Throws<SafeResultException>]
         bool Track(IssueKey key);
 
         /// <summary>

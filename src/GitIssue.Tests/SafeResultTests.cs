@@ -1,4 +1,5 @@
 using System;
+using Exceptionable;
 using NUnit.Framework;
 
 namespace GitIssue.Tests
@@ -9,6 +10,12 @@ namespace GitIssue.Tests
         [TestFixture]
         public class NonGeneric : SafeResultTests
         {
+            [Test]
+            public void SafeResult_Type_Declares_DoesNotThrow_Contract()
+            {
+                Assert.That(Attribute.IsDefined(typeof(SafeResult), typeof(DoesNotThrowAttribute), false), Is.True);
+            }
+
             [Test]
             public void Fail_Returns_NotSuccessful_With_Null_Exception()
             {
@@ -42,6 +49,20 @@ namespace GitIssue.Tests
         [TestFixture]
         public class Generic : SafeResultTests
         {
+            [Test]
+            public void Generic_SafeResult_Type_Declares_DoesNotThrow_Contract()
+            {
+                Assert.That(Attribute.IsDefined(typeof(SafeResult<string>), typeof(DoesNotThrowAttribute), false), Is.True);
+            }
+
+            [Test]
+            public void GetResult_Declares_SafeResultException_Contract()
+            {
+                System.Reflection.MethodInfo method = typeof(SafeResult<string>).GetMethod(nameof(SafeResult<string>.GetResult))!;
+
+                Assert.That(Attribute.IsDefined(method, typeof(ThrowsAttribute<SafeResultException>), false), Is.True);
+            }
+
             [Test]
             public void Fail_Generic_Has_Default_Result_And_NotSuccessful()
             {
