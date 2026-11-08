@@ -123,6 +123,10 @@ namespace GitIssue.Tool.Tests.Integration
                 this.updates = updates;
             }
 
+            public void UpdateCommand(string command)
+            {
+            }
+
             public Task<string> Edit(string header, string content)
             {
                 return Task.FromResult(content);

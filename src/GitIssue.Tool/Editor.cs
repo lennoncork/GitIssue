@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GitIssue.Exceptions;
@@ -112,6 +113,47 @@ namespace GitIssue.Tool
             return string.Join(Editor.newline, lines);
         }
 
+        private static string[] splitArguments(string arguments)
+        {
+            if (string.IsNullOrWhiteSpace(arguments))
+            {
+                return Array.Empty<string>();
+            }
+
+            List<string> result = new List<string>();
+            StringBuilder current = new StringBuilder();
+            bool quoted = false;
+            foreach (char character in arguments)
+            {
+                if (character == '"')
+                {
+                    quoted = !quoted;
+                    continue;
+                }
+
+                if (!quoted && char.IsWhiteSpace(character))
+                {
+                    if (current.Length > 0)
+                    {
+                        result.Add(current.ToString());
+                        current.Clear();
+                    }
+
+                    continue;
+                }
+
+                current.Append(character);
+            }
+
+            if (current.Length > 0)
+            {
+                result.Add(current.ToString());
+            }
+
+            return result.ToArray();
+        }
+
+        /// <inheritdoc />
         public void UpdateCommand(string command)
         {
             (string, string) result = Editor.getProcessAndArgumentsFromCommand(command);
@@ -130,7 +172,7 @@ namespace GitIssue.Tool
 
             DateTime created = File.GetLastWriteTime(temp);
 
-            if (!await this.editFileAsync(this.Command, this.Arguments + " " + temp))
+            if (!await this.editFileAsync(this.Command, this.Arguments, temp))
             {
                 return content;
             }
@@ -170,7 +212,7 @@ namespace GitIssue.Tool
 
             // Open and modify the file
             DateTime created = File.GetLastWriteTime(temp);
-            if (await this.editFileAsync(this.Command, this.Arguments + " " + temp))
+            if (await this.editFileAsync(this.Command, this.Arguments, temp))
             {
                 if (created == File.GetLastWriteTime(temp))
                 {
@@ -231,7 +273,7 @@ namespace GitIssue.Tool
             await File.AppendAllTextAsync(temp, Editor.fieldTemplate);
 
             DateTime created = File.GetLastWriteTime(temp);
-            if (await this.editFileAsync(this.Command, this.Arguments + " " + temp))
+            if (await this.editFileAsync(this.Command, this.Arguments, temp))
             {
                 if (created == File.GetLastWriteTime(temp))
                 {
@@ -248,7 +290,7 @@ namespace GitIssue.Tool
             string temp = Editor.getTempFile();
             await File.WriteAllTextAsync(temp, original);
             DateTime created = File.GetLastWriteTime(temp);
-            if (!await this.editFileAsync(this.Command, this.Arguments + " " + temp))
+            if (!await this.editFileAsync(this.Command, this.Arguments, temp))
             {
                 return;
             }
@@ -268,9 +310,10 @@ namespace GitIssue.Tool
             issue.Apply(read);
         }
 
-        private async Task<bool> editFileAsync(string editor, string arguments)
+        private async Task<bool> editFileAsync(string editor, string arguments, string file)
         {
-            int result = await this.processRunner.RunAsync(editor, arguments);
+            string[] processArguments = Editor.splitArguments(arguments).Append(file).ToArray();
+            int result = await this.processRunner.RunAsync(editor, processArguments);
             return result == this.Success;
         }
     }
