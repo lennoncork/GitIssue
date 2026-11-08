@@ -27,4 +27,24 @@ jobs:
       - name: Build
         uses: cake-build/cake-action@v2
         with:
+          target: Build
+      - name: Format
+        uses: cake-build/cake-action@v2
+        with:
+          target: Format
+      - name: Analyzers
+        uses: cake-build/cake-action@v2
+        with:
+          target: Analyzers
+      - name: Validate
+        uses: cake-build/cake-action@v2
+        with:
+          target: Validate
+      - name: Test
+        uses: cake-build/cake-action@v2
+        with:
           target: Test
+      - name: Report
+        uses: cake-build/cake-action@v2
+        with:
+          target: Report

@@ -25,5 +25,19 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(this.Output, Does.Contain($"Deleted issue '{key}'"));
             });
         }
+
+        [Test]
+        public void Delete_ReturnsNonZeroWhenIssueIsNotFound()
+        {
+            this.InitializeRepository();
+
+            int exitCode = this.Run("Delete", "MISSING-1");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(this.GetIssueKeys(), Is.Empty);
+            });
+        }
     }
 }

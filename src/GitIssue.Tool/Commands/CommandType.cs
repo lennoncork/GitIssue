@@ -42,6 +42,11 @@
         Import,
 
         /// <summary>
+        ///     Imports issues from a JSON file
+        /// </summary>
+        Sync,
+
+        /// <summary>
         ///     Exports all issues into a JSON or CSV file
         /// </summary>
         Export,

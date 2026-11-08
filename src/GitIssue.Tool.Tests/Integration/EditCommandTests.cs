@@ -43,13 +43,28 @@ namespace GitIssue.Tool.Tests.Integration
         }
 
         [Test]
+        public void Edit_ReturnsNonZeroWhenIssueIsNotFound()
+        {
+            this.InitializeRepository();
+
+            int exitCode = this.Run("Edit", "MISSING-1", "Title", "Updated title");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(this.Output + this.Error, Does.Contain("not found"));
+                Assert.That(this.GetIssueKeys(), Is.Empty);
+            });
+        }
+
+        [Test]
         public async Task Edit_UsesIssuesEditorWhenEditorOptionIsDefault()
         {
             this.InitializeRepository();
             string key = this.CreateIssue("Original title");
-            this.SetGitConfig("issues.editor", "vim");
+            this.setGitConfig("issues.editor", "vim");
 
-            RecordingProcessRunner runner = await this.EditField(new EditOptions
+            RecordingProcessRunner runner = await this.editField(new EditOptions
             {
                 Key = key,
                 Field = "Title",
@@ -70,9 +85,9 @@ namespace GitIssue.Tool.Tests.Integration
         {
             this.InitializeRepository();
             string key = this.CreateIssue("Original title");
-            this.SetGitConfig("issues.editor", "vim");
+            this.setGitConfig("issues.editor", "vim");
 
-            RecordingProcessRunner runner = await this.EditField(new EditOptions
+            RecordingProcessRunner runner = await this.editField(new EditOptions
             {
                 Key = key,
                 Field = "Title",
@@ -94,7 +109,7 @@ namespace GitIssue.Tool.Tests.Integration
             this.InitializeRepository();
             string key = this.CreateIssue("Original title");
 
-            RecordingProcessRunner runner = await this.EditField(
+            RecordingProcessRunner runner = await this.editField(
                 new EditOptions
                 {
                     Key = key,
@@ -117,7 +132,7 @@ namespace GitIssue.Tool.Tests.Integration
             });
         }
 
-        private async Task<RecordingProcessRunner> EditField(EditOptions options, Configuration? configuration = null)
+        private async Task<RecordingProcessRunner> editField(EditOptions options, Configuration? configuration = null)
         {
             RecordingProcessRunner runner = new RecordingProcessRunner();
             Editor editor = new Editor(configuration ?? new Configuration(), runner);
@@ -127,7 +142,7 @@ namespace GitIssue.Tool.Tests.Integration
             return runner;
         }
 
-        private void SetGitConfig(string key, string value)
+        private void setGitConfig(string key, string value)
         {
             using Repository repository = new Repository(this.TestDirectory);
             repository.Config.Set(key, value);
