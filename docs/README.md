@@ -100,7 +100,7 @@ The `edit` command opens the editor when no field and value are supplied. The `c
 
 ## Where GitIssue stores data
 
-By default, GitIssue creates `.issues` in the working directory. That directory contains `config.json`, the issue files, `tracking.json`, and `changes.json`.
+By default, GitIssue creates `.issues` in the working directory. That directory contains `config.json`, the issue files, `tracking.json`, and `changes.json`. Each issue is a Markdown document. `gitissue init --storage json` selects one JSON document per issue. `gitissue validate` reports fields that do not match the configured schema.
 
 The `.issues` directory is part of your repository. Review and commit it according to your project's normal practices. Back it up before making manual changes to its files.
 

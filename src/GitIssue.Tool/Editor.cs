@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GitIssue.Exceptions;
 using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Issues.Markdown;
 
 namespace GitIssue.Tool
 {
@@ -85,6 +87,12 @@ namespace GitIssue.Tool
         /// <inheritdoc />
         public async Task Open(IIssue issue)
         {
+            if (issue is MarkdownIssue markdownIssue)
+            {
+                await this.openMarkdown(markdownIssue);
+                return;
+            }
+
             await this.Open(issue.Values);
         }
 
@@ -173,6 +181,32 @@ namespace GitIssue.Tool
             }
 
             field.Update(Editor.removeComments(await File.ReadAllTextAsync(temp)));
+        }
+
+        private async Task openMarkdown(MarkdownIssue issue)
+        {
+            string original = MarkdownIssueFormat.Write(issue, issue.Schema);
+            string temp = Editor.getTempFile();
+            await File.WriteAllTextAsync(temp, original);
+            DateTime created = File.GetLastWriteTime(temp);
+            if (!await this.editFileAsync(this.Command, this.Arguments + " " + temp))
+            {
+                return;
+            }
+
+            if (created == File.GetLastWriteTime(temp))
+            {
+                return;
+            }
+
+            string updated = await File.ReadAllTextAsync(temp);
+            MarkdownRead read = MarkdownIssueFormat.Read(updated, issue.Key, issue.Schema);
+            if (read.Errors.Count > 0)
+            {
+                throw new IssueValidationException(issue.Key, read.Errors);
+            }
+
+            issue.Apply(read);
         }
 
         private static (string, string) getProcessAndArgumentsFromCommand(string command)

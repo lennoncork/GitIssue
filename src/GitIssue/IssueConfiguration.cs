@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Exceptionable;
 using GitIssue.Fields;
 using GitIssue.Issues;
@@ -43,6 +45,10 @@ namespace GitIssue
         /// <inheritdoc />
         public TypeValue KeyProvider { get; set; }
 
+        /// <inheritdoc />
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public IssueStorage Storage { get; set; } = IssueStorage.Markdown;
+
         /// <summary>
         ///     Reads the configuration from a file
         /// </summary>
@@ -66,7 +72,13 @@ namespace GitIssue
             try
             {
                 string json = File.ReadAllText(file);
-                return JsonSerializer.Deserialize<T>(json, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
+                T configuration = JsonSerializer.Deserialize<T>(json, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
+                if (!IssueConfiguration.hasStorageProperty(json))
+                {
+                    configuration.Storage = IssueStorage.Json;
+                }
+
+                return configuration;
             }
             catch (Exception ex)
             {
@@ -94,6 +106,24 @@ namespace GitIssue
             {
                 throw new AggregateException($"Unable to serialize {file} as config file ", ex);
             }
+        }
+
+        private static bool hasStorageProperty(string json)
+        {
+            if (JsonNode.Parse(json) is not JsonObject document)
+            {
+                return false;
+            }
+
+            foreach (KeyValuePair<string, JsonNode?> property in document)
+            {
+                if (property.Key.Equals(nameof(IssueConfiguration.Storage), StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
