@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Exceptionable;
 using GitIssue.Exceptions;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
@@ -38,6 +39,7 @@ namespace GitIssue.Issues.Markdown
         /// <summary>
         ///     Gets the Markdown path for the issue
         /// </summary>
+        [Throws<System.ArgumentException>]
         public string Markdown => MarkdownIssue.GetMarkdownFile(this.Root);
 
         /// <summary>
@@ -82,6 +84,7 @@ namespace GitIssue.Issues.Markdown
         /// </summary>
         /// <param name="root">the issue root</param>
         /// <returns>the Markdown file path</returns>
+        [Throws<System.ArgumentException>]
         public static string GetMarkdownFile(IssueRoot root)
         {
             return Path.Combine(root.IssuePath, $"{Path.GetFileName(root.Key.ToString())}.md");
