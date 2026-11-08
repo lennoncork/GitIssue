@@ -72,6 +72,11 @@ namespace GitIssue.Tests.ValueTests
                     yield return new TestCaseData("Foo Bar <foo.bar@gmail.com>", Signature.Parse("Foo Bar <foo.bar@gmail.com>"))
                         .Returns(true)
                         .SetName("ParsesSignatureSuccessfully");
+                    yield return new TestCaseData(
+                            "GitIssue Tool Tests <gitissue-tool-tests@example.com>",
+                            Signature.Parse("GitIssue Tool Tests <gitissue-tool-tests@example.com>"))
+                        .Returns(true)
+                        .SetName("ParsesSignatureWithHyphenatedEmail");
                 }
             }
         }
