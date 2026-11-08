@@ -3,6 +3,9 @@
 GitIssue is an in-source issue management system built on Git. It stores issues in your repository and supports a flexible issue schema.
 
 ![build](https://github.com/lennoncork/GitIssue/actions/workflows/build.yml/badge.svg?branch=main)
+[![NuGet](https://img.shields.io/nuget/v/GitIssue.Tool)](https://www.nuget.org/packages/GitIssue.Tool)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/GitIssue.Tool)](https://www.nuget.org/packages/GitIssue.Tool)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
 
 ## Quick start
 
@@ -39,10 +42,6 @@ The tool targets .NET 10 and supports Windows and Linux.
 ## Contributing
 
 Contributions are welcome. See the [user guide](docs/README.md) for project usage and the repository's contribution process.
-
-## Releasing
-
-After the build workflow passes on `main`, create and publish a GitHub Release from a stable `vMAJOR.MINOR.PATCH` tag, such as `v0.3.0`. Configure NuGet Trusted Publishing for the `lennoncork/GitIssue` repository and the `deploy.yaml` workflow before publishing. The deployment workflow uses GitHub OIDC to obtain a short-lived NuGet API key, builds, tests, and packages both NuGet projects, saves the packages as an artifact, and publishes them to NuGet.org. GitVersion derives package versions from the release tag.
 
 ## Thanks
 Thank you to [JetBrains](https://www.jetbrains.com/) for providing developers with an Open Source License for [ReSharper](https://www.jetbrains.com/resharper/).

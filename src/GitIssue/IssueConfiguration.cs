@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Exceptionable;
 using GitIssue.Fields;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
@@ -53,6 +54,7 @@ namespace GitIssue
         /// </summary>
         /// <param name="file">the configuration file</param>
         /// <returns>the <see cref="IssueConfiguration" /></returns>
+        [Throws<AggregateException>]
         public static IssueConfiguration Read(string file)
         {
             return IssueConfiguration.Read<IssueConfiguration>(file);
@@ -64,6 +66,7 @@ namespace GitIssue
         /// <typeparam name="T">the configuration type</typeparam>
         /// <param name="file">the configuration file</param>
         /// <returns>the <see cref="IssueConfiguration" /></returns>
+        [Throws<AggregateException>]
         public static T Read<T>(string file) where T : IssueConfiguration, new()
         {
             try
@@ -84,12 +87,14 @@ namespace GitIssue
         }
 
         /// <inheritdoc />
+        [Throws<AggregateException>]
         public void Save(string file)
         {
             this.Save<IssueConfiguration>(file);
         }
 
         /// <inheritdoc />
+        [Throws<AggregateException>]
         public void Save<T>(string file) where T : IssueConfiguration, new()
         {
             try

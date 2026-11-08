@@ -1,10 +1,12 @@
 ﻿using System;
+using Exceptionable;
 
 namespace GitIssue
 {
     /// <summary>
     ///     Helper class for dealing with tasks
     /// </summary>
+    [DoesNotThrow]
     public class SafeResult
     {
         /// <summary>
@@ -67,6 +69,7 @@ namespace GitIssue
     /// <summary>
     ///     Helper class for dealing with tasks
     /// </summary>
+    [DoesNotThrow]
     public class SafeResult<T> : SafeResult
     {
         /// <summary>
@@ -134,6 +137,7 @@ namespace GitIssue
         /// </summary>
         /// <param name="throwIfFailed">throw a <see cref="SafeResultException" /> if the task failed</param>
         /// <returns></returns>
+        [Throws<SafeResultException>]
         public T GetResult(bool throwIfFailed = true)
         {
             if (this.IsSuccess)
