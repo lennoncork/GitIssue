@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="9.3.0" />
+    <PackageReference Include="Autofac" Version="9.3.4" />
     <PackageReference Include="Exceptionable.Analyzers" Version="0.1.0" PrivateAssets="all" />
     <PackageReference Include="GitVersion.MsBuild" Version="6.8.2">
       <PrivateAssets>all</PrivateAssets>
@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GitIssue\GitIssue.csproj" />
+    <ProjectReference Include="..\GitIssue.Mcp\GitIssue.Mcp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Autofac;
 using CommandLine;
 using GitIssue.Issues;
+using GitIssue.Mcp;
 using GitIssue.Tool.Commands;
 using GitIssue.Tool.Commands.Add;
 using GitIssue.Tool.Commands.Changes;
@@ -128,6 +129,11 @@ namespace GitIssue.Tool
 
         internal static int Main(string[] args)
         {
+            if ((args.Length > 0) && args[0].Equals("mcp", StringComparison.OrdinalIgnoreCase))
+            {
+                return McpApplication.Execute(args, Console.Out, Console.Error);
+            }
+
             Program.logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .MinimumLevel.Debug()

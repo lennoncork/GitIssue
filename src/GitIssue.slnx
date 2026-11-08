@@ -3,6 +3,8 @@
     <File Path="../LICENSE.md" />
     <File Path="../README.md" />
   </Folder>
+  <Project Path="GitIssue.Mcp.Tests/GitIssue.Mcp.Tests.csproj" />
+  <Project Path="GitIssue.Mcp/GitIssue.Mcp.csproj" />
   <Project Path="GitIssue.Tests/GitIssue.Tests.csproj" />
   <Project Path="GitIssue.Tool.Tests/GitIssue.Tool.Tests.csproj" />
   <Project Path="GitIssue.Tool/GitIssue.Tool.csproj" />

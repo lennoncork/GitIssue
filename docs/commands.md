@@ -93,6 +93,29 @@ JSON import reads one JSON object representing an issue and requires `Key` and `
 }
 ```
 
+## MCP server
+
+`gitissue mcp` exposes the repository issues to an MCP client. The server reads and writes the working tree and does not commit. Logs go to standard error because standard output carries the MCP protocol.
+
+| Command | Usage | Description |
+| --- | --- | --- |
+| `mcp serve` | `mcp serve [--path <directory>] [--name <folder>]` | Run the stdio MCP server. This is the default action. |
+| `mcp install` | `mcp install [--scope workspace\|user] [--dry-run] [--insiders] [--command <command>] [--server-arg <arg>]` | Add the server to Visual Studio Code Copilot. The default file is `.vscode/mcp.json`. `--scope user` writes the user profile `mcp.json`. |
+| `mcp uninstall` | `mcp uninstall [--scope workspace\|user] [--dry-run] [--insiders]` | Remove the `gitissue` entry and leave other servers in place. |
+
+```shell
+gitissue mcp install
+gitissue mcp serve
+```
+
+After install, reload Visual Studio Code or run **MCP: List Servers**, then trust the `gitissue` server. A global tool uses command `gitissue`. For a local tool, pass `--command dotnet`. A custom issue directory is recorded with `--name`:
+
+```shell
+gitissue mcp install --command dotnet --name work-items
+```
+
+The server provides tools for listing, reading, finding, creating, and updating issues, plus the field schema, tracked issue, and change log. `find_issues` uses structured filters. It does not evaluate the C# expressions accepted by `gitissue find`.
+
 ## Help
 
 ```shell
