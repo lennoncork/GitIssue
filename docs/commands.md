@@ -16,9 +16,10 @@ Options are case-insensitive. Run `gitissue <command> --help` for parser-generat
 
 | Command | Usage | Description |
 | --- | --- | --- |
-| `init` | `init` | Initialize issue data in the current repository. The default directory is `.issues`. |
+| `init` | `init [--storage markdown\|json]` | Initialize issue data in the current repository. The default directory is `.issues`. Each issue is saved as Markdown unless `--storage json` is set. |
 | `create` | `create [Title] [Description]` | Create an issue. If no title is given, the default editor opens. A new issue is tracked if no issue is currently tracked; `--Track` forces tracking of the new issue. |
 | `fields` | `fields` | List configured fields and their types. |
+| `validate` | `validate [Issue Key]` | Check issue documents against the configured fields. Omit the key to check every issue. `.`, `T`, and `Tracked` select the tracked issue. The command exits with code 1 when any field is invalid. |
 
 ## View, search, and track
 
@@ -68,6 +69,7 @@ gitissue delete ISSUE_KEY
 | `export` | `export [File] [--Overwrite] [--Separator VALUE]` | Export issues to a `.json` or `.csv` file. Existing output files are not overwritten unless `--Overwrite` is specified. |
 | `import` | `import [File] [--Update] [--Separator VALUE]` | Import issues from a `.json` or `.csv` file. JSON import expects `Key` and `Title` properties; `Description` is optional. |
 | `sync` | `sync [File]` | Import issues from a JSON file. |
+| `convert` | `convert --to json\|markdown` | Rewrite every issue into the selected storage format and update `config.json`. |
 
 Examples:
 
@@ -90,6 +92,29 @@ JSON import reads one JSON object representing an issue and requires `Key` and `
   "Description": "Imported issue description."
 }
 ```
+
+## MCP server
+
+`gitissue mcp` exposes the repository issues to an MCP client. The server reads and writes the working tree and does not commit. Logs go to standard error because standard output carries the MCP protocol.
+
+| Command | Usage | Description |
+| --- | --- | --- |
+| `mcp serve` | `mcp serve [--path <directory>] [--name <folder>]` | Run the stdio MCP server. This is the default action. |
+| `mcp install` | `mcp install [--scope workspace\|user] [--dry-run] [--insiders] [--command <command>] [--server-arg <arg>]` | Add the server to Visual Studio Code Copilot. The default file is `.vscode/mcp.json`. `--scope user` writes the user profile `mcp.json`. |
+| `mcp uninstall` | `mcp uninstall [--scope workspace\|user] [--dry-run] [--insiders]` | Remove the `gitissue` entry and leave other servers in place. |
+
+```shell
+gitissue mcp install
+gitissue mcp serve
+```
+
+After install, reload Visual Studio Code or run **MCP: List Servers**, then trust the `gitissue` server. A global tool uses command `gitissue`. For a local tool, pass `--command dotnet`. A custom issue directory is recorded with `--name`:
+
+```shell
+gitissue mcp install --command dotnet --name work-items
+```
+
+The server provides tools for listing, reading, finding, creating, and updating issues, plus the field schema, tracked issue, and change log. `find_issues` uses structured filters. It does not evaluate the C# expressions accepted by `gitissue find`.
 
 ## Help
 

@@ -30,6 +30,17 @@ namespace GitIssue.Tool.Commands.Edit
             this.logger = logger;
         }
 
+        private static bool hasExplicitEditor(string editor)
+        {
+            return !string.IsNullOrWhiteSpace(editor) && editor != EditCommand.defaultEditor;
+        }
+
+        private static bool tryGetEditor(IRepository repository, string key, out string config)
+        {
+            config = repository.Config.GetValueOrDefault<string>(key) ?? string.Empty;
+            return !string.IsNullOrEmpty(config);
+        }
+
         /// <inheritdoc />
         public override async Task Exec(EditOptions options)
         {
@@ -106,17 +117,6 @@ namespace GitIssue.Tool.Commands.Edit
             {
                 this.editor.UpdateCommand(config);
             }
-        }
-
-        private static bool hasExplicitEditor(string editor)
-        {
-            return !string.IsNullOrWhiteSpace(editor) && editor != EditCommand.defaultEditor;
-        }
-
-        private static bool tryGetEditor(IRepository repository, string key, out string config)
-        {
-            config = repository.Config.GetValueOrDefault<string>(key) ?? string.Empty;
-            return !string.IsNullOrEmpty(config);
         }
     }
 }

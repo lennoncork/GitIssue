@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
+using Exceptionable;
 using GitIssue.Issues;
 using LibGit2Sharp;
 using Serilog;
@@ -42,6 +43,13 @@ namespace GitIssue
     /// </summary>
     public class IssueManager : IIssueManager
     {
+        private const FileStatus indexChangeFlags =
+            FileStatus.NewInIndex |
+            FileStatus.ModifiedInIndex |
+            FileStatus.DeletedFromIndex |
+            FileStatus.RenamedInIndex |
+            FileStatus.TypeChangeInIndex;
+
         private readonly IssueCreation issueCreation;
 
         private readonly IssueDeletion issueDeletion;
@@ -122,6 +130,8 @@ namespace GitIssue
         ///     Initializes a new issue manager
         /// </summary>
         /// <returns>the issue manager</returns>
+        [Throws<ArgumentException>]
+        [Throws<AggregateException>]
         public static IIssueManager Init()
         {
             return IssueManager.Init(new IssueConfiguration());
@@ -132,6 +142,8 @@ namespace GitIssue
         /// </summary>
         /// <param name="directory"></param>
         /// <returns></returns>
+        [Throws<ArgumentException>]
+        [Throws<AggregateException>]
         public static IIssueManager Init(string directory)
         {
             return IssueManager.Init(new IssueConfiguration(), directory);
@@ -143,6 +155,8 @@ namespace GitIssue
         /// <param name="directory"></param>
         /// <param name="name"></param>
         /// <returns></returns>
+        [Throws<ArgumentException>]
+        [Throws<AggregateException>]
         public static IIssueManager Init(string directory, string name)
         {
             return IssueManager.Init(new IssueConfiguration(), directory, name);
@@ -153,6 +167,8 @@ namespace GitIssue
         /// </summary>
         /// <param name="configuration"></param>
         /// <returns></returns>
+        [Throws<ArgumentException>]
+        [Throws<AggregateException>]
         public static IIssueManager Init(IssueConfiguration configuration)
         {
             return IssueManager.Init(configuration, Environment.CurrentDirectory);
@@ -164,6 +180,8 @@ namespace GitIssue
         /// <param name="configuration"></param>
         /// <param name="directory"></param>
         /// <returns></returns>
+        [Throws<ArgumentException>]
+        [Throws<AggregateException>]
         public static IIssueManager Init(IssueConfiguration configuration, string directory)
         {
             return IssueManager.Init(configuration, directory, Paths.IssueRootFolderName);
@@ -176,6 +194,8 @@ namespace GitIssue
         /// <param name="directory"></param>
         /// <param name="name"></param>
         /// <returns></returns>
+        [Throws<ArgumentException>]
+        [Throws<AggregateException>]
         public static IIssueManager Init(IssueConfiguration configuration, string directory, string name)
         {
             if (configuration == null)
@@ -208,6 +228,7 @@ namespace GitIssue
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
+        [Throws<GitIssue.Exceptions.RepositoryNotFoundException>]
         public static IIssueManager Open(string directory)
         {
             return IssueManager.Open(directory, Paths.IssueRootFolderName);
@@ -216,6 +237,7 @@ namespace GitIssue
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueManager" /> mass
         /// </summary>
+        [Throws<GitIssue.Exceptions.RepositoryNotFoundException>]
         public static IIssueManager Open(string directory, string name)
         {
             ContainerBuilder builder = new ContainerBuilder();
@@ -250,6 +272,7 @@ namespace GitIssue
         }
 
         /// <inheritdoc />
+        [Throws<SafeResultException>]
         public bool Commit()
         {
             return this.CommitAsync()
@@ -296,6 +319,7 @@ namespace GitIssue
         }
 
         /// <inheritdoc />
+        [Throws<SafeResultException>]
         public IIssue Create(string title)
         {
             return this.CreateAsync(title)
@@ -304,6 +328,7 @@ namespace GitIssue
         }
 
         /// <inheritdoc />
+        [Throws<SafeResultException>]
         public IIssue Create(string title, string description)
         {
             return this.CreateAsync(title, description)
@@ -323,7 +348,9 @@ namespace GitIssue
             IIssue issue = this.issueCreation(this.KeyProvider.Next());
             issue.Title = title;
             issue.Description = description;
-            issue.Author = this.Repository.Config.BuildSignature(issue.Created.Item);
+            DateTimeOffset created = DateTimeOffset.Now;
+            issue.Created = created.LocalDateTime;
+            issue.Author = this.Repository.Config.BuildSignature(created);
             await issue.SaveAsync();
             this.Changes.Add(issue, ChangeType.Create);
             return issue;
@@ -331,6 +358,7 @@ namespace GitIssue
 
 
         /// <inheritdoc />
+        [Throws<SafeResultException>]
         public bool Delete(string id)
         {
             return this.DeleteAsync(id)
@@ -340,6 +368,7 @@ namespace GitIssue
 
 
         /// <inheritdoc />
+        [Throws<SafeResultException>]
         public bool Delete(IssueKey key)
         {
             return this.DeleteAsync(key)
@@ -401,6 +430,7 @@ namespace GitIssue
         }
 
         /// <inheritdoc />
+        [Throws<SafeResultException>]
         public bool Track(IssueKey key)
         {
             return this.TrackAsync(key)
@@ -421,12 +451,10 @@ namespace GitIssue
             return true;
         }
 
-        private const FileStatus indexChangeFlags =
-            FileStatus.NewInIndex |
-            FileStatus.ModifiedInIndex |
-            FileStatus.DeletedFromIndex |
-            FileStatus.RenamedInIndex |
-            FileStatus.TypeChangeInIndex;
+        private static bool isIndexChange(StatusEntry entry)
+        {
+            return (entry.State & IssueManager.indexChangeFlags) != 0;
+        }
 
         private List<PreservedIndexChange> captureIndexChangesOutsideIssues(string issuesRelativePath)
         {
@@ -510,11 +538,6 @@ namespace GitIssue
             string fullPath = this.getFullPath(relativePath);
             return fullPath.Equals(Path.GetFullPath(this.Root.ChangeLog), StringComparison.Ordinal) ||
                 fullPath.Equals(Path.GetFullPath(this.Root.Tracked), StringComparison.Ordinal);
-        }
-
-        private static bool isIndexChange(StatusEntry entry)
-        {
-            return (entry.State & IssueManager.indexChangeFlags) != 0;
         }
 
         private bool isUnderIssues(string relativePath, string issuesRelativePath)

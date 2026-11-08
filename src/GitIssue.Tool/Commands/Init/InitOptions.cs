@@ -8,6 +8,9 @@ namespace GitIssue.Tool.Commands.Init
     {
         [Value(0, MetaName = "Issue Type", HelpText = "The type of issues that will be available", Required = false)]
         public string IssueType { get; set; } = string.Empty;
+
+        [Option("storage", HelpText = "Issue storage format: Markdown or Json. Defaults to Markdown", Required = false)]
+        public string Storage { get; set; } = "Markdown";
     }
 #pragma warning restore 1591
 }

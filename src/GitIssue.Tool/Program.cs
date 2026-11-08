@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using Autofac;
 using CommandLine;
 using GitIssue.Issues;
+using GitIssue.Mcp;
 using GitIssue.Tool.Commands;
 using GitIssue.Tool.Commands.Add;
 using GitIssue.Tool.Commands.Changes;
 using GitIssue.Tool.Commands.Comment;
 using GitIssue.Tool.Commands.Commit;
+using GitIssue.Tool.Commands.Convert;
 using GitIssue.Tool.Commands.Create;
 using GitIssue.Tool.Commands.Delete;
 using GitIssue.Tool.Commands.Edit;
@@ -22,6 +24,7 @@ using GitIssue.Tool.Commands.Remove;
 using GitIssue.Tool.Commands.Show;
 using GitIssue.Tool.Commands.Sync;
 using GitIssue.Tool.Commands.Track;
+using GitIssue.Tool.Commands.Validate;
 using Serilog;
 using CommitOptions = GitIssue.Tool.Commands.Commit.CommitOptions;
 
@@ -54,6 +57,17 @@ namespace GitIssue.Tool
                         InitCommand.Initializer onInitCommand = () =>
                         {
                             IssueConfiguration config = new IssueConfiguration();
+                            if (options is InitOptions initOptions)
+                            {
+                                if (string.IsNullOrWhiteSpace(initOptions.Storage) ||
+                                    !Enum.TryParse(initOptions.Storage, true, out IssueStorage storage))
+                                {
+                                    throw new ArgumentException($"Storage '{initOptions.Storage}' is not Json or Markdown.");
+                                }
+
+                                config.Storage = storage;
+                            }
+
                             RepositoryRoot root = RepositoryRoot.Create(options.Path, options.Name);
                             config.Save(root.ConfigFile);
                         };
@@ -115,6 +129,11 @@ namespace GitIssue.Tool
 
         internal static int Main(string[] args)
         {
+            if ((args.Length > 0) && args[0].Equals("mcp", StringComparison.OrdinalIgnoreCase))
+            {
+                return McpApplication.Execute(args, Console.Out, Console.Error);
+            }
+
             Program.logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .MinimumLevel.Debug()
@@ -129,11 +148,28 @@ namespace GitIssue.Tool
             });
 
             int exitCode = 1;
-            parser.ParseArguments<InitOptions, CreateOptions, DeleteOptions, FindOptions,
-                    ShowOptions, AddOptions, RemoveOptions, EditOptions, TrackOptions,
-                    FieldsOptions, CommitOptions, ExportOptions, ChangesOptions,
-                    ImportOptions, SyncOptions,
-                    CommentOptions>(args)
+            Type[] commands =
+            {
+                typeof(InitOptions),
+                typeof(CreateOptions),
+                typeof(DeleteOptions),
+                typeof(FindOptions),
+                typeof(ShowOptions),
+                typeof(AddOptions),
+                typeof(RemoveOptions),
+                typeof(EditOptions),
+                typeof(TrackOptions),
+                typeof(FieldsOptions),
+                typeof(CommitOptions),
+                typeof(ExportOptions),
+                typeof(ChangesOptions),
+                typeof(ImportOptions),
+                typeof(SyncOptions),
+                typeof(CommentOptions),
+                typeof(ValidateOptions),
+                typeof(ConvertOptions),
+            };
+            parser.ParseArguments(args, commands)
                 .WithParsed<InitOptions>(o => exitCode = Program.execAsync<InitCommand, InitOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<CreateOptions>(o => exitCode = Program.execAsync<CreateCommand, CreateOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<DeleteOptions>(o => exitCode = Program.execAsync<DeleteCommand, DeleteOptions>(o).GetAwaiter().GetResult())
@@ -150,6 +186,8 @@ namespace GitIssue.Tool
                 .WithParsed<TrackOptions>(o => exitCode = Program.execAsync<TrackCommand, TrackOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<CommitOptions>(o => exitCode = Program.execAsync<CommitCommand, CommitOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<ChangesOptions>(o => exitCode = Program.execAsync<ChangesCommand, ChangesOptions>(o).GetAwaiter().GetResult())
+                .WithParsed<ValidateOptions>(o => exitCode = Program.execAsync<ValidateCommand, ValidateOptions>(o).GetAwaiter().GetResult())
+                .WithParsed<ConvertOptions>(o => exitCode = Program.execAsync<ConvertCommand, ConvertOptions>(o).GetAwaiter().GetResult())
                 .WithNotParsed(errors =>
                 {
                     if (errors.Any(error => error is HelpRequestedError ||

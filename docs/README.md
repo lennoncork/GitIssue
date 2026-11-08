@@ -65,6 +65,16 @@ gitissue help
 gitissue create --help
 ```
 
+### Use GitIssue from Copilot
+
+From the repository root, install the MCP server into Visual Studio Code:
+
+```shell
+gitissue mcp install
+```
+
+Reload the window and trust the `gitissue` server when Visual Studio Code asks. Copilot can then list and update issues in the working tree. The server does not commit. See the [command reference](commands.md#mcp-server).
+
 ## Everyday workflows
 
 Commands that accept an issue key can use the key printed when the issue was created. For commands that support tracking, `.` (or `T` / `Tracked`) means the currently tracked issue.
@@ -100,7 +110,7 @@ The `edit` command opens the editor when no field and value are supplied. The `c
 
 ## Where GitIssue stores data
 
-By default, GitIssue creates `.issues` in the working directory. That directory contains `config.json`, the issue files, `tracking.json`, and `changes.json`.
+By default, GitIssue creates `.issues` in the working directory. That directory contains `config.json`, the issue files, `tracking.json`, and `changes.json`. Each issue is a Markdown document. `gitissue init --storage json` selects one JSON document per issue. `gitissue validate` reports fields that do not match the configured schema.
 
 The `.issues` directory is part of your repository. Review and commit it according to your project's normal practices. Back it up before making manual changes to its files.
 

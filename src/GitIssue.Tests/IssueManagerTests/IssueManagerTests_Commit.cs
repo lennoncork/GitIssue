@@ -269,11 +269,13 @@ namespace GitIssue.Tests.IssueManagerTests
 
             private string findCreatedIssueRelativePath()
             {
-                return Directory.EnumerateFiles(this.IssueDirectory, "*.json", SearchOption.AllDirectories)
+                return Directory.EnumerateFiles(this.IssueDirectory, "*", SearchOption.AllDirectories)
                     .Select(path => Path.GetRelativePath(this.TestDirectory, path).Replace('\\', '/'))
-                    .Single(path => !path.EndsWith("/" + Paths.ChangeLogFileName, StringComparison.Ordinal) &&
-                        !path.EndsWith("/" + Paths.ConfigFileName, StringComparison.Ordinal) &&
-                        !path.EndsWith("/" + Paths.TrackedIssueFileName, StringComparison.Ordinal));
+                    .Single(path => path.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ||
+                        (path.EndsWith(".json", StringComparison.OrdinalIgnoreCase) &&
+                         !path.EndsWith("/" + Paths.ChangeLogFileName, StringComparison.Ordinal) &&
+                         !path.EndsWith("/" + Paths.ConfigFileName, StringComparison.Ordinal) &&
+                         !path.EndsWith("/" + Paths.TrackedIssueFileName, StringComparison.Ordinal)));
             }
         }
     }

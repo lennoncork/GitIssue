@@ -90,5 +90,15 @@
         ///     Shows the current status
         /// </summary>
         Changes,
+
+        /// <summary>
+        ///     Validates issue documents
+        /// </summary>
+        Validate,
+
+        /// <summary>
+        ///     Converts issue storage between JSON and Markdown
+        /// </summary>
+        Convert,
     }
 }

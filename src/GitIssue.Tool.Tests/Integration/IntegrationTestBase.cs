@@ -72,7 +72,7 @@ namespace GitIssue.Tool.Tests.Integration
 
         protected void InitializeRepository()
         {
-            Assert.That(this.Run("Init"), Is.Zero, this.Error);
+            Assert.That(this.Run("Init", "--storage", "json"), Is.Zero, this.Error);
         }
 
         protected void AssertDirectoryDoesNotExist(string path)

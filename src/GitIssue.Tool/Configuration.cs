@@ -1,4 +1,7 @@
-﻿namespace GitIssue.Tool
+﻿using System;
+using Exceptionable;
+
+namespace GitIssue.Tool
 {
     /// <summary>
     ///     Configuration for the issue
@@ -20,6 +23,7 @@
         /// </summary>
         /// <param name="file">the configuration file</param>
         /// <returns>the <see cref="Configuration" /></returns>
+        [Throws<AggregateException>]
         public new static Configuration Read(string file)
         {
             return IssueConfiguration.Read<Configuration>(file);

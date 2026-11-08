@@ -1,5 +1,7 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
+using System.Diagnostics.Contracts;
 using System.IO;
+using Exceptionable;
 using LibGit2Sharp;
 using RepositoryNotFoundException = GitIssue.Exceptions.RepositoryNotFoundException;
 
@@ -48,6 +50,7 @@ namespace GitIssue
         /// <summary>
         ///     Gets the issue configuration
         /// </summary>
+        [Throws<AggregateException>]
         public IssueConfiguration Configuration => IssueConfiguration.Read(this.ConfigFile);
 
         /// <summary>

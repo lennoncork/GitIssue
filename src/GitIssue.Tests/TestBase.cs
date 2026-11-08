@@ -26,6 +26,7 @@ namespace GitIssue.Tests
             if (initGit)
             {
                 Repository.Init(directory);
+                TestsBase.configureRepositoryIdentity(directory);
             }
 
             if (initIssue)
@@ -49,6 +50,7 @@ namespace GitIssue.Tests
             if (initGit)
             {
                 Repository.Init(directory);
+                TestsBase.configureRepositoryIdentity(directory);
             }
 
             if (initIssue)
@@ -60,6 +62,14 @@ namespace GitIssue.Tests
             {
                 this.Manager = IssueManager.Open(this.TestDirectory, name);
             }
+        }
+
+        private static void configureRepositoryIdentity(string directory)
+        {
+            // Creating an issue requires a valid author. Hosted runners have no global git identity.
+            using Repository repository = new Repository(directory);
+            repository.Config.Set("user.name", "Tester");
+            repository.Config.Set("user.email", "tester@example.com");
         }
 
         [OneTimeSetUp]
