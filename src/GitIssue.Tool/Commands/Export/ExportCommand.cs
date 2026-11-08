@@ -18,7 +18,7 @@ namespace GitIssue.Tool.Commands.Export
     /// </summary>
     public class ExportCommand : Command<ExportOptions>
     {
-        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             WriteIndented = true,
@@ -40,20 +40,26 @@ namespace GitIssue.Tool.Commands.Export
             switch (Path.GetExtension(options.Export))
             {
                 case ".json":
-                    await this.exportJson(options);
+                    await this.ExportJson(options);
                     break;
 
                 case ".csv":
-                    await this.exportCsv(options);
+                    await this.ExportCsv(options);
+                    break;
+
+                default:
+                    this.logger.Error($"Export of '{Path.GetExtension(options.Export)}' files is not supported");
+                    this.ExitCode = 1;
                     break;
             }
         }
 
-        public async Task exportCsv(ExportOptions options)
+        public async Task ExportCsv(ExportOptions options)
         {
             if (File.Exists(options.Export) && !options.Overwrite)
             {
                 this.logger.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -94,11 +100,12 @@ namespace GitIssue.Tool.Commands.Export
             Console.WriteLine($"Exported {count} issues to {options.Export}");
         }
 
-        public async Task exportJson(ExportOptions options)
+        public async Task ExportJson(ExportOptions options)
         {
             if (File.Exists(options.Export) && !options.Overwrite)
             {
                 this.logger.Error($"Export file {options.Export} exists, use '{nameof(ExportOptions.Overwrite)}' to force");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -111,7 +118,7 @@ namespace GitIssue.Tool.Commands.Export
                 }
             }
 
-            await File.WriteAllTextAsync(options.Export, json.ToJsonString(ExportCommand.JsonOptions));
+            await File.WriteAllTextAsync(options.Export, json.ToJsonString(ExportCommand.jsonOptions));
 
             Console.WriteLine($"Exported {json.Count} issues to {options.Export}");
         }

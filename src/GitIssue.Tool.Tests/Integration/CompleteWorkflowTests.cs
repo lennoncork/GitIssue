@@ -15,7 +15,7 @@ namespace GitIssue.Tool.Tests.Integration
             const string importedTitle = "Follow up with external reporter";
 
             // A user starts by creating the local issue store for the repository.
-            this.RunSuccessfully("Init");
+            this.RunSuccessfully("Init", "--storage", "json");
             this.AssertFileExists(this.ConfigurationFile);
             this.AssertFileDoesNotExist(this.TrackingFile);
 

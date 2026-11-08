@@ -5,9 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Exceptionable;
 using GitIssue.Exceptions;
 using GitIssue.Fields;
 using GitIssue.Issues.File;
+using GitIssue.Validation;
 
 namespace GitIssue.Issues.Json
 {
@@ -32,6 +34,11 @@ namespace GitIssue.Issues.Json
         protected readonly HashSet<FieldKey> modifiedFields;
 
         /// <summary>
+        ///     The schema used to validate this issue
+        /// </summary>
+        protected readonly IDictionary<FieldKey, FieldInfo>? schema;
+
+        /// <summary>
         ///     Initializes a new instance of a <see cref="JsonIssue" /> class
         /// </summary>
         /// <param name="root">the issue root</param>
@@ -51,6 +58,7 @@ namespace GitIssue.Issues.Json
         public JsonIssue(IssueRoot root, IDictionary<FieldKey, FieldInfo> fields) :
             base(root)
         {
+            this.schema = fields;
             this.fields = fields.ToDictionary(f => f.Key,
                 f => f.Value.CreateField(this, f.Key));
             this.modifiedFields = new HashSet<FieldKey>();
@@ -67,6 +75,7 @@ namespace GitIssue.Issues.Json
         /// <summary>
         ///     Gets the Json path for the issue
         /// </summary>
+        [Throws<ArgumentException>]
         public string Json => JsonIssue.GetJsonFile(this.Root);
 
         /// <inheritdoc />
@@ -80,6 +89,8 @@ namespace GitIssue.Issues.Json
         /// </summary>
         /// <param name="issueRoot"></param>
         /// <returns></returns>
+        [Throws<ArgumentException>]
+        [Throws<IssueNotFoundException>]
         public static Task<bool> DeleteAsync(IssueRoot issueRoot)
         {
             // Issue should exist before attempting to delete
@@ -109,6 +120,7 @@ namespace GitIssue.Issues.Json
         /// </summary>
         /// <param name="root"></param>
         /// <returns></returns>
+        [Throws<ArgumentException>]
         public static string GetJsonFile(IssueRoot root)
         {
             return Path.Combine(root.IssuePath, $"{Path.GetFileName(root.Key.ToString())}.json");
@@ -150,25 +162,43 @@ namespace GitIssue.Issues.Json
         /// <inheritdoc />
         public override async Task<bool> SaveAsync()
         {
-            // Make sure the issue root exists
-            if (!Directory.Exists(this.Root.IssuePath))
-            {
-                Directory.CreateDirectory(this.Root.IssuePath);
-            }
-
-            // Set the created and updated dates
+            // Set the created and updated dates before validation
             if (this.Created == DateTime.MinValue)
             {
                 this.Created = DateTime.Now;
             }
 
             this.Updated = DateTime.Now;
+            this.EnsureValid();
+
+            // Make sure the issue root exists
+            if (!Directory.Exists(this.Root.IssuePath))
+            {
+                Directory.CreateDirectory(this.Root.IssuePath);
+            }
 
             // Save as Json
             await this.SaveAsJsonAsync(this.Json);
 
             // Success
             return true;
+        }
+
+        /// <summary>
+        ///     Throws when the issue fields do not satisfy the schema
+        /// </summary>
+        protected void EnsureValid()
+        {
+            if (this.schema == null)
+            {
+                return;
+            }
+
+            IReadOnlyList<IssueValidationError> errors = IssueValidator.ValidateFields(this, this.schema);
+            if (errors.Count > 0)
+            {
+                throw new IssueValidationException(this.Key, errors);
+            }
         }
 
         /// <inheritdoc />

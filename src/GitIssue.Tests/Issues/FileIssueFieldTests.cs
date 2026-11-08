@@ -12,7 +12,7 @@ namespace GitIssue.Tests.Issues
     [TestFixture]
     public class FileIssueFieldTests
     {
-        private IssueRoot CreateIssueRoot()
+        private IssueRoot createIssueRoot()
         {
             string repository = Helpers.CreateTempDirectory();
             RepositoryRoot repositoryRoot = RepositoryRoot.Open(repository, null);
@@ -24,7 +24,7 @@ namespace GitIssue.Tests.Issues
         [Test]
         public async Task ArrayField_RoundTripsInOrderAndRemovesStaleValues()
         {
-            IssueRoot root = this.CreateIssueRoot();
+            IssueRoot root = this.createIssueRoot();
             FieldKey key = FieldKey.Create("values");
             FileArrayField<StringValue> field = new FileArrayField<StringValue>(root, key,
                 new[] { StringValue.Parse("one"), StringValue.Parse("two"), StringValue.Parse("three") });
@@ -42,7 +42,7 @@ namespace GitIssue.Tests.Issues
         [Test]
         public async Task ArrayField_StaticReader_UsesConfiguredValueType()
         {
-            IssueRoot root = this.CreateIssueRoot();
+            IssueRoot root = this.createIssueRoot();
             FieldKey key = FieldKey.Create("values");
             FileArrayField<StringValue> field = new FileArrayField<StringValue>(root, key,
                 new[] { StringValue.Parse("saved") });
@@ -59,7 +59,7 @@ namespace GitIssue.Tests.Issues
         [Test]
         public async Task ArrayField_ReadAsync_ReturnsEmptyWhenFieldDirectoryDoesNotExist()
         {
-            IssueRoot root = this.CreateIssueRoot();
+            IssueRoot root = this.createIssueRoot();
             FieldKey key = FieldKey.Create("values");
 
             IField result = await FileArrayField<StringValue>.ReadAsync(root, key, new FieldInfo());
@@ -70,7 +70,7 @@ namespace GitIssue.Tests.Issues
         [Test]
         public async Task ValueField_RoundTrips()
         {
-            IssueRoot root = this.CreateIssueRoot();
+            IssueRoot root = this.createIssueRoot();
             FieldKey key = FieldKey.Create("value");
             FileValueField<StringValue> field = new FileValueField<StringValue>(root, key, StringValue.Parse("saved"));
 

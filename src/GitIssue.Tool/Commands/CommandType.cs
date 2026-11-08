@@ -42,6 +42,11 @@
         Import,
 
         /// <summary>
+        ///     Imports issues from a JSON file
+        /// </summary>
+        Sync,
+
+        /// <summary>
         ///     Exports all issues into a JSON or CSV file
         /// </summary>
         Export,
@@ -85,5 +90,15 @@
         ///     Shows the current status
         /// </summary>
         Changes,
+
+        /// <summary>
+        ///     Validates issue documents
+        /// </summary>
+        Validate,
+
+        /// <summary>
+        ///     Converts issue storage between JSON and Markdown
+        /// </summary>
+        Convert,
     }
 }

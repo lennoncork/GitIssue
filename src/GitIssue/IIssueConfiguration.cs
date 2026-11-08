@@ -20,6 +20,11 @@ namespace GitIssue
         TypeValue KeyProvider { get; set; }
 
         /// <summary>
+        ///     Gets or sets the on-disk format used for issue documents
+        /// </summary>
+        IssueStorage Storage { get; set; }
+
+        /// <summary>
         ///     Saves the configuration to a file
         /// </summary>
         /// <param name="file">the configuration file</param>

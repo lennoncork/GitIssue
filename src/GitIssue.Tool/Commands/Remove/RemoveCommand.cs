@@ -35,12 +35,14 @@ namespace GitIssue.Tool.Commands.Remove
             if (issue == null)
             {
                 this.logger.Error($"Issue \"{options.Key}\" not found");
+                this.ExitCode = 1;
                 return;
             }
 
             if (string.IsNullOrEmpty(options.Field))
             {
                 this.logger.Error($"Field must be supplied to remove a value on \"{issue.Key}\"");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -48,6 +50,7 @@ namespace GitIssue.Tool.Commands.Remove
             if (!issue.ContainsKey(key))
             {
                 this.logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -65,16 +68,19 @@ namespace GitIssue.Tool.Commands.Remove
                     else
                     {
                         this.logger.Error($"Item \"{options.Remove}\" does not exist on field {options.Field}");
+                        this.ExitCode = 1;
                     }
                 }
                 else
                 {
                     this.logger.Error($"Item \"{options.Remove}\" is not a valid value for field {options.Field}");
+                    this.ExitCode = 1;
                 }
             }
             else
             {
                 this.logger.Error($"Field \"{key}\" is not an array type, cannot remove value");
+                this.ExitCode = 1;
             }
         }
     }

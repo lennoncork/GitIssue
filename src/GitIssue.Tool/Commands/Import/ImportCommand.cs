@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Syncs;
 using Serilog;
 
 namespace GitIssue.Tool.Commands.Import
 {
     /// <summary>
-    ///     Edit command
+    ///     Import command
     /// </summary>
     public class ImportCommand : Command<ImportOptions>
     {
@@ -30,19 +33,87 @@ namespace GitIssue.Tool.Commands.Import
             switch (Path.GetExtension(options.Import))
             {
                 case ".csv":
-                    await this.importCsv(options);
+                    await this.ImportCsv(options);
                     break;
+
+                case ".json":
+                    await this.ImportJson(options.Import);
+                    break;
+
                 default:
-                    this.Fail(ImportCommand.UnsupportedImportMessage(options.Import));
+                    this.logger.Error($"Unsupported import file '{options.Import}'. Use a .json or .csv file.");
+                    this.ExitCode = 1;
                     break;
             }
         }
 
-        public async Task importCsv(ImportOptions options)
+        public async Task ImportJson(string path)
+        {
+            FileImporter importer = new FileImporter(this.manager)
+            {
+                ImportPath = path,
+            };
+            await ImportCommand.applyDefaultMappingAsync(importer);
+
+            bool imported = await importer.Import();
+            int count = imported ? 1 : 0;
+            Console.WriteLine($"Imported {count} issues from {path}");
+            if (imported)
+            {
+                return;
+            }
+
+            string message = File.Exists(path)
+                ? $"Failed to import issues from {path}. The JSON object must include Key and Title."
+                : $"Import file {path} does not exist";
+            this.logger.Error(message);
+            this.ExitCode = 1;
+        }
+
+        private static async Task applyDefaultMappingAsync(FileImporter importer)
+        {
+            string key = "Key";
+            string title = "Title";
+            string description = "Description";
+            if (File.Exists(importer.ImportPath))
+            {
+                try
+                {
+                    string content = await File.ReadAllTextAsync(importer.ImportPath);
+                    if (JsonNode.Parse(content) is JsonObject json)
+                    {
+                        key = ImportCommand.mapProperty(json, "Key", "key");
+                        title = ImportCommand.mapProperty(json, "Title", "title");
+                        description = ImportCommand.mapProperty(json, "Description", "description");
+                    }
+                }
+                catch (JsonException)
+                {
+                    // FileImporter reports JSON that it cannot read.
+                }
+            }
+
+            importer.Configuration.Mapping["Key"] = key;
+            importer.Configuration.Mapping["Title"] = title;
+            importer.Configuration.Mapping["Description"] = description;
+        }
+
+        private static string mapProperty(JsonObject json, string name, string alias)
+        {
+            if (json.ContainsKey(name) || !json.ContainsKey(alias))
+            {
+                return name;
+            }
+
+            return alias;
+        }
+
+        public async Task ImportCsv(ImportOptions options)
         {
             if (!File.Exists(options.Import))
             {
                 this.logger.Error($"Import file {options.Import} does not exist");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -52,6 +123,8 @@ namespace GitIssue.Tool.Commands.Import
             string? header = await reader.ReadLineAsync();
             if (header == null)
             {
+                this.logger.Error($"Import file {options.Import} is empty");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -70,7 +143,10 @@ namespace GitIssue.Tool.Commands.Import
                 }
             }
 
-            this.EnsureRequiredColumns(mapping);
+            if (!this.ensureRequiredColumns(mapping))
+            {
+                return;
+            }
 
             foreach (KeyValuePair<FieldKey, int> map in mapping)
             {
@@ -111,7 +187,7 @@ namespace GitIssue.Tool.Commands.Import
                     }
 
                     Console.WriteLine($"Updating {issue.Key}");
-                    this.ApplyFields(issue, mapping, import);
+                    this.applyFields(issue, mapping, import);
                     issue.Updated = DateTime.Now;
                     await issue.SaveAsync();
                 }
@@ -119,7 +195,7 @@ namespace GitIssue.Tool.Commands.Import
                 {
                     Console.WriteLine($"Creating {sourceKey}");
                     issue = await this.manager.CreateAsync(import[mapping["Title"]]);
-                    this.ApplyFields(issue, mapping, import);
+                    this.applyFields(issue, mapping, import);
                     issue.Updated = DateTime.Now;
                     await issue.SaveAsync();
                 }
@@ -132,7 +208,7 @@ namespace GitIssue.Tool.Commands.Import
             Console.WriteLine($"Imported {count} issues from {options.Import}");
         }
 
-        private void ApplyFields(IIssue issue, IReadOnlyDictionary<FieldKey, int> mapping, string[] values)
+        private void applyFields(IIssue issue, IReadOnlyDictionary<FieldKey, int> mapping, string[] values)
         {
             foreach (KeyValuePair<FieldKey, int> map in mapping)
             {
@@ -154,7 +230,7 @@ namespace GitIssue.Tool.Commands.Import
             }
         }
 
-        private void EnsureRequiredColumns(IReadOnlyDictionary<FieldKey, int> mapping)
+        private bool ensureRequiredColumns(IReadOnlyDictionary<FieldKey, int> mapping)
         {
             List<string> missing = new List<string>();
             if (!mapping.ContainsKey("Key"))
@@ -169,29 +245,14 @@ namespace GitIssue.Tool.Commands.Import
 
             if (missing.Count == 0)
             {
-                return;
+                return true;
             }
 
             string columnList = missing.Count == 1 ? missing[0] : string.Join(" and ", missing);
             string suffix = missing.Count == 1 ? "column" : "columns";
-            this.Fail($"CSV import requires the {columnList} {suffix}.");
-        }
-
-        private void Fail(string message)
-        {
-            this.logger.Error(message);
-            throw new InvalidOperationException(message);
-        }
-
-        private static string UnsupportedImportMessage(string path)
-        {
-            string extension = Path.GetExtension(path);
-            if (string.IsNullOrEmpty(extension))
-            {
-                return $"Import file \"{path}\" is not supported. Only .csv files can be imported.";
-            }
-
-            return $"Import of \"{extension}\" files is not supported. Only .csv files can be imported.";
+            this.logger.Error($"CSV import requires the {columnList} {suffix}.");
+            this.ExitCode = 1;
+            return false;
         }
     }
 }

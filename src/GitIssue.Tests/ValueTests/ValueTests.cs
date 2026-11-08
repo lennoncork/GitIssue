@@ -65,28 +65,28 @@ namespace GitIssue.Tests.ValueTests
     public abstract class JsonValueTests<TValue> : ValueTests<TValue>
         where TValue : IValue, IJsonValue
     {
-        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         };
 
         public virtual string ConvertToJson(TValue value)
         {
-            return value.ToJson()?.ToJsonString(JsonValueTests<TValue>.JsonOptions) ?? "null";
+            return value.ToJson()?.ToJsonString(JsonValueTests<TValue>.jsonOptions) ?? "null";
         }
     }
 
     public abstract class JsonValueTests<TValue, TBacking> : ValueTests<TValue, TBacking>
         where TValue : IValue, IValue<TBacking>, IJsonValue
     {
-        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         };
 
         public virtual string ConvertToJson(TValue value)
         {
-            return value.ToJson()?.ToJsonString(JsonValueTests<TValue, TBacking>.JsonOptions) ?? "null";
+            return value.ToJson()?.ToJsonString(JsonValueTests<TValue, TBacking>.jsonOptions) ?? "null";
         }
     }
 

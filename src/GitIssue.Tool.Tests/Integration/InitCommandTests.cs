@@ -24,8 +24,17 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(this.GetIssueKeys(), Is.Empty);
                 this.AssertJsonPropertyExists(configuration, "Fields");
                 this.AssertJsonPropertyExists(configuration["Fields"]!.AsObject(), "Title");
+                Assert.That(configuration["Storage"]?.GetValue<string>(), Is.EqualTo("Markdown"));
                 Assert.That(this.Output, Does.Contain("Initialized empty 'Issue' repository"));
             });
+        }
+
+        [Test]
+        public void Help_ReturnsZero()
+        {
+            int exitCode = this.Run("--help");
+
+            Assert.That(exitCode, Is.Zero);
         }
     }
 }
