@@ -32,80 +32,6 @@ namespace GitIssue.Mcp
     }
 
     /// <summary>
-    ///     Parsed <c>gitissue mcp</c> arguments
-    /// </summary>
-    public sealed class McpArguments
-    {
-        /// <summary>
-        ///     Gets the selected action
-        /// </summary>
-        public McpAction Action { get; init; } = McpAction.Serve;
-
-        /// <summary>
-        ///     Gets the parse error, when parsing failed
-        /// </summary>
-        public string? Error { get; init; }
-
-        /// <summary>
-        ///     Gets the working directory
-        /// </summary>
-        public string RepositoryPath { get; init; } = Environment.CurrentDirectory;
-
-        /// <summary>
-        ///     Gets the issue directory name
-        /// </summary>
-        public string IssueFolderName { get; init; } = Paths.IssueRootFolderName;
-
-        /// <summary>
-        ///     Gets the configuration scope
-        /// </summary>
-        public McpInstallScope Scope { get; init; } = McpInstallScope.Workspace;
-
-        /// <summary>
-        ///     Gets a value indicating whether the configuration is previewed
-        /// </summary>
-        public bool DryRun { get; init; }
-
-        /// <summary>
-        ///     Gets a value indicating whether the Insiders user profile is used
-        /// </summary>
-        public bool Insiders { get; init; }
-
-        /// <summary>
-        ///     Gets the server command
-        /// </summary>
-        public string Command { get; init; } = "gitissue";
-
-        /// <summary>
-        ///     Gets replacement server arguments
-        /// </summary>
-        public IReadOnlyList<string> ServerArguments { get; init; } = new List<string>();
-
-        /// <summary>
-        ///     Gets a value indicating whether the arguments parsed
-        /// </summary>
-        public bool IsValid => this.Error is null;
-
-        /// <summary>
-        ///     Creates the install request described by these arguments
-        /// </summary>
-        /// <returns>the install request</returns>
-        public McpInstallRequest ToInstallRequest()
-        {
-            return new McpInstallRequest
-            {
-                Scope = this.Scope,
-                WorkspaceDirectory = this.RepositoryPath,
-                Insiders = this.Insiders,
-                DryRun = this.DryRun,
-                Command = this.Command,
-                IssueFolderName = this.IssueFolderName,
-                ServerArguments = this.ServerArguments,
-            };
-        }
-    }
-
-    /// <summary>
     ///     Parses <c>gitissue mcp</c> arguments
     /// </summary>
     public static class McpCommandLine
@@ -411,6 +337,80 @@ namespace GitIssue.Mcp
                 error.WriteLine(exception.Message);
                 return 1;
             }
+        }
+    }
+
+    /// <summary>
+    ///     Parsed <c>gitissue mcp</c> arguments
+    /// </summary>
+    public sealed class McpArguments
+    {
+        /// <summary>
+        ///     Gets the selected action
+        /// </summary>
+        public McpAction Action { get; init; } = McpAction.Serve;
+
+        /// <summary>
+        ///     Gets the parse error, when parsing failed
+        /// </summary>
+        public string? Error { get; init; }
+
+        /// <summary>
+        ///     Gets the working directory
+        /// </summary>
+        public string RepositoryPath { get; init; } = Environment.CurrentDirectory;
+
+        /// <summary>
+        ///     Gets the issue directory name
+        /// </summary>
+        public string IssueFolderName { get; init; } = Paths.IssueRootFolderName;
+
+        /// <summary>
+        ///     Gets the configuration scope
+        /// </summary>
+        public McpInstallScope Scope { get; init; } = McpInstallScope.Workspace;
+
+        /// <summary>
+        ///     Gets a value indicating whether the configuration is previewed
+        /// </summary>
+        public bool DryRun { get; init; }
+
+        /// <summary>
+        ///     Gets a value indicating whether the Insiders user profile is used
+        /// </summary>
+        public bool Insiders { get; init; }
+
+        /// <summary>
+        ///     Gets the server command
+        /// </summary>
+        public string Command { get; init; } = "gitissue";
+
+        /// <summary>
+        ///     Gets replacement server arguments
+        /// </summary>
+        public IReadOnlyList<string> ServerArguments { get; init; } = new List<string>();
+
+        /// <summary>
+        ///     Gets a value indicating whether the arguments parsed
+        /// </summary>
+        public bool IsValid => this.Error is null;
+
+        /// <summary>
+        ///     Creates the install request described by these arguments
+        /// </summary>
+        /// <returns>the install request</returns>
+        public McpInstallRequest ToInstallRequest()
+        {
+            return new McpInstallRequest
+            {
+                Scope = this.Scope,
+                WorkspaceDirectory = this.RepositoryPath,
+                Insiders = this.Insiders,
+                DryRun = this.DryRun,
+                Command = this.Command,
+                IssueFolderName = this.IssueFolderName,
+                ServerArguments = this.ServerArguments,
+            };
         }
     }
 }

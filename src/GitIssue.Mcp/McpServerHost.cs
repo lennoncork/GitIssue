@@ -15,33 +15,6 @@ using Serilog.Events;
 namespace GitIssue.Mcp
 {
     /// <summary>
-    ///     Options for the stdio MCP server
-    /// </summary>
-    public sealed class McpServeOptions
-    {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="McpServeOptions" /> class
-        /// </summary>
-        /// <param name="repositoryPath">the working directory</param>
-        /// <param name="issueFolderName">the issue directory name</param>
-        public McpServeOptions(string repositoryPath, string issueFolderName)
-        {
-            this.RepositoryPath = repositoryPath;
-            this.IssueFolderName = issueFolderName;
-        }
-
-        /// <summary>
-        ///     Gets the working directory
-        /// </summary>
-        public string RepositoryPath { get; }
-
-        /// <summary>
-        ///     Gets the issue directory name
-        /// </summary>
-        public string IssueFolderName { get; }
-    }
-
-    /// <summary>
     ///     Hosts the GitIssue MCP server on standard input and output
     /// </summary>
     public static class McpServerHost
@@ -126,5 +99,32 @@ namespace GitIssue.Mcp
         {
             McpServerHost.CreateHost(options).Run();
         }
+    }
+
+    /// <summary>
+    ///     Options for the stdio MCP server
+    /// </summary>
+    public sealed class McpServeOptions
+    {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="McpServeOptions" /> class
+        /// </summary>
+        /// <param name="repositoryPath">the working directory</param>
+        /// <param name="issueFolderName">the issue directory name</param>
+        public McpServeOptions(string repositoryPath, string issueFolderName)
+        {
+            this.RepositoryPath = repositoryPath;
+            this.IssueFolderName = issueFolderName;
+        }
+
+        /// <summary>
+        ///     Gets the working directory
+        /// </summary>
+        public string RepositoryPath { get; }
+
+        /// <summary>
+        ///     Gets the issue directory name
+        /// </summary>
+        public string IssueFolderName { get; }
     }
 }

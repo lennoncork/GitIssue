@@ -24,6 +24,69 @@ namespace GitIssue.Mcp
     }
 
     /// <summary>
+    ///     Locates Visual Studio Code MCP configuration files
+    /// </summary>
+    public static class McpConfigurationPaths
+    {
+        /// <summary>
+        ///     Gets the user-profile MCP configuration path for this operating system
+        /// </summary>
+        /// <param name="insiders">true to use Visual Studio Code Insiders</param>
+        /// <returns>the absolute configuration path</returns>
+        public static string UserConfigurationFile(bool insiders)
+        {
+            string folder = insiders ? "Code - Insiders" : "Code";
+            if (OperatingSystem.IsWindows())
+            {
+                return Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    folder,
+                    "User",
+                    "mcp.json");
+            }
+
+            if (OperatingSystem.IsMacOS())
+            {
+                return Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "Library",
+                    "Application Support",
+                    folder,
+                    "User",
+                    "mcp.json");
+            }
+
+            string configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") ?? string.Empty;
+            if (string.IsNullOrEmpty(configHome))
+            {
+                configHome = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
+            }
+
+            return Path.Combine(configHome, folder, "User", "mcp.json");
+        }
+
+        /// <summary>
+        ///     Resolves the configuration file for a request
+        /// </summary>
+        /// <param name="request">the install request</param>
+        /// <returns>the configuration path</returns>
+        public static string Resolve(McpInstallRequest request)
+        {
+            if (!string.IsNullOrWhiteSpace(request.ConfigurationFile))
+            {
+                return request.ConfigurationFile;
+            }
+
+            if (request.Scope == McpInstallScope.User)
+            {
+                return McpConfigurationPaths.UserConfigurationFile(request.Insiders);
+            }
+
+            return Path.Combine(request.WorkspaceDirectory, ".vscode", "mcp.json");
+        }
+    }
+
+    /// <summary>
     ///     Values used to install or remove the gitissue MCP server
     /// </summary>
     public sealed class McpInstallRequest
@@ -98,69 +161,6 @@ namespace GitIssue.Mcp
         ///     Gets a value indicating whether the file was written
         /// </summary>
         public bool FileUpdated { get; init; }
-    }
-
-    /// <summary>
-    ///     Locates Visual Studio Code MCP configuration files
-    /// </summary>
-    public static class McpConfigurationPaths
-    {
-        /// <summary>
-        ///     Gets the user-profile MCP configuration path for this operating system
-        /// </summary>
-        /// <param name="insiders">true to use Visual Studio Code Insiders</param>
-        /// <returns>the absolute configuration path</returns>
-        public static string UserConfigurationFile(bool insiders)
-        {
-            string folder = insiders ? "Code - Insiders" : "Code";
-            if (OperatingSystem.IsWindows())
-            {
-                return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    folder,
-                    "User",
-                    "mcp.json");
-            }
-
-            if (OperatingSystem.IsMacOS())
-            {
-                return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    "Library",
-                    "Application Support",
-                    folder,
-                    "User",
-                    "mcp.json");
-            }
-
-            string configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") ?? string.Empty;
-            if (string.IsNullOrEmpty(configHome))
-            {
-                configHome = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
-            }
-
-            return Path.Combine(configHome, folder, "User", "mcp.json");
-        }
-
-        /// <summary>
-        ///     Resolves the configuration file for a request
-        /// </summary>
-        /// <param name="request">the install request</param>
-        /// <returns>the configuration path</returns>
-        public static string Resolve(McpInstallRequest request)
-        {
-            if (!string.IsNullOrWhiteSpace(request.ConfigurationFile))
-            {
-                return request.ConfigurationFile;
-            }
-
-            if (request.Scope == McpInstallScope.User)
-            {
-                return McpConfigurationPaths.UserConfigurationFile(request.Insiders);
-            }
-
-            return Path.Combine(request.WorkspaceDirectory, ".vscode", "mcp.json");
-        }
     }
 
     /// <summary>

@@ -30,6 +30,105 @@ namespace GitIssue.Mcp
             this.manager = manager;
         }
 
+        private static bool tryResolveField(IIssue issue, string field, out FieldKey key)
+        {
+            foreach (FieldKey candidate in issue.Keys)
+            {
+                if (string.Equals(candidate.ToString(), field, StringComparison.OrdinalIgnoreCase))
+                {
+                    key = candidate;
+                    return true;
+                }
+            }
+
+            key = FieldKey.None;
+            return false;
+        }
+
+        private static int normalizeLimit(int limit)
+        {
+            if (limit < 1)
+            {
+                throw new McpOperationException("Limit must be at least 1.");
+            }
+
+            return Math.Min(limit, 200);
+        }
+
+        private static bool matches(IssueDocument document, IssueQuery query)
+        {
+            if (!IssueMcpService.contains(document.Title, query.TitleContains) ||
+                !IssueMcpService.contains(document.Description, query.DescriptionContains))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(query.Field))
+            {
+                return true;
+            }
+
+            if (!IssueMcpService.tryGetField(document, query.Field, out JsonElement field))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(query.FieldEquals))
+            {
+                return true;
+            }
+
+            return IssueMcpService.equals(field, query.FieldEquals);
+        }
+
+        private static bool contains(string text, string? expected)
+        {
+            if (string.IsNullOrEmpty(expected))
+            {
+                return true;
+            }
+
+            return text.Contains(expected, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool tryGetField(IssueDocument document, string name, out JsonElement field)
+        {
+            foreach (KeyValuePair<string, JsonElement> entry in document.Fields)
+            {
+                if (string.Equals(entry.Key, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    field = entry.Value;
+                    return true;
+                }
+            }
+
+            field = default;
+            return false;
+        }
+
+        private static bool equals(JsonElement element, string expected)
+        {
+            if (element.ValueKind == JsonValueKind.String)
+            {
+                return string.Equals(element.GetString(), expected, StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (element.ValueKind == JsonValueKind.Array)
+            {
+                foreach (JsonElement item in element.EnumerateArray())
+                {
+                    if (IssueMcpService.equals(item, expected))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            return string.Equals(element.ToString(), expected, StringComparison.OrdinalIgnoreCase);
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -358,105 +457,6 @@ namespace GitIssue.Mcp
             {
                 this.gate.Release();
             }
-        }
-
-        private static bool tryResolveField(IIssue issue, string field, out FieldKey key)
-        {
-            foreach (FieldKey candidate in issue.Keys)
-            {
-                if (string.Equals(candidate.ToString(), field, StringComparison.OrdinalIgnoreCase))
-                {
-                    key = candidate;
-                    return true;
-                }
-            }
-
-            key = FieldKey.None;
-            return false;
-        }
-
-        private static int normalizeLimit(int limit)
-        {
-            if (limit < 1)
-            {
-                throw new McpOperationException("Limit must be at least 1.");
-            }
-
-            return Math.Min(limit, 200);
-        }
-
-        private static bool matches(IssueDocument document, IssueQuery query)
-        {
-            if (!IssueMcpService.contains(document.Title, query.TitleContains) ||
-                !IssueMcpService.contains(document.Description, query.DescriptionContains))
-            {
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(query.Field))
-            {
-                return true;
-            }
-
-            if (!IssueMcpService.tryGetField(document, query.Field, out JsonElement field))
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(query.FieldEquals))
-            {
-                return true;
-            }
-
-            return IssueMcpService.equals(field, query.FieldEquals);
-        }
-
-        private static bool contains(string text, string? expected)
-        {
-            if (string.IsNullOrEmpty(expected))
-            {
-                return true;
-            }
-
-            return text.Contains(expected, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static bool tryGetField(IssueDocument document, string name, out JsonElement field)
-        {
-            foreach (KeyValuePair<string, JsonElement> entry in document.Fields)
-            {
-                if (string.Equals(entry.Key, name, StringComparison.OrdinalIgnoreCase))
-                {
-                    field = entry.Value;
-                    return true;
-                }
-            }
-
-            field = default;
-            return false;
-        }
-
-        private static bool equals(JsonElement element, string expected)
-        {
-            if (element.ValueKind == JsonValueKind.String)
-            {
-                return string.Equals(element.GetString(), expected, StringComparison.OrdinalIgnoreCase);
-            }
-
-            if (element.ValueKind == JsonValueKind.Array)
-            {
-                foreach (JsonElement item in element.EnumerateArray())
-                {
-                    if (IssueMcpService.equals(item, expected))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            return string.Equals(element.ToString(), expected, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
