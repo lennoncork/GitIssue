@@ -18,7 +18,7 @@ namespace GitIssue.Fields
         /// <inheritdoc />
         public IField CreateField(Issue issue, FieldKey key, FieldInfo info)
         {
-            MethodInfo? method = GetType().GetMethods()
+            MethodInfo? method = this.GetType().GetMethods()
                 .Where(m => m.IsPublic)
                 .Where(m => m.Name == nameof(CreateField))
                 .Where(m => m.IsGenericMethodDefinition)
@@ -41,7 +41,7 @@ namespace GitIssue.Fields
         /// <inheritdoc />
         public async Task<IField> ReadFieldAsync(Issue issue, FieldKey key, FieldInfo info)
         {
-            MethodInfo? method = GetType().GetMethods()
+            MethodInfo? method = this.GetType().GetMethods()
                 .Where(m => m.IsPublic)
                 .Where(m => m.Name == nameof(ReadFieldAsync))
                 .Where(m => m.IsGenericMethodDefinition)

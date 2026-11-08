@@ -36,7 +36,7 @@ namespace GitIssue.Tool.Tests.Integration
             const string otherTitle = "Issue authored by someone else";
             this.CreateIssue(currentUserTitle);
             string otherKey = this.CreateIssue(otherTitle);
-            this.SetAuthor(otherKey, "Other Person <other@example.com>");
+            this.setAuthor(otherKey, "Other Person <other@example.com>");
 
             int mineExitCode = this.Run("Show", "mine");
             string mineOutput = this.Output;
@@ -57,7 +57,21 @@ namespace GitIssue.Tool.Tests.Integration
             });
         }
 
-        private void SetAuthor(string key, string author)
+        [Test]
+        public void Show_ReturnsZeroWhenNoIssuesExist()
+        {
+            this.InitializeRepository();
+
+            int exitCode = this.Run("Show", "all");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Zero, this.Error);
+                Assert.That(this.Output, Does.Contain("No issues to show"));
+            });
+        }
+
+        private void setAuthor(string key, string author)
         {
             JsonObject issue = this.ReadIssue(key);
             issue["Author"] = author;

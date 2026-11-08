@@ -148,6 +148,59 @@ namespace GitIssue.Tests.SyncTests
             }
 
             [Test]
+            public async Task ReimportUpdatesExistingIssueInsteadOfCreatingDuplicate()
+            {
+                this.Initialize(this.TestDirectory);
+                string importFile = Path.Combine(this.TestDirectory, "reimport.json");
+                File.WriteAllText(importFile,
+                    "{ \"key\": \"EXTERNAL-9\", \"summary\": \"Original title\", \"description\": \"Original description\" }");
+                SyncConfiguration configuration = new SyncConfiguration
+                {
+                    Mapping =
+                    {
+                        ["Key"] = "key",
+                        ["Title"] = "summary",
+                        ["Description"] = "description",
+                    },
+                };
+                FileImporter importer = new FileImporter(this.Sut)
+                {
+                    Configuration = configuration,
+                    ImportPath = importFile,
+                };
+
+                bool firstImport = await importer.Import();
+                IIssue created = this.Sut.Find(candidate => candidate.Title.ToString() == "Original title").Single();
+                IssueKey createdKey = created.Key;
+
+                File.WriteAllText(importFile,
+                    "{ \"key\": \"EXTERNAL-9\", \"summary\": \"Updated title\", \"description\": \"Updated description\" }");
+                FileImporter secondImporter = new FileImporter(this.Sut)
+                {
+                    Configuration = configuration,
+                    ImportPath = importFile,
+                };
+                bool secondImport = await secondImporter.Import();
+
+                IIssue[] issues = this.Sut.Find(issue => true).ToArray();
+                IIssue updated = issues.Single();
+                string mappingFile = Path.Combine(importer.Root.ImportPath, "EXTERNAL-9.import");
+                string mappingContents = File.Exists(mappingFile) ? File.ReadAllText(mappingFile) : string.Empty;
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(firstImport, Is.True);
+                    Assert.That(secondImport, Is.True);
+                    Assert.That(issues.Length, Is.EqualTo(1));
+                    Assert.That(updated.Key, Is.EqualTo(createdKey));
+                    Assert.That(updated.Title.ToString(), Is.EqualTo("Updated title"));
+                    Assert.That(updated.Description.ToString(), Is.EqualTo("Updated description"));
+                    Assert.That(File.Exists(mappingFile), Is.True);
+                    Assert.That(mappingContents, Is.EqualTo(createdKey.ToString()));
+                });
+            }
+
+            [Test]
             public void SaveMapping_RejectsPathOutsideImportDirectory()
             {
                 this.Initialize(this.TestDirectory);

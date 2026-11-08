@@ -12,17 +12,20 @@ namespace GitIssue.Tool
     /// <summary>
     ///     Editor class
     /// </summary>
-    public class Editor : IEditor
+    public partial class Editor : IEditor
     {
-        private static readonly char CommentChar = '#';
+        private static readonly char commentChar = '#';
 
-        private static readonly string FieldHeaderRegex = @$"^{Editor.CommentChar}[\s]?([\w]*)[\s]?$";
+        [GeneratedRegex(@"^\s?([\w.]+|""[\w\s.]*"")\s?(.*)?$")]
+        private static partial Regex ProcessCommandRegex();
 
-        private static readonly char Newline = '\n';
+        private static readonly string fieldHeaderRegex = @$"^{Editor.commentChar}[\s]?([\w]*)[\s]?$";
 
-        private static readonly string FieldTemplate =
-            $"{Editor.Newline}{Editor.CommentChar} Please edit the field with your updates. Lines starting" +
-            $"{Editor.Newline}{Editor.CommentChar} with '#' will be ignored, leave the file unchanged to abort. ";
+        private static readonly char newline = '\n';
+
+        private static readonly string fieldTemplate =
+            $"{Editor.newline}{Editor.commentChar} Please edit the field with your updates. Lines starting" +
+            $"{Editor.newline}{Editor.commentChar} with '#' will be ignored, leave the file unchanged to abort. ";
 
         private readonly IProcessRunner processRunner;
 
@@ -50,7 +53,7 @@ namespace GitIssue.Tool
 
         public void UpdateCommand(string command)
         {
-            (string, string) result = Editor.GetProcessAndArgumentsFromCommand(command);
+            (string, string) result = Editor.getProcessAndArgumentsFromCommand(command);
             this.Command = result.Item1;
             this.Arguments = result.Item2;
         }
@@ -58,15 +61,15 @@ namespace GitIssue.Tool
         /// <inheritdoc />
         public async Task<string> Edit(string header, string content)
         {
-            string temp = Editor.GetTempFile();
+            string temp = Editor.getTempFile();
 
-            await File.AppendAllTextAsync(temp, $"{Editor.CommentChar} {header} {Editor.Newline}");
+            await File.AppendAllTextAsync(temp, $"{Editor.commentChar} {header} {Editor.newline}");
             await File.AppendAllTextAsync(temp, content);
-            await File.AppendAllTextAsync(temp, Editor.FieldTemplate);
+            await File.AppendAllTextAsync(temp, Editor.fieldTemplate);
 
             DateTime created = File.GetLastWriteTime(temp);
 
-            if (!await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
+            if (!await this.editFileAsync(this.Command, this.Arguments + " " + temp))
             {
                 return content;
             }
@@ -76,7 +79,7 @@ namespace GitIssue.Tool
                 return content;
             }
 
-            return Editor.RemoveComments(await File.ReadAllTextAsync(temp));
+            return Editor.removeComments(await File.ReadAllTextAsync(temp));
         }
 
         /// <inheritdoc />
@@ -89,18 +92,18 @@ namespace GitIssue.Tool
         public async Task Open(IEnumerable<IField> fields)
         {
             // Convert fields to a file
-            string temp = Editor.GetTempFile();
+            string temp = Editor.getTempFile();
             foreach (IField field in fields)
             {
-                await File.AppendAllTextAsync(temp, $"{Editor.CommentChar} {field.Key} {Editor.Newline}");
-                await File.AppendAllTextAsync(temp, $"{await field.ExportAsync()}{Editor.Newline}");
+                await File.AppendAllTextAsync(temp, $"{Editor.commentChar} {field.Key} {Editor.newline}");
+                await File.AppendAllTextAsync(temp, $"{await field.ExportAsync()}{Editor.newline}");
             }
 
-            await File.AppendAllTextAsync(temp, Editor.FieldTemplate);
+            await File.AppendAllTextAsync(temp, Editor.fieldTemplate);
 
             // Open and modify the file
             DateTime created = File.GetLastWriteTime(temp);
-            if (await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
+            if (await this.editFileAsync(this.Command, this.Arguments + " " + temp))
             {
                 if (created == File.GetLastWriteTime(temp))
                 {
@@ -116,9 +119,9 @@ namespace GitIssue.Tool
             FieldKey key = FieldKey.None;
             string content = string.Empty;
             Dictionary<FieldKey, string> updates = new Dictionary<FieldKey, string>();
-            await foreach (string line in Editor.ReadLinesAsync(temp))
+            await foreach (string line in Editor.readLinesAsync(temp))
             {
-                if (Editor.IsMatch(line, Editor.FieldHeaderRegex, out Match match))
+                if (Editor.isMatch(line, Editor.fieldHeaderRegex, out Match match))
                 {
                     if (key != FieldKey.None)
                     {
@@ -137,7 +140,7 @@ namespace GitIssue.Tool
                     }
                     else
                     {
-                        content = content + Editor.Newline + line;
+                        content = content + Editor.newline + line;
                     }
                 }
             }
@@ -156,12 +159,12 @@ namespace GitIssue.Tool
         public async Task Open(IField field)
         {
             string content = await field.ExportAsync();
-            string temp = Editor.GetTempFile();
+            string temp = Editor.getTempFile();
             await File.WriteAllTextAsync(temp, content);
-            await File.AppendAllTextAsync(temp, Editor.FieldTemplate);
+            await File.AppendAllTextAsync(temp, Editor.fieldTemplate);
 
             DateTime created = File.GetLastWriteTime(temp);
-            if (await this.EditFileAsync(this.Command, this.Arguments + " " + temp))
+            if (await this.editFileAsync(this.Command, this.Arguments + " " + temp))
             {
                 if (created == File.GetLastWriteTime(temp))
                 {
@@ -169,14 +172,14 @@ namespace GitIssue.Tool
                 }
             }
 
-            field.Update(Editor.RemoveComments(await File.ReadAllTextAsync(temp)));
+            field.Update(Editor.removeComments(await File.ReadAllTextAsync(temp)));
         }
 
-        private static (string, string) GetProcessAndArgumentsFromCommand(string command)
+        private static (string, string) getProcessAndArgumentsFromCommand(string command)
         {
             try
             {
-                Match match = Regex.Match(command, "^\\s?([\\w.]+|\"[\\w\\s.]*\")\\s?(.*)?$");
+                Match match = Editor.ProcessCommandRegex().Match(command);
                 if (match.Success)
                 {
                     if (match.Groups.Count == 3)
@@ -193,12 +196,12 @@ namespace GitIssue.Tool
             return (command.Trim(), string.Empty);
         }
 
-        private static string GetTempFile()
+        private static string getTempFile()
         {
             return Path.GetTempFileName();
         }
 
-        private static bool IsMatch(string input, string pattern, out Match match)
+        private static bool isMatch(string input, string pattern, out Match match)
         {
             if (!string.IsNullOrEmpty(input))
             {
@@ -210,7 +213,7 @@ namespace GitIssue.Tool
             return false;
         }
 
-        private static async IAsyncEnumerable<string> ReadLinesAsync(string file)
+        private static async IAsyncEnumerable<string> readLinesAsync(string file)
         {
             await using Stream stream = new FileStream(file, FileMode.Open, FileAccess.Read);
             using StreamReader reader = new StreamReader(stream);
@@ -222,16 +225,16 @@ namespace GitIssue.Tool
             }
         }
 
-        private static string RemoveComments(string input)
+        private static string removeComments(string input)
         {
-            string comments = $@"^{Editor.CommentChar}(.*)$";
+            string comments = $@"^{Editor.commentChar}(.*)$";
             string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
                 .Where(l => !Regex.IsMatch(l, comments))
                 .ToArray();
-            return string.Join(Editor.Newline, lines);
+            return string.Join(Editor.newline, lines);
         }
 
-        private async Task<bool> EditFileAsync(string editor, string arguments)
+        private async Task<bool> editFileAsync(string editor, string arguments)
         {
             int result = await this.processRunner.RunAsync(editor, arguments);
             return result == this.Success;
