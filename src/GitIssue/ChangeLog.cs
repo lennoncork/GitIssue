@@ -57,7 +57,7 @@ namespace GitIssue
                 this.Log[key] = new List<string>();
             }
 
-            this.Log[key].Add($"{DateTime.Now}: {ChangeLog.GetChangeDescription(change)}");
+            this.Log[key].Add($"{DateTime.Now}: {ChangeLog.getChangeDescription(change)}");
         }
 
         /// <inheritdoc />
@@ -101,7 +101,7 @@ namespace GitIssue
             }
         }
 
-        private static string GetChangeDescription(ChangeType change)
+        private static string getChangeDescription(ChangeType change)
         {
             DescriptionAttribute? attribute = typeof(ChangeType)
                 .GetField(change.ToString())
