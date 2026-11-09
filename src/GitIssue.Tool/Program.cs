@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Autofac;
 using CommandLine;
 using GitIssue.Issues;
-using GitIssue.Services.Mcp;
 using GitIssue.Tool.Commands;
 using GitIssue.Tool.Commands.Add;
 using GitIssue.Tool.Commands.Changes;
@@ -20,11 +19,13 @@ using GitIssue.Tool.Commands.Fields;
 using GitIssue.Tool.Commands.Find;
 using GitIssue.Tool.Commands.Import;
 using GitIssue.Tool.Commands.Init;
+using GitIssue.Tool.Commands.Mcp;
 using GitIssue.Tool.Commands.Remove;
 using GitIssue.Tool.Commands.Show;
 using GitIssue.Tool.Commands.Sync;
 using GitIssue.Tool.Commands.Track;
 using GitIssue.Tool.Commands.Validate;
+using GitIssue.Tool.Commands.Web;
 using Serilog;
 using CommitOptions = GitIssue.Tool.Commands.Commit.CommitOptions;
 
@@ -131,12 +132,12 @@ namespace GitIssue.Tool
         {
             if ((args.Length > 0) && args[0].Equals("mcp", StringComparison.OrdinalIgnoreCase))
             {
-                return McpApplication.Execute(args, Console.Out, Console.Error);
+                return McpCommand.Execute(args, Console.Out, Console.Error);
             }
 
             if ((args.Length > 0) && args[0].Equals("web", StringComparison.OrdinalIgnoreCase))
             {
-                return WebServeApplication.Execute(args, Console.Out, Console.Error);
+                return WebCommand.Execute(args, Console.Out, Console.Error);
             }
 
             Program.logger = new LoggerConfiguration()

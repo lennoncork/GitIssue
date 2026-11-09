@@ -63,48 +63,6 @@ namespace GitIssue.Services.Web.Tests
         }
 
         [Test]
-        public void Prepare_PrintsUsageForHelp()
-        {
-            using StringWriter output = new StringWriter();
-            using StringWriter error = new StringWriter();
-
-            int code = Program.Prepare(new[] { "--help" }, output, error);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(code, Is.Zero);
-                Assert.That(output.ToString(), Does.Contain("gitissue web serve"));
-                Assert.That(error.ToString(), Is.Empty);
-            });
-        }
-
-        [Test]
-        public void Prepare_PrintsTheErrorForAnInvalidPort()
-        {
-            using StringWriter output = new StringWriter();
-            using StringWriter error = new StringWriter();
-
-            int code = Program.Prepare(new[] { "--port", "0" }, output, error);
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(code, Is.EqualTo(1));
-                Assert.That(error.ToString(), Does.Contain("--port must be from 1 to 65535."));
-            });
-        }
-
-        [Test]
-        public void Prepare_ContinuesForAValidRequest()
-        {
-            using StringWriter output = new StringWriter();
-            using StringWriter error = new StringWriter();
-
-            int code = Program.Prepare(new[] { "--port", "5080" }, output, error);
-
-            Assert.That(code, Is.EqualTo(-1));
-        }
-
-        [Test]
         public void Create_RejectsADirectoryThatIsNotInitialized()
         {
             string directory = Path.Combine(Path.GetTempPath(), "gitissue-web-" + Guid.NewGuid().ToString("N"));

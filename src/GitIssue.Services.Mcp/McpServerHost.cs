@@ -1,10 +1,13 @@
 using System;
 using System.IO;
+using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Exceptionable;
 using GitIssue.Services;
 using GitIssue.Services.Mcp.Tools;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -29,9 +32,9 @@ namespace GitIssue.Services.Mcp
         ///     Builds the MCP host without starting it
         /// </summary>
         /// <param name="options">the serve options</param>
-        /// <returns>the host</returns>
+        /// <returns>the web application hosting the stdio server</returns>
         [Throws<IssueOperationException>]
-        public static IHost CreateHost(McpServeOptions options)
+        public static WebApplication CreateHost(McpServeOptions options)
         {
             string repositoryPath = Path.GetFullPath(options.RepositoryPath);
             if (!Directory.Exists(repositoryPath))
@@ -39,13 +42,22 @@ namespace GitIssue.Services.Mcp
                 throw new IssueOperationException($"Repository path \"{repositoryPath}\" does not exist.");
             }
 
-            HostApplicationBuilder builder = Host.CreateEmptyApplicationBuilder(new HostApplicationBuilderSettings
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(new WebApplicationOptions
             {
                 Args = Array.Empty<string>(),
                 ApplicationName = McpServerHost.ServerName,
                 ContentRootPath = repositoryPath,
             });
+            builder.WebHost.ConfigureServices(services =>
+            {
+                foreach (ServiceDescriptor descriptor in services.Where(service => service.ServiceType == typeof(IServer)).ToArray())
+                {
+                    services.Remove(descriptor);
+                }
 
+                services.AddSingleton<IServer>(new StdioTransportServer());
+            });
+            builder.Logging.ClearProviders();
             builder.Logging.AddConsole(console =>
             {
                 console.LogToStandardErrorThreshold = LogLevel.Trace;
@@ -56,7 +68,7 @@ namespace GitIssue.Services.Mcp
                 .WriteTo.Console(standardErrorFromLevel: LogEventLevel.Verbose)
                 .CreateLogger();
 
-            builder.ConfigureContainer(new AutofacServiceProviderFactory(), container =>
+            ((IHostApplicationBuilder)builder).ConfigureContainer(new AutofacServiceProviderFactory(), container =>
             {
                 container.RegisterInstance(logger).As<Serilog.ILogger>().SingleInstance();
                 container.Register(_ => RepositoryRoot.Open(repositoryPath, options.IssueFolderName))

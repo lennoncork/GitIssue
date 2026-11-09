@@ -6,7 +6,6 @@ using GitIssue.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace GitIssue.Services.Web
 {
@@ -23,9 +22,13 @@ namespace GitIssue.Services.Web
         [Throws<IssueOperationException>]
         public static WebApplication Create(WebServeRequest request)
         {
-            WebApplicationBuilder builder = WebApplication.CreateBuilder();
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(new WebApplicationOptions
+            {
+                Args = Array.Empty<string>(),
+                ApplicationName = "gitissue",
+                ContentRootPath = request.RepositoryPath,
+            });
             builder.WebHost.UseUrls(request.Url);
-            builder.Logging.ClearProviders();
 
             WebApplication application = builder.Build();
             IssueWorkspace workspace;
@@ -35,6 +38,7 @@ namespace GitIssue.Services.Web
             }
             catch (Exception exception) when (exception is not IssueOperationException)
             {
+                ((IDisposable)application).Dispose();
                 throw new IssueOperationException(
                     "Unable to open the GitIssue repository. Run gitissue init and start the server from the repository root. " + exception.GetBaseException().Message,
                     exception);
