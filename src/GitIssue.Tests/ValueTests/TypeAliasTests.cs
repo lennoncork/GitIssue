@@ -1,5 +1,6 @@
 using System.Linq;
 using GitIssue.Fields;
+using GitIssue.Issues;
 using GitIssue.Values;
 using NUnit.Framework;
 using ValueString = GitIssue.Values.String;
@@ -47,6 +48,15 @@ namespace GitIssue.Tests.ValueTests
                 Assert.That(TypeAlias.IsValueType(typeof(ValueString)), Is.True);
                 Assert.That(TypeAlias.IsValueType(typeof(object)), Is.False);
             }
+
+            [Test]
+            public void IsKeyProviderType_Recognizes_Key_Providers()
+            {
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(DateIssueKeyProvider)), Is.True);
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(NameIssueKeyProvider)), Is.True);
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(IssueKeyProvider)), Is.False);
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(ValueString)), Is.False);
+            }
         }
 
         [TestFixture]
@@ -61,6 +71,28 @@ namespace GitIssue.Tests.ValueTests
                 });
 
                 Assert.That(hasStringAlias, Is.True, "Expected an alias entry for the String value type.");
+            }
+
+            [Test]
+            public void Aliases_Contains_Entry_For_DateIssueKeyProvider()
+            {
+                bool hasAlias = TypeAlias.Aliases.Any(a =>
+                {
+                    return a.TryParse(typeof(DateIssueKeyProvider), out string alias) && (alias == nameof(DateIssueKeyProvider));
+                });
+
+                Assert.That(hasAlias, Is.True, "Expected an alias entry for DateIssueKeyProvider.");
+            }
+
+            [Test]
+            public void Aliases_Contains_Entry_For_NameIssueKeyProvider()
+            {
+                bool hasAlias = TypeAlias.Aliases.Any(a =>
+                {
+                    return a.TryParse(typeof(NameIssueKeyProvider), out string alias) && (alias == nameof(NameIssueKeyProvider));
+                });
+
+                Assert.That(hasAlias, Is.True, "Expected an alias entry for NameIssueKeyProvider.");
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using GitIssue.Fields;
+using GitIssue.Issues;
 
 namespace GitIssue.Values
 {
@@ -34,6 +35,12 @@ namespace GitIssue.Values
 
             aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
                 .Where(TypeAlias.IsValueType)
+                .Select(TypeAlias.FromType)
+                .Where(TypeAlias.IsNotNull)
+                .Select(t => t!));
+
+            aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
+                .Where(TypeAlias.IsKeyProviderType)
                 .Select(TypeAlias.FromType)
                 .Where(TypeAlias.IsNotNull)
                 .Select(t => t!));
@@ -146,6 +153,16 @@ namespace GitIssue.Values
         public static bool IsValueType(Type type)
         {
             return typeof(IValue).IsAssignableFrom(type);
+        }
+
+        /// <summary>
+        ///     Gets a value indicating if the type is an issue key provider
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsKeyProviderType(Type type)
+        {
+            return typeof(IIssueKeyProvider).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface;
         }
 
         /// <summary>

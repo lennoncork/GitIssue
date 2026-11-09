@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Autofac;
 using CommandLine;
 using GitIssue.Issues;
+using GitIssue.Issues.File;
 using GitIssue.Services.Mcp;
 using GitIssue.Tool.Commands;
 using GitIssue.Tool.Commands.Add;
@@ -25,6 +26,7 @@ using GitIssue.Tool.Commands.Show;
 using GitIssue.Tool.Commands.Sync;
 using GitIssue.Tool.Commands.Track;
 using GitIssue.Tool.Commands.Validate;
+using GitIssue.Values;
 using Serilog;
 using CommitOptions = GitIssue.Tool.Commands.Commit.CommitOptions;
 
@@ -66,6 +68,12 @@ namespace GitIssue.Tool
                                 }
 
                                 config.Storage = storage;
+                                if (!Program.tryGetKeyProvider(initOptions.KeyProvider, out Type keyProvider))
+                                {
+                                    throw new ArgumentException($"Key provider '{initOptions.KeyProvider}' is not Date or Name.");
+                                }
+
+                                config.KeyProvider = TypeValue.Create(keyProvider);
                             }
 
                             RepositoryRoot root = RepositoryRoot.Create(options.Path, options.Name);
@@ -204,6 +212,45 @@ namespace GitIssue.Tool
                 });
 
             return exitCode;
+        }
+
+        private static bool tryGetKeyProvider(string value, out Type type)
+        {
+            if (string.IsNullOrWhiteSpace(value) ||
+                value.Equals("Date", StringComparison.OrdinalIgnoreCase) ||
+                value.Equals(nameof(DateIssueKeyProvider), StringComparison.OrdinalIgnoreCase))
+            {
+                type = typeof(DateIssueKeyProvider);
+                return true;
+            }
+
+            if (value.Equals("Name", StringComparison.OrdinalIgnoreCase) ||
+                value.Equals(nameof(NameIssueKeyProvider), StringComparison.OrdinalIgnoreCase))
+            {
+                type = typeof(NameIssueKeyProvider);
+                return true;
+            }
+
+            if (value.Equals("File", StringComparison.OrdinalIgnoreCase) ||
+                value.Equals("FileIssueKeyProvider", StringComparison.OrdinalIgnoreCase))
+            {
+#pragma warning disable CS0618
+                type = typeof(FileIssueKeyProvider);
+#pragma warning restore CS0618
+                return true;
+            }
+
+            if (TypeValue.TryParse(value, out TypeValue parsed) &&
+                (parsed.Type != null) &&
+                typeof(IIssueKeyProvider).IsAssignableFrom(parsed.Type) &&
+                !parsed.Type.IsAbstract)
+            {
+                type = parsed.Type;
+                return true;
+            }
+
+            type = null!;
+            return false;
         }
     }
 }

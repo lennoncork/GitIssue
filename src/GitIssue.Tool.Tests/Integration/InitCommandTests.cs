@@ -25,8 +25,30 @@ namespace GitIssue.Tool.Tests.Integration
                 this.AssertJsonPropertyExists(configuration, "Fields");
                 this.AssertJsonPropertyExists(configuration["Fields"]!.AsObject(), "Title");
                 Assert.That(configuration["Storage"]?.GetValue<string>(), Is.EqualTo("Markdown"));
+                Assert.That(configuration["KeyProvider"]?.GetValue<string>(), Is.EqualTo("DateIssueKeyProvider"));
                 Assert.That(this.Output, Does.Contain("Initialized empty 'Issue' repository"));
             });
+        }
+
+        [Test]
+        public void Init_SelectsNameKeyProvider()
+        {
+            int exitCode = this.Run("Init", "--key-provider", "name");
+
+            var configuration = this.ReadJsonObject(this.ConfigurationFile);
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Zero, this.Error);
+                Assert.That(configuration["KeyProvider"]?.GetValue<string>(), Is.EqualTo("NameIssueKeyProvider"));
+            });
+        }
+
+        [Test]
+        public void Init_RejectsUnknownKeyProvider()
+        {
+            int exitCode = this.Run("Init", "--key-provider", "uuid");
+
+            Assert.That(exitCode, Is.EqualTo(1), this.Output + this.Error);
         }
 
         [Test]

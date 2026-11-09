@@ -16,7 +16,7 @@ Options are case-insensitive. Run `gitissue <command> --help` for parser-generat
 
 | Command | Usage | Description |
 | --- | --- | --- |
-| `init` | `init [--storage markdown\|json]` | Initialize issue data in the current repository. The default directory is `.issues`. Each issue is saved as Markdown unless `--storage json` is set. |
+| `init` | `init [--storage markdown\|json] [--key-provider date\|name]` | Initialize issue data in the current repository. The default directory is `.issues`. Each issue is saved as Markdown unless `--storage json` is set. `--key-provider date` (the default) creates keys such as `2026-11-09-A1B2C3D4`. `--key-provider name` creates keys such as `A1B2C3D4 - Add login page`. |
 | `create` | `create [Title] [Description]` | Create an issue. If no title is given, the default editor opens. A new issue is tracked if no issue is currently tracked; `--Track` forces tracking of the new issue. |
 | `fields` | `fields` | List configured fields and their types. |
 | `validate` | `validate [Issue Key]` | Check issue documents against the configured fields. Omit the key to check every issue. `.`, `T`, and `Tracked` select the tracked issue. The command exits with code 1 when any field is invalid. |

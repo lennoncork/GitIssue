@@ -345,7 +345,7 @@ namespace GitIssue
         /// <inheritdoc />
         public async Task<IIssue> CreateAsync(string title, string description)
         {
-            IIssue issue = this.issueCreation(this.KeyProvider.Next());
+            IIssue issue = this.issueCreation(this.KeyProvider.Next(title));
             issue.Title = title;
             issue.Description = description;
             DateTimeOffset created = DateTimeOffset.Now;

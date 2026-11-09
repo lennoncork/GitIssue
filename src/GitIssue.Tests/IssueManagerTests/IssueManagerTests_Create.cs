@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GitIssue.Issues;
+using LibGit2Sharp;
 using NUnit.Framework;
 using Signature = GitIssue.Values.Signature;
 
@@ -92,6 +94,29 @@ namespace GitIssue.Tests.IssueManagerTests
                     .CreateAsync(nameof(Create.SetsUpdatedDate), string.Empty)
                     .WithSafeResultAsync();
                 Assert.That((DateTime)create.Result.Updated, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
+            }
+
+            [Test]
+            public async Task CreatesNamedKeyWhenNameProviderIsConfigured()
+            {
+                Repository.Init(this.TestDirectory);
+                using Repository repository = new Repository(this.TestDirectory);
+                repository.Config.Set("user.name", "Tester");
+                repository.Config.Set("user.email", "tester@example.com");
+
+                IssueConfiguration configuration = new IssueConfiguration
+                {
+                    KeyProvider = GitIssue.Values.TypeValue.Create<NameIssueKeyProvider>(),
+                };
+                this.Sut = IssueManager.Init(configuration, this.TestDirectory);
+
+                IIssue issue = await this.Sut.CreateAsync("Add login page", "Feature work");
+
+                Assert.That(issue.Key.ToString(), Does.Match(new Regex(@"^[A-F0-9]{8} - Add login page$")));
+                Assert.That(issue.Title, Is.EqualTo("Add login page"));
+                Assert.That(this.Sut.KeyProvider, Is.InstanceOf<NameIssueKeyProvider>());
+                Assert.That(this.Sut.KeyProvider.TryGetKey(issue.Key.ToString()[..8], out IssueKey found), Is.True);
+                Assert.That(found, Is.EqualTo(issue.Key));
             }
         }
     }

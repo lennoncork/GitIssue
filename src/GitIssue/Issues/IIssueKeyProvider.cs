@@ -26,6 +26,13 @@ namespace GitIssue.Issues
         IssueKey Next();
 
         /// <summary>
+        ///     The next unique issue key, using the supplied name when the provider supports named keys
+        /// </summary>
+        /// <param name="name">the issue name or title</param>
+        /// <returns></returns>
+        IssueKey Next(string name);
+
+        /// <summary>
         ///     Tries to get the specified key from a string
         /// </summary>
         /// <param name="value"></param>

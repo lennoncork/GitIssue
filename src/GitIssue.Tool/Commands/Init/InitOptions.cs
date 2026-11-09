@@ -11,6 +11,9 @@ namespace GitIssue.Tool.Commands.Init
 
         [Option("storage", HelpText = "Issue storage format: Markdown or Json. Defaults to Markdown", Required = false)]
         public string Storage { get; set; } = "Markdown";
+
+        [Option("key-provider", HelpText = "Issue key provider: Date or Name. Defaults to Date", Required = false)]
+        public string KeyProvider { get; set; } = "Date";
     }
 #pragma warning restore 1591
 }

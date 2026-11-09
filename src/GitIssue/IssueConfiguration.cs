@@ -7,7 +7,6 @@ using System.Text.Json.Serialization;
 using Exceptionable;
 using GitIssue.Fields;
 using GitIssue.Issues;
-using GitIssue.Issues.File;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
 using DateTime = GitIssue.Values.DateTime;
@@ -25,7 +24,7 @@ namespace GitIssue
         /// </summary>
         public IssueConfiguration()
         {
-            this.KeyProvider = TypeValue.Create<FileIssueKeyProvider>();
+            this.KeyProvider = TypeValue.Create<DateIssueKeyProvider>();
             this.Fields = new Dictionary<FieldKey, FieldInfo>
             {
                 { FieldKey.Create("Key"), new FieldInfo<IssueKey, JsonValueField>(true) },
