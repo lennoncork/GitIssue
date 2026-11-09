@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace GitIssue.Mcp
+namespace GitIssue.Services
 {
     /// <summary>
-    ///     An issue document returned to an MCP client
+    ///     An issue document returned to a client
     /// </summary>
     public sealed class IssueDocument
     {

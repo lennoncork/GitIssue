@@ -5,7 +5,12 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <DocumentationFile></DocumentationFile>
+    <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
@@ -15,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GitIssue.Mcp\GitIssue.Mcp.csproj" />
+    <ProjectReference Include="..\GitIssue.Services.Web\GitIssue.Services.Web.csproj" />
   </ItemGroup>
 
 </Project>

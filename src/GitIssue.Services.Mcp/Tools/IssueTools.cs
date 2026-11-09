@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using GitIssue.Services;
 using ModelContextProtocol.Server;
 
-namespace GitIssue.Mcp.Tools
+namespace GitIssue.Services.Mcp.Tools
 {
     /// <summary>
     ///     MCP tools for issues stored in the working tree

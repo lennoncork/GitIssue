@@ -1,27 +1,27 @@
 using System;
 
-namespace GitIssue.Mcp
+namespace GitIssue.Services
 {
     /// <summary>
-    ///     An MCP operation could not be completed
+    ///     An issue operation could not be completed
     /// </summary>
-    public class McpOperationException : Exception
+    public class IssueOperationException : Exception
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="McpOperationException" /> class
+        ///     Initializes a new instance of the <see cref="IssueOperationException" /> class
         /// </summary>
         /// <param name="message">the error message</param>
-        public McpOperationException(string message)
+        public IssueOperationException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="McpOperationException" /> class
+        ///     Initializes a new instance of the <see cref="IssueOperationException" /> class
         /// </summary>
         /// <param name="message">the error message</param>
         /// <param name="inner">the exception that caused this failure</param>
-        public McpOperationException(string message, Exception inner)
+        public IssueOperationException(string message, Exception inner)
             : base(message, inner)
         {
         }

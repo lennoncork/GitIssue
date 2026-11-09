@@ -30,5 +30,41 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.That(this.Run("mcp", "uninstall"), Is.Zero, this.Error);
             Assert.That(File.ReadAllText(configuration), Does.Not.Contain("gitissue"));
         }
+
+        [Test]
+        public void WebHelp_PrintsServeUsage()
+        {
+            int exitCode = this.Run("web", "--help");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Zero, this.Error);
+                Assert.That(this.Output, Does.Contain("gitissue web serve"));
+            });
+        }
+
+        [Test]
+        public void WebUnknownAction_Fails()
+        {
+            int exitCode = this.Run("web", "install");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.EqualTo(1));
+                Assert.That(this.Error, Does.Contain("Unknown web action"));
+            });
+        }
+
+        [Test]
+        public void WebServe_ReportsAMissingHostAssembly()
+        {
+            int exitCode = this.Run("web", "serve");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.EqualTo(1));
+                Assert.That(this.Error, Does.Contain("web host was not found"));
+            });
+        }
     }
 }

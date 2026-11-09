@@ -6,7 +6,7 @@ using Exceptionable;
 using GitIssue.Issues;
 using GitIssue.Issues.Json;
 
-namespace GitIssue.Mcp
+namespace GitIssue.Services
 {
     /// <summary>
     ///     Maps issue documents to the JSON shape already stored by GitIssue
@@ -14,7 +14,7 @@ namespace GitIssue.Mcp
     public static class IssueDocumentMapper
     {
         /// <summary>
-        ///     Gets the serializer options used for MCP payloads
+        ///     Gets the serializer options used for client payloads
         /// </summary>
         public static JsonSerializerOptions JsonOptions { get; } = new JsonSerializerOptions
         {
@@ -26,12 +26,12 @@ namespace GitIssue.Mcp
         /// </summary>
         /// <param name="issue">the issue to map</param>
         /// <returns>the mapped document</returns>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public static IssueDocument FromIssue(IIssue issue)
         {
             if (issue is not IJsonIssue jsonIssue)
             {
-                throw new McpOperationException($"Issue \"{issue.Key}\" cannot be read as JSON.");
+                throw new IssueOperationException($"Issue \"{issue.Key}\" cannot be read as JSON.");
             }
 
             JsonObject json = jsonIssue.ToJson();

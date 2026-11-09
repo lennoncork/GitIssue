@@ -3,8 +3,12 @@
     <File Path="../LICENSE.md" />
     <File Path="../README.md" />
   </Folder>
-  <Project Path="GitIssue.Mcp.Tests/GitIssue.Mcp.Tests.csproj" />
-  <Project Path="GitIssue.Mcp/GitIssue.Mcp.csproj" />
+  <Project Path="GitIssue.Services.Mcp.Tests/GitIssue.Services.Mcp.Tests.csproj" />
+  <Project Path="GitIssue.Services.Mcp/GitIssue.Services.Mcp.csproj" />
+  <Project Path="GitIssue.Services.Tests/GitIssue.Services.Tests.csproj" />
+  <Project Path="GitIssue.Services.Web.Tests/GitIssue.Services.Web.Tests.csproj" />
+  <Project Path="GitIssue.Services.Web/GitIssue.Services.Web.csproj" />
+  <Project Path="GitIssue.Services/GitIssue.Services.csproj" />
   <Project Path="GitIssue.Tests/GitIssue.Tests.csproj" />
   <Project Path="GitIssue.Tool.Tests/GitIssue.Tool.Tests.csproj" />
   <Project Path="GitIssue.Tool/GitIssue.Tool.csproj" />

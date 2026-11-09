@@ -4,8 +4,9 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Exceptionable;
+using GitIssue.Services;
 
-namespace GitIssue.Mcp
+namespace GitIssue.Services.Mcp
 {
     /// <summary>
     ///     Where an MCP configuration file is written
@@ -178,7 +179,7 @@ namespace GitIssue.Mcp
         /// </summary>
         /// <param name="request">the install request</param>
         /// <returns>the resulting configuration</returns>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public McpConfigurationEdit Install(McpInstallRequest request)
         {
             string path = McpConfigurationPaths.Resolve(request);
@@ -194,7 +195,7 @@ namespace GitIssue.Mcp
         /// </summary>
         /// <param name="request">the uninstall request</param>
         /// <returns>the resulting configuration, or null when the file does not exist</returns>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public McpConfigurationEdit? Uninstall(McpInstallRequest request)
         {
             string path = McpConfigurationPaths.Resolve(request);
@@ -211,7 +212,7 @@ namespace GitIssue.Mcp
             }
             else if (root["servers"] is not null)
             {
-                throw new McpOperationException($"Property \"servers\" in {path} must be a JSON object.");
+                throw new IssueOperationException($"Property \"servers\" in {path} must be a JSON object.");
             }
 
             return McpConfigurationInstaller.write(path, root, true, changed, request.DryRun || !changed);
@@ -293,7 +294,7 @@ namespace GitIssue.Mcp
 
             if (root["servers"] is not null)
             {
-                throw new McpOperationException($"Property \"servers\" in {path} must be a JSON object.");
+                throw new IssueOperationException($"Property \"servers\" in {path} must be a JSON object.");
             }
 
             JsonObject created = new JsonObject();
@@ -325,12 +326,12 @@ namespace GitIssue.Mcp
             }
             catch (JsonException exception)
             {
-                throw new McpOperationException($"Unable to read MCP configuration {path}: {exception.Message}");
+                throw new IssueOperationException($"Unable to read MCP configuration {path}: {exception.Message}");
             }
 
             if (node is not JsonObject root)
             {
-                throw new McpOperationException($"MCP configuration {path} must be a JSON object.");
+                throw new IssueOperationException($"MCP configuration {path} must be a JSON object.");
             }
 
             return root;

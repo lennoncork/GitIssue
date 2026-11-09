@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using NUnit.Framework;
 
-namespace GitIssue.Mcp.Tests
+namespace GitIssue.Services.Mcp.Tests
 {
     public sealed class TempDirectory : IDisposable
     {
@@ -10,7 +10,7 @@ namespace GitIssue.Mcp.Tests
         {
             this.Path = System.IO.Path.Combine(
                 TestContext.CurrentContext.WorkDirectory,
-                nameof(GitIssue.Mcp.Tests),
+                nameof(GitIssue.Services.Mcp.Tests),
                 Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(this.Path);
         }

@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using NUnit.Framework;
 
-namespace GitIssue.Mcp.Tests
+namespace GitIssue.Services.Mcp.Tests
 {
     [TestFixture]
     public class McpCommandTests

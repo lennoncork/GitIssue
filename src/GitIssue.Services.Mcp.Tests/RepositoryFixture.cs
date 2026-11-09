@@ -1,9 +1,10 @@
 using System;
 using System.IO;
+using GitIssue.Services;
 using LibGit2Sharp;
 using NUnit.Framework;
 
-namespace GitIssue.Mcp.Tests
+namespace GitIssue.Services.Mcp.Tests
 {
     public sealed class RepositoryFixture : IDisposable
     {
@@ -11,7 +12,7 @@ namespace GitIssue.Mcp.Tests
         {
             this.Directory = Path.Combine(
                 TestContext.CurrentContext.WorkDirectory,
-                nameof(GitIssue.Mcp.Tests),
+                nameof(GitIssue.Services.Mcp.Tests),
                 Guid.NewGuid().ToString("N"));
             System.IO.Directory.CreateDirectory(this.Directory);
             LibGit2Sharp.Repository.Init(this.Directory);
@@ -23,9 +24,9 @@ namespace GitIssue.Mcp.Tests
 
         public string Directory { get; }
 
-        public IssueMcpService Open()
+        public IssueWorkspace Open()
         {
-            return new IssueMcpService(IssueManager.Open(this.Directory));
+            return new IssueWorkspace(IssueManager.Open(this.Directory));
         }
 
         public void Dispose()

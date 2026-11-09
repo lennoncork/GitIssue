@@ -3,7 +3,8 @@ using System.IO;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Exceptionable;
-using GitIssue.Mcp.Tools;
+using GitIssue.Services;
+using GitIssue.Services.Mcp.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,7 @@ using ModelContextProtocol.Server;
 using Serilog;
 using Serilog.Events;
 
-namespace GitIssue.Mcp
+namespace GitIssue.Services.Mcp
 {
     /// <summary>
     ///     Hosts the GitIssue MCP server on standard input and output
@@ -29,13 +30,13 @@ namespace GitIssue.Mcp
         /// </summary>
         /// <param name="options">the serve options</param>
         /// <returns>the host</returns>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public static IHost CreateHost(McpServeOptions options)
         {
             string repositoryPath = Path.GetFullPath(options.RepositoryPath);
             if (!Directory.Exists(repositoryPath))
             {
-                throw new McpOperationException($"Repository path \"{repositoryPath}\" does not exist.");
+                throw new IssueOperationException($"Repository path \"{repositoryPath}\" does not exist.");
             }
 
             HostApplicationBuilder builder = Host.CreateEmptyApplicationBuilder(new HostApplicationBuilderSettings
@@ -61,11 +62,11 @@ namespace GitIssue.Mcp
                 container.Register(_ => RepositoryRoot.Open(repositoryPath, options.IssueFolderName))
                     .As<RepositoryRoot>()
                     .SingleInstance();
-                container.RegisterType<IssueMcpService>().AsSelf().SingleInstance();
+                container.RegisterType<IssueWorkspace>().AsSelf().SingleInstance();
                 container.Register(context =>
                 {
                     IComponentContext components = context.Resolve<IComponentContext>();
-                    return new IssueSession(() => components.Resolve<IssueMcpService>());
+                    return new IssueSession(() => components.Resolve<IssueWorkspace>());
                 }).AsSelf().SingleInstance();
                 container.RegisterModule<GitIssueModule>();
             });
@@ -94,7 +95,7 @@ namespace GitIssue.Mcp
         ///     Runs the MCP server until the client closes the input stream
         /// </summary>
         /// <param name="options">the serve options</param>
-        [Throws<McpOperationException>]
+        [Throws<IssueOperationException>]
         public static void Run(McpServeOptions options)
         {
             McpServerHost.CreateHost(options).Run();

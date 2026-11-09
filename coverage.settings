@@ -8,7 +8,9 @@
             <ModulePaths>
               <Include>
                 <ModulePath>.*[\\/]GitIssue\.dll$</ModulePath>
-                <ModulePath>.*[\\/]GitIssue\.Mcp\.dll$</ModulePath>
+                <ModulePath>.*[\\/]GitIssue\.Services\.dll$</ModulePath>
+                <ModulePath>.*[\\/]GitIssue\.Services\.Mcp\.dll$</ModulePath>
+                <ModulePath>.*[\\/]GitIssue\.Services\.Web\.dll$</ModulePath>
                 <ModulePath>.*[\\/]GitIssue\.Tool\.dll$</ModulePath>
               </Include>
             </ModulePaths>

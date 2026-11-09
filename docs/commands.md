@@ -116,6 +116,22 @@ gitissue mcp install --command dotnet --name work-items
 
 The server provides tools for listing, reading, finding, creating, and updating issues, plus the field schema, tracked issue, and change log. `find_issues` uses structured filters. It does not evaluate the C# expressions accepted by `gitissue find`.
 
+## Web server
+
+`gitissue web serve` runs a local website for the issues in the working tree. It is separate from `gitissue mcp serve`, which speaks MCP on standard input and output.
+
+| Command | Usage | Description |
+| --- | --- | --- |
+| `web serve` | `web serve [--host <address>] [--port <port>] [--open] [--token <token>]` | Run the website. The default address is `http://127.0.0.1:5080`. `--open` launches a browser after the server responds. A host other than loopback requires `--token`. |
+
+```shell
+gitissue web serve
+gitissue web serve --open
+gitissue web serve --host 0.0.0.0 --token "$GITISSUE_TOKEN"
+```
+
+`web` with no action also starts the server. Shared options `--path` and `--name` select the repository and issue directory.
+
 ## Help
 
 ```shell
