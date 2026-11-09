@@ -116,9 +116,17 @@ namespace GitIssue.Tool
         {
             try
             {
-                Console.WriteLine();
+                if (command.WriteSpacing)
+                {
+                    Console.WriteLine();
+                }
+
                 await command.Exec(value);
-                Console.WriteLine();
+                if (command.WriteSpacing)
+                {
+                    Console.WriteLine();
+                }
+
                 return command.ExitCode;
             }
             catch (Exception e)
@@ -130,16 +138,6 @@ namespace GitIssue.Tool
 
         internal static int Main(string[] args)
         {
-            if ((args.Length > 0) && args[0].Equals("mcp", StringComparison.OrdinalIgnoreCase))
-            {
-                return McpCommand.Execute(args, Console.Out, Console.Error);
-            }
-
-            if ((args.Length > 0) && args[0].Equals("web", StringComparison.OrdinalIgnoreCase))
-            {
-                return WebCommand.Execute(args, Console.Out, Console.Error);
-            }
-
             Program.logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .MinimumLevel.Debug()
@@ -149,6 +147,7 @@ namespace GitIssue.Tool
             {
                 with.EnableDashDash = true;
                 with.AutoHelp = true;
+                with.AllowMultiInstance = true;
                 with.CaseSensitive = false;
                 with.HelpWriter = Console.Error;
             });
@@ -174,9 +173,13 @@ namespace GitIssue.Tool
                 typeof(CommentOptions),
                 typeof(ValidateOptions),
                 typeof(ConvertOptions),
+                typeof(McpOptions),
+                typeof(WebOptions),
             };
             parser.ParseArguments(args, commands)
                 .WithParsed<InitOptions>(o => exitCode = Program.execAsync<InitCommand, InitOptions>(o).GetAwaiter().GetResult())
+                .WithParsed<McpOptions>(o => exitCode = Program.execAsync<McpCommand, McpOptions>(o).GetAwaiter().GetResult())
+                .WithParsed<WebOptions>(o => exitCode = Program.execAsync<WebCommand, WebOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<CreateOptions>(o => exitCode = Program.execAsync<CreateCommand, CreateOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<DeleteOptions>(o => exitCode = Program.execAsync<DeleteCommand, DeleteOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<ImportOptions>(o => exitCode = Program.execAsync<ImportCommand, ImportOptions>(o).GetAwaiter().GetResult())

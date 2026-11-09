@@ -38,7 +38,7 @@ namespace GitIssue.Services.Mcp
 
             try
             {
-                WebServeApplication.run(request);
+                WebServeApplication.Run(request);
                 return 0;
             }
             catch (Exception exception)
@@ -48,8 +48,12 @@ namespace GitIssue.Services.Mcp
             }
         }
 
+        /// <summary>
+        ///     Runs the website until the host shuts down
+        /// </summary>
+        /// <param name="request">the serve request</param>
         [Throws<IssueOperationException>]
-        private static void run(WebServeRequest request)
+        public static void Run(WebServeRequest request)
         {
             WebApplication application = WebServerHost.Create(request);
             if (request.OpenBrowser)

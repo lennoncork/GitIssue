@@ -51,8 +51,8 @@ The solution is organized under `src/`:
 - `GitIssue.Services.Web` is an ASP.NET class library for the local website.
   Both hosts are built with `WebApplication.CreateBuilder`.
 - `GitIssue.Tool` is the executable .NET tool, exposed as the `gitissue` command.
-  `McpCommand` and `WebCommand` parse those commands the same way and run the
-  ASP.NET hosts in the tool process. The tool also parses the other command
+  `McpCommand` and `WebCommand` are CommandLineParser verbs, like the other
+  commands, and they run the ASP.NET hosts in the tool process. The tool also parses the other command
   options, wires dependencies, invokes library operations, and formats terminal
   output.
 - `GitIssue.Tests` tests the library, including issue persistence, fields,
