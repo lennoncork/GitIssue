@@ -130,30 +130,6 @@ namespace GitIssue.Issues
             return IssueKeyTemplate.sanitize(name, slug: true);
         }
 
-        /// <summary>
-        ///     Sanitizes an issue type token
-        /// </summary>
-        /// <param name="type">the issue type</param>
-        /// <returns>the sanitized type</returns>
-        public static string SanitizeType(string type)
-        {
-            if (string.IsNullOrWhiteSpace(type))
-            {
-                return "ISSUE";
-            }
-
-            StringBuilder builder = new StringBuilder(type.Length);
-            foreach (char character in type.Trim())
-            {
-                if (char.IsLetterOrDigit(character) || (character == '_'))
-                {
-                    builder.Append(character);
-                }
-            }
-
-            return builder.Length == 0 ? "ISSUE" : builder.ToString();
-        }
-
         private static string sanitize(string value, bool slug)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -326,7 +302,7 @@ namespace GitIssue.Issues
             switch (segment.Token)
             {
                 case Token.Type:
-                    return IssueKeyTemplate.SanitizeType(context.Type);
+                    return IssueTypeName.Validate(context.Type);
                 case Token.Uid:
                     return string.IsNullOrEmpty(context.Uid) ? string.Empty : context.Uid.ToUpperInvariant();
                 case Token.Name:
@@ -375,7 +351,7 @@ namespace GitIssue.Issues
                 case Token.Created:
                     return this.createdPattern(string.IsNullOrEmpty(segment.Format) ? "yyyy-MM-dd" : segment.Format);
                 case Token.Type:
-                    return @"[A-Za-z0-9_]+";
+                    return @"[A-Za-z0-9]+";
                 case Token.Slug:
                     return @"[^/\\]+";
                 case Token.Name:

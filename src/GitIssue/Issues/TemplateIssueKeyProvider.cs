@@ -124,7 +124,7 @@ namespace GitIssue.Issues
         {
             IssueKeyContext complete = new IssueKeyContext
             {
-                Type = string.IsNullOrWhiteSpace(context.Type) ? this.configuration.IssueType : context.Type,
+                Type = IssueTypeName.Validate(context.Type),
                 Created = context.Created == default ? DateTime.Now : context.Created,
                 Index = context.Index > 0 ? context.Index : this.NextIndex(),
                 Uid = string.IsNullOrEmpty(context.Uid) ? IssueKeyProvider.GetUniqueId(IssueKeyProvider.UniqueIdLength) : context.Uid,

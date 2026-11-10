@@ -80,6 +80,7 @@ namespace GitIssue
             {
                 string json = File.ReadAllText(file);
                 T configuration = JsonSerializer.Deserialize<T>(json, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
+                IssueTypeName.Validate(configuration.IssueType);
                 if (!IssueConfiguration.hasStorageProperty(json))
                 {
                     configuration.Storage = IssueStorage.Json;
@@ -124,6 +125,7 @@ namespace GitIssue
         {
             try
             {
+                IssueTypeName.Validate(this.IssueType);
                 this.normalizeKeyTemplate();
                 string json = JsonSerializer.Serialize(this, typeof(T), JsonSerialization.IndentedOptions);
                 Paths.WriteAllTextAsync(file, json).GetAwaiter().GetResult();

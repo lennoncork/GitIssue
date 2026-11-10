@@ -69,6 +69,17 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.That(exitCode, Is.EqualTo(1), this.Output + this.Error);
         }
 
+        [TestCase("bug fix")]
+        [TestCase("bug_fix")]
+        [TestCase("   ")]
+        public void Init_RejectsInvalidIssueType(string type)
+        {
+            int exitCode = this.Run("Init", "--issue-type", type);
+
+            Assert.That(exitCode, Is.EqualTo(1), this.Output + this.Error);
+            this.AssertDirectoryDoesNotExist(this.IssuesDirectory);
+        }
+
         [Test]
         public void Help_ReturnsZero()
         {

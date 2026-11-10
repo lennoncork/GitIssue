@@ -78,7 +78,7 @@ gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index
 
 | Token | Meaning | Default format |
 | --- | --- | --- |
-| `{type}` | `IssueType` from configuration, letters, digits, and underscore only | `ISSUE` |
+| `{type}` | `IssueType` from configuration, ASCII letters and digits only | `ISSUE` |
 | `{created}` | Issue creation time. Use .NET date format specifiers, for example `{created:yyyy}`, `{created:MM}`, `{created:dd}`, or `{created:yyyy-MM-dd}` | `yyyy-MM-dd` |
 | `{index}` | Sequential integer assigned in this repository. Use `{index:D3}` for `001`. Unique across clones only if `{uid}` is also present | unpadded |
 | `{uid}` | Eight-character hexadecimal id | n/a |

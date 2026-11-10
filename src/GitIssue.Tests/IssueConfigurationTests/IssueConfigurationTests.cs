@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using GitIssue.Fields;
 using GitIssue.Issues;
@@ -37,6 +38,28 @@ namespace GitIssue.Tests.IssueConfigurationTests
         [TestFixture]
         public class SaveAndRead : IssueConfigurationTests
         {
+            [TestCase("bug fix")]
+            [TestCase("bug_fix")]
+            [TestCase("")]
+            public void Save_RejectsInvalidIssueType(string type)
+            {
+                string file = Path.Combine(Helpers.CreateTempDirectory(), "config.json");
+                IssueConfiguration config = new IssueConfiguration { IssueType = type };
+
+                Assert.That(() => config.Save(file), Throws.TypeOf<AggregateException>());
+                Assert.That(File.Exists(file), Is.False);
+            }
+
+            [Test]
+            public void Read_RejectsInvalidIssueType()
+            {
+                string file = Path.Combine(Helpers.CreateTempDirectory(), "config.json");
+                File.WriteAllText(file, "{\"IssueType\":\"bug fix\"}");
+
+                AggregateException? error = Assert.Throws<AggregateException>(() => IssueConfiguration.Read(file));
+                Assert.That(error!.InnerException, Is.TypeOf<ArgumentException>());
+            }
+
             [Test]
             public void Save_And_Read_RoundTrips_Configuration()
             {
