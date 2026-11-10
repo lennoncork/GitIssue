@@ -117,10 +117,12 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 string json = File.ReadAllText(file);
                 IssueConfiguration loaded = IssueConfiguration.Read(file);
 
-                Assert.That(json, Does.Contain("\"FieldType\": \"Value\""));
-                Assert.That(json, Does.Contain("\"FieldType\": \"Array\""));
+                Assert.That(json, Does.Contain("\"FieldType\": \"ValueField\""));
+                Assert.That(json, Does.Contain("\"FieldType\": \"ArrayField\""));
                 Assert.That(json, Does.Not.Contain("JsonValue"));
                 Assert.That(json, Does.Not.Contain("JsonArray"));
+                Assert.That(loaded.Fields[FieldKey.Create("Title")].FieldType.ToString(), Is.EqualTo("ValueField"));
+                Assert.That(loaded.Fields[FieldKey.Create("Labels")].FieldType.ToString(), Is.EqualTo("ArrayField"));
                 Assert.That(loaded.Fields[FieldKey.Create("Title")].FieldType.Type, Is.EqualTo(typeof(JsonValueField)));
                 Assert.That(loaded.Fields[FieldKey.Create("Title")].ValueType.Type, Is.EqualTo(typeof(GitIssue.Values.String)));
                 Assert.That(loaded.Fields[FieldKey.Create("Labels")].FieldType.Type, Is.EqualTo(typeof(JsonArrayField)));

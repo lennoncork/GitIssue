@@ -104,14 +104,18 @@ namespace GitIssue.Tests.ValueTests
                 TypeValue arrayType = TypeValue.Create<JsonArrayField>();
                 TypeValue valueType = TypeValue.Create<JsonValueField>();
 
-                Assert.That(arrayType.ToString(), Is.EqualTo("Array"));
-                Assert.That(valueType.ToString(), Is.EqualTo("Value"));
-                Assert.That(TypeValue.TryParse("Array", out TypeValue parsedArray), Is.True);
+                Assert.That(arrayType.ToString(), Is.EqualTo("ArrayField"));
+                Assert.That(valueType.ToString(), Is.EqualTo("ValueField"));
+                Assert.That(TypeValue.TryParse("ArrayField", out TypeValue parsedArray), Is.True);
                 Assert.That(parsedArray.Type, Is.EqualTo(typeof(JsonArrayField)));
+                Assert.That(TypeValue.TryParse("Array", out TypeValue shortArray), Is.True);
+                Assert.That(shortArray.Type, Is.EqualTo(typeof(JsonArrayField)));
                 Assert.That(TypeValue.TryParse("JsonArray", out TypeValue legacyArray), Is.True);
                 Assert.That(legacyArray.Type, Is.EqualTo(typeof(JsonArrayField)));
-                Assert.That(TypeValue.TryParse("Value", out TypeValue parsedValue), Is.True);
+                Assert.That(TypeValue.TryParse("ValueField", out TypeValue parsedValue), Is.True);
                 Assert.That(parsedValue.Type, Is.EqualTo(typeof(JsonValueField)));
+                Assert.That(TypeValue.TryParse("Value", out TypeValue shortValue), Is.True);
+                Assert.That(shortValue.Type, Is.EqualTo(typeof(JsonValueField)));
                 Assert.That(TypeValue.TryParse("JsonValue", out TypeValue legacyValue), Is.True);
                 Assert.That(legacyValue.Type, Is.EqualTo(typeof(JsonValueField)));
                 Assert.That(TypeValue.TryParse("String", out TypeValue stringValue), Is.True);

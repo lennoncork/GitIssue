@@ -103,15 +103,15 @@ namespace GitIssue.Tests.ValueTests
             {
                 bool hasArrayAlias = TypeAlias.Aliases.Any(a =>
                 {
-                    return a.TryParse("Array", out Type type) && (type == typeof(JsonArrayField));
+                    return a.TryParse("ArrayField", out Type type) && (type == typeof(JsonArrayField));
                 });
                 bool hasValueAlias = TypeAlias.Aliases.Any(a =>
                 {
-                    return a.TryParse("Value", out Type type) && (type == typeof(JsonValueField));
+                    return a.TryParse("ValueField", out Type type) && (type == typeof(JsonValueField));
                 });
 
-                Assert.That(hasArrayAlias, Is.True, "Expected an Array alias for array fields.");
-                Assert.That(hasValueAlias, Is.True, "Expected a Value alias for single-value fields.");
+                Assert.That(hasArrayAlias, Is.True, "Expected an ArrayField alias for array fields.");
+                Assert.That(hasValueAlias, Is.True, "Expected a ValueField alias for single-value fields.");
             }
         }
     }
