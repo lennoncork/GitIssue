@@ -17,6 +17,8 @@ namespace GitIssue.Values
         /// </summary>
         public static ITypeAlias[] Aliases;
 
+        private readonly string[] legacyAliases;
+
         static TypeAlias()
         {
             List<ITypeAlias> aliases = new List<ITypeAlias>();
@@ -51,11 +53,13 @@ namespace GitIssue.Values
         /// <summary>
         ///     Initializes a new instance of the <see cref="TypeAlias" /> class
         /// </summary>
-        /// <param name="alias"></param>
-        protected TypeAlias(string alias)
+        /// <param name="alias">the name written for this type</param>
+        /// <param name="legacyAliases">older names that still resolve to this type</param>
+        protected TypeAlias(string alias, params string[] legacyAliases)
         {
             this.Alias = alias;
             this.Type = this.GetType();
+            this.legacyAliases = legacyAliases ?? Array.Empty<string>();
         }
 
         /// <summary>
@@ -67,6 +71,7 @@ namespace GitIssue.Values
         {
             this.Alias = alias;
             this.Type = type;
+            this.legacyAliases = Array.Empty<string>();
         }
 
         /// <summary>
@@ -205,7 +210,7 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public bool TryParse(string alias, out Type type)
         {
-            if (alias == this.Alias)
+            if (this.matches(alias))
             {
                 type = this.Type;
                 return true;
@@ -225,6 +230,24 @@ namespace GitIssue.Values
             }
 
             str = null!;
+            return false;
+        }
+
+        private bool matches(string alias)
+        {
+            if (alias == this.Alias)
+            {
+                return true;
+            }
+
+            foreach (string legacyAlias in this.legacyAliases)
+            {
+                if (legacyAlias == alias)
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
     }

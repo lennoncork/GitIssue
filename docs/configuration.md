@@ -108,4 +108,18 @@ gitissue rekey
 
 The configuration defines the key provider, key template, issue type, and each field's field/value types, metadata, and required status. Make a backup before editing it manually: changing a field's type or name can make existing issue data unreadable or prevent commands from working. Use the `fields` command afterward to confirm that the repository still loads and reports the expected schema.
 
+`FieldType` describes the shape of the field. `ValueField` is one value and `ArrayField` is a list. `ValueType` is the kind of value, such as `String`, `Label`, or `DateTime`. These names are the same for Markdown and JSON issue files. The fields are still read and written with the JSON value model. Configurations that still say `JsonValue`, `JsonArray`, `Value`, or `Array` continue to load.
+
+```json
+"Title": {
+  "FieldType": "ValueField",
+  "ValueType": "String",
+  "Required": true
+},
+"Labels": {
+  "FieldType": "ArrayField",
+  "ValueType": "Label"
+}
+```
+
 Interactive commands use `joe` as the default editor. Although some commands expose editor-related options, editor selection is not consistently applied across commands in the current implementation.
