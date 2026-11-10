@@ -86,6 +86,70 @@ namespace GitIssue.Tool.Tests.Integration
         }
 
         [Test]
+        public void Convert_RejectsConflictingDocumentsWithoutChangingEitherFile()
+        {
+            this.InitializeRepository();
+            string key = this.CreateIssue("Conflicting issue", "Body");
+            string jsonPath = this.GetIssueFile(key);
+            string markdownPath = this.getMarkdownFile(key);
+            string originalJson = File.ReadAllText(jsonPath);
+            const string originalMarkdown = "# Existing document";
+            File.WriteAllText(markdownPath, originalMarkdown);
+
+            int exitCode = this.Run("Convert", "--to", "markdown");
+
+            Assert.That(exitCode, Is.EqualTo(1), this.Output + this.Error);
+            Assert.That(this.Output, Does.Contain("has both JSON and Markdown files"));
+            Assert.That(File.ReadAllText(jsonPath), Is.EqualTo(originalJson));
+            Assert.That(File.ReadAllText(markdownPath), Is.EqualTo(originalMarkdown));
+            Assert.That(this.ReadJsonObject(this.ConfigurationFile)["Storage"]?.GetValue<string>() ?? "Json", Is.EqualTo("Json"));
+        }
+
+        [Test]
+        public void Convert_RejectsUnknownJsonFieldWithoutLosingData()
+        {
+            this.InitializeRepository();
+            string validKey = this.CreateIssue("Valid JSON issue", "Body");
+            string key = this.CreateIssue("Invalid JSON issue", "Body");
+            string validJsonPath = this.GetIssueFile(validKey);
+            string validOriginal = File.ReadAllText(validJsonPath);
+            string jsonPath = this.GetIssueFile(key);
+            var json = this.ReadIssue(key);
+            json["Unexpected"] = "keep this";
+            string original = json.ToJsonString();
+            File.WriteAllText(jsonPath, original);
+
+            int exitCode = this.Run("Convert", "--to", "markdown");
+
+            Assert.That(exitCode, Is.EqualTo(1), this.Output + this.Error);
+            Assert.That(this.Output, Does.Contain("unknown field"));
+            Assert.That(File.ReadAllText(jsonPath), Is.EqualTo(original));
+            this.AssertFileDoesNotExist(this.getMarkdownFile(key));
+            Assert.That(File.ReadAllText(validJsonPath), Is.EqualTo(validOriginal));
+            this.AssertFileDoesNotExist(this.getMarkdownFile(validKey));
+            Assert.That(this.ReadJsonObject(this.ConfigurationFile)["Storage"]?.GetValue<string>() ?? "Json", Is.EqualTo("Json"));
+        }
+
+        [Test]
+        public void Convert_RejectsUnknownMarkdownFieldWithoutLosingData()
+        {
+            Assert.That(this.Run("Init"), Is.Zero, this.Output + this.Error);
+            Assert.That(this.Run("Create", "Invalid markdown issue", "Body"), Is.Zero, this.Output + this.Error);
+            string key = this.findMarkdownKey("Invalid markdown issue");
+            string markdownPath = this.getMarkdownFile(key);
+            string original = File.ReadAllText(markdownPath) + "\n## Unexpected\n\nkeep this\n";
+            File.WriteAllText(markdownPath, original);
+
+            int exitCode = this.Run("Convert", "--to", "json");
+
+            Assert.That(exitCode, Is.EqualTo(1), this.Output + this.Error);
+            Assert.That(this.Output, Does.Contain("unknown field"));
+            Assert.That(File.ReadAllText(markdownPath), Is.EqualTo(original));
+            this.AssertFileDoesNotExist(this.GetIssueFile(key));
+            Assert.That(this.ReadJsonObject(this.ConfigurationFile)["Storage"]?.GetValue<string>(), Is.EqualTo("Markdown"));
+        }
+
+        [Test]
         public void Init_RejectsUnknownStorage()
         {
             int exitCode = this.Run("Init", "--storage", "yaml");

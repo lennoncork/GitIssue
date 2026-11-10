@@ -23,6 +23,11 @@ namespace GitIssue.Tool
         /// <returns>the process exit code</returns>
         public static int Execute(string[] args, TextWriter output, TextWriter error)
         {
+            return WebServeApplication.Execute(args, output, error, AppContext.BaseDirectory);
+        }
+
+        internal static int Execute(string[] args, TextWriter output, TextWriter error, string hostDirectory)
+        {
             WebServeRequest request = WebServeCommandLine.ParseCli(args);
             if (request.Help)
             {
@@ -37,7 +42,7 @@ namespace GitIssue.Tool
                 return 1;
             }
 
-            string? hostAssembly = WebServeApplication.findHostAssembly();
+            string? hostAssembly = WebServeApplication.findHostAssembly(hostDirectory);
             if (hostAssembly is null)
             {
                 error.WriteLine("The GitIssue web host was not found next to the tool.");
@@ -99,9 +104,9 @@ namespace GitIssue.Tool
             }
         }
 
-        private static string? findHostAssembly()
+        private static string? findHostAssembly(string hostDirectory)
         {
-            string candidate = Path.Combine(AppContext.BaseDirectory, "GitIssue.Services.Web.dll");
+            string candidate = Path.Combine(hostDirectory, "GitIssue.Services.Web.dll");
             return File.Exists(candidate) ? candidate : null;
         }
 

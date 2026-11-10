@@ -1,4 +1,5 @@
 using System.IO;
+using GitIssue.Tool;
 using NUnit.Framework;
 
 namespace GitIssue.Tool.Tests.Integration
@@ -58,12 +59,18 @@ namespace GitIssue.Tool.Tests.Integration
         [Test]
         public void WebServe_ReportsAMissingHostAssembly()
         {
-            int exitCode = this.Run("web", "serve");
+            using StringWriter output = new StringWriter();
+            using StringWriter error = new StringWriter();
+            int exitCode = WebServeApplication.Execute(
+                new[] { "web", "serve", "--path", this.TestDirectory },
+                output,
+                error,
+                this.TestDirectory);
 
             Assert.Multiple(() =>
             {
                 Assert.That(exitCode, Is.EqualTo(1));
-                Assert.That(this.Error, Does.Contain("web host was not found"));
+                Assert.That(error.ToString(), Does.Contain("web host was not found"));
             });
         }
     }

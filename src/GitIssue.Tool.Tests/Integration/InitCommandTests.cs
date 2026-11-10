@@ -69,6 +69,39 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.That(exitCode, Is.EqualTo(1), this.Output + this.Error);
         }
 
+        [Test]
+        public void Init_TemplateProviderRequiresTemplate()
+        {
+            int exitCode = this.Run("Init", "--key-provider", "template");
+
+            Assert.That(exitCode, Is.EqualTo(1));
+            Assert.That(this.Output, Does.Contain("requires --key-template"));
+            this.AssertDirectoryDoesNotExist(this.IssuesDirectory);
+        }
+
+        [TestCase("date", "DateIssueKeyProvider")]
+        [TestCase("DateIssueKeyProvider", "DateIssueKeyProvider")]
+        [TestCase("NameIssueKeyProvider", "NameIssueKeyProvider")]
+        [TestCase("File", "FileIssueKeyProvider")]
+        [TestCase("FileIssueKeyProvider", "FileIssueKeyProvider")]
+        public void Init_SelectsProviderByAlias(string provider, string expected)
+        {
+            int exitCode = this.Run("Init", "--key-provider", provider);
+
+            Assert.That(exitCode, Is.Zero, this.Output + this.Error);
+            Assert.That(this.ReadJsonObject(this.ConfigurationFile)["KeyProvider"]?.GetValue<string>(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void Init_RejectsResolvedTypeThatIsNotAKeyProvider()
+        {
+            int exitCode = this.Run("Init", "--key-provider", "System.String");
+
+            Assert.That(exitCode, Is.EqualTo(1));
+            Assert.That(this.Output, Does.Contain("is not Date, Name, or Template"));
+            this.AssertDirectoryDoesNotExist(this.IssuesDirectory);
+        }
+
         [TestCase("bug fix")]
         [TestCase("bug_fix")]
         [TestCase("   ")]
