@@ -26,6 +26,8 @@ namespace GitIssue.Tool.Tests.Integration
                 this.AssertJsonPropertyExists(configuration["Fields"]!.AsObject(), "Title");
                 Assert.That(configuration["Storage"]?.GetValue<string>(), Is.EqualTo("Markdown"));
                 Assert.That(configuration["KeyProvider"]?.GetValue<string>(), Is.EqualTo("DateIssueKeyProvider"));
+                Assert.That(configuration["IssueType"]?.GetValue<string>(), Is.EqualTo("ISSUE"));
+                Assert.That(configuration["KeyTemplate"]?.GetValue<string>(), Is.EqualTo("{created:yyyy}/{created:MM}/{created:dd}/{uid}"));
                 Assert.That(this.Output, Does.Contain("Initialized empty 'Issue' repository"));
             });
         }
@@ -40,6 +42,22 @@ namespace GitIssue.Tool.Tests.Integration
             {
                 Assert.That(exitCode, Is.Zero, this.Error);
                 Assert.That(configuration["KeyProvider"]?.GetValue<string>(), Is.EqualTo("NameIssueKeyProvider"));
+                Assert.That(configuration["KeyTemplate"]?.GetValue<string>(), Is.EqualTo("{uid} - {name}"));
+            });
+        }
+
+        [Test]
+        public void Init_SelectsKeyTemplate()
+        {
+            int exitCode = this.Run("Init", "--issue-type", "FEAT", "--key-template", "{type}-{uid}-{slug}");
+
+            var configuration = this.ReadJsonObject(this.ConfigurationFile);
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Zero, this.Error);
+                Assert.That(configuration["KeyProvider"]?.GetValue<string>(), Is.EqualTo("TemplateIssueKeyProvider"));
+                Assert.That(configuration["IssueType"]?.GetValue<string>(), Is.EqualTo("FEAT"));
+                Assert.That(configuration["KeyTemplate"]?.GetValue<string>(), Is.EqualTo("{type}-{uid}-{slug}"));
             });
         }
 

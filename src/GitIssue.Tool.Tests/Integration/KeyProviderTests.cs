@@ -55,5 +55,38 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.That(this.Run("Delete", uniqueId), Is.Zero, this.Error);
             Assert.That(Directory.Exists(Path.Combine(this.IssuesDirectory, key)), Is.False);
         }
+
+        [Test]
+        public void Init_Template_CreatesTemplatedKeysAndRekeyRenamesThem()
+        {
+            Assert.That(this.Run("Init", "--key-template", "{type}-{uid}-{slug}", "--issue-type", "FEAT", "--storage", "json"), Is.Zero, this.Error);
+            Assert.That(this.Run("Create", "Add login page", "Feature work."), Is.Zero, this.Error);
+
+            string[] directories = Directory.EnumerateDirectories(this.IssuesDirectory)
+                .Select(Path.GetFileName)
+                .Where(name => name != null)
+                .Select(name => name!)
+                .ToArray();
+            Assert.That(directories, Has.Length.EqualTo(1));
+            string original = directories[0];
+            Assert.That(original, Does.Match(new Regex(@"^FEAT-[A-F0-9]{8}-add-login-page$")));
+
+            string json = File.ReadAllText(this.ConfigurationFile);
+            File.WriteAllText(this.ConfigurationFile, json.Replace("{type}-{uid}-{slug}", "{uid} - {name}", System.StringComparison.Ordinal));
+
+            Assert.That(this.Run("Rekey", "--dry-run"), Is.Zero, this.Error);
+            Assert.That(this.Output, Does.Contain(original));
+            Assert.That(Directory.Exists(Path.Combine(this.IssuesDirectory, original)), Is.True);
+
+            Assert.That(this.Run("Rekey"), Is.Zero, this.Error);
+            string[] renamed = Directory.EnumerateDirectories(this.IssuesDirectory)
+                .Select(Path.GetFileName)
+                .Where(name => name != null)
+                .Select(name => name!)
+                .ToArray();
+            Assert.That(renamed, Has.Length.EqualTo(1));
+            Assert.That(renamed[0], Does.Match(new Regex(@"^[A-F0-9]{8} - Add login page$")));
+            Assert.That(Directory.Exists(Path.Combine(this.IssuesDirectory, original)), Is.False);
+        }
     }
 }

@@ -67,35 +67,45 @@ Ada Lovelace <ada@example.com>
 
 ## Issue keys
 
-`KeyProvider` in `config.json` selects how new issue keys are generated and how those keys map to directories under the issue-data folder. The default is `DateIssueKeyProvider`. Choose a provider when initializing:
+Issue keys are generated from `KeyTemplate` in `config.json`. `IssueType` supplies the `{type}` token. `KeyProvider` selects the implementation; the template is what actually shapes the key. A `/` in the template becomes a directory. Other characters, including `-`, stay in the folder name. The issue key is the same string with `/` replaced by `-`.
 
 ```shell
 gitissue init
 gitissue init --key-provider date
 gitissue init --key-provider name
+gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index:D3}-{uid}-{slug}"
 ```
 
-| Provider | Key example | Directory layout | Best for |
+| Token | Meaning | Default format |
+| --- | --- | --- |
+| `{type}` | `IssueType` from configuration, letters, digits, and underscore only | `ISSUE` |
+| `{created}` | Issue creation time. Use .NET date format specifiers, for example `{created:yyyy}`, `{created:MM}`, `{created:dd}`, or `{created:yyyy-MM-dd}` | `yyyy-MM-dd` |
+| `{index}` | Sequential integer assigned in this repository. Use `{index:D3}` for `001`. Unique across clones only if `{uid}` is also present | unpadded |
+| `{uid}` | Eight-character hexadecimal id | n/a |
+| `{name}` or `{title}` | Sanitized issue title, with spaces | n/a |
+| `{slug}` | Lowercase hyphenated title | n/a |
+
+| Provider | Default template | Key example | Directory layout |
 | --- | --- | --- | --- |
-| `DateIssueKeyProvider` | `2026-11-09-A1B2C3D4` | `.issues/2026/11/09/A1B2C3D4/` | Bugs and other time-ordered work. The date groups issues on disk; the trailing unique id avoids collisions. |
-| `NameIssueKeyProvider` | `A1B2C3D4 - Add login page` | `.issues/A1B2C3D4 - Add login page/` | Features and other named work. The unique id stays unique in a distributed repository; the title makes the key readable. Quote keys that contain spaces, or pass the eight-character unique id to commands that resolve keys. |
+| `DateIssueKeyProvider` | `{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `2026-11-09-A1B2C3D4` | `.issues/2026/11/09/A1B2C3D4/` |
+| `NameIssueKeyProvider` | `{uid} - {name}` | `A1B2C3D4 - Add login page` | `.issues/A1B2C3D4 - Add login page/` |
+| `TemplateIssueKeyProvider` | the configured `KeyTemplate` | depends on the template | depends on `/` in the template |
 
-Existing repositories that still name `FileIssueKeyProvider` keep that date-based behavior. New repositories should use `DateIssueKeyProvider`.
+If `KeyTemplate` is set, it overrides the provider's default. Existing repositories that still name `FileIssueKeyProvider` keep date-based behavior until you change the template.
 
-The date format is a poor fit for feature work because the calendar path says when the issue was created, not what it is. Named keys reverse that: the title is visible in the key, and uniqueness still comes from a short id rather than a shared counter.
+After you edit `KeyTemplate` or `IssueType`, regenerate on-disk names:
 
-Other schemes that are not built in, but are reasonable later providers:
+```shell
+gitissue rekey --dry-run
+gitissue rekey
+```
 
-- **Slug plus unique id**, such as `A1B2C3D4-add-login-page`. Same uniqueness as named keys, without spaces, so command-line use is easier.
-- **Type-prefixed keys**, such as `BUG-2026-11-09-A1B2C3D4` or `FEAT-A1B2C3D4`. Useful when one repository tracks more than one issue kind.
-- **Content-addressed hashes**, as in git-bug: the id is a hash of the first change, shown as a short prefix. Opaque to read, but collision-free and git-like.
-- **Random UUID or ULID**. Fossil uses a 40-character hex ticket id. ULIDs stay unique and sort by time.
-- **Sequential ids**, such as `ISS-1`. Familiar from Jira and GitHub, but two clones can mint the same number before they push.
+`rekey` locates issues by their stored `.json` or `.md` files, so they can be renamed even when the previous key no longer matches the new template. It rebuilds each key from the current template using the issue title, created time, type, and the unique id already present in the existing key. Quote keys that contain spaces, or pass the eight-character unique id to commands that resolve keys.
 
-Sequential numbers are a poor default here because GitIssue is distributed: keys must stay unique without a central allocator.
+`{index}` is convenient, but two clones can mint the same index before they push. Keep `{uid}` in the template when the repository is distributed.
 
 ## Editing `config.json`
 
-The configuration defines the key provider and each field's field/value types, metadata, and required status. Make a backup before editing it manually: changing a field's type or name can make existing issue data unreadable or prevent commands from working. Use the `fields` command afterward to confirm that the repository still loads and reports the expected schema.
+The configuration defines the key provider, key template, issue type, and each field's field/value types, metadata, and required status. Make a backup before editing it manually: changing a field's type or name can make existing issue data unreadable or prevent commands from working. Use the `fields` command afterward to confirm that the repository still loads and reports the expected schema.
 
 Interactive commands use `joe` as the default editor. Although some commands expose editor-related options, editor selection is not consistently applied across commands in the current implementation.

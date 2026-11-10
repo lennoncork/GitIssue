@@ -67,11 +67,13 @@ loads, deletes, searches, and tracks issues, using injected key, configuration,
 repository, change-log, and persistence services. Autofac registrations in
 `GitIssueModule` provide the default implementations and allow selected
 services to be overridden. `IIssueKeyProvider` implementations generate unique
-issue keys and map them to directories; the configured type is stored as
-`KeyProvider` in `config.json`. `DateIssueKeyProvider` is the default
-(`YYYY-MM-DD-UID`). `NameIssueKeyProvider` produces `UID - Issue Name`.
-Existing configuration that names `FileIssueKeyProvider` continues to use the
-date-based provider.
+issue keys and map them to directories. `config.json` stores `KeyProvider`,
+`KeyTemplate`, and `IssueType`. The template is the source of truth and can
+include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
+`DateIssueKeyProvider` and `NameIssueKeyProvider` are presets of
+`TemplateIssueKeyProvider`. `gitissue rekey` regenerates on-disk names after
+the template or type changes. Existing configuration that names
+`FileIssueKeyProvider` continues to use the date-based provider.
 
 An issue is modeled by `IIssue` and the abstract `Issue` base class. Fields are
 identified by `FieldKey` and described by `FieldInfo`, which specifies the

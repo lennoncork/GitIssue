@@ -37,7 +37,7 @@ From the root directory of the Git repository where you want to keep issues, run
 gitissue init
 ```
 
-This creates an `.issues` directory and the default issue configuration. New issues get date-based keys such as `2026-11-09-A1B2C3D4`. To use named keys such as `A1B2C3D4 - Add onboarding guide`, pass `--key-provider name`. To use a non-default directory, pass `--name` and use the same value in later commands:
+This creates an `.issues` directory and the default issue configuration. New issues get date-based keys such as `2026-11-09-A1B2C3D4`. To use named keys such as `A1B2C3D4 - Add onboarding guide`, pass `--key-provider name`. To choose the key shape yourself, pass `--key-template` and optionally `--issue-type`. After you change the template or issue type in `config.json`, run `gitissue rekey` to rename existing issue files. To use a non-default directory, pass `--name` and use the same value in later commands:
 
 ```shell
 gitissue init --name work-items

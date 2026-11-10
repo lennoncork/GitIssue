@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Autofac;
 using Exceptionable;
 using GitIssue.Issues;
+using GitIssue.Issues.File;
+using GitIssue.Issues.Markdown;
 using LibGit2Sharp;
 using Serilog;
 
@@ -356,6 +358,119 @@ namespace GitIssue
             return issue;
         }
 
+        /// <inheritdoc />
+        [Throws<SafeResultException>]
+        public IReadOnlyList<IssueRekeyResult> Rekey(bool dryRun = false)
+        {
+            return this.RekeyAsync(dryRun)
+                .WithSafeResult()
+                .GetResult();
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyList<IssueRekeyResult>> RekeyAsync(bool dryRun = false)
+        {
+            if (this.KeyProvider is not TemplateIssueKeyProvider provider)
+            {
+                throw new InvalidOperationException("Issue keys can only be regenerated when a template key provider is configured.");
+            }
+
+            List<IIssue> issues = new List<IIssue>();
+            foreach ((IssueKey key, string relativePath) in provider.FindExisting())
+            {
+                IIssue? loaded = await this.loadIssue(key, relativePath);
+                if (loaded != null)
+                {
+                    issues.Add(loaded);
+                }
+            }
+
+            issues.Sort((left, right) => ((System.DateTime)left.Created).CompareTo((System.DateTime)right.Created));
+
+            int nextIndex = 1;
+            foreach (IIssue issue in issues)
+            {
+                if (provider.TryGetContext(issue.Key.ToString(), out IssueKeyContext existing) && (existing.Index > 0))
+                {
+                    nextIndex = Math.Max(nextIndex, existing.Index + 1);
+                }
+            }
+
+            List<(Issue Issue, IssueKey From, IssueKey To, string FromPath)> planned = new List<(Issue, IssueKey, IssueKey, string)>();
+            HashSet<string> used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (IIssue item in issues)
+            {
+                if (item is not Issue issue)
+                {
+                    continue;
+                }
+
+                IssueKeyContext context = provider.CreateContext(issue);
+                if (provider.Template.HasIndex && (context.Index <= 0))
+                {
+                    context = new IssueKeyContext
+                    {
+                        Type = context.Type,
+                        Created = context.Created,
+                        Index = nextIndex++,
+                        Uid = context.Uid,
+                        Name = context.Name,
+                    };
+                }
+
+                IssueKey to = provider.Create(context);
+                if (!used.Add(to.ToString()))
+                {
+                    throw new InvalidOperationException($"Key template '{provider.TemplateSource}' produced duplicate key '{to}'.");
+                }
+
+                if (to == issue.Key)
+                {
+                    continue;
+                }
+
+                string toPath = Path.GetFullPath(Path.Combine(this.Root.IssuesPath, provider.GetIssuePath(to)));
+                string fromPath = Path.GetFullPath(issue.Root.IssuePath);
+                if (Directory.Exists(toPath) && !string.Equals(toPath, fromPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException($"Cannot rename '{issue.Key}' to '{to}' because that path already exists.");
+                }
+
+                planned.Add((issue, issue.Key, to, fromPath));
+            }
+
+            List<IssueRekeyResult> results = planned
+                .Select(item => new IssueRekeyResult(item.From, item.To))
+                .ToList();
+            if (dryRun)
+            {
+                return results;
+            }
+
+            foreach ((Issue issue, IssueKey from, IssueKey to, string fromPath) in planned)
+            {
+                IssueRoot newRoot = new IssueRoot(this.Root, to, provider.GetIssuePath(to));
+                issue.Relocate(newRoot);
+                await issue.SaveAsync();
+                this.Changes.Add(to, ChangeType.Rename);
+
+                string newPath = Path.GetFullPath(issue.Root.IssuePath);
+                if (!string.Equals(fromPath, newPath, StringComparison.OrdinalIgnoreCase) && Directory.Exists(fromPath))
+                {
+                    Directory.Delete(fromPath, true);
+                    this.deleteEmptyParents(fromPath, this.Root.IssuesPath);
+                }
+
+                if (this.Tracked.Key == from)
+                {
+                    this.Tracked.Key = to;
+                    await this.Tracked.SaveAsync(this.Root.Tracked, this.logger);
+                }
+            }
+
+            return results;
+        }
 
         /// <inheritdoc />
         [Throws<SafeResultException>]
@@ -551,6 +666,32 @@ namespace GitIssue
 
             return path.Equals(root, StringComparison.Ordinal) ||
                 path.StartsWith(root + "/", StringComparison.Ordinal);
+        }
+
+        private Task<IIssue?> loadIssue(IssueKey key, string relativePath)
+        {
+            IssueRoot issueRoot = new IssueRoot(this.Root, key, relativePath);
+            if (this.Configuration.Storage == IssueStorage.Markdown)
+            {
+                return MarkdownIssue.ReadAsync(issueRoot, this.Configuration.Fields);
+            }
+
+            return FileIssue.ReadAsync(issueRoot, this.Configuration.Fields);
+        }
+
+        private void deleteEmptyParents(string path, string stopAt)
+        {
+            DirectoryInfo? current = Directory.GetParent(path);
+            string stop = Path.GetFullPath(stopAt);
+            while ((current != null) &&
+                   current.Exists &&
+                   (Path.GetFullPath(current.FullName) != stop) &&
+                   !current.EnumerateFileSystemInfos().Any())
+            {
+                DirectoryInfo? parent = current.Parent;
+                current.Delete();
+                current = parent;
+            }
         }
 
         private void restorePreservedChanges(List<PreservedIndexChange> preserved)

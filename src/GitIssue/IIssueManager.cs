@@ -93,6 +93,21 @@ namespace GitIssue
         Task<IIssue> CreateAsync(string title, string description);
 
         /// <summary>
+        ///     Regenerates issue keys and file names from the configured key template
+        /// </summary>
+        /// <param name="dryRun">when true, report planned renames without writing</param>
+        /// <returns>the issues whose keys would change</returns>
+        [Throws<SafeResultException>]
+        IReadOnlyList<IssueRekeyResult> Rekey(bool dryRun = false);
+
+        /// <summary>
+        ///     Regenerates issue keys and file names from the configured key template
+        /// </summary>
+        /// <param name="dryRun">when true, report planned renames without writing</param>
+        /// <returns>the issues whose keys would change</returns>
+        Task<IReadOnlyList<IssueRekeyResult>> RekeyAsync(bool dryRun = false);
+
+        /// <summary>
         ///     Deletes an existing issue
         /// </summary>
         /// <param name="id">the id to search</param>

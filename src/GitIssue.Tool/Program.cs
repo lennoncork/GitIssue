@@ -21,6 +21,7 @@ using GitIssue.Tool.Commands.Fields;
 using GitIssue.Tool.Commands.Find;
 using GitIssue.Tool.Commands.Import;
 using GitIssue.Tool.Commands.Init;
+using GitIssue.Tool.Commands.Rekey;
 using GitIssue.Tool.Commands.Remove;
 using GitIssue.Tool.Commands.Show;
 using GitIssue.Tool.Commands.Sync;
@@ -68,12 +69,30 @@ namespace GitIssue.Tool
                                 }
 
                                 config.Storage = storage;
-                                if (!Program.tryGetKeyProvider(initOptions.KeyProvider, out Type keyProvider))
-                                {
-                                    throw new ArgumentException($"Key provider '{initOptions.KeyProvider}' is not Date or Name.");
-                                }
+                                string issueType = !string.IsNullOrWhiteSpace(initOptions.IssueType)
+                                    ? initOptions.IssueType
+                                    : initOptions.IssueTypeName;
+                                config.IssueType = string.IsNullOrWhiteSpace(issueType) ? "ISSUE" : issueType;
 
-                                config.KeyProvider = TypeValue.Create(keyProvider);
+                                if (!string.IsNullOrWhiteSpace(initOptions.KeyTemplate))
+                                {
+                                    IssueKeyTemplate.Parse(initOptions.KeyTemplate);
+                                    config.KeyTemplate = initOptions.KeyTemplate;
+                                    config.KeyProvider = TypeValue.Create<TemplateIssueKeyProvider>();
+                                }
+                                else if (!Program.tryGetKeyProvider(initOptions.KeyProvider, out Type keyProvider, out string template))
+                                {
+                                    throw new ArgumentException($"Key provider '{initOptions.KeyProvider}' is not Date, Name, or Template.");
+                                }
+                                else if (string.IsNullOrEmpty(template))
+                                {
+                                    throw new ArgumentException("Key provider 'Template' requires --key-template.");
+                                }
+                                else
+                                {
+                                    config.KeyProvider = TypeValue.Create(keyProvider);
+                                    config.KeyTemplate = template;
+                                }
                             }
 
                             RepositoryRoot root = RepositoryRoot.Create(options.Path, options.Name);
@@ -181,6 +200,7 @@ namespace GitIssue.Tool
                 typeof(CommentOptions),
                 typeof(ValidateOptions),
                 typeof(ConvertOptions),
+                typeof(RekeyOptions),
             };
             parser.ParseArguments(args, commands)
                 .WithParsed<InitOptions>(o => exitCode = Program.execAsync<InitCommand, InitOptions>(o).GetAwaiter().GetResult())
@@ -201,6 +221,7 @@ namespace GitIssue.Tool
                 .WithParsed<ChangesOptions>(o => exitCode = Program.execAsync<ChangesCommand, ChangesOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<ValidateOptions>(o => exitCode = Program.execAsync<ValidateCommand, ValidateOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<ConvertOptions>(o => exitCode = Program.execAsync<ConvertCommand, ConvertOptions>(o).GetAwaiter().GetResult())
+                .WithParsed<RekeyOptions>(o => exitCode = Program.execAsync<RekeyCommand, RekeyOptions>(o).GetAwaiter().GetResult())
                 .WithNotParsed(errors =>
                 {
                     if (errors.Any(error => error is HelpRequestedError ||
@@ -214,8 +235,9 @@ namespace GitIssue.Tool
             return exitCode;
         }
 
-        private static bool tryGetKeyProvider(string value, out Type type)
+        private static bool tryGetKeyProvider(string value, out Type type, out string template)
         {
+            template = IssueKeyTemplate.Date;
             if (string.IsNullOrWhiteSpace(value) ||
                 value.Equals("Date", StringComparison.OrdinalIgnoreCase) ||
                 value.Equals(nameof(DateIssueKeyProvider), StringComparison.OrdinalIgnoreCase))
@@ -228,6 +250,15 @@ namespace GitIssue.Tool
                 value.Equals(nameof(NameIssueKeyProvider), StringComparison.OrdinalIgnoreCase))
             {
                 type = typeof(NameIssueKeyProvider);
+                template = IssueKeyTemplate.Name;
+                return true;
+            }
+
+            if (value.Equals("Template", StringComparison.OrdinalIgnoreCase) ||
+                value.Equals(nameof(TemplateIssueKeyProvider), StringComparison.OrdinalIgnoreCase))
+            {
+                type = typeof(TemplateIssueKeyProvider);
+                template = string.Empty;
                 return true;
             }
 

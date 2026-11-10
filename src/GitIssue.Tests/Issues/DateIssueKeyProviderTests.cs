@@ -87,5 +87,24 @@ namespace GitIssue.Tests.Issues
 
             Assert.That(keys.Select(key => key.ToString()), Is.EqualTo(new[] { "2026-11-09-ABCD1234" }));
         }
+
+        [Test]
+        public void FindExisting_FindsIssueFilesWhenTheTemplateNoLongerMatches()
+        {
+            string path = Path.Combine(this.root.IssuesPath, "2026", "11", "09", "ABCD1234");
+            Directory.CreateDirectory(path);
+            File.WriteAllText(Path.Combine(path, "2026-11-09-ABCD1234.json"), "{}");
+
+            IssueConfiguration configuration = new IssueConfiguration
+            {
+                KeyTemplate = IssueKeyTemplate.Name,
+            };
+            TemplateIssueKeyProvider renamed = new TemplateIssueKeyProvider(this.root, configuration);
+
+            Assert.That(renamed.Keys, Is.Empty);
+            Assert.That(
+                renamed.FindExisting().Select(item => item.Key.ToString()),
+                Is.EqualTo(new[] { "2026-11-09-ABCD1234" }));
+        }
     }
 }

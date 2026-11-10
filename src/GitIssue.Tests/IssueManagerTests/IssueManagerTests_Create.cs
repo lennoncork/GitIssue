@@ -118,6 +118,27 @@ namespace GitIssue.Tests.IssueManagerTests
                 Assert.That(this.Sut.KeyProvider.TryGetKey(issue.Key.ToString()[..8], out IssueKey found), Is.True);
                 Assert.That(found, Is.EqualTo(issue.Key));
             }
+
+            [Test]
+            public async Task CreatesKeyFromConfiguredTemplate()
+            {
+                Repository.Init(this.TestDirectory);
+                using Repository repository = new Repository(this.TestDirectory);
+                repository.Config.Set("user.name", "Tester");
+                repository.Config.Set("user.email", "tester@example.com");
+
+                IssueConfiguration configuration = new IssueConfiguration
+                {
+                    KeyProvider = GitIssue.Values.TypeValue.Create<TemplateIssueKeyProvider>(),
+                    IssueType = "FEAT",
+                    KeyTemplate = "{type}-{uid}-{slug}",
+                };
+                this.Sut = IssueManager.Init(configuration, this.TestDirectory);
+
+                IIssue issue = await this.Sut.CreateAsync("Add login page", "Feature work");
+
+                Assert.That(issue.Key.ToString(), Does.Match(new Regex(@"^FEAT-[A-F0-9]{8}-add-login-page$")));
+            }
         }
     }
 }

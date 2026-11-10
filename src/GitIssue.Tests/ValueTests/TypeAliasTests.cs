@@ -54,6 +54,7 @@ namespace GitIssue.Tests.ValueTests
             {
                 Assert.That(TypeAlias.IsKeyProviderType(typeof(DateIssueKeyProvider)), Is.True);
                 Assert.That(TypeAlias.IsKeyProviderType(typeof(NameIssueKeyProvider)), Is.True);
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(TemplateIssueKeyProvider)), Is.True);
                 Assert.That(TypeAlias.IsKeyProviderType(typeof(IssueKeyProvider)), Is.False);
                 Assert.That(TypeAlias.IsKeyProviderType(typeof(ValueString)), Is.False);
             }
