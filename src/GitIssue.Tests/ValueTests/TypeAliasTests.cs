@@ -1,6 +1,8 @@
+using System;
 using System.Linq;
 using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Issues.Json;
 using GitIssue.Values;
 using NUnit.Framework;
 using ValueString = GitIssue.Values.String;
@@ -94,6 +96,22 @@ namespace GitIssue.Tests.ValueTests
                 });
 
                 Assert.That(hasAlias, Is.True, "Expected an alias entry for NameIssueKeyProvider.");
+            }
+
+            [Test]
+            public void Aliases_Use_Plain_Field_Type_Names()
+            {
+                bool hasArrayAlias = TypeAlias.Aliases.Any(a =>
+                {
+                    return a.TryParse("Array", out Type type) && (type == typeof(JsonArrayField));
+                });
+                bool hasValueAlias = TypeAlias.Aliases.Any(a =>
+                {
+                    return a.TryParse("Value", out Type type) && (type == typeof(JsonValueField));
+                });
+
+                Assert.That(hasArrayAlias, Is.True, "Expected an Array alias for array fields.");
+                Assert.That(hasValueAlias, Is.True, "Expected a Value alias for single-value fields.");
             }
         }
     }

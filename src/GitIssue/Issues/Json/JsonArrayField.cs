@@ -7,14 +7,14 @@ using GitIssue.Values;
 namespace GitIssue.Issues.Json
 {
     /// <summary>
-    ///     Generic alias class for JsonArray
+    ///     Configuration alias for an array field
     /// </summary>
     public class JsonArrayField : TypeAlias
     {
         /// <summary>
-        ///     Creates a new instance of the JsonArrayField
+        ///     Creates a new instance of the <see cref="JsonArrayField" /> class
         /// </summary>
-        public JsonArrayField() : base("JsonArray")
+        public JsonArrayField() : base("Array", "JsonArray")
         {
         }
     }

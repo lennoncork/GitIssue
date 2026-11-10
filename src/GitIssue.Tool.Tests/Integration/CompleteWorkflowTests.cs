@@ -21,7 +21,7 @@ namespace GitIssue.Tool.Tests.Integration
 
             // Inspect available fields before recording the issue details.
             this.RunSuccessfully("Fields");
-            Assert.That(this.Output, Does.Contain("Title: A 'JsonValue' field with 'String' values"));
+            Assert.That(this.Output, Does.Contain("Title: A 'Value' field with 'String' values"));
 
             // Capture a newly discovered release task and begin tracking it.
             this.RunSuccessfully("Create", initialTitle, "Document customer-visible changes.");

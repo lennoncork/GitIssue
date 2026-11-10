@@ -2,6 +2,7 @@ using System.IO;
 using GitIssue.Fields;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
+using GitIssue.Issues.Json;
 using GitIssue.Values;
 using NUnit.Framework;
 
@@ -103,6 +104,56 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 Assert.That(json, Does.Contain($"\"KeyTemplate\": \"{IssueKeyTemplate.Name}\""));
                 Assert.That(loaded.KeyProvider.Type, Is.EqualTo(typeof(NameIssueKeyProvider)));
                 Assert.That(loaded.KeyTemplate, Is.EqualTo(IssueKeyTemplate.Name));
+            }
+
+            [Test]
+            public void Save_WritesFriendlyFieldTypeNames()
+            {
+                string directory = Helpers.CreateTempDirectory();
+                string file = Path.Combine(directory, "config.json");
+                IssueConfiguration config = new IssueConfiguration();
+
+                config.Save(file);
+                string json = File.ReadAllText(file);
+                IssueConfiguration loaded = IssueConfiguration.Read(file);
+
+                Assert.That(json, Does.Contain("\"FieldType\": \"Value\""));
+                Assert.That(json, Does.Contain("\"FieldType\": \"Array\""));
+                Assert.That(json, Does.Not.Contain("JsonValue"));
+                Assert.That(json, Does.Not.Contain("JsonArray"));
+                Assert.That(loaded.Fields[FieldKey.Create("Title")].FieldType.Type, Is.EqualTo(typeof(JsonValueField)));
+                Assert.That(loaded.Fields[FieldKey.Create("Title")].ValueType.Type, Is.EqualTo(typeof(GitIssue.Values.String)));
+                Assert.That(loaded.Fields[FieldKey.Create("Labels")].FieldType.Type, Is.EqualTo(typeof(JsonArrayField)));
+                Assert.That(loaded.Fields[FieldKey.Create("Labels")].ValueType.Type, Is.EqualTo(typeof(Label)));
+            }
+
+            [Test]
+            public void Read_AcceptsLegacyJsonFieldTypeNames()
+            {
+                string directory = Helpers.CreateTempDirectory();
+                string file = Path.Combine(directory, "config.json");
+                File.WriteAllText(file, """
+                    {
+                      "Fields": {
+                        "Title": {
+                          "FieldType": "JsonValue",
+                          "ValueType": "String",
+                          "Required": true
+                        },
+                        "Labels": {
+                          "FieldType": "JsonArray",
+                          "ValueType": "Label"
+                        }
+                      }
+                    }
+                    """);
+
+                IssueConfiguration loaded = IssueConfiguration.Read(file);
+
+                Assert.That(loaded.Fields[FieldKey.Create("Title")].FieldType.Type, Is.EqualTo(typeof(JsonValueField)));
+                Assert.That(loaded.Fields[FieldKey.Create("Title")].ValueType.Type, Is.EqualTo(typeof(GitIssue.Values.String)));
+                Assert.That(loaded.Fields[FieldKey.Create("Labels")].FieldType.Type, Is.EqualTo(typeof(JsonArrayField)));
+                Assert.That(loaded.Fields[FieldKey.Create("Labels")].ValueType.Type, Is.EqualTo(typeof(Label)));
             }
 
             [Test]
