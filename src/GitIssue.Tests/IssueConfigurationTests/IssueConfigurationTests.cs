@@ -1,6 +1,8 @@
 using System.IO;
 using GitIssue.Fields;
+using GitIssue.Issues;
 using GitIssue.Issues.File;
+using GitIssue.Values;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IssueConfigurationTests
@@ -16,7 +18,9 @@ namespace GitIssue.Tests.IssueConfigurationTests
             {
                 IssueConfiguration config = new IssueConfiguration();
 
-                Assert.That(config.KeyProvider.Type, Is.EqualTo(typeof(FileIssueKeyProvider)));
+                Assert.That(config.KeyProvider.Type, Is.EqualTo(typeof(DateIssueKeyProvider)));
+                Assert.That(config.IssueType, Is.EqualTo("ISSUE"));
+                Assert.That(config.KeyTemplate, Is.EqualTo(IssueKeyTemplate.Date));
                 Assert.That(config.Storage, Is.EqualTo(IssueStorage.Markdown));
                 Assert.That(config.Fields.ContainsKey(FieldKey.Create("Key")), Is.True);
                 Assert.That(config.Fields.ContainsKey(FieldKey.Create("Title")), Is.True);
@@ -53,6 +57,72 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 Assert.That(loaded.KeyProvider.Type, Is.EqualTo(config.KeyProvider.Type));
                 Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Markdown));
                 Assert.That(json, Does.Contain("\"Storage\": \"Markdown\""));
+                Assert.That(json, Does.Contain("\"KeyProvider\": \"DateIssueKeyProvider\""));
+                Assert.That(json, Does.Contain("\"IssueType\": \"ISSUE\""));
+                Assert.That(json, Does.Contain("\"KeyTemplate\":"));
+            }
+
+            [Test]
+            public void Save_And_Read_RoundTrips_KeyTemplate()
+            {
+                string directory = Helpers.CreateTempDirectory();
+                string file = Path.Combine(directory, "config.json");
+                IssueConfiguration config = new IssueConfiguration
+                {
+                    KeyProvider = TypeValue.Create<TemplateIssueKeyProvider>(),
+                    IssueType = "FEAT",
+                    KeyTemplate = "{type}-{uid}-{slug}",
+                };
+
+                config.Save(file);
+                string json = File.ReadAllText(file);
+                IssueConfiguration loaded = IssueConfiguration.Read(file);
+
+                Assert.That(json, Does.Contain("\"KeyTemplate\": \"{type}-{uid}-{slug}\""));
+                Assert.That(json, Does.Contain("\"IssueType\": \"FEAT\""));
+                Assert.That(loaded.KeyProvider.Type, Is.EqualTo(typeof(TemplateIssueKeyProvider)));
+                Assert.That(loaded.IssueType, Is.EqualTo("FEAT"));
+                Assert.That(loaded.KeyTemplate, Is.EqualTo("{type}-{uid}-{slug}"));
+            }
+
+            [Test]
+            public void Save_And_Read_RoundTrips_NameIssueKeyProvider()
+            {
+                string directory = Helpers.CreateTempDirectory();
+                string file = Path.Combine(directory, "config.json");
+                IssueConfiguration config = new IssueConfiguration
+                {
+                    KeyProvider = TypeValue.Create<NameIssueKeyProvider>(),
+                };
+
+                config.Save(file);
+                string json = File.ReadAllText(file);
+                IssueConfiguration loaded = IssueConfiguration.Read(file);
+
+                Assert.That(json, Does.Contain("\"KeyProvider\": \"NameIssueKeyProvider\""));
+                Assert.That(json, Does.Contain($"\"KeyTemplate\": \"{IssueKeyTemplate.Name}\""));
+                Assert.That(loaded.KeyProvider.Type, Is.EqualTo(typeof(NameIssueKeyProvider)));
+                Assert.That(loaded.KeyTemplate, Is.EqualTo(IssueKeyTemplate.Name));
+            }
+
+            [Test]
+            public void Read_ResolvesLegacyFileIssueKeyProvider()
+            {
+                string directory = Helpers.CreateTempDirectory();
+                string file = Path.Combine(directory, "config.json");
+                File.WriteAllText(file, """
+                    {
+                      "KeyProvider": "GitIssue.Issues.File.FileIssueKeyProvider",
+                      "Storage": "Json",
+                      "Fields": {}
+                    }
+                    """);
+
+                IssueConfiguration loaded = IssueConfiguration.Read(file);
+
+#pragma warning disable CS0618
+                Assert.That(loaded.KeyProvider.Type, Is.EqualTo(typeof(FileIssueKeyProvider)));
+#pragma warning restore CS0618
             }
 
             [Test]

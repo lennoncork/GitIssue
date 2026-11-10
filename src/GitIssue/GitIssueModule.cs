@@ -116,7 +116,12 @@ namespace GitIssue
                 .IfNotRegistered(typeof(IssueLoading));
 
             // Key providers
+            builder.RegisterType<TemplateIssueKeyProvider>().AsSelf();
+            builder.RegisterType<DateIssueKeyProvider>().AsSelf();
+            builder.RegisterType<NameIssueKeyProvider>().AsSelf();
+#pragma warning disable CS0618
             builder.RegisterType<FileIssueKeyProvider>().AsSelf();
+#pragma warning restore CS0618
         }
     }
 }

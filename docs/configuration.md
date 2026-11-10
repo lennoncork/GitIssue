@@ -65,8 +65,47 @@ Ada Lovelace <ada@example.com>
 
 `gitissue convert --to markdown` and `gitissue convert --to json` rewrite every issue and update `Storage`. The command stops when one issue already has both a `.json` and a `.md` file.
 
+## Issue keys
+
+Issue keys are generated from `KeyTemplate` in `config.json`. `IssueType` supplies the `{type}` token. `KeyProvider` selects the implementation; the template is what actually shapes the key. A `/` in the template becomes a directory. Other characters, including `-`, stay in the folder name. The issue key is the same string with `/` replaced by `-`.
+
+```shell
+gitissue init
+gitissue init --key-provider date
+gitissue init --key-provider name
+gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index:D3}-{uid}-{slug}"
+```
+
+| Token | Meaning | Default format |
+| --- | --- | --- |
+| `{type}` | `IssueType` from configuration, letters, digits, and underscore only | `ISSUE` |
+| `{created}` | Issue creation time. Use .NET date format specifiers, for example `{created:yyyy}`, `{created:MM}`, `{created:dd}`, or `{created:yyyy-MM-dd}` | `yyyy-MM-dd` |
+| `{index}` | Sequential integer assigned in this repository. Use `{index:D3}` for `001`. Unique across clones only if `{uid}` is also present | unpadded |
+| `{uid}` | Eight-character hexadecimal id | n/a |
+| `{name}` or `{title}` | Sanitized issue title, with spaces | n/a |
+| `{slug}` | Lowercase hyphenated title | n/a |
+
+| Provider | Default template | Key example | Directory layout |
+| --- | --- | --- | --- |
+| `DateIssueKeyProvider` | `{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `2026-11-09-A1B2C3D4` | `.issues/2026/11/09/A1B2C3D4/` |
+| `NameIssueKeyProvider` | `{uid} - {name}` | `A1B2C3D4 - Add login page` | `.issues/A1B2C3D4 - Add login page/` |
+| `TemplateIssueKeyProvider` | the configured `KeyTemplate` | depends on the template | depends on `/` in the template |
+
+If `KeyTemplate` is set, it overrides the provider's default. Existing repositories that still name `FileIssueKeyProvider` keep date-based behavior until you change the template.
+
+After you edit `KeyTemplate` or `IssueType`, regenerate on-disk names:
+
+```shell
+gitissue rekey --dry-run
+gitissue rekey
+```
+
+`rekey` locates issues by their stored `.json` or `.md` files, so they can be renamed even when the previous key no longer matches the new template. It rebuilds each key from the current template using the issue title, created time, type, and the unique id already present in the existing key. Quote keys that contain spaces, or pass the eight-character unique id to commands that resolve keys.
+
+`{index}` is convenient, but two clones can mint the same index before they push. Keep `{uid}` in the template when the repository is distributed.
+
 ## Editing `config.json`
 
-The configuration defines the key provider and each field's field/value types, metadata, and required status. Make a backup before editing it manually: changing a field's type or name can make existing issue data unreadable or prevent commands from working. Use the `fields` command afterward to confirm that the repository still loads and reports the expected schema.
+The configuration defines the key provider, key template, issue type, and each field's field/value types, metadata, and required status. Make a backup before editing it manually: changing a field's type or name can make existing issue data unreadable or prevent commands from working. Use the `fields` command afterward to confirm that the repository still loads and reports the expected schema.
 
 Interactive commands use `joe` as the default editor. Although some commands expose editor-related options, editor selection is not consistently applied across commands in the current implementation.

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using GitIssue.Fields;
+using GitIssue.Issues;
 using GitIssue.Values;
 using NUnit.Framework;
 
@@ -74,6 +75,26 @@ namespace GitIssue.Tests.ValueTests
                 // Implementation returns true but tv.Type will be default (null) when type cannot be resolved
                 Assert.That(success, Is.True);
                 Assert.That(tv.Type, Is.EqualTo(default(TypeValue).Type));
+            }
+
+            [Test]
+            public void TryParse_Parses_DateIssueKeyProvider_Alias()
+            {
+                bool success = TypeValue.TryParse(nameof(DateIssueKeyProvider), out TypeValue tv);
+
+                Assert.That(success, Is.True);
+                Assert.That(tv.Type, Is.EqualTo(typeof(DateIssueKeyProvider)));
+                Assert.That(tv.ToString(), Is.EqualTo(nameof(DateIssueKeyProvider)));
+            }
+
+            [Test]
+            public void TryParse_Parses_NameIssueKeyProvider_Alias()
+            {
+                bool success = TypeValue.TryParse(nameof(NameIssueKeyProvider), out TypeValue tv);
+
+                Assert.That(success, Is.True);
+                Assert.That(tv.Type, Is.EqualTo(typeof(NameIssueKeyProvider)));
+                Assert.That(tv.ToString(), Is.EqualTo(nameof(NameIssueKeyProvider)));
             }
         }
 

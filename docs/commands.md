@@ -16,7 +16,7 @@ Options are case-insensitive. Run `gitissue <command> --help` for parser-generat
 
 | Command | Usage | Description |
 | --- | --- | --- |
-| `init` | `init [--storage markdown\|json]` | Initialize issue data in the current repository. The default directory is `.issues`. Each issue is saved as Markdown unless `--storage json` is set. |
+| `init` | `init [--storage markdown\|json] [--key-provider date\|name\|template] [--key-template TEMPLATE] [--issue-type TYPE]` | Initialize issue data in the current repository. The default directory is `.issues`. Each issue is saved as Markdown unless `--storage json` is set. `--key-provider date` (the default) uses `{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `--key-provider name` uses `{uid} - {name}`. `--key-template` selects `TemplateIssueKeyProvider` and the given pattern, for example `{type}-{created}-{index}-{uid}-{slug}`. `--issue-type` sets the `{type}` token (default `ISSUE`). |
 | `create` | `create [Title] [Description]` | Create an issue. If no title is given, the default editor opens. A new issue is tracked if no issue is currently tracked; `--Track` forces tracking of the new issue. |
 | `fields` | `fields` | List configured fields and their types. |
 | `validate` | `validate [Issue Key]` | Check issue documents against the configured fields. Omit the key to check every issue. `.`, `T`, and `Tracked` select the tracked issue. The command exits with code 1 when any field is invalid. |
@@ -70,6 +70,7 @@ gitissue delete ISSUE_KEY
 | `import` | `import [File] [--Update] [--Separator VALUE]` | Import issues from a `.json` or `.csv` file. JSON import expects `Key` and `Title` properties; `Description` is optional. |
 | `sync` | `sync [File]` | Import issues from a JSON file. |
 | `convert` | `convert --to json\|markdown` | Rewrite every issue into the selected storage format and update `config.json`. |
+| `rekey` | `rekey [--dry-run]` | Rewrite issue keys and file names from the current `KeyTemplate` and `IssueType`. `--dry-run` prints the planned renames without writing. |
 
 Examples:
 
