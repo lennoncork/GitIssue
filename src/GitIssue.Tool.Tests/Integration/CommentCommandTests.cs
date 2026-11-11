@@ -19,6 +19,7 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(exitCode, Is.Zero, this.Error);
                 this.AssertIssueExists(key);
                 this.AssertJsonArrayContains(issue, "Comments", "Integration comment");
+                this.AssertJsonArrayCount(issue, "Comments", 1);
             });
         }
     }
