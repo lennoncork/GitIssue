@@ -1,0 +1,105 @@
+@page "/"
+@inject IssueWorkspace Workspace
+
+<h1>GitIssue</h1>
+<section aria-labelledby="tracked-heading">
+    <h2 id="tracked-heading">Tracked issue</h2>
+    @if (trackedIssue is not null)
+    {
+        <p><a href="@IssueUrl(trackedIssue.Key)">@trackedIssue.Key: @trackedIssue.Title</a></p>
+        <p>@trackedIssue.Description</p>
+    }
+    else if (trackedError is not null)
+    {
+        <p class="error" role="alert">@trackedError</p>
+    }
+    else
+    {
+        <p>No issue is currently tracked.</p>
+    }
+</section>
+<section aria-labelledby="issues-heading">
+    <h2 id="issues-heading">Issues</h2>
+    <form method="get" action="/">
+        <label for="search">Search issues</label>
+        <input id="search" name="search" value="@Search" type="search" />
+        <button type="submit">Search</button>
+        <a href="/">Clear</a>
+    </form>
+    <p>@results.Total matching @(results.Total == 1 ? "issue" : "issues")</p>
+    @if (results.Total == 0)
+    {
+        <p>No issues found.</p>
+    }
+    else
+    {
+        <table>
+            <thead><tr><th scope="col">Key</th><th scope="col">Title</th><th scope="col">Description</th></tr></thead>
+            <tbody>
+                @foreach (IssueSummary issue in results.Items)
+                {
+                    <tr>
+                        <td><a href="@IssueUrl(issue.Key)">@issue.Key</a></td>
+                        <td>@issue.Title</td>
+                        <td>@issue.Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <nav class="pagination" aria-label="Issue pages">
+            @if (currentPage > 1)
+            {
+                <a href="@PageUrl(currentPage - 1)">Previous</a>
+            }
+            <span>Page @currentPage of @totalPages</span>
+            @if (currentPage < totalPages)
+            {
+                <a href="@PageUrl(currentPage + 1)">Next</a>
+            }
+        </nav>
+    }
+</section>
+
+@code {
+    private const int PageSize = 10;
+    private IssuePage results = new IssuePage();
+    private IssueDocument? trackedIssue;
+    private string? trackedError;
+    private int currentPage = 1;
+    private int totalPages = 1;
+
+    [SupplyParameterFromQuery(Name = "search")]
+    public string? Search { get; set; }
+
+    [SupplyParameterFromQuery(Name = "page")]
+    public int? Page { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        TrackedIssueDocument tracked = Workspace.GetTracked();
+        if (!string.Equals(tracked.Key, "None", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                trackedIssue = await Workspace.GetIssueAsync(tracked.Key, CancellationToken.None);
+            }
+            catch (IssueOperationException exception)
+            {
+                trackedError = exception.Message;
+            }
+        }
+
+        currentPage = Math.Max(1, Page ?? 1);
+        results = await Workspace.SearchIssuesAsync(Search, currentPage, PageSize, CancellationToken.None);
+        totalPages = Math.Max(1, (int)(((long)results.Total + PageSize - 1) / PageSize));
+        if (currentPage > totalPages)
+        {
+            currentPage = totalPages;
+            results = await Workspace.SearchIssuesAsync(Search, currentPage, PageSize, CancellationToken.None);
+        }
+    }
+
+    private static string IssueUrl(string key) => "/issue?key=" + Uri.EscapeDataString(key);
+
+    private string PageUrl(int page) => "/?search=" + Uri.EscapeDataString(Search ?? string.Empty) + "&page=" + page;
+}

@@ -1,0 +1,129 @@
+@page "/issue"
+@inject IssueWorkspace Workspace
+
+<p><a href="/">Back to issues</a></p>
+@if (error is not null)
+{
+    <p class="error" role="alert">@error</p>
+}
+@if (savedField is not null)
+{
+    <p class="success" role="status">@savedField saved.</p>
+}
+@if (issue is not null)
+{
+    <h1>@issue.Title</h1>
+    <p>Issue <strong>@issue.Key</strong></p>
+    <p>Each field is saved separately. Changes are written to the working tree, not committed.</p>
+    <section aria-labelledby="fields-heading">
+        <h2 id="fields-heading">Issue fields</h2>
+        @foreach (FieldDescriptor field in fields)
+        {
+            <div class="field">
+                @if (string.Equals(field.Name, "Key", StringComparison.OrdinalIgnoreCase))
+                {
+                    <label>Key</label>
+                    <p>@issue.Key (read-only)</p>
+                }
+                else if (string.Equals(field.Name, "Updated", StringComparison.OrdinalIgnoreCase))
+                {
+                    <label>Updated</label>
+                    <p>@FieldValue(field.Name) (set automatically on save)</p>
+                }
+                else
+                {
+                    <form method="post" @formname="@field.Name" @onsubmit="SaveAsync">
+                        <AntiforgeryToken />
+                        <label for="@field.Name">@field.Name</label>
+                        <input type="hidden" name="Field" value="@field.Name" />
+                        @if (IsArray(field))
+                        {
+                            <p>Current value: @FieldValue(field.Name)</p>
+                            <p>Enter +value, -value, or [value1, value2] to update this array.</p>
+                            <input id="@field.Name" name="Value" value="@EditorValue(field.Name, true)" />
+                        }
+                        else
+                        {
+                            <textarea id="@field.Name" name="Value">@EditorValue(field.Name, false)</textarea>
+                        }
+                        <button type="submit">Save @field.Name</button>
+                    </form>
+                }
+            </div>
+        }
+    </section>
+}
+
+@code {
+    private IssueDocument? issue;
+    private IReadOnlyList<FieldDescriptor> fields = Array.Empty<FieldDescriptor>();
+    private string? error;
+    private string? savedField;
+
+    [SupplyParameterFromQuery(Name = "key")]
+    public string? Key { get; set; }
+
+    [SupplyParameterFromForm]
+    public string? Field { get; set; }
+
+    [SupplyParameterFromForm]
+    public string? Value { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            issue = await Workspace.GetIssueAsync(Key ?? string.Empty, CancellationToken.None);
+            fields = Workspace.ListFields();
+        }
+        catch (IssueOperationException exception)
+        {
+            error = exception.Message;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (issue is null)
+        {
+            return;
+        }
+
+        try
+        {
+            issue = await Workspace.UpdateIssueAsync(issue.Key, Field ?? string.Empty, Value ?? string.Empty, CancellationToken.None);
+            savedField = Field;
+        }
+        catch (IssueOperationException exception)
+        {
+            error = exception.Message;
+        }
+        catch (GitIssue.Exceptions.IssueValidationException exception)
+        {
+            error = exception.Message;
+        }
+    }
+
+    private bool IsArray(FieldDescriptor field) =>
+        issue is not null && issue.Fields.TryGetValue(field.Name, out JsonElement value) && value.ValueKind == JsonValueKind.Array;
+
+    private string EditorValue(string name, bool isArray)
+    {
+        if (error is not null && string.Equals(Field, name, StringComparison.OrdinalIgnoreCase))
+        {
+            return Value ?? string.Empty;
+        }
+
+        return isArray ? string.Empty : FieldValue(name);
+    }
+
+    private string FieldValue(string name)
+    {
+        if (issue is null || !issue.Fields.TryGetValue(name, out JsonElement value))
+        {
+            return string.Empty;
+        }
+
+        return value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : value.ToString();
+    }
+}

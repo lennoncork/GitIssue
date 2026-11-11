@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -150,6 +151,27 @@ namespace GitIssue.Services
         }
 
         /// <summary>
+        ///     Searches and pages through all issue summaries
+        /// </summary>
+        /// <param name="search">text to match in the key, title, or description</param>
+        /// <param name="page">the one-based page number</param>
+        /// <param name="pageSize">the number of items on each page</param>
+        /// <param name="cancellationToken">the cancellation token</param>
+        /// <returns>the requested page and total match count</returns>
+        [Throws<IssueOperationException>]
+        public Task<IssuePage> SearchIssuesAsync(string? search, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            if ((page < 1) || (pageSize < 1) || (pageSize > 200))
+            {
+                throw new IssueOperationException("Page must be at least 1 and page size must be between 1 and 200.");
+            }
+
+            return this.withLockAsync(
+                () => this.searchAsync(search, page, pageSize, cancellationToken),
+                cancellationToken);
+        }
+
+        /// <summary>
         ///     Gets one issue
         /// </summary>
         /// <param name="key">the issue key</param>
@@ -277,6 +299,30 @@ namespace GitIssue.Services
             }
 
             return summaries;
+        }
+
+        private async Task<IssuePage> searchAsync(string? search, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            List<IssueSummary> matches = new List<IssueSummary>();
+            string text = search?.Trim() ?? string.Empty;
+            await foreach (IIssue issue in this.manager.FindAsync(candidate => true).WithCancellation(cancellationToken))
+            {
+                IssueSummary summary = IssueDocumentMapper.ToSummary(IssueDocumentMapper.FromIssue(issue));
+                if (summary.Key.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                    summary.Title.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                    summary.Description.Contains(text, StringComparison.OrdinalIgnoreCase))
+                {
+                    matches.Add(summary);
+                }
+            }
+
+            matches.Sort((left, right) => StringComparer.Ordinal.Compare(left.Key, right.Key));
+            long offset = ((long)page - 1) * pageSize;
+            return new IssuePage
+            {
+                Items = offset >= matches.Count ? new List<IssueSummary>() : matches.Skip((int)offset).Take(pageSize).ToList(),
+                Total = matches.Count,
+            };
         }
 
         private async Task<IssueDocument> getAsync(string key, CancellationToken cancellationToken)

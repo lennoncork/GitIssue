@@ -49,7 +49,9 @@ The solution is organized under `src/`:
   in-process. `gitissue mcp serve` does not commit. MCP logs are written to
   standard error.
 - `GitIssue.Services.Web` is an ASP.NET class library for the local website.
-  Both hosts are built with `WebApplication.CreateBuilder`.
+  It uses server-rendered Blazor components to show the tracked issue, search
+  and paginate issue summaries, and edit configured fields. Forms use ASP.NET
+  antiforgery protection. Both hosts are built with `WebApplication.CreateBuilder`.
 - `GitIssue.Tool` is the executable .NET tool, exposed as the `gitissue` command.
   `McpCommand` and `WebCommand` are CommandLineParser verbs, like the other
   commands, and they run the ASP.NET hosts in the tool process. The tool also parses the other command
@@ -143,10 +145,16 @@ dotnet cake --target=Report
 ```
 
 `Build` builds the solution, `Format` checks formatting without changing
-files, `Analyzers` runs the analyzer check, and `Test` runs both NUnit test
-projects. `Coverage` collects test coverage, and `Report` produces the
+files, `Analyzers` runs the analyzer check, and `Test` runs the NUnit test
+projects, including the Playwright browser tests. `Coverage` collects test coverage, and `Report` produces the
 Markdown coverage summary. The Cake `Default` target combines these checks
 with packaging and publishing work.
+
+Playwright tests require Chromium. After building, install it with the
+generated `src/.output/GitIssue.Services.Web.Tests/bin/Release/net10.0/playwright.ps1`
+script, passing `install chromium` (or `install --with-deps chromium` on a
+Linux machine that needs system dependencies). The build workflow installs it
+before running tests and coverage.
 
 The GitHub Actions build workflow runs on Windows and Ubuntu with .NET 10 and
 invokes Cake targets for build, formatting, analyzers, validation, tests, and

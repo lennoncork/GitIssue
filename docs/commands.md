@@ -133,6 +133,24 @@ gitissue web serve --host 0.0.0.0 --token "$GITISSUE_TOKEN"
 
 `web` with no action also starts the server. Shared options `--path` and `--name` select the repository and issue directory.
 
+The landing page shows the tracked issue and a table of issues. Search matches
+the issue key, title, or description without regard to case. Results are
+displayed 10 per page, and the previous and next links retain the search.
+Select an issue key to open its details. Each configured field has a separate
+save button; the issue key is read-only and the updated timestamp is set
+automatically on save. Array fields use the same syntax as
+the CLI: `+value` adds, `-value` removes, and `[value1, value2]` replaces the
+contents. `[]` clears the array. Validation errors are shown on the page.
+Changes are saved to the working tree and are not committed automatically.
+
+When `--token` is specified, every request must include the
+`Authorization: Bearer <token>` header. An ordinary browser does not send this
+header automatically, including when `--open` is used. Use a trusted,
+authenticated reverse proxy that adds the header for browser requests, or
+another client configured to supply it. The server itself uses HTTP, not HTTPS;
+do not expose the token or server over an untrusted network without appropriate
+transport security and access controls.
+
 ## Help
 
 ```shell

@@ -6,9 +6,7 @@ using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Threading.Tasks;
-using GitIssue.Issues;
 using GitIssue.Services;
-using LibGit2Sharp;
 using Microsoft.AspNetCore.Builder;
 using NUnit.Framework;
 
@@ -30,6 +28,28 @@ namespace GitIssue.Services.Web.Tests
                 HttpResponseMessage response = await client.GetAsync($"{request.Url}/health");
 
                 Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            }
+
+            finally
+            {
+                await application.StopAsync();
+            }
+        }
+
+        [Test]
+        public async Task IssuePost_WithoutAntiforgeryToken_IsRejected()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            WebServeRequest request = WebServerHostTests.request(fixture.Directory, WebServerHostTests.freePort(), null);
+            await using WebApplication application = WebServerHost.Create(request);
+            await application.StartAsync();
+            try
+            {
+                using HttpClient client = new HttpClient();
+                using StringContent content = new StringContent("_handler=Title&Field=Title&Value=Changed", System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+                HttpResponseMessage response = await client.PostAsync($"{request.Url}/issue?key=missing", content);
+
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             }
             finally
             {
@@ -133,7 +153,7 @@ namespace GitIssue.Services.Web.Tests
             }
         }
 
-        private static WebServeRequest request(string directory, int port, string? token)
+        internal static WebServeRequest request(string directory, int port, string? token)
         {
             return new WebServeRequest
             {
@@ -145,7 +165,7 @@ namespace GitIssue.Services.Web.Tests
             };
         }
 
-        private static int freePort()
+        internal static int freePort()
         {
             using TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
             listener.Start();
@@ -154,31 +174,5 @@ namespace GitIssue.Services.Web.Tests
             return port;
         }
 
-        private sealed class RepositoryFixture : IDisposable
-        {
-            public RepositoryFixture()
-            {
-                this.Directory = Path.Combine(Path.GetTempPath(), "gitissue-web-" + Guid.NewGuid().ToString("N"));
-                System.IO.Directory.CreateDirectory(this.Directory);
-                LibGit2Sharp.Repository.Init(this.Directory);
-                using Repository repository = new Repository(this.Directory);
-                repository.Config.Set("user.name", "Tester");
-                repository.Config.Set("user.email", "tester@example.com");
-                using IIssueManager manager = IssueManager.Init(this.Directory);
-            }
-
-            public string Directory { get; }
-
-            public void Dispose()
-            {
-                try
-                {
-                    System.IO.Directory.Delete(this.Directory, true);
-                }
-                catch (UnauthorizedAccessException)
-                {
-                }
-            }
-        }
     }
 }

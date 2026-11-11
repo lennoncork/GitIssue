@@ -1,14 +1,14 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using Exceptionable;
 using GitIssue.Services;
+using GitIssue.Services.Web.Components;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration.Json;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GitIssue.Services.Web
 {
@@ -38,8 +38,8 @@ namespace GitIssue.Services.Web
             }
 
             builder.WebHost.UseUrls(request.Url);
+            builder.Services.AddRazorComponents();
 
-            WebApplication application = builder.Build();
             IssueWorkspace workspace;
             try
             {
@@ -47,12 +47,13 @@ namespace GitIssue.Services.Web
             }
             catch (Exception exception) when (exception is not IssueOperationException)
             {
-                ((IDisposable)application).Dispose();
                 throw new IssueOperationException(
                     "Unable to open the GitIssue repository. Run gitissue init and start the server from the repository root. " + exception.GetBaseException().Message,
                     exception);
             }
 
+            builder.Services.AddSingleton(workspace);
+            WebApplication application = builder.Build();
             application.Lifetime.ApplicationStopping.Register(() => workspace.Dispose());
             if (!string.IsNullOrEmpty(request.Token))
             {
@@ -69,26 +70,10 @@ namespace GitIssue.Services.Web
                 });
             }
 
+            application.UseAntiforgery();
             application.MapGet("/health", () => Results.Json(new { status = "ok" }));
-            application.MapGet("/", () => Results.Content(WebServerHost.homePage(request), "text/html", Encoding.UTF8));
+            application.MapRazorComponents<App>();
             return application;
-        }
-
-        private static string homePage(WebServeRequest request)
-        {
-            return $"""
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                  <meta charset="utf-8" />
-                  <title>GitIssue</title>
-                </head>
-                <body>
-                  <h1>GitIssue</h1>
-                  <p>The web server is running for <code>{WebUtility.HtmlEncode(request.IssueFolderName)}</code> in <code>{WebUtility.HtmlEncode(request.RepositoryPath)}</code>.</p>
-                </body>
-                </html>
-                """;
         }
     }
 }

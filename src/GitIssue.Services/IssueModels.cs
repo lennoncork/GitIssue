@@ -71,6 +71,22 @@ namespace GitIssue.Services
     }
 
     /// <summary>
+    ///     One page of issue summaries
+    /// </summary>
+    public sealed class IssuePage
+    {
+        /// <summary>
+        ///     Gets the summaries on this page
+        /// </summary>
+        public IReadOnlyList<IssueSummary> Items { get; init; } = new List<IssueSummary>();
+
+        /// <summary>
+        ///     Gets the total number of matching issues
+        /// </summary>
+        public int Total { get; init; }
+    }
+
+    /// <summary>
     ///     A configured issue field
     /// </summary>
     public sealed class FieldDescriptor
