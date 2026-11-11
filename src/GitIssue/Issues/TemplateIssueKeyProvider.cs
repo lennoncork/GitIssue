@@ -158,12 +158,13 @@ namespace GitIssue.Issues
         /// <returns>the substitution values</returns>
         public IssueKeyContext CreateContext(IIssue issue)
         {
-            this.TryGetContext(issue.Key.ToString(), out IssueKeyContext matched);
+            IssueKeyTemplate template = this.Template;
+            bool matchedCurrentKey = template.TryMatch(issue.Key.ToString(), out IssueKeyContext matched);
             string title = issue.Title.ToString();
             DateTime created = (DateTime)issue.Created;
             return new IssueKeyContext
             {
-                Type = this.configuration.IssueType,
+                Type = matchedCurrentKey && template.HasType ? matched.Type : this.configuration.IssueType,
                 Created = created == default ? (matched.Created == default ? DateTime.Now : matched.Created) : created,
                 Index = matched.Index,
                 Uid = string.IsNullOrEmpty(matched.Uid)

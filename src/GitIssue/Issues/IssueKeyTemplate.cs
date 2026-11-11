@@ -51,6 +51,11 @@ namespace GitIssue.Issues
         public bool HasUid => this.segments.Any(segment => segment.Token == Token.Uid);
 
         /// <summary>
+        ///     Gets a value indicating whether the template includes {type}
+        /// </summary>
+        public bool HasType => this.segments.Any(segment => segment.Token == Token.Type);
+
+        /// <summary>
         ///     Parses a key template
         /// </summary>
         /// <param name="template">the template string</param>
