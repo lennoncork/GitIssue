@@ -151,7 +151,7 @@ namespace GitIssue.Issues.Json
             }
 
             JsonIssue issue = new JsonIssue(root, fields);
-            await issue.ReadFieldsFromDiskAsync(fields);
+            await issue.ReadFieldsFromDiskAsync(fields).ConfigureAwait(false);
             return issue;
         }
 
@@ -162,12 +162,12 @@ namespace GitIssue.Issues.Json
         /// <param name="fieldInfos">the expected fields</param>
         internal async Task ReadFieldsFromDiskAsync(IDictionary<FieldKey, FieldInfo> fieldInfos)
         {
-            this.loadedDocument = await JsonIssueExtensions.ReadJsonFieldsAsync(this.Json);
+            this.loadedDocument = await JsonIssueExtensions.ReadJsonFieldsAsync(this.Json).ConfigureAwait(false);
             try
             {
                 foreach (FieldKey key in fieldInfos.Keys)
                 {
-                    this.fields[key] = await fieldInfos[key].ReadFieldAsync(this, key);
+                    this.fields[key] = await fieldInfos[key].ReadFieldAsync(this, key).ConfigureAwait(false);
                 }
             }
             finally

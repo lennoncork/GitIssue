@@ -56,7 +56,7 @@ namespace GitIssue.Issues.Json
             {
                 JsonObject json = issue is JsonIssue cached && cached.LoadedDocument is JsonObject loaded
                     ? loaded
-                    : await JsonIssueExtensions.ReadJsonFieldsAsync(jsonIssue.Json);
+                    : await JsonIssueExtensions.ReadJsonFieldsAsync(jsonIssue.Json).ConfigureAwait(false);
                 if (json.TryGetPropertyValue(key.ToString(), out JsonNode? token))
                 {
                     if (JsonFieldReader.isValueField(info) && token is JsonValue jsonValue)

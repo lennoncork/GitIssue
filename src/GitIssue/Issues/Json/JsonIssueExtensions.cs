@@ -30,7 +30,7 @@ namespace GitIssue.Issues.Json
         public static async Task<JsonObject> ReadJsonFieldsAsync(string path)
         {
             JsonIssueExtensions.FileReadCount++;
-            string json = await System.IO.File.ReadAllTextAsync(path);
+            string json = await System.IO.File.ReadAllTextAsync(path).ConfigureAwait(false);
             return JsonNode.Parse(json) as JsonObject ?? throw new JsonException($"Unable to deserialize {path} as a JSON object.");
         }
 

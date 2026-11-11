@@ -65,7 +65,7 @@ namespace GitIssue.Issues.File
             }
 
             FileIssue issue = new FileIssue(root, fields);
-            await issue.ReadFieldsFromDiskAsync(fields);
+            await issue.ReadFieldsFromDiskAsync(fields).ConfigureAwait(false);
             return issue;
         }
 

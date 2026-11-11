@@ -59,7 +59,7 @@ namespace GitIssue.Issues.File
             try
             {
                 string fieldFile = Path.Combine(issueRoot.IssuePath, key.ToString());
-                string content = await System.IO.File.ReadAllTextAsync(fieldFile);
+                string content = await System.IO.File.ReadAllTextAsync(fieldFile).ConfigureAwait(false);
                 FileValueField<T> field = new FileValueField<T>(issueRoot, key);
                 if (field.TryParse(content, out T value))
                 {

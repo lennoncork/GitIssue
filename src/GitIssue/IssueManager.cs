@@ -533,7 +533,7 @@ namespace GitIssue
         private async Task<List<IIssue>> CollectMatches(Func<IIssue, bool> predicate)
         {
             List<IIssue> issues = new List<IIssue>();
-            await foreach (IIssue issue in this.FindAsync(predicate))
+            await foreach (IIssue issue in this.FindAsync(predicate).ConfigureAwait(false))
             {
                 issues.Add(issue);
             }
@@ -546,7 +546,7 @@ namespace GitIssue
         {
             foreach (IssueKey key in this.KeyProvider.Keys)
             {
-                IIssue? issue = await this.issueLoading(key);
+                IIssue? issue = await this.issueLoading(key).ConfigureAwait(false);
                 if ((issue != null) && predicated.Invoke(issue))
                 {
                     yield return issue;
