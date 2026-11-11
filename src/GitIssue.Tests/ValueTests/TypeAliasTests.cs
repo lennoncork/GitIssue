@@ -1,5 +1,8 @@
+using System;
 using System.Linq;
 using GitIssue.Fields;
+using GitIssue.Issues;
+using GitIssue.Issues.Json;
 using GitIssue.Values;
 using NUnit.Framework;
 using ValueString = GitIssue.Values.String;
@@ -47,6 +50,16 @@ namespace GitIssue.Tests.ValueTests
                 Assert.That(TypeAlias.IsValueType(typeof(ValueString)), Is.True);
                 Assert.That(TypeAlias.IsValueType(typeof(object)), Is.False);
             }
+
+            [Test]
+            public void IsKeyProviderType_Recognizes_Key_Providers()
+            {
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(DateIssueKeyProvider)), Is.True);
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(NameIssueKeyProvider)), Is.True);
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(TemplateIssueKeyProvider)), Is.True);
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(IssueKeyProvider)), Is.False);
+                Assert.That(TypeAlias.IsKeyProviderType(typeof(ValueString)), Is.False);
+            }
         }
 
         [TestFixture]
@@ -61,6 +74,44 @@ namespace GitIssue.Tests.ValueTests
                 });
 
                 Assert.That(hasStringAlias, Is.True, "Expected an alias entry for the String value type.");
+            }
+
+            [Test]
+            public void Aliases_Contains_Entry_For_DateIssueKeyProvider()
+            {
+                bool hasAlias = TypeAlias.Aliases.Any(a =>
+                {
+                    return a.TryParse(typeof(DateIssueKeyProvider), out string alias) && (alias == nameof(DateIssueKeyProvider));
+                });
+
+                Assert.That(hasAlias, Is.True, "Expected an alias entry for DateIssueKeyProvider.");
+            }
+
+            [Test]
+            public void Aliases_Contains_Entry_For_NameIssueKeyProvider()
+            {
+                bool hasAlias = TypeAlias.Aliases.Any(a =>
+                {
+                    return a.TryParse(typeof(NameIssueKeyProvider), out string alias) && (alias == nameof(NameIssueKeyProvider));
+                });
+
+                Assert.That(hasAlias, Is.True, "Expected an alias entry for NameIssueKeyProvider.");
+            }
+
+            [Test]
+            public void Aliases_Use_Plain_Field_Type_Names()
+            {
+                bool hasArrayAlias = TypeAlias.Aliases.Any(a =>
+                {
+                    return a.TryParse("ArrayField", out Type type) && (type == typeof(JsonArrayField));
+                });
+                bool hasValueAlias = TypeAlias.Aliases.Any(a =>
+                {
+                    return a.TryParse("ValueField", out Type type) && (type == typeof(JsonValueField));
+                });
+
+                Assert.That(hasArrayAlias, Is.True, "Expected an ArrayField alias for array fields.");
+                Assert.That(hasValueAlias, Is.True, "Expected a ValueField alias for single-value fields.");
             }
         }
     }

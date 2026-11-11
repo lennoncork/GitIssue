@@ -20,6 +20,16 @@ namespace GitIssue
         TypeValue KeyProvider { get; set; }
 
         /// <summary>
+        ///     Gets or sets the issue type token used by {type} in the key template
+        /// </summary>
+        string IssueType { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the issue key template
+        /// </summary>
+        string KeyTemplate { get; set; }
+
+        /// <summary>
         ///     Gets or sets the on-disk format used for issue documents
         /// </summary>
         IssueStorage Storage { get; set; }

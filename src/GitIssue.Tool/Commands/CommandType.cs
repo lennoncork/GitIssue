@@ -100,5 +100,10 @@
         ///     Converts issue storage between JSON and Markdown
         /// </summary>
         Convert,
+
+        /// <summary>
+        ///     Regenerates issue keys from the configured template
+        /// </summary>
+        Rekey,
     }
 }

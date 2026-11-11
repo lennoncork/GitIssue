@@ -75,7 +75,7 @@ namespace GitIssue.Issues
         /// <summary>
         ///     Gets or sets the repository root
         /// </summary>
-        public IssueRoot Root { get; }
+        public IssueRoot Root { get; private set; }
 
         /// <inheritdoc cref="IIssue" />
         public String Title
@@ -155,6 +155,16 @@ namespace GitIssue.Issues
             }
 
             return false;
+        }
+
+        /// <summary>
+        ///     Moves this issue to a new key and path
+        /// </summary>
+        /// <param name="root">the relocated issue root</param>
+        public void Relocate(IssueRoot root)
+        {
+            this.Root = root;
+            this.Key = root.Key;
         }
 
         /// <inheritdoc />
