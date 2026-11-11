@@ -10,13 +10,27 @@ namespace GitIssue.Issues.Json
     public static class JsonIssueExtensions
     {
         /// <summary>
+        ///     Gets the number of times an issue JSON file has been read.
+        /// </summary>
+        internal static int FileReadCount { get; private set; }
+
+        /// <summary>
+        ///     Resets <see cref="FileReadCount" />. Tests use this to confirm a load reads the file once.
+        /// </summary>
+        internal static void ResetFileReadCount()
+        {
+            JsonIssueExtensions.FileReadCount = 0;
+        }
+
+        /// <summary>
         ///     Saves the issue as Json
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
         public static async Task<JsonObject> ReadJsonFieldsAsync(string path)
         {
-            string json = await System.IO.File.ReadAllTextAsync(path);
+            JsonIssueExtensions.FileReadCount++;
+            string json = await System.IO.File.ReadAllTextAsync(path).ConfigureAwait(false);
             return JsonNode.Parse(json) as JsonObject ?? throw new JsonException($"Unable to deserialize {path} as a JSON object.");
         }
 

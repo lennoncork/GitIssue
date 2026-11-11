@@ -37,7 +37,7 @@ namespace GitIssue.Issues.File
                 {
                     object[] args = { issueRoot, key, info };
                     Task task = (Task)read.Invoke(null, args)!;
-                    await task;
+                    await task.ConfigureAwait(false);
                     IField result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
                     return result;
                 }
@@ -100,7 +100,7 @@ namespace GitIssue.Issues.File
                              .OrderBy(path => int.TryParse(Path.GetFileName(path), out int index) ? index : int.MaxValue)
                              .ThenBy(path => path, StringComparer.Ordinal))
                 {
-                    string content = await System.IO.File.ReadAllTextAsync(fieldFile);
+                    string content = await System.IO.File.ReadAllTextAsync(fieldFile).ConfigureAwait(false);
                     if (field.TryParse(content, out T result))
                     {
                         field.Add(result);
