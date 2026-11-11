@@ -14,7 +14,8 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.Multiple(() =>
             {
                 Assert.That(exitCode, Is.Zero, this.Error);
-                Assert.That(this.Output, Does.Contain("gitissue mcp install"));
+                Assert.That(this.Error, Does.Contain("--server-arg"));
+                Assert.That(this.Error, Does.Contain("install"));
             });
         }
 
@@ -39,7 +40,8 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.Multiple(() =>
             {
                 Assert.That(exitCode, Is.Zero, this.Error);
-                Assert.That(this.Output, Does.Contain("gitissue web serve"));
+                Assert.That(this.Error, Does.Contain("--token"));
+                Assert.That(this.Error, Does.Contain("serve"));
             });
         }
 
@@ -55,16 +57,5 @@ namespace GitIssue.Tool.Tests.Integration
             });
         }
 
-        [Test]
-        public void WebServe_ReportsAMissingHostAssembly()
-        {
-            int exitCode = this.Run("web", "serve");
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(exitCode, Is.EqualTo(1));
-                Assert.That(this.Error, Does.Contain("web host was not found"));
-            });
-        }
     }
 }

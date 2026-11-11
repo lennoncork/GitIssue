@@ -13,6 +13,11 @@ namespace GitIssue.Tool.Commands
         public int ExitCode { get; protected set; }
 
         /// <summary>
+        ///     Gets a value indicating whether blank lines surround the command output.
+        /// </summary>
+        public virtual bool WriteSpacing => true;
+
+        /// <summary>
         ///     Executes the command
         /// </summary>
         /// <param name="options">the command options</param>

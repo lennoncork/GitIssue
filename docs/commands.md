@@ -119,7 +119,7 @@ The server provides tools for listing, reading, finding, creating, and updating 
 
 ## Web server
 
-`gitissue web serve` runs a local website for the issues in the working tree. It is separate from `gitissue mcp serve`, which speaks MCP on standard input and output.
+`gitissue web serve` runs a local website for the issues in the working tree. The ASP.NET host runs in the `gitissue` process and writes its log to the terminal. It is separate from `gitissue mcp serve`, which speaks MCP on standard input and output.
 
 | Command | Usage | Description |
 | --- | --- | --- |

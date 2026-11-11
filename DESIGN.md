@@ -44,14 +44,17 @@ The solution is organized under `src/`:
   change tracking, and import/sync abstractions.
 - `GitIssue.Services` is the shared application library. `IssueWorkspace`
   lists, finds, creates, updates, comments, and tracks issues for every host.
-- `GitIssue.Services.Mcp` hosts the stdio MCP server and the Visual Studio Code
-  installer. `gitissue mcp serve` does not commit.
-- `GitIssue.Services.Web` hosts the local website. `gitissue web serve` starts
-  it with `dotnet exec` so the tool itself does not take an ASP.NET framework
-  reference.
+- `GitIssue.Services.Mcp` is an ASP.NET class library. It hosts the stdio MCP
+  server and the Visual Studio Code installer, and it runs `gitissue web serve`
+  in-process. `gitissue mcp serve` does not commit. MCP logs are written to
+  standard error.
+- `GitIssue.Services.Web` is an ASP.NET class library for the local website.
+  Both hosts are built with `WebApplication.CreateBuilder`.
 - `GitIssue.Tool` is the executable .NET tool, exposed as the `gitissue` command.
-  It parses command options, wires dependencies, invokes library operations,
-  and formats terminal output.
+  `McpCommand` and `WebCommand` are CommandLineParser verbs, like the other
+  commands, and they run the ASP.NET hosts in the tool process. The tool also parses the other command
+  options, wires dependencies, invokes library operations, and formats terminal
+  output.
 - `GitIssue.Tests` tests the library, including issue persistence, fields,
   configuration, Git operations, and import/sync behavior.
 - `GitIssue.Tool.Tests` tests CLI command parsing and end-to-end command

@@ -6,7 +6,9 @@
     <LangVersion>latest</LangVersion>
     <Exceptionable>enable</Exceptionable>
     <IsPackable>false</IsPackable>
+    <OutputType>Library</OutputType>
     <ImplicitUsings>disable</ImplicitUsings>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
   </PropertyGroup>
 
   <ItemGroup>
