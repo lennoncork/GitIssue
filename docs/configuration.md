@@ -63,7 +63,7 @@ Ada Lovelace <ada@example.com>
 
 `gitissue validate` checks every field against the schema. A required field must be present. Text other than `Description` must not be empty. Signatures, dates, emails, URLs, versions, numbers, labels, and enumerated values must parse. A label is one token. An unknown `##` heading, a duplicate field, or list text that is not a list is an error. Save, edit, and convert refuse to write a document that fails these checks.
 
-`gitissue convert --to markdown` and `gitissue convert --to json` rewrite every issue and update `Storage`. The command stops when one issue already has both a `.json` and a `.md` file.
+`gitissue convert --to markdown` and `gitissue convert --to json` rewrite every issue and update `Storage`. Before writing, the command validates the source documents and stops if any document is invalid or an issue already has both a `.json` and a `.md` file. Correct the reported errors before converting so unknown or invalid fields are not discarded.
 
 ## Issue keys
 
@@ -78,7 +78,7 @@ gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index
 
 | Token | Meaning | Default format |
 | --- | --- | --- |
-| `{type}` | `IssueType` from configuration, letters, digits, and underscore only | `ISSUE` |
+| `{type}` | `IssueType` from configuration, ASCII letters and digits only | `ISSUE` |
 | `{created}` | Issue creation time. Use .NET date format specifiers, for example `{created:yyyy}`, `{created:MM}`, `{created:dd}`, or `{created:yyyy-MM-dd}` | `yyyy-MM-dd` |
 | `{index}` | Sequential integer assigned in this repository. Use `{index:D3}` for `001`. Unique across clones only if `{uid}` is also present | unpadded |
 | `{uid}` | Eight-character hexadecimal id | n/a |

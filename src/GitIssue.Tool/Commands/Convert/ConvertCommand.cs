@@ -70,7 +70,24 @@ namespace GitIssue.Tool.Commands.Convert
                     return;
                 }
 
-                IReadOnlyList<IssueValidationError> errors = IssueValidator.ValidateFields(issue, configuration.Fields);
+                IReadOnlyList<IssueValidationError> errors;
+                if (configuration.Storage == IssueStorage.Markdown)
+                {
+                    string markdown = await File.ReadAllTextAsync(markdownPath);
+                    errors = MarkdownIssueFormat.Read(markdown, issue.Key, configuration.Fields).Errors;
+                }
+                else
+                {
+                    string json = await File.ReadAllTextAsync(jsonPath);
+                    errors = IssueValidator.ValidateJson(json, issue.Key, configuration.Fields);
+                }
+
+                if (errors.Count > 0)
+                {
+                    throw new IssueValidationException(issue.Key, errors);
+                }
+
+                errors = IssueValidator.ValidateFields(issue, configuration.Fields);
                 if (errors.Count > 0)
                 {
                     throw new IssueValidationException(issue.Key, errors);

@@ -44,6 +44,29 @@ namespace GitIssue.Tests.IssueManagerTests
             }
 
             [Test]
+            public async Task PreservesExistingIssueTypesWhenRekeying()
+            {
+                this.Initialize(this.TestDirectory);
+                this.Sut.Configuration.KeyTemplate = "{type}-{uid}-{slug}";
+                this.Sut.Configuration.IssueType = "FEAT";
+                IIssue feature = await this.Sut.CreateAsync("Feature", string.Empty);
+                this.Sut.Configuration.IssueType = "BUG";
+                IIssue bug = await this.Sut.CreateAsync("Bug", string.Empty);
+
+                feature.Title = "Updated feature";
+                await feature.SaveAsync();
+                bug.Title = "Updated bug";
+                await bug.SaveAsync();
+                this.Sut.Configuration.IssueType = "TASK";
+
+                IReadOnlyList<IssueRekeyResult> results = this.Sut.Rekey();
+
+                Assert.That(results, Has.Count.EqualTo(2));
+                Assert.That(results.Any(result => result.To.ToString().StartsWith("FEAT-")), Is.True);
+                Assert.That(results.Any(result => result.To.ToString().StartsWith("BUG-")), Is.True);
+            }
+
+            [Test]
             public async Task RegeneratesNamedKeysFromDateKeys()
             {
                 this.Initialize(this.TestDirectory);

@@ -1,4 +1,5 @@
 using System.IO;
+using GitIssue.Tool;
 using NUnit.Framework;
 
 namespace GitIssue.Tool.Tests.Integration

@@ -80,11 +80,31 @@ namespace GitIssue.Tests.Issues
             Assert.That(IssueKeyTemplate.SanitizeSlug("Add Login Page"), Is.EqualTo("add-login-page"));
         }
 
-        [Test]
-        public void SanitizeType_StripsInvalidCharacters()
+        [TestCase("FEAT-1")]
+        [TestCase("bug fix")]
+        [TestCase("bug_fix")]
+        [TestCase("   ")]
+        [TestCase("")]
+        [TestCase("é")]
+        public void TypeName_RejectsInvalidCharacters(string name)
         {
-            Assert.That(IssueKeyTemplate.SanitizeType("FEAT-1"), Is.EqualTo("FEAT1"));
-            Assert.That(IssueKeyTemplate.SanitizeType("   "), Is.EqualTo("ISSUE"));
+            Assert.That(() => IssueTypeName.Validate(name), Throws.ArgumentException);
+            Assert.That(() => IssueKeyTemplate.Parse("{type}-{uid}").RenderKey(new IssueKeyContext
+            {
+                Type = name,
+                Uid = "ABCD1234",
+            }), Throws.ArgumentException);
+        }
+
+        [TestCase("bug")]
+        [TestCase("FEAT1")]
+        public void TypeName_PreservesValidName(string name)
+        {
+            Assert.That(IssueTypeName.Validate(name), Is.EqualTo(name));
+            IssueKeyTemplate template = IssueKeyTemplate.Parse("{type}-{uid}");
+            string key = template.RenderKey(new IssueKeyContext { Type = name, Uid = "ABCD1234" });
+            Assert.That(template.TryMatch(key, out IssueKeyContext matched), Is.True);
+            Assert.That(matched.Type, Is.EqualTo(name));
         }
     }
 }

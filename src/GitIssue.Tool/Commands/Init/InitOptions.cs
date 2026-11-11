@@ -12,7 +12,7 @@ namespace GitIssue.Tool.Commands.Init
         [Option("storage", HelpText = "Issue storage format: Markdown or Json. Defaults to Markdown", Required = false)]
         public string Storage { get; set; } = "Markdown";
 
-        [Option("issue-type", HelpText = "Issue type token used by {type} in the key template. Defaults to ISSUE", Required = false)]
+        [Option("issue-type", HelpText = "Issue type token used by {type}; ASCII letters and digits only. Defaults to ISSUE", Required = false)]
         public string IssueTypeName { get; set; } = "ISSUE";
 
         [Option("key-provider", HelpText = "Issue key provider: Date, Name, or Template. Defaults to Date", Required = false)]

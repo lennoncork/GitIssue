@@ -70,10 +70,10 @@ namespace GitIssue.Tool
                                 }
 
                                 config.Storage = storage;
-                                string issueType = !string.IsNullOrWhiteSpace(initOptions.IssueType)
+                                string issueType = !string.IsNullOrEmpty(initOptions.IssueType)
                                     ? initOptions.IssueType
                                     : initOptions.IssueTypeName;
-                                config.IssueType = string.IsNullOrWhiteSpace(issueType) ? "ISSUE" : issueType;
+                                config.IssueType = IssueTypeName.Validate(issueType);
 
                                 if (!string.IsNullOrWhiteSpace(initOptions.KeyTemplate))
                                 {
