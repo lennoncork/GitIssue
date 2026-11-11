@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Exceptionable;
@@ -6,6 +8,7 @@ using GitIssue.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration.Json;
 
 namespace GitIssue.Services.Web
 {
@@ -22,19 +25,25 @@ namespace GitIssue.Services.Web
         [Throws<IssueOperationException>]
         public static WebApplication Create(WebServeRequest request)
         {
+            string repositoryPath = Path.GetFullPath(request.RepositoryPath);
             WebApplicationBuilder builder = WebApplication.CreateBuilder(new WebApplicationOptions
             {
                 Args = Array.Empty<string>(),
                 ApplicationName = "gitissue",
-                ContentRootPath = request.RepositoryPath,
+                ContentRootPath = repositoryPath,
             });
+            foreach (JsonConfigurationSource source in builder.Configuration.Sources.OfType<JsonConfigurationSource>().ToArray())
+            {
+                builder.Configuration.Sources.Remove(source);
+            }
+
             builder.WebHost.UseUrls(request.Url);
 
             WebApplication application = builder.Build();
             IssueWorkspace workspace;
             try
             {
-                workspace = new IssueWorkspace(IssueManager.Open(request.RepositoryPath, request.IssueFolderName));
+                workspace = new IssueWorkspace(IssueManager.Open(repositoryPath, request.IssueFolderName));
             }
             catch (Exception exception) when (exception is not IssueOperationException)
             {

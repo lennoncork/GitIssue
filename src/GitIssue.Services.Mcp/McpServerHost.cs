@@ -46,7 +46,7 @@ namespace GitIssue.Services.Mcp
             {
                 Args = Array.Empty<string>(),
                 ApplicationName = McpServerHost.ServerName,
-                ContentRootPath = repositoryPath,
+                ContentRootPath = AppContext.BaseDirectory,
             });
             builder.WebHost.ConfigureServices(services =>
             {

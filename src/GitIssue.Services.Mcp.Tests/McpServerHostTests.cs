@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -47,6 +48,19 @@ namespace GitIssue.Services.Mcp.Tests
                 Assert.That(resources, Does.Contain("issue"));
                 Assert.That(prompts, Is.EquivalentTo(new[] { "triage-issues", "draft-issue" }));
             });
+        }
+
+        [Test]
+        public void CreateHost_DoesNotLoadRepositoryApplicationSettings()
+        {
+            using TempDirectory directory = new TempDirectory();
+            File.WriteAllText(Path.Combine(directory.Path, "appsettings.json"), "{");
+
+            using IHost host = McpServerHost.CreateHost(new McpServeOptions(directory.Path, ".issues"));
+
+            Assert.That(
+                host.Services.GetRequiredService<IHostEnvironment>().ContentRootPath,
+                Is.EqualTo(AppContext.BaseDirectory));
         }
 
         [Test]

@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
+using System.Text.Json;
 using System.Threading.Tasks;
 using GitIssue.Issues;
 using GitIssue.Services;
@@ -76,6 +77,59 @@ namespace GitIssue.Services.Web.Tests
             finally
             {
                 Directory.Delete(directory, true);
+            }
+        }
+
+        [Test]
+        public void Create_UsesAnAbsoluteRepositoryContentRoot()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            WebServeRequest request = WebServerHostTests.request(
+                Path.GetRelativePath(Environment.CurrentDirectory, fixture.Directory),
+                WebServerHostTests.freePort(),
+                null);
+
+            using WebApplication application = WebServerHost.Create(request);
+
+            Assert.That(application.Environment.ContentRootPath, Is.EqualTo(Path.GetFullPath(request.RepositoryPath)));
+        }
+
+        [Test]
+        public async Task ConfiguredKestrelEndpoints_DoNotOverrideTheRequestedUrl()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            int configuredPort = WebServerHostTests.freePort();
+            int requestedPort = WebServerHostTests.freePort();
+            while (requestedPort == configuredPort)
+            {
+                requestedPort = WebServerHostTests.freePort();
+            }
+
+            File.WriteAllText(
+                Path.Combine(fixture.Directory, "appsettings.json"),
+                JsonSerializer.Serialize(new
+                {
+                    Kestrel = new
+                    {
+                        Endpoints = new
+                        {
+                            Configured = new { Url = $"http://127.0.0.1:{configuredPort}" },
+                        },
+                    },
+                }));
+            WebServeRequest request = WebServerHostTests.request(fixture.Directory, requestedPort, null);
+            await using WebApplication application = WebServerHost.Create(request);
+            await application.StartAsync();
+            try
+            {
+                using HttpClient client = new HttpClient();
+                HttpResponseMessage response = await client.GetAsync($"{request.Url}/health");
+
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            }
+            finally
+            {
+                await application.StopAsync();
             }
         }
 
