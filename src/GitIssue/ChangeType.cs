@@ -9,6 +9,9 @@ namespace GitIssue
 
         [Description("Deleted existing issue")]
         Delete,
+
+        [Description("Renamed existing issue")]
+        Rename,
     }
 #pragma warning restore 1591
 }

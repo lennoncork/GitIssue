@@ -15,13 +15,13 @@ namespace GitIssue.Tool.Tests.Integration
             const string importedTitle = "Follow up with external reporter";
 
             // A user starts by creating the local issue store for the repository.
-            this.RunSuccessfully("Init");
+            this.RunSuccessfully("Init", "--storage", "json");
             this.AssertFileExists(this.ConfigurationFile);
             this.AssertFileDoesNotExist(this.TrackingFile);
 
             // Inspect available fields before recording the issue details.
             this.RunSuccessfully("Fields");
-            Assert.That(this.Output, Does.Contain("Title: A 'JsonValue' field with 'String' values"));
+            Assert.That(this.Output, Does.Contain("Title: A 'ValueField' field with 'String' values"));
 
             // Capture a newly discovered release task and begin tracking it.
             this.RunSuccessfully("Create", initialTitle, "Document customer-visible changes.");

@@ -7,6 +7,7 @@ using GitIssue.Fields;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
 using GitIssue.Issues.Json;
+using GitIssue.Values;
 using Moq;
 using NUnit.Framework;
 using StringValue = GitIssue.Values.String;
@@ -54,7 +55,7 @@ namespace GitIssue.Tests.Issues
                 Assert.That(issue[key1], Is.SameAs(field1));
                 Assert.That(issue.ContainsKey(key1), Is.True);
 
-                bool found = issue.TryGetValue(key2, out IField foundField);
+                bool found = issue.TryGetValue(key2, out IField? foundField);
                 Assert.That(found, Is.True);
                 Assert.That(foundField, Is.SameAs(field2));
 
@@ -138,6 +139,7 @@ namespace GitIssue.Tests.Issues
                 JsonIssue created = new JsonIssue(issueRoot, configuration.Fields);
                 created.Title = title;
                 created.Description = description;
+                created.Author = Signature.Parse("Tester <tester@example.com>");
                 await created.SaveAsync();
 
                 JsonIssueExtensions.ResetFileReadCount();

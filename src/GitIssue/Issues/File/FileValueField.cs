@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Exceptionable;
 using GitIssue.Fields;
 using GitIssue.Fields.Value;
 using GitIssue.Issues.Json;
@@ -43,6 +44,7 @@ namespace GitIssue.Issues.File
         /// <summary>
         ///     Gets the file used to save the fields value
         /// </summary>
+        [Throws<ArgumentException>]
         public string FilePath => Path.Combine(this.issueRoot.IssuePath, this.Key);
 
         /// <summary>

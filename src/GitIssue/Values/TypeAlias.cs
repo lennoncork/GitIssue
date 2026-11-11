@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using GitIssue.Fields;
+using GitIssue.Issues;
 
 namespace GitIssue.Values
 {
@@ -15,6 +16,8 @@ namespace GitIssue.Values
         ///     The collection of aliases found
         /// </summary>
         public static ITypeAlias[] Aliases;
+
+        private readonly string[] legacyAliases;
 
         static TypeAlias()
         {
@@ -38,17 +41,25 @@ namespace GitIssue.Values
                 .Where(TypeAlias.IsNotNull)
                 .Select(t => t!));
 
+            aliases.AddRange(typeof(TypeValue).Assembly.GetTypes()
+                .Where(TypeAlias.IsKeyProviderType)
+                .Select(TypeAlias.FromType)
+                .Where(TypeAlias.IsNotNull)
+                .Select(t => t!));
+
             TypeAlias.Aliases = aliases.ToArray();
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TypeAlias" /> class
         /// </summary>
-        /// <param name="alias"></param>
-        protected TypeAlias(string alias)
+        /// <param name="alias">the name written for this type</param>
+        /// <param name="legacyAliases">older names that still resolve to this type</param>
+        protected TypeAlias(string alias, params string[] legacyAliases)
         {
             this.Alias = alias;
             this.Type = this.GetType();
+            this.legacyAliases = legacyAliases ?? Array.Empty<string>();
         }
 
         /// <summary>
@@ -60,6 +71,7 @@ namespace GitIssue.Values
         {
             this.Alias = alias;
             this.Type = type;
+            this.legacyAliases = Array.Empty<string>();
         }
 
         /// <summary>
@@ -149,6 +161,16 @@ namespace GitIssue.Values
         }
 
         /// <summary>
+        ///     Gets a value indicating if the type is an issue key provider
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsKeyProviderType(Type type)
+        {
+            return typeof(IIssueKeyProvider).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface;
+        }
+
+        /// <summary>
         ///     Tries to get the alias value
         /// </summary>
         /// <param name="type"></param>
@@ -188,7 +210,7 @@ namespace GitIssue.Values
         /// <inheritdoc />
         public bool TryParse(string alias, out Type type)
         {
-            if (alias == this.Alias)
+            if (this.matches(alias))
             {
                 type = this.Type;
                 return true;
@@ -208,6 +230,24 @@ namespace GitIssue.Values
             }
 
             str = null!;
+            return false;
+        }
+
+        private bool matches(string alias)
+        {
+            if (alias == this.Alias)
+            {
+                return true;
+            }
+
+            foreach (string legacyAlias in this.legacyAliases)
+            {
+                if (legacyAlias == alias)
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
     }

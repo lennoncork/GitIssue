@@ -1,5 +1,7 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
+using System.Diagnostics.Contracts;
 using System.IO;
+using Exceptionable;
 using LibGit2Sharp;
 using RepositoryNotFoundException = GitIssue.Exceptions.RepositoryNotFoundException;
 
@@ -48,6 +50,7 @@ namespace GitIssue
         /// <summary>
         ///     Gets the issue configuration
         /// </summary>
+        [Throws<AggregateException>]
         public IssueConfiguration Configuration => IssueConfiguration.Read(this.ConfigFile);
 
         /// <summary>
@@ -116,7 +119,7 @@ namespace GitIssue
         public static RepositoryRoot Locate(string directory, string name)
         {
             DirectoryInfo current = new DirectoryInfo(directory);
-            while (RepositoryRoot.TryGetParent(current, out DirectoryInfo parent))
+            while (RepositoryRoot.tryGetParent(current, out DirectoryInfo parent))
             {
                 if (RepositoryRoot.IsIssueRoot(current, name, out DirectoryInfo issues))
                 {
@@ -154,7 +157,7 @@ namespace GitIssue
         /// <param name="directory">the current directory</param>
         /// <param name="parent">the parent directory</param>
         /// <returns>true if the parent directory exists</returns>
-        private static bool TryGetParent(DirectoryInfo directory, out DirectoryInfo parent)
+        private static bool tryGetParent(DirectoryInfo directory, out DirectoryInfo parent)
         {
             parent = directory.Parent!;
             return directory.Exists && (directory.Parent != null);

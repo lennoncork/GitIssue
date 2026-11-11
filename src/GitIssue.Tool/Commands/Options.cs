@@ -22,6 +22,7 @@ namespace GitIssue.Tool.Commands
     public interface ITrackedOptions
     {
         string Name { get; set; }
+
         string Path { get; set; }
 
         TrackedIssue Tracked { get; set; }

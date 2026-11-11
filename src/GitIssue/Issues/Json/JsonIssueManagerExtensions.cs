@@ -9,7 +9,7 @@ namespace GitIssue.Issues.Json
     /// </summary>
     public static class JsonIssueManagerExtensions
     {
-        private static readonly Func<IIssue, bool> AllIssues = issue => true;
+        private static readonly Func<IIssue, bool> allIssues = issue => true;
 
         /// <summary>
         ///     Exports all issues to a single json file
@@ -19,7 +19,7 @@ namespace GitIssue.Issues.Json
         /// <returns></returns>
         public static async Task ExportAsJsonAsync(this IIssueManager manager, string path)
         {
-            await manager.ExportAsJsonAsync(path, JsonIssueManagerExtensions.AllIssues);
+            await manager.ExportAsJsonAsync(path, JsonIssueManagerExtensions.allIssues);
         }
 
 

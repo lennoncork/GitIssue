@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using Exceptionable;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
 using GitIssue.Issues.Json;
@@ -72,6 +73,7 @@ namespace GitIssue.Issues.File
         /// <summary>
         ///     Gets the directory used to save the fields values
         /// </summary>
+        [Throws<ArgumentException>]
         public string DirectoryPath => Path.Combine(this.issueRoot.IssuePath, this.Key.ToString());
 
         /// <summary>

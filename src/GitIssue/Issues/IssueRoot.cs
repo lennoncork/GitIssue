@@ -1,4 +1,6 @@
-﻿namespace GitIssue.Issues
+﻿using Exceptionable;
+
+namespace GitIssue.Issues
 {
     /// <summary>
     ///     Specifies the location on disk of a given issue
@@ -33,6 +35,7 @@
         /// <summary>
         ///     Gets the <see cref="IssuePath" /> for the issue
         /// </summary>
+        [Throws<System.ArgumentException>]
         public string IssuePath => Paths.GetContainedPath(this.Root.IssuesPath, this.issuePath ?? this.Key.ToString());
     }
 }

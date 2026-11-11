@@ -1,6 +1,10 @@
 <Project>
 
     <PropertyGroup>
+        <StyleCopAnalyzersVersion>1.1.118</StyleCopAnalyzersVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <DirectoryBuildPath>$(MSBuildThisFileDirectory)</DirectoryBuildPath>
         <SolutionOutputPath>$(MSBuildThisFileDirectory).output</SolutionOutputPath>
         <ProjectOutputPath>$(SolutionOutputPath)\$(MSBuildProjectName)</ProjectOutputPath>
@@ -11,6 +15,12 @@
 
     <PropertyGroup>
         <LanguageTargets>$(MSBuildBinPath)\Microsoft.CSharp.targets</LanguageTargets>
+        <EnableNETAnalyzers>false</EnableNETAnalyzers>
+        <AnalysisMode>None</AnalysisMode>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <NuGetAudit>true</NuGetAudit>
+        <NuGetAuditMode>all</NuGetAuditMode>
+        <NuGetAuditLevel>high</NuGetAuditLevel>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
         <NoWarn>1701;1702;1705;NU1603;NU5105</NoWarn>
         <DocumentationFile>$(ProjectOutputPath)\$(MSBuildProjectName).xml</DocumentationFile>
@@ -25,6 +35,17 @@
         <RepositoryType>GIT</RepositoryType>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference
+            Include="StyleCop.Analyzers"
+            Version="$(StyleCopAnalyzersVersion)"
+            PrivateAssets="all" />
+    </ItemGroup>
 
     <ItemGroup>
         <None

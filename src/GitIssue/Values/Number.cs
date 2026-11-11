@@ -24,7 +24,7 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static Number Parse(string value)
         {
-            return new Number(double.Parse(value));
+            return new Number(double.Parse(value, CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace GitIssue.Values
         /// <returns></returns>
         public static bool TryParse(string value, out Number number)
         {
-            if (double.TryParse(value, out double result))
+            if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
             {
                 number = new Number(result);
                 return true;

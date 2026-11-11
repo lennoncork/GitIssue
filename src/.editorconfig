@@ -12,7 +12,7 @@ indent_style = space
 tab_width = 4
 
 # New line preferences
-insert_final_newline = false
+insert_final_newline = true
 
 #### .NET Coding Conventions ####
 
@@ -113,6 +113,23 @@ csharp_style_unused_value_assignment_preference = discard_variable
 csharp_style_unused_value_expression_statement_preference = discard_variable
 
 # 'using' directive preferences
+
+# File layout
+# Keep using directives outside namespaces with System directives first. The
+# ReSharper layout pattern is more specific than StyleCop's generic member order.
+dotnet_analyzer_diagnostic.severity = none
+csharp_using_directive_placement = outside_namespace
+dotnet_diagnostic.IDE0065.severity = suggestion
+dotnet_diagnostic.SA1200.severity = suggestion
+dotnet_diagnostic.SA1208.severity = suggestion
+dotnet_diagnostic.SA1210.severity = suggestion
+dotnet_diagnostic.SA1203.severity = suggestion
+dotnet_diagnostic.SA1204.severity = suggestion
+dotnet_diagnostic.SA1214.severity = suggestion
+dotnet_diagnostic.SA1516.severity = suggestion
+dotnet_diagnostic.SA1518.severity = suggestion
+dotnet_diagnostic.SA0001.severity = none
+dotnet_diagnostic.SA1633.severity = none
 
 #### C# Formatting Rules ####
 
@@ -266,7 +283,7 @@ dotnet_naming_symbols.private_methods_override_symbols.applicable_accessibilitie
 dotnet_naming_symbols.private_methods_override_symbols.applicable_kinds = class
 dotnet_naming_symbols.private_methods_override_symbols.required_modifiers = static
 dotnet_naming_symbols.private_methods_symbols.applicable_accessibilities = private
-dotnet_naming_symbols.private_methods_symbols.applicable_kinds = class,field,method
+dotnet_naming_symbols.private_methods_symbols.applicable_kinds = method
 dotnet_naming_symbols.private_methods_symbols.resharper_applicable_kinds = async_method,field,readonly_field,class,method
 dotnet_naming_symbols.private_methods_symbols.resharper_required_modifiers = instance
 dotnet_naming_symbols.private_static_fields_symbols.applicable_accessibilities = private
@@ -356,6 +373,8 @@ indent_style = tab
 indent_size = tab
 tab_width = 4
 
+[*.cs]
+
 # Microsoft .NET properties
 csharp_new_line_before_members_in_object_initializers = false
 csharp_preferred_modifier_order = public, private, protected, internal, file, new, static, abstract, virtual, sealed, readonly, override, extern, unsafe, volatile, async, required:suggestion
@@ -425,7 +444,7 @@ dotnet_naming_symbols.private_methods_override_symbols.applicable_accessibilitie
 dotnet_naming_symbols.private_methods_override_symbols.applicable_kinds = class
 dotnet_naming_symbols.private_methods_override_symbols.required_modifiers = static
 dotnet_naming_symbols.private_methods_symbols.applicable_accessibilities = private
-dotnet_naming_symbols.private_methods_symbols.applicable_kinds = class,field,method
+dotnet_naming_symbols.private_methods_symbols.applicable_kinds = method
 dotnet_naming_symbols.private_methods_symbols.resharper_applicable_kinds = async_method,field,readonly_field,class,method
 dotnet_naming_symbols.private_methods_symbols.resharper_required_modifiers = instance
 dotnet_naming_symbols.private_static_fields_symbols.applicable_accessibilities = private

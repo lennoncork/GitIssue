@@ -1,12 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using GitIssue.Syncs;
+﻿using System.Threading.Tasks;
+using GitIssue.Tool.Commands.Import;
 using Serilog;
 
 namespace GitIssue.Tool.Commands.Sync
 {
     /// <summary>
-    ///     Edit command
+    ///     Sync command
     /// </summary>
     public class SyncCommand : Command<SyncOptions>
     {
@@ -21,11 +20,14 @@ namespace GitIssue.Tool.Commands.Sync
         }
 
         /// <inheritdoc />
-        public override Task Exec(SyncOptions options)
+        public override async Task Exec(SyncOptions options)
         {
-            FileImporter importer = new FileImporter(this.manager);
-            Console.WriteLine($"Exported issues to {options.Import}");
-            return Task.CompletedTask;
+            ImportCommand import = new ImportCommand(this.manager, this.logger);
+            await import.Exec(new ImportOptions
+            {
+                Import = options.Import,
+            });
+            this.ExitCode = import.ExitCode;
         }
     }
 }

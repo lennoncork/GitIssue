@@ -14,6 +14,10 @@ namespace GitIssue.Tool.Commands.Edit
     /// </summary>
     public class EditCommand : Command<EditOptions>
     {
+        private static readonly string defaultEditor = new EditorOptions().Editor;
+
+        private static readonly string issuesEditorKey = "issues.editor";
+
         private readonly IEditor editor;
         private readonly ILogger logger;
 
@@ -24,6 +28,17 @@ namespace GitIssue.Tool.Commands.Edit
             this.manager = manager;
             this.editor = editor;
             this.logger = logger;
+        }
+
+        private static bool hasExplicitEditor(string editor)
+        {
+            return !string.IsNullOrWhiteSpace(editor) && editor != EditCommand.defaultEditor;
+        }
+
+        private static bool tryGetEditor(IRepository repository, string key, out string config)
+        {
+            config = repository.Config.GetValueOrDefault<string>(key) ?? string.Empty;
+            return !string.IsNullOrEmpty(config);
         }
 
         /// <inheritdoc />
@@ -38,13 +53,11 @@ namespace GitIssue.Tool.Commands.Edit
             if (issue == null)
             {
                 this.logger.Error($"Issue \"{options.Key}\" not found");
+                this.ExitCode = 1;
                 return;
             }
 
-            if (EditCommand.TryGetEditor(this.manager.Repository, "issues.editor", out string config))
-            {
-                options.Editor = config;
-            }
+            this.selectEditor(options);
 
             bool updated = false;
             if (string.IsNullOrEmpty(options.Field))
@@ -68,6 +81,7 @@ namespace GitIssue.Tool.Commands.Edit
             if (!issue.ContainsKey(key))
             {
                 this.logger.Error($"Field \"{key}\" does not exist on issue \"{issue.Key}\"");
+                this.ExitCode = 1;
                 return;
             }
 
@@ -91,10 +105,18 @@ namespace GitIssue.Tool.Commands.Edit
             }
         }
 
-        private static bool TryGetEditor(IRepository repository, string key, out string config)
+        private void selectEditor(EditOptions options)
         {
-            config = repository.Config.GetValueOrDefault<string>(key);
-            return !string.IsNullOrEmpty(config);
+            if (EditCommand.hasExplicitEditor(options.Editor))
+            {
+                this.editor.UpdateCommand(options.Editor);
+                return;
+            }
+
+            if (EditCommand.tryGetEditor(this.manager.Repository, EditCommand.issuesEditorKey, out string config))
+            {
+                this.editor.UpdateCommand(config);
+            }
         }
     }
 }

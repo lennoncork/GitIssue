@@ -76,7 +76,7 @@ namespace GitIssue.Syncs
                 FieldKey key = FieldKey.Create(kvp.Key);
                 if (this.manager.Configuration.Fields.ContainsKey(key))
                 {
-                    JsonNode? token = Importer.SelectNode(json, kvp.Value);
+                    JsonNode? token = Importer.selectNode(json, kvp.Value);
                     if (token != null)
                     {
                         tokens[key] = token;
@@ -84,10 +84,10 @@ namespace GitIssue.Syncs
                 }
             }
 
-            return await this.Import(tokens);
+            return await this.import(tokens);
         }
 
-        private static JsonNode? SelectNode(JsonNode node, string path)
+        private static JsonNode? selectNode(JsonNode node, string path)
         {
             JsonNode? current = node;
             foreach (string segment in path.TrimStart('$', '.').Split('.', StringSplitOptions.RemoveEmptyEntries))
@@ -119,7 +119,7 @@ namespace GitIssue.Syncs
             return current;
         }
 
-        private static bool TryConvert(JsonValue value, Type targetType, out object? result)
+        private static bool tryConvert(JsonValue value, Type targetType, out object? result)
         {
             if (!JsonSerialization.TryGetScalar(value, out object? scalar) || (scalar == null))
             {
@@ -164,10 +164,10 @@ namespace GitIssue.Syncs
             return false;
         }
 
-        private async Task<bool> Import(Dictionary<FieldKey, JsonNode> tokens)
+        private async Task<bool> import(Dictionary<FieldKey, JsonNode> tokens)
         {
             IssueKey importKey;
-            if (this.TryGetFieldValue(tokens, nameof(IReadOnlyIssue.Key), out string importKeyValue))
+            if (this.tryGetFieldValue(tokens, nameof(IReadOnlyIssue.Key), out string importKeyValue))
             {
                 importKey = IssueKey.Create(importKeyValue);
                 tokens.Remove(FieldKey.Create(nameof(IReadOnlyIssue.Key)));
@@ -178,7 +178,7 @@ namespace GitIssue.Syncs
             }
 
             string title;
-            if (this.TryGetFieldValue(tokens, nameof(IIssue.Title), out string titleValue))
+            if (this.tryGetFieldValue(tokens, nameof(IIssue.Title), out string titleValue))
             {
                 title = titleValue;
             }
@@ -188,7 +188,7 @@ namespace GitIssue.Syncs
             }
 
             string description;
-            if (this.TryGetFieldValue(tokens, nameof(IIssue.Description), out string descriptionValue))
+            if (this.tryGetFieldValue(tokens, nameof(IIssue.Description), out string descriptionValue))
             {
                 description = descriptionValue;
             }
@@ -204,7 +204,7 @@ namespace GitIssue.Syncs
             if (synced.IsValid)
             {
                 issue = await this.manager
-                    .FindAsync(i => i.Key == importKey)
+                    .FindAsync(i => i.Key == synced.IssueKey)
                     .FirstOrDefaultAsync();
             }
 
@@ -214,7 +214,7 @@ namespace GitIssue.Syncs
                 synced = new SyncedIssue(this, issue.Key, importKey);
             }
 
-            if (await this.Import(issue, tokens))
+            if (await this.import(issue, tokens))
             {
                 await issue.SaveAsync();
                 await synced.SaveAsync();
@@ -224,7 +224,7 @@ namespace GitIssue.Syncs
             return false;
         }
 
-        private async Task<bool> Import(IIssue issue, Dictionary<FieldKey, JsonNode> tokens)
+        private async Task<bool> import(IIssue issue, Dictionary<FieldKey, JsonNode> tokens)
         {
             foreach (KeyValuePair<FieldKey, JsonNode> token in tokens)
             {
@@ -234,7 +234,7 @@ namespace GitIssue.Syncs
                     {
                         if (field is IValueField valueField)
                         {
-                            if (Importer.TryConvert(value, valueField.ValueType, out object? converted))
+                            if (Importer.tryConvert(value, valueField.ValueType, out object? converted))
                             {
                                 valueField.Value = converted;
                             }
@@ -249,7 +249,7 @@ namespace GitIssue.Syncs
                             foreach (JsonNode? item in array)
                             {
                                 if (item is JsonValue itemValue &&
-                                    Importer.TryConvert(itemValue, arrayField.ValueType, out object? converted))
+                                    Importer.tryConvert(itemValue, arrayField.ValueType, out object? converted))
                                 {
                                     arrayField.Add(converted);
                                 }
@@ -263,7 +263,7 @@ namespace GitIssue.Syncs
             return true;
         }
 
-        private bool TryGetFieldValue<T>(Dictionary<FieldKey, JsonNode> tokens, string field, out T result)
+        private bool tryGetFieldValue<T>(Dictionary<FieldKey, JsonNode> tokens, string field, out T result)
         {
             if (tokens.TryGetValue(FieldKey.Create(field), out JsonNode? token))
             {

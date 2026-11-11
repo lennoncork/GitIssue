@@ -7,14 +7,14 @@ using GitIssue.Values;
 namespace GitIssue.Issues.Json
 {
     /// <summary>
-    ///     Generic alias class for JsonValue
+    ///     Configuration alias for a single-value field
     /// </summary>
     public class JsonValueField : TypeAlias
     {
         /// <summary>
-        ///     Creates a new instance of the JsonValueField
+        ///     Creates a new instance of the <see cref="JsonValueField" /> class
         /// </summary>
-        public JsonValueField() : base("JsonValue")
+        public JsonValueField() : base("ValueField", "JsonValue", "Value")
         {
         }
     }

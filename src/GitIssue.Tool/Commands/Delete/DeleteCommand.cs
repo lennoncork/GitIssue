@@ -25,16 +25,19 @@ namespace GitIssue.Tool.Commands.Delete
         public override async Task Exec(DeleteOptions options)
         {
             bool result = await this.manager.DeleteAsync(options.Key);
-            if (result)
+            if (!result)
             {
-                Console.WriteLine($"Deleted issue '{options.Key}'");
-                if (options.Tracked != TrackedIssue.None)
+                this.ExitCode = 1;
+                return;
+            }
+
+            Console.WriteLine($"Deleted issue '{options.Key}'");
+            if (options.Tracked != TrackedIssue.None)
+            {
+                if (options.Tracked.Key == options.Key)
                 {
-                    if (options.Tracked.Key == options.Key)
-                    {
-                        options.Tracked = TrackedIssue.None;
-                        await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);
-                    }
+                    options.Tracked = TrackedIssue.None;
+                    await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);
                 }
             }
         }

@@ -2,6 +2,7 @@
 using Autofac;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
+using GitIssue.Issues.Markdown;
 using LibGit2Sharp;
 using Serilog;
 using Serilog.Core;
@@ -58,7 +59,16 @@ namespace GitIssue
                     RepositoryRoot root = c.Resolve<RepositoryRoot>();
                     IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
-                    IssueCreation creation = key => new FileIssue(new IssueRoot(root, key, provider.GetIssuePath(key)), configuration.Fields);
+                    IssueCreation creation = key =>
+                    {
+                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key));
+                        if (configuration.Storage == IssueStorage.Markdown)
+                        {
+                            return new MarkdownIssue(issueRoot, configuration.Fields);
+                        }
+
+                        return new FileIssue(issueRoot, configuration.Fields);
+                    };
                     return creation;
                 })
                 .AsSelf()
@@ -68,7 +78,17 @@ namespace GitIssue
                 {
                     RepositoryRoot root = c.Resolve<RepositoryRoot>();
                     IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
-                    IssueDeletion deletion = key => FileIssue.DeleteAsync(new IssueRoot(root, key, provider.GetIssuePath(key)));
+                    IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
+                    IssueDeletion deletion = key =>
+                    {
+                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key));
+                        if (configuration.Storage == IssueStorage.Markdown)
+                        {
+                            return MarkdownIssue.DeleteAsync(issueRoot);
+                        }
+
+                        return FileIssue.DeleteAsync(issueRoot);
+                    };
                     return deletion;
                 })
                 .AsSelf()
@@ -79,7 +99,16 @@ namespace GitIssue
                     RepositoryRoot root = c.Resolve<RepositoryRoot>();
                     IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
-                    IssueLoading read = key => FileIssue.ReadAsync(new IssueRoot(root, key, provider.GetIssuePath(key)), configuration.Fields);
+                    IssueLoading read = key =>
+                    {
+                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key));
+                        if (configuration.Storage == IssueStorage.Markdown)
+                        {
+                            return MarkdownIssue.ReadAsync(issueRoot, configuration.Fields);
+                        }
+
+                        return FileIssue.ReadAsync(issueRoot, configuration.Fields);
+                    };
                     return read;
                 })
                 .AsSelf()
@@ -87,7 +116,12 @@ namespace GitIssue
                 .IfNotRegistered(typeof(IssueLoading));
 
             // Key providers
+            builder.RegisterType<TemplateIssueKeyProvider>().AsSelf();
+            builder.RegisterType<DateIssueKeyProvider>().AsSelf();
+            builder.RegisterType<NameIssueKeyProvider>().AsSelf();
+#pragma warning disable CS0618
             builder.RegisterType<FileIssueKeyProvider>().AsSelf();
+#pragma warning restore CS0618
         }
     }
 }

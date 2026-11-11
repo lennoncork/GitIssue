@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using Exceptionable;
 using GitIssue.Fields;
 using GitIssue.Issues;
-using GitIssue.Issues.File;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
 using DateTime = GitIssue.Values.DateTime;
@@ -22,7 +24,9 @@ namespace GitIssue
         /// </summary>
         public IssueConfiguration()
         {
-            this.KeyProvider = TypeValue.Create<FileIssueKeyProvider>();
+            this.KeyProvider = TypeValue.Create<DateIssueKeyProvider>();
+            this.IssueType = "ISSUE";
+            this.KeyTemplate = IssueKeyTemplate.Date;
             this.Fields = new Dictionary<FieldKey, FieldInfo>
             {
                 { FieldKey.Create("Key"), new FieldInfo<IssueKey, JsonValueField>(true) },
@@ -42,11 +46,22 @@ namespace GitIssue
         /// <inheritdoc />
         public TypeValue KeyProvider { get; set; }
 
+        /// <inheritdoc />
+        public string IssueType { get; set; }
+
+        /// <inheritdoc />
+        public string KeyTemplate { get; set; }
+
+        /// <inheritdoc />
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public IssueStorage Storage { get; set; } = IssueStorage.Markdown;
+
         /// <summary>
         ///     Reads the configuration from a file
         /// </summary>
         /// <param name="file">the configuration file</param>
         /// <returns>the <see cref="IssueConfiguration" /></returns>
+        [Throws<AggregateException>]
         public static IssueConfiguration Read(string file)
         {
             return IssueConfiguration.Read<IssueConfiguration>(file);
@@ -58,12 +73,19 @@ namespace GitIssue
         /// <typeparam name="T">the configuration type</typeparam>
         /// <param name="file">the configuration file</param>
         /// <returns>the <see cref="IssueConfiguration" /></returns>
+        [Throws<AggregateException>]
         public static T Read<T>(string file) where T : IssueConfiguration, new()
         {
             try
             {
                 string json = File.ReadAllText(file);
-                return JsonSerializer.Deserialize<T>(json, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
+                T configuration = JsonSerializer.Deserialize<T>(json, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
+                if (!IssueConfiguration.hasStorageProperty(json))
+                {
+                    configuration.Storage = IssueStorage.Json;
+                }
+
+                return configuration;
             }
             catch (Exception ex)
             {
@@ -71,23 +93,53 @@ namespace GitIssue
             }
         }
 
+        private static bool hasStorageProperty(string json)
+        {
+            if (JsonNode.Parse(json) is not JsonObject document)
+            {
+                return false;
+            }
+
+            foreach (KeyValuePair<string, JsonNode?> property in document)
+            {
+                if (property.Key.Equals(nameof(IssueConfiguration.Storage), StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <inheritdoc />
+        [Throws<AggregateException>]
         public void Save(string file)
         {
             this.Save<IssueConfiguration>(file);
         }
 
         /// <inheritdoc />
+        [Throws<AggregateException>]
         public void Save<T>(string file) where T : IssueConfiguration, new()
         {
             try
             {
+                this.normalizeKeyTemplate();
                 string json = JsonSerializer.Serialize(this, typeof(T), JsonSerialization.IndentedOptions);
                 Paths.WriteAllTextAsync(file, json).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
                 throw new AggregateException($"Unable to serialize {file} as config file ", ex);
+            }
+        }
+
+        private void normalizeKeyTemplate()
+        {
+            if ((this.KeyProvider.Type == typeof(NameIssueKeyProvider)) &&
+                (string.IsNullOrWhiteSpace(this.KeyTemplate) || (this.KeyTemplate == IssueKeyTemplate.Date)))
+            {
+                this.KeyTemplate = IssueKeyTemplate.Name;
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Formatters;
 using GitIssue.Issues;
+using GitIssue.Values;
 using Serilog;
 
 namespace GitIssue.Tool.Commands.Show
@@ -46,7 +47,8 @@ namespace GitIssue.Tool.Commands.Show
                 case ShowSubCommand.mine:
                 case ShowSubCommand.Mine:
                     Console.WriteLine("Showing 'my' issues");
-                    issues = this.manager.FindAsync(i => true);
+                    Signature signature = this.manager.Repository.Config.BuildSignature(DateTimeOffset.Now);
+                    issues = this.manager.FindAsync(i => i.Author.Equals(signature));
                     break;
 
                 default:

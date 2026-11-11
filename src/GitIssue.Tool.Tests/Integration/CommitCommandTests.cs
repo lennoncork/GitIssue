@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using LibGit2Sharp;
 using NUnit.Framework;
 
@@ -26,6 +28,60 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(repository.Head.Tip.Tree[".issues"], Is.Not.Null);
                 Assert.That(changes["Log"]!.AsObject(), Is.Empty);
                 Assert.That(this.Output, Does.Contain("Committed changes"));
+            });
+        }
+
+        [Test]
+        public void Commit_LeavesStagedChangesOutsideIssuesDirectory()
+        {
+            this.InitializeRepository();
+            string key = this.CreateIssue("Issue beside staged work");
+            string trackedFile = Path.Combine(this.TestDirectory, "tracked.txt");
+            File.WriteAllText(trackedFile, "initial");
+            Signature signature = new Signature("GitIssue Tool Tests", "gitissue-tool-tests@example.com", DateTimeOffset.Now);
+            using (Repository repository = new Repository(this.TestDirectory))
+            {
+                LibGit2Sharp.Commands.Stage(repository, "tracked.txt");
+                repository.Commit("initial", signature, signature);
+                File.WriteAllText(trackedFile, "changed");
+                LibGit2Sharp.Commands.Stage(repository, "tracked.txt");
+            }
+
+            int exitCode = this.Run("Commit");
+
+            using Repository after = new Repository(this.TestDirectory);
+            Blob committed = (Blob)after.Head.Tip!["tracked.txt"].Target;
+            Blob staged = after.Lookup<Blob>(after.Index["tracked.txt"].Id);
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Zero, this.Error);
+                Assert.That(after.Head.Tip.Message, Does.Contain(key));
+                Assert.That(committed.GetContentText(), Is.EqualTo("initial"));
+                Assert.That(staged.GetContentText(), Is.EqualTo("changed"));
+                Assert.That(File.ReadAllText(trackedFile), Is.EqualTo("changed"));
+                Assert.That(this.Output, Does.Contain("Committed changes"));
+            });
+        }
+
+        [Test]
+        public void Commit_ReturnsNonZeroWhenIssuesDirectoryAlreadyHasStagedChanges()
+        {
+            this.InitializeRepository();
+            string key = this.CreateIssue("Issue already staged");
+            using (Repository repository = new Repository(this.TestDirectory))
+            {
+                LibGit2Sharp.Commands.Stage(repository, this.GetIssueFile(key));
+            }
+
+            int exitCode = this.Run("Commit");
+
+            using Repository after = new Repository(this.TestDirectory);
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Not.Zero);
+                Assert.That(after.Info.IsHeadUnborn, Is.True);
+                Assert.That(this.Output, Does.Not.Contain("Committed changes"));
+                Assert.That(this.Output + this.Error, Does.Contain("another commit is in progress"));
             });
         }
     }

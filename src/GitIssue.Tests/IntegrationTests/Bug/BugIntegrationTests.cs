@@ -58,6 +58,9 @@ namespace GitIssue.Tests.IntegrationTests.Bug
             if (initGit)
             {
                 this.GitRepository = new Repository(Repository.Init(directory));
+                // Creating an issue requires a valid author. Hosted runners have no global git identity.
+                this.GitRepository.Config.Set("user.name", "Tester");
+                this.GitRepository.Config.Set("user.email", "tester@example.com");
             }
 
             if (initIssue)

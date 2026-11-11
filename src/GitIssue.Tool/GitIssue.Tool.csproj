@@ -4,6 +4,7 @@
 	  <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <Exceptionable>enable</Exceptionable>
     <ApplicationIcon />
     <OutputType>Exe</OutputType>
     <StartupObject />
@@ -19,8 +20,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="9.3.0" />
-    <PackageReference Include="GitVersion.MsBuild" Version="6.8.1">
+    <PackageReference Include="Autofac" Version="9.3.4" />
+    <PackageReference Include="Exceptionable.Analyzers" Version="0.1.0" PrivateAssets="all" />
+    <PackageReference Include="GitVersion.MsBuild" Version="6.8.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -35,10 +37,45 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GitIssue\GitIssue.csproj" />
+    <ProjectReference Include="..\GitIssue.Services\GitIssue.Services.csproj" />
+    <ProjectReference Include="..\GitIssue.Services.Mcp\GitIssue.Services.Mcp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="GitIssue.Tool.Tests" />
   </ItemGroup>
+
+  <Target Name="CopyWebHost" AfterTargets="Build">
+    <PropertyGroup>
+      <WebHostOutput>$(MSBuildThisFileDirectory)..\.output\GitIssue.Services.Web\bin\$(Configuration)\$(TargetFramework)\</WebHostOutput>
+    </PropertyGroup>
+    <MSBuild
+      Projects="$(MSBuildThisFileDirectory)..\GitIssue.Services.Web\GitIssue.Services.Web.csproj"
+      Targets="Build"
+      Properties="Configuration=$(Configuration)" />
+    <ItemGroup>
+      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.dll" />
+      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.pdb" />
+      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.deps.json" />
+      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.runtimeconfig.json" />
+    </ItemGroup>
+    <Copy SourceFiles="@(WebHostFile)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="AddWebHostToPublish" AfterTargets="ComputeFilesToPublish">
+    <PropertyGroup>
+      <WebHostOutput>$(MSBuildThisFileDirectory)..\.output\GitIssue.Services.Web\bin\$(Configuration)\$(TargetFramework)\</WebHostOutput>
+    </PropertyGroup>
+    <ItemGroup>
+      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.dll" />
+      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.pdb" />
+      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.deps.json" />
+      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.runtimeconfig.json" />
+      <ResolvedFileToPublish Include="@(WebHostFile)">
+        <RelativePath>%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 
 </Project>

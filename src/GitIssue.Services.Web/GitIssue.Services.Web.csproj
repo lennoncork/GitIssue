@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Exceptionable>enable</Exceptionable>
+    <IsPackable>false</IsPackable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Exceptionable" Version="0.1.0" />
+    <PackageReference Include="Exceptionable.Analyzers" Version="0.1.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GitIssue.Services\GitIssue.Services.csproj" />
+    <ProjectReference Include="..\GitIssue\GitIssue.csproj" />
+  </ItemGroup>
+
+</Project>
