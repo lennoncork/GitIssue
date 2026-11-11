@@ -5,7 +5,6 @@ using GitIssue.Fields;
 using GitIssue.Fields.Array;
 using GitIssue.Issues;
 using Serilog;
-using String = GitIssue.Values.String;
 
 namespace GitIssue.Tool.Commands.Comment
 {
@@ -73,8 +72,6 @@ namespace GitIssue.Tool.Commands.Comment
                         this.logger?.Error($"Comment \"{options.Comment}\" is not valid");
                         this.ExitCode = 1;
                     }
-
-                    arrayField.Add(String.Parse(options.Comment));
                 }
             }
         }
