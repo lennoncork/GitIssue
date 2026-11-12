@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GitIssue.Fields;
+using GitIssue.Issues.Json;
 using GitIssue.Services;
 using GitIssue.Services.Mcp.Tools;
 using LibGit2Sharp;
@@ -102,6 +105,39 @@ namespace GitIssue.Services.Mcp.Tests
                 Assert.That(tools.GetChanges().Any(change => change.Key == created.Key), Is.True);
                 Assert.That(issueJson, Does.Contain(created.Key));
                 Assert.That(resources.Schema(), Does.Contain("Comments"));
+            });
+        }
+
+        [Test]
+        public async Task Tools_CreateAndInspectTypedIssue()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            string path = Path.Combine(fixture.Directory, ".issues", "config.json");
+            IssueConfiguration configuration = IssueConfiguration.Read(path);
+            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.Fields)
+            {
+                ["Severity"] = new FieldInfo<GitIssue.Values.String, JsonValueField>(true),
+            };
+            configuration.Issues.Add(new IssueTypeConfiguration { Name = "ISSUE", Fields = configuration.Fields });
+            configuration.Issues.Add(new IssueTypeConfiguration { Name = "BUG", Fields = bug });
+            configuration.Save(path);
+
+            using IssueWorkspace service = fixture.Open();
+            IssueTools tools = new IssueTools(new IssueSession(() => service));
+            IssueDocument created = await tools.CreateIssue(
+                "A bug", "Description", CancellationToken.None, "BUG",
+                new Dictionary<string, string> { ["Severity"] = "high" });
+            IssueDocument loaded = await tools.GetIssue(created.Key, CancellationToken.None);
+            Assert.Multiple(() =>
+            {
+                Assert.That(loaded.IssueType, Is.EqualTo("BUG"));
+                Assert.That(loaded.Fields["Severity"].GetString(), Is.EqualTo("high"));
+                Assert.That(tools.ListIssueTypes(), Is.EqualTo(new[] { "ISSUE", "BUG" }));
+                Assert.That(tools.ListFields("BUG").Any(field => field.Name == "Severity"), Is.True);
+                Assert.That(tools.ListFields("ISSUE").Any(field => field.Name == "Severity"), Is.False);
+                Assert.That(
+                    async () => await tools.UpdateIssue(created.Key, "IssueType", "ISSUE", CancellationToken.None),
+                    Throws.TypeOf<IssueOperationException>());
             });
         }
 

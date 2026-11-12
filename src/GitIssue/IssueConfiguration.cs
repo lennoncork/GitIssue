@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -44,6 +45,35 @@ namespace GitIssue
         public Dictionary<FieldKey, FieldInfo> Fields { get; set; }
 
         /// <inheritdoc />
+        public List<IssueTypeConfiguration> Issues { get; set; } = new List<IssueTypeConfiguration>();
+
+        /// <inheritdoc />
+        public Dictionary<FieldKey, FieldInfo> GetFields(string issueType)
+        {
+            IssueTypeName.Validate(issueType);
+            Dictionary<FieldKey, FieldInfo> fields;
+            if (this.Issues.Count == 0)
+            {
+                fields = this.Fields;
+            }
+            else
+            {
+                IssueTypeConfiguration? match = this.Issues.SingleOrDefault(
+                    issue => string.Equals(issue.Name, issueType, StringComparison.Ordinal));
+                fields = match?.Fields ?? throw new ArgumentException($"Unknown issue type '{issueType}'.", nameof(issueType));
+            }
+
+            Dictionary<FieldKey, FieldInfo> schema = new Dictionary<FieldKey, FieldInfo>(fields);
+            if (schema.Keys.Any(key => string.Equals(key.ToString(), "IssueType", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new ArgumentException("'IssueType' is reserved for the issue type identifier.");
+            }
+
+            schema.Add(FieldKey.Create("IssueType"), new FieldInfo<String, JsonValueField>(false));
+            return schema;
+        }
+
+        /// <inheritdoc />
         public TypeValue KeyProvider { get; set; }
 
         /// <inheritdoc />
@@ -80,7 +110,7 @@ namespace GitIssue
             {
                 string json = File.ReadAllText(file);
                 T configuration = JsonSerializer.Deserialize<T>(json, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
-                IssueTypeName.Validate(configuration.IssueType);
+                configuration.validateTypes();
                 if (!IssueConfiguration.hasStorageProperty(json))
                 {
                     configuration.Storage = IssueStorage.Json;
@@ -125,7 +155,7 @@ namespace GitIssue
         {
             try
             {
-                IssueTypeName.Validate(this.IssueType);
+                this.validateTypes();
                 this.normalizeKeyTemplate();
                 string json = JsonSerializer.Serialize(this, typeof(T), JsonSerialization.IndentedOptions);
                 Paths.WriteAllTextAsync(file, json).GetAwaiter().GetResult();
@@ -142,6 +172,63 @@ namespace GitIssue
                 (string.IsNullOrWhiteSpace(this.KeyTemplate) || (this.KeyTemplate == IssueKeyTemplate.Date)))
             {
                 this.KeyTemplate = IssueKeyTemplate.Name;
+            }
+        }
+
+        private void validateTypes()
+        {
+            IssueTypeName.Validate(this.IssueType);
+            if (this.Issues == null)
+            {
+                throw new ArgumentException("Issues must be an array.");
+            }
+
+            HashSet<string> names = new HashSet<string>(StringComparer.Ordinal);
+            foreach (IssueTypeConfiguration issue in this.Issues)
+            {
+                if (issue == null)
+                {
+                    throw new ArgumentException("Issue type definitions cannot be null.");
+                }
+
+                IssueTypeName.Validate(issue.Name);
+                if (!names.Add(issue.Name))
+                {
+                    throw new ArgumentException($"Duplicate issue type '{issue.Name}'.");
+                }
+
+                if (issue.Fields == null)
+                {
+                    throw new ArgumentException($"Issue type '{issue.Name}' has no field schema.");
+                }
+
+                if (issue.Fields.Keys.Any(key => string.Equals(key.ToString(), "IssueType", StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new ArgumentException("'IssueType' is reserved for the issue type identifier.");
+                }
+
+                if (issue.Fields.Any(field => field.Value == null))
+                {
+                    throw new ArgumentException($"Issue type '{issue.Name}' contains an empty field definition.");
+                }
+
+                Dictionary<FieldKey, FieldInfo> core = new IssueConfiguration().Fields;
+                foreach (string fieldName in new[] { "Key", "Title", "Description", "Author", "Created", "Updated" })
+                {
+                    FieldKey fieldKey = FieldKey.Create(fieldName);
+                    if (!issue.Fields.TryGetValue(fieldKey, out FieldInfo? actual) || actual == null ||
+                        actual.ValueType.Type != core[fieldKey].ValueType.Type ||
+                        actual.FieldType.Type != core[fieldKey].FieldType.Type ||
+                        !actual.Required)
+                    {
+                        throw new ArgumentException($"Issue type '{issue.Name}' requires the standard '{fieldName}' field.");
+                    }
+                }
+            }
+
+            if ((this.Issues.Count > 0) && !names.Contains(this.IssueType))
+            {
+                throw new ArgumentException($"Default issue type '{this.IssueType}' is not configured.");
             }
         }
     }

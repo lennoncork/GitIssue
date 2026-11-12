@@ -164,7 +164,9 @@ namespace GitIssue.Issues
             DateTime created = (DateTime)issue.Created;
             return new IssueKeyContext
             {
-                Type = matchedCurrentKey && template.HasType ? matched.Type : this.configuration.IssueType,
+                Type = string.IsNullOrEmpty(issue.IssueType)
+                    ? (matchedCurrentKey && template.HasType ? matched.Type : this.configuration.IssueType)
+                    : issue.IssueType,
                 Created = created == default ? (matched.Created == default ? DateTime.Now : matched.Created) : created,
                 Index = matched.Index,
                 Uid = string.IsNullOrEmpty(matched.Uid)

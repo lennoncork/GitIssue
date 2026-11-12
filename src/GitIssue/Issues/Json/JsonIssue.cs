@@ -38,6 +38,9 @@ namespace GitIssue.Issues.Json
         /// </summary>
         protected readonly IDictionary<FieldKey, FieldInfo>? schema;
 
+        private string? expectedIssueType;
+        private IReadOnlyList<IssueValidationError> sourceErrors = Array.Empty<IssueValidationError>();
+
         /// <summary>
         ///     Initializes a new instance of a <see cref="JsonIssue" /> class
         /// </summary>
@@ -147,6 +150,13 @@ namespace GitIssue.Issues.Json
                 issue.fields[key] = valueField;
             }
 
+            string json = await System.IO.File.ReadAllTextAsync(issue.Json);
+            issue.SetSourceErrors(IssueValidator.ValidateJson(json, root.Key, fields));
+            if (!string.IsNullOrEmpty(issue.IssueType))
+            {
+                issue.SetIssueType(issue.IssueType);
+            }
+
             return issue;
         }
 
@@ -189,6 +199,16 @@ namespace GitIssue.Issues.Json
         /// </summary>
         protected void EnsureValid()
         {
+            if (this.sourceErrors.Count > 0)
+            {
+                throw new IssueValidationException(this.Key, this.sourceErrors);
+            }
+
+            if (this.expectedIssueType != null && this.IssueType != this.expectedIssueType)
+            {
+                throw new InvalidOperationException("An issue's type cannot be changed by editing its fields.");
+            }
+
             if (this.schema == null)
             {
                 return;
@@ -199,6 +219,17 @@ namespace GitIssue.Issues.Json
             {
                 throw new IssueValidationException(this.Key, errors);
             }
+        }
+
+        internal void SetIssueType(string type)
+        {
+            this.expectedIssueType = IssueTypeName.Validate(type);
+            this.SetField("IssueType").WithValue(GitIssue.Values.String.Parse(type));
+        }
+
+        internal void SetSourceErrors(IReadOnlyList<IssueValidationError> errors)
+        {
+            this.sourceErrors = errors;
         }
 
         /// <inheritdoc />

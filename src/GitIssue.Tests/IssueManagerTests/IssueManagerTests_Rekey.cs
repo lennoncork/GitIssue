@@ -33,7 +33,7 @@ namespace GitIssue.Tests.IssueManagerTests
 
                 IReadOnlyList<IssueRekeyResult> results = this.Sut.Rekey();
                 Assert.That(results, Has.Count.EqualTo(1));
-                Assert.That(results[0].To.ToString(), Does.Match(new Regex(@"^FEAT-[A-F0-9]{8}-add-login-page$")));
+                Assert.That(results[0].To.ToString(), Does.Match(new Regex(@"^ISSUE-[A-F0-9]{8}-add-login-page$")));
                 Assert.That(results[0].To.ToString(), Does.Contain(original[^8..]));
 
                 IIssue[] found = this.Sut.Find(_ => true).ToArray();

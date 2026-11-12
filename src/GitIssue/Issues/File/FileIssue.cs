@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues.Json;
+using GitIssue.Validation;
 
 namespace GitIssue.Issues.File
 {
@@ -69,6 +70,13 @@ namespace GitIssue.Issues.File
             {
                 IField valueField = await fields[key].ReadFieldAsync(issue, key);
                 issue.fields[key] = valueField;
+            }
+
+            string json = await System.IO.File.ReadAllTextAsync(issue.Json);
+            issue.SetSourceErrors(IssueValidator.ValidateJson(json, root.Key, fields));
+            if (!string.IsNullOrEmpty(issue.IssueType))
+            {
+                issue.SetIssueType(issue.IssueType);
             }
 
             return issue;

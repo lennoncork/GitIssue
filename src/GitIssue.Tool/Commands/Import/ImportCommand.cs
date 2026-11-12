@@ -53,7 +53,7 @@ namespace GitIssue.Tool.Commands.Import
             {
                 ImportPath = path,
             };
-            await ImportCommand.applyDefaultMappingAsync(importer);
+            await ImportCommand.applyDefaultMappingAsync(importer, this.manager.Configuration);
 
             bool imported = await importer.Import();
             int count = imported ? 1 : 0;
@@ -70,7 +70,7 @@ namespace GitIssue.Tool.Commands.Import
             this.ExitCode = 1;
         }
 
-        private static async Task applyDefaultMappingAsync(FileImporter importer)
+        private static async Task applyDefaultMappingAsync(FileImporter importer, IIssueConfiguration configuration)
         {
             string key = "Key";
             string title = "Title";
@@ -85,6 +85,16 @@ namespace GitIssue.Tool.Commands.Import
                         key = ImportCommand.mapProperty(json, "Key", "key");
                         title = ImportCommand.mapProperty(json, "Title", "title");
                         description = ImportCommand.mapProperty(json, "Description", "description");
+                        IEnumerable<Dictionary<FieldKey, FieldInfo>> schemas = configuration.Issues.Count == 0
+                            ? new[] { configuration.GetFields(configuration.IssueType) }
+                            : configuration.Issues.Select(issue => configuration.GetFields(issue.Name));
+                        foreach (FieldKey field in schemas.SelectMany(schema => schema.Keys).Distinct())
+                        {
+                            if (json.ContainsKey(field.ToString()))
+                            {
+                                importer.Configuration.Mapping[field.ToString()] = field.ToString();
+                            }
+                        }
                     }
                 }
                 catch (JsonException)
@@ -130,16 +140,19 @@ namespace GitIssue.Tool.Commands.Import
 
             string[] fields = header.Split(options.Separator);
             Dictionary<FieldKey, int> mapping = new Dictionary<FieldKey, int>();
-            foreach (KeyValuePair<FieldKey, FieldInfo> field in this.manager.Configuration.Fields)
+            IEnumerable<Dictionary<FieldKey, FieldInfo>> schemas = this.manager.Configuration.Issues.Count == 0
+                ? new[] { this.manager.Configuration.GetFields(this.manager.Configuration.IssueType) }
+                : this.manager.Configuration.Issues.Select(issue => this.manager.Configuration.GetFields(issue.Name));
+            foreach (FieldKey field in schemas.SelectMany(schema => schema.Keys).Distinct())
             {
                 int? index = fields.Select((f, i) => new { Field = f, Index = i })
-                    .Where(x => x.Field == field.Key.ToString())
+                    .Where(x => x.Field == field.ToString())
                     .Select(x => (int?)x.Index)
                     .FirstOrDefault();
 
                 if (index.HasValue)
                 {
-                    mapping[field.Key] = index.Value;
+                    mapping[field] = index.Value;
                 }
             }
 
@@ -167,10 +180,14 @@ namespace GitIssue.Tool.Commands.Import
                 string[] import = line.Split(options.Separator);
                 if (import.Length != fields.Length)
                 {
-                    continue;
+                    throw new InvalidDataException("A CSV row does not match the header column count.");
                 }
 
                 string sourceKey = import[mapping["Key"]];
+                string issueType = mapping.TryGetValue("IssueType", out int typeIndex)
+                    ? import[typeIndex]
+                    : this.manager.Configuration.IssueType;
+                Dictionary<FieldKey, FieldInfo> schema = this.manager.Configuration.GetFields(issueType);
                 IIssue? issue = null;
                 await foreach (IIssue found in this.manager.FindAsync(i => i.Key == sourceKey))
                 {
@@ -180,6 +197,11 @@ namespace GitIssue.Tool.Commands.Import
 
                 if (issue != null)
                 {
+                    if (issue.IssueType != issueType)
+                    {
+                        throw new InvalidOperationException($"Issue '{issue.Key}' has type '{issue.IssueType}', not '{issueType}'.");
+                    }
+
                     if (!options.Overwrite)
                     {
                         Console.WriteLine($"Skipping {issue.Key}; it already exists. Use --Update to overwrite.");
@@ -194,10 +216,30 @@ namespace GitIssue.Tool.Commands.Import
                 else
                 {
                     Console.WriteLine($"Creating {sourceKey}");
-                    issue = await this.manager.CreateAsync(import[mapping["Title"]]);
-                    this.applyFields(issue, mapping, import);
-                    issue.Updated = DateTime.Now;
-                    await issue.SaveAsync();
+                    List<IField> initial = new List<IField>();
+                    foreach (KeyValuePair<FieldKey, int> map in mapping)
+                    {
+                        if (map.Key == "Key" || map.Key == "IssueType" || map.Key == "Title" ||
+                            string.IsNullOrEmpty(import[map.Value]))
+                        {
+                            continue;
+                        }
+
+                        if (!schema.TryGetValue(map.Key, out FieldInfo? info))
+                        {
+                            throw new InvalidOperationException($"Field '{map.Key}' does not exist on issue type '{issueType}'.");
+                        }
+
+                        IField field = info.CreateField(null!, map.Key);
+                        if (!field.Update(import[map.Value]))
+                        {
+                            throw new InvalidOperationException($"Invalid value for field '{map.Key}'.");
+                        }
+
+                        initial.Add(field);
+                    }
+
+                    issue = await this.manager.CreateAsync(import[mapping["Title"]], string.Empty, issueType, initial);
                 }
 
                 count++;
@@ -212,20 +254,24 @@ namespace GitIssue.Tool.Commands.Import
         {
             foreach (KeyValuePair<FieldKey, int> map in mapping)
             {
-                if (map.Key == "Key")
+                if (map.Key == "Key" || map.Key == "IssueType")
                 {
                     continue;
                 }
 
                 if (!issue.ContainsKey(map.Key))
                 {
-                    this.logger.Error($"Field \"{map.Key}\" does not exist on issue \"{issue.Key}\"");
+                    if (!string.IsNullOrEmpty(values[map.Value]))
+                    {
+                        throw new InvalidOperationException($"Field \"{map.Key}\" does not exist on issue \"{issue.Key}\"");
+                    }
+
                     continue;
                 }
 
                 if (!issue[map.Key].Update(values[map.Value]))
                 {
-                    this.logger.Error($"Failed to update field \"{map.Key}\" on issue \"{issue.Key}\"");
+                    throw new InvalidOperationException($"Failed to update field \"{map.Key}\" on issue \"{issue.Key}\"");
                 }
             }
         }

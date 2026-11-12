@@ -25,6 +25,11 @@
                     <label>Key</label>
                     <p>@issue.Key (read-only)</p>
                 }
+                else if (string.Equals(field.Name, "IssueType", StringComparison.OrdinalIgnoreCase))
+                {
+                    <label>Issue type</label>
+                    <p>@issue.IssueType (read-only)</p>
+                }
                 else if (string.Equals(field.Name, "Updated", StringComparison.OrdinalIgnoreCase))
                 {
                     <label>Updated</label>
@@ -74,7 +79,7 @@
         try
         {
             issue = await Workspace.GetIssueAsync(Key ?? string.Empty, CancellationToken.None);
-            fields = Workspace.ListFields();
+            fields = Workspace.ListFields(issue.IssueType);
         }
         catch (IssueOperationException exception)
         {

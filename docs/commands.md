@@ -16,9 +16,9 @@ Options are case-insensitive. Run `gitissue <command> --help` for parser-generat
 
 | Command | Usage | Description |
 | --- | --- | --- |
-| `init` | `init [--storage markdown\|json] [--key-provider date\|name\|template] [--key-template TEMPLATE] [--issue-type TYPE]` | Initialize issue data in the current repository. The default directory is `.issues`. Each issue is saved as Markdown unless `--storage json` is set. `--key-provider date` (the default) uses `{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `--key-provider name` uses `{uid} - {name}`. `--key-template` selects `TemplateIssueKeyProvider` and the given pattern, for example `{type}-{created}-{index}-{uid}-{slug}`. `--issue-type` sets the `{type}` token (default `ISSUE`). |
-| `create` | `create [Title] [Description]` | Create an issue. If no title is given, the default editor opens. A new issue is tracked if no issue is currently tracked; `--Track` forces tracking of the new issue. |
-| `fields` | `fields` | List configured fields and their types. |
+| `init` | `init [--storage markdown\|json] [--key-provider date\|name\|template] [--key-template TEMPLATE] [--issue-type TYPE]` | Initialize issue data in the current repository. The default directory is `.issues`. Each issue is saved as Markdown unless `--storage json` is set. `--key-provider date` (the default) uses `{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `--key-provider name` uses `{uid} - {name}`. `--key-template` selects `TemplateIssueKeyProvider` and the given pattern, for example `{type}-{created}-{index}-{uid}-{slug}`. `--issue-type` sets the default type (default `ISSUE`). |
+| `create` | `create [Title] [Description] [--type TYPE] [--field NAME=VALUE ...]` | Create an issue using the selected or default type. Supply required custom fields with `--field`. If no title is given, the default editor opens. A new issue is tracked if no issue is currently tracked; `--Track` forces tracking. |
+| `fields` | `fields [--type TYPE]` | List fields for the selected or default issue type. |
 | `validate` | `validate [Issue Key]` | Check issue documents against the configured fields. Omit the key to check every issue. `.`, `T`, and `Tracked` select the tracked issue. The command exits with code 1 when any field is invalid. |
 
 ## View, search, and track
@@ -70,7 +70,7 @@ gitissue delete ISSUE_KEY
 | `import` | `import [File] [--Update] [--Separator VALUE]` | Import issues from a `.json` or `.csv` file. JSON import expects `Key` and `Title` properties; `Description` is optional. |
 | `sync` | `sync [File]` | Import issues from a JSON file. |
 | `convert` | `convert --to json\|markdown` | Rewrite every issue into the selected storage format and update `config.json`. |
-| `rekey` | `rekey [--dry-run]` | Rewrite issue keys and file names from the current `KeyTemplate` and `IssueType`. `--dry-run` prints the planned renames without writing. |
+| `rekey` | `rekey [--dry-run]` | Rewrite issue keys and file names from the current `KeyTemplate` and each issue's stored type. `--dry-run` prints the planned renames without writing. |
 
 Examples:
 
@@ -82,9 +82,9 @@ gitissue import issues.csv --Separator ";"
 gitissue commit
 ```
 
-CSV import/export uses a simple separator-based format with a header row. The header names must match configured field names (for example `Key;Title;Description`). The parser splits on the specified separator; it is not a full quoted-CSV parser. CSV import currently uses `Key` to find an issue and `Title` to create a new issue; it does not import the other CSV field values. The `--Update` option is accepted, but is not currently applied by the command implementation.
+CSV import/export uses a simple separator-based format with a header row. The header names must match configured field names (for example `Key;Title;Description`). The parser splits on the specified separator; it is not a full quoted-CSV parser. Export includes the union of configured fields and `IssueType`. Import uses the type to select a schema, imports matching field values, and uses the default type if the column is absent. `--Update` permits updating existing issues; it does not change an issue's type.
 
-JSON import reads one JSON object representing an issue and requires `Key` and `Title`; `Description` is optional. For example:
+JSON import reads one JSON object representing an issue and requires `Key` and `Title`; `Description` and `IssueType` are optional. A missing type uses the configured default. Include any required type-specific fields. For example:
 
 ```json
 {
@@ -115,7 +115,7 @@ After install, reload Visual Studio Code or run **MCP: List Servers**, then trus
 gitissue mcp install --command dotnet --name work-items
 ```
 
-The server provides tools for listing, reading, finding, creating, and updating issues, plus the field schema, tracked issue, and change log. `find_issues` uses structured filters. It does not evaluate the C# expressions accepted by `gitissue find`.
+The server provides tools for listing, reading, finding, creating, and updating issues, plus the field schema, tracked issue, and change log. `list_issue_types` lists configured types; `list_fields` accepts an optional type, and `create_issue` accepts a type and initial field values. `find_issues` uses structured filters. It does not evaluate the C# expressions accepted by `gitissue find`.
 
 ## Web server
 
@@ -137,7 +137,7 @@ The landing page shows the tracked issue and a table of issues. Search matches
 the issue key, title, or description without regard to case. Results are
 displayed 10 per page, and the previous and next links retain the search.
 Select an issue key to open its details. Each configured field has a separate
-save button; the issue key is read-only and the updated timestamp is set
+save button; the issue key and issue type are read-only and the updated timestamp is set
 automatically on save. Array fields use the same syntax as
 the CLI: `+value` adds, `-value` removes, and `[value1, value2]` replaces the
 contents. `[]` clears the array. Validation errors are shown on the page.

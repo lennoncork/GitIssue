@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
@@ -22,6 +23,56 @@ namespace GitIssue.Issues.Markdown
         private static readonly MarkdownPipeline pipeline = new MarkdownPipelineBuilder()
             .UsePreciseSourceLocation()
             .Build();
+
+        /// <summary>
+        ///     Reads the schema discriminator without needing the issue's schema.
+        /// </summary>
+        /// <param name="markdown">the issue document</param>
+        /// <returns>the stored issue type, or null for a legacy document</returns>
+        public static string? ReadIssueType(string markdown)
+        {
+            string text = markdown.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
+            MarkdownDocument document = Markdig.Markdown.Parse(text, MarkdownIssueFormat.pipeline);
+            HeadingBlock? found = null;
+            int end = text.Length;
+            foreach (Block block in document)
+            {
+                if (block is not HeadingBlock heading || heading.Level > 2)
+                {
+                    continue;
+                }
+
+                if (found != null && end == text.Length)
+                {
+                    end = heading.Span.Start;
+                }
+
+                if (heading.Level == 2 && MarkdownIssueFormat.inlineText(heading.Inline).Trim() == "IssueType")
+                {
+                    if (found != null)
+                    {
+                        throw new InvalidDataException("Duplicate IssueType fields in Markdown issue.");
+                    }
+
+                    found = heading;
+                }
+            }
+
+            if (found == null)
+            {
+                return null;
+            }
+
+            string value = MarkdownIssueFormat.slice(text, found.Span.End + 1, end);
+            try
+            {
+                return IssueTypeName.Validate(value);
+            }
+            catch (ArgumentException exception)
+            {
+                throw new InvalidDataException("Invalid IssueType in Markdown issue.", exception);
+            }
+        }
 
         /// <summary>
         ///     Reads issue fields from a Markdown document

@@ -37,6 +37,7 @@ namespace GitIssue.Services.Mcp.Tests
                     "get_issue",
                     "find_issues",
                     "list_fields",
+                    "list_issue_types",
                     "get_tracked_issue",
                     "get_changes",
                     "create_issue",
