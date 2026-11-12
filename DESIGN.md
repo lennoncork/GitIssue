@@ -161,10 +161,9 @@ script, passing `install chromium` (or `install --with-deps chromium` on a
 Linux machine that needs system dependencies). The build workflow installs it
 before running tests and coverage.
 
-The GitHub Actions build workflow runs on Windows and Ubuntu 24.04 with .NET 10 and
+The GitHub Actions build workflow runs on Windows and Ubuntu with .NET 10 and
 invokes Cake targets for build, formatting, analyzers, validation, tests, and
-coverage reporting. Ubuntu is pinned to 24.04 because the Playwright version
-used by the web tests does not support Ubuntu 26.04.
+coverage reporting.
 
 Tests use NUnit and temporary Git repositories to exercise the library and
 CLI behavior. Prefer focused tests in the relevant test project, then use the
