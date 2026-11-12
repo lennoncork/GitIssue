@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Exceptionable;
+using GitIssue.Fields;
 using GitIssue.Issues;
 using LibGit2Sharp;
 
@@ -91,6 +92,16 @@ namespace GitIssue
         /// <param name="description">the issue description</param>
         /// <returns></returns>
         Task<IIssue> CreateAsync(string title, string description);
+
+        /// <summary>
+        ///     Creates an issue of the specified type with its initial fields.
+        /// </summary>
+        /// <param name="title">the issue title</param>
+        /// <param name="description">the issue description</param>
+        /// <param name="issueType">the configured issue type</param>
+        /// <param name="fields">additional initial field values</param>
+        /// <returns>the created issue</returns>
+        Task<IIssue> CreateAsync(string title, string description, string issueType, IEnumerable<IField> fields);
 
         /// <summary>
         ///     Regenerates issue keys and file names from the configured key template

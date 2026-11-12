@@ -38,6 +38,11 @@ namespace GitIssue.Issues
         IssueKey Key { get; }
 
         /// <summary>
+        ///     Gets the identifier of the schema used by this issue.
+        /// </summary>
+        string IssueType { get; }
+
+        /// <summary>
         ///     Gets or sets the issue title
         /// </summary>
         String Title { get; }

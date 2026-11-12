@@ -44,6 +44,7 @@ namespace GitIssue.Services
             return new IssueDocument
             {
                 Key = issue.Key.ToString(),
+                IssueType = issue.IssueType,
                 Title = IssueDocumentMapper.readString(json, "Title"),
                 Description = IssueDocumentMapper.readString(json, "Description"),
                 Author = IssueDocumentMapper.readString(json, "Author"),

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -66,15 +67,19 @@ namespace GitIssue.Tool.Commands.Export
             await using FileStream stream = new FileStream(options.Export, FileMode.Create, FileAccess.ReadWrite);
             using TextWriter writer = new StreamWriter(stream);
 
+            IEnumerable<Dictionary<FieldKey, FieldInfo>> schemas = this.manager.Configuration.Issues.Count == 0
+                ? new[] { this.manager.Configuration.GetFields(this.manager.Configuration.IssueType) }
+                : this.manager.Configuration.Issues.Select(issue => this.manager.Configuration.GetFields(issue.Name));
+            FieldKey[] columns = schemas.SelectMany(schema => schema.Keys).Distinct().ToArray();
             StringBuilder builder = new StringBuilder();
-            foreach (KeyValuePair<FieldKey, FieldInfo> field in this.manager.Configuration.Fields)
+            foreach (FieldKey field in columns)
             {
                 if (builder.Length != 0)
                 {
                     builder.Append(options.Separator);
                 }
 
-                builder.Append(field.Key.ToString());
+                builder.Append(field.ToString());
             }
 
             await writer.WriteLineAsync(builder.ToString());
@@ -83,14 +88,17 @@ namespace GitIssue.Tool.Commands.Export
             await foreach (IIssue issue in this.manager.FindAsync(i => true))
             {
                 builder.Clear();
-                foreach (KeyValuePair<FieldKey, FieldInfo> field in this.manager.Configuration.Fields)
+                foreach (FieldKey field in columns)
                 {
                     if (builder.Length != 0)
                     {
                         builder.Append(options.Separator);
                     }
 
-                    builder.Append(issue[field.Key]);
+                    if (issue.TryGetValue(field, out IField? value))
+                    {
+                        builder.Append(value);
+                    }
                 }
 
                 await writer.WriteLineAsync(builder.ToString());

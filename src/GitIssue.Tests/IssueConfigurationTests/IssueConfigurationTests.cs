@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using GitIssue.Fields;
 using GitIssue.Issues;
@@ -38,6 +39,25 @@ namespace GitIssue.Tests.IssueConfigurationTests
         [TestFixture]
         public class SaveAndRead : IssueConfigurationTests
         {
+            [Test]
+            public void Save_RejectsMissingCoreFieldsAndDuplicateTypes()
+            {
+                string file = Path.Combine(Helpers.CreateTempDirectory(), "config.json");
+                IssueConfiguration config = new IssueConfiguration();
+                config.Issues.Add(new IssueTypeConfiguration { Name = "ISSUE" });
+                Assert.That(() => config.Save(file), Throws.TypeOf<AggregateException>());
+                Assert.That(File.Exists(file), Is.False);
+
+                config.Issues[0].Fields = new Dictionary<FieldKey, FieldInfo>(config.Fields);
+                config.Issues.Add(new IssueTypeConfiguration
+                {
+                    Name = "ISSUE",
+                    Fields = new Dictionary<FieldKey, FieldInfo>(config.Fields),
+                });
+                Assert.That(() => config.Save(file), Throws.TypeOf<AggregateException>());
+                Assert.That(File.Exists(file), Is.False);
+            }
+
             [TestCase("bug fix")]
             [TestCase("bug_fix")]
             [TestCase("")]

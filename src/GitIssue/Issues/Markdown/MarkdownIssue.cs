@@ -111,7 +111,14 @@ namespace GitIssue.Issues.Markdown
 
             MarkdownIssue issue = new MarkdownIssue(root, fields);
             string text = await global::System.IO.File.ReadAllTextAsync(path);
-            issue.Apply(MarkdownIssueFormat.Read(text, root.Key, fields));
+            MarkdownRead read = MarkdownIssueFormat.Read(text, root.Key, fields);
+            issue.Apply(read);
+            issue.SetSourceErrors(read.Errors);
+            if (!string.IsNullOrEmpty(issue.IssueType))
+            {
+                issue.SetIssueType(issue.IssueType);
+            }
+
             return issue;
         }
 

@@ -73,19 +73,21 @@ repository, change-log, and persistence services. Autofac registrations in
 `GitIssueModule` provide the default implementations and allow selected
 services to be overridden. `IIssueKeyProvider` implementations generate unique
 issue keys and map them to directories. `config.json` stores `KeyProvider`,
-`KeyTemplate`, and `IssueType`. The template is the source of truth and can
+`KeyTemplate`, a default `IssueType`, and optionally named `Issues` schemas. The template can
 include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
 `DateIssueKeyProvider` and `NameIssueKeyProvider` are presets of
-`TemplateIssueKeyProvider`. `gitissue rekey` regenerates on-disk names after
-the template or type changes. Existing configuration that names
+`TemplateIssueKeyProvider`. `gitissue rekey` regenerates on-disk names from
+the template and each issue's type. Existing configuration that names
 `FileIssueKeyProvider` continues to use the date-based provider.
 
 An issue is modeled by `IIssue` and the abstract `Issue` base class. Fields are
 identified by `FieldKey` and described by `FieldInfo`, which specifies the
 value type, field representation, required status, and metadata. The default
 `IssueConfiguration` defines key, title, description, author, created and
-updated timestamps, labels, and comments. Field factories and readers create
-typed scalar or array fields from this schema; the value types and type
+updated timestamps, labels, and comments. A reserved `IssueType` field selects
+the schema stored under `Issues`; configurations without that array use the
+legacy shared `Fields` schema. Field factories and readers create
+typed scalar or array fields from the selected schema; the value types and type
 converters provide serialization and parsing for the supported domain values.
 
 ### Repository data and persistence
@@ -96,7 +98,10 @@ the JSON configuration and issue data. `IssueConfiguration.Storage` selects
 the issue document and defaults to `Markdown`. `Json` keeps the
 `FileIssue`/`JsonIssue` document, including when an existing configuration
 omits `Storage`. `Markdown` stores the same fields in one Markdown file, read
-and written with Markdig. `IssueValidator` checks each field against its configured type,
+and written with Markdig. Readers inspect the stored `IssueType` before selecting
+the schema; legacy documents without it use the configured default. Invalid or
+unknown source fields prevent saving so they cannot be silently discarded.
+`IssueValidator` checks each field against its configured type,
 metadata, and required flag. `gitissue validate` reports those errors, and
 save, edit, and convert refuse to write an invalid document. The library also
 contains file-backed field implementations, allowing an individual field to be
@@ -158,10 +163,7 @@ before running tests and coverage.
 
 The GitHub Actions build workflow runs on Windows and Ubuntu with .NET 10 and
 invokes Cake targets for build, formatting, analyzers, validation, tests, and
-coverage reporting. The workflow currently names a `Validate` target, while
-`build.cake` does not define one; treat the declared Cake targets as the
-authoritative local commands until that workflow/target discrepancy is
-resolved.
+coverage reporting.
 
 Tests use NUnit and temporary Git repositories to exercise the library and
 CLI behavior. Prefer focused tests in the relevant test project, then use the

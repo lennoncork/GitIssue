@@ -20,6 +20,7 @@ gitissue fields
 | `Updated` | Scalar date/time | Yes | Last update time. |
 | `Labels` | Array of labels | No | Labels for categorization. |
 | `Comments` | Array of strings | No | Issue comments. |
+| `IssueType` | Scalar string | Automatically managed | Selects the issue's schema; read-only through issue commands. |
 
 Required fields are part of the default schema. Array fields support `add` and `remove`; use `edit` for scalar fields.
 
@@ -65,9 +66,54 @@ Ada Lovelace <ada@example.com>
 
 `gitissue convert --to markdown` and `gitissue convert --to json` rewrite every issue and update `Storage`. Before writing, the command validates the source documents and stops if any document is invalid or an issue already has both a `.json` and a `.md` file. Correct the reported errors before converting so unknown or invalid fields are not discarded.
 
+## Multiple issue types
+
+The root `IssueType` is the default type. To give types different fields, define an `Issues` array. Each entry supplies its complete `Fields` schema, including the required core fields shown below. Names are case-sensitive and use ASCII letters and digits. `IssueType` is reserved: do not define it in `Fields`.
+
+```json
+{
+  "IssueType": "BUG",
+  "KeyProvider": "DateIssueKeyProvider",
+  "KeyTemplate": "{created:yyyy}/{created:MM}/{created:dd}/{uid}",
+  "Storage": "Markdown",
+  "Issues": [
+    {
+      "Name": "BUG",
+      "Fields": {
+        "Key": { "FieldType": "ValueField", "ValueType": "IssueKey", "Required": true },
+        "Title": { "FieldType": "ValueField", "ValueType": "String", "Required": true },
+        "Description": { "FieldType": "ValueField", "ValueType": "String", "Required": true },
+        "Author": { "FieldType": "ValueField", "ValueType": "Signature", "Required": true },
+        "Created": { "FieldType": "ValueField", "ValueType": "DateTime", "Required": true },
+        "Updated": { "FieldType": "ValueField", "ValueType": "DateTime", "Required": true },
+        "Severity": { "FieldType": "ValueField", "ValueType": "String", "Required": true }
+      }
+    },
+    {
+      "Name": "FEATURE",
+      "Fields": {
+        "Key": { "FieldType": "ValueField", "ValueType": "IssueKey", "Required": true },
+        "Title": { "FieldType": "ValueField", "ValueType": "String", "Required": true },
+        "Description": { "FieldType": "ValueField", "ValueType": "String", "Required": true },
+        "Author": { "FieldType": "ValueField", "ValueType": "Signature", "Required": true },
+        "Created": { "FieldType": "ValueField", "ValueType": "DateTime", "Required": true },
+        "Updated": { "FieldType": "ValueField", "ValueType": "DateTime", "Required": true },
+        "Proposal": { "FieldType": "ValueField", "ValueType": "String", "Required": true }
+      }
+    }
+  ]
+}
+```
+
+The default type must match an entry in `Issues`. Use `gitissue fields --type BUG` to inspect its fields and `gitissue create "Crash" "Details" --type BUG --field Severity=high` to create one. Multiple initial values follow the same `--field` option, for example `--field Severity=high Platform=linux`. When no title is supplied, the editor prompts for the selected type's fields.
+
+The issue document stores its own `IssueType` as a JSON property or Markdown `## IssueType` section. It determines the schema independently of the key and cannot be changed through field editing. Documents without it use the configured default, even if their key contains another type; the type is written on their next save. A document with an invalid type, or a type not listed in `Issues`, is rejected. Before enabling `Issues`, make sure every existing document matches the chosen default schema and resolve any existing custom field named `IssueType`.
+
+Older configurations without `Issues` continue using the root `Fields` schema for all type names. The root `IssueType` remains the default. Changing the default does not change the stored type of existing issues.
+
 ## Issue keys
 
-Issue keys are generated from `KeyTemplate` in `config.json`. `IssueType` supplies the `{type}` token. `KeyProvider` selects the implementation; the template is what actually shapes the key. A `/` in the template becomes a directory. Other characters, including `-`, stay in the folder name. The issue key is the same string with `/` replaced by `-`.
+Issue keys are generated from `KeyTemplate` in `config.json`. The issue's stored `IssueType` supplies the `{type}` token. `KeyProvider` selects the implementation; the template is what actually shapes the key. A `/` in the template becomes a directory. Other characters, including `-`, stay in the folder name. The issue key is the same string with `/` replaced by `-`.
 
 ```shell
 gitissue init
@@ -78,7 +124,7 @@ gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index
 
 | Token | Meaning | Default format |
 | --- | --- | --- |
-| `{type}` | `IssueType` from configuration, ASCII letters and digits only | `ISSUE` |
+| `{type}` | The issue's type, defaulting to the configured `IssueType` | `ISSUE` |
 | `{created}` | Issue creation time. Use .NET date format specifiers, for example `{created:yyyy}`, `{created:MM}`, `{created:dd}`, or `{created:yyyy-MM-dd}` | `yyyy-MM-dd` |
 | `{index}` | Sequential integer assigned in this repository. Use `{index:D3}` for `001`. Unique across clones only if `{uid}` is also present | unpadded |
 | `{uid}` | Eight-character hexadecimal id | n/a |
@@ -93,7 +139,7 @@ gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index
 
 If `KeyTemplate` is set, it overrides the provider's default. Existing repositories that still name `FileIssueKeyProvider` keep date-based behavior until you change the template.
 
-After you edit `KeyTemplate` or `IssueType`, regenerate on-disk names:
+After you edit `KeyTemplate`, regenerate on-disk names:
 
 ```shell
 gitissue rekey --dry-run

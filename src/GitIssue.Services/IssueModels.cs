@@ -14,6 +14,11 @@ namespace GitIssue.Services
         public string Key { get; init; } = string.Empty;
 
         /// <summary>
+        ///     Gets the issue type identifier.
+        /// </summary>
+        public string IssueType { get; init; } = string.Empty;
+
+        /// <summary>
         ///     Gets the issue title
         /// </summary>
         public string Title { get; init; } = string.Empty;

@@ -5,8 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Exceptionable;
+using GitIssue.Fields;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
+using GitIssue.Issues.Json;
 using GitIssue.Issues.Markdown;
 using LibGit2Sharp;
 using Serilog;
@@ -24,6 +26,14 @@ namespace GitIssue
     /// <param name="key"></param>
     /// <returns></returns>
     public delegate IIssue IssueCreation(IssueKey key);
+
+    /// <summary>
+    ///     Creates an issue with a specific configured type.
+    /// </summary>
+    /// <param name="key">the issue key</param>
+    /// <param name="issueType">the issue type</param>
+    /// <returns>the new issue</returns>
+    public delegate IIssue TypedIssueCreation(IssueKey key, string issueType);
 
     /// <summary>
     ///     Delegate for issue deletion
@@ -58,6 +68,8 @@ namespace GitIssue
 
         private readonly IssueLoading issueLoading;
 
+        private readonly TypedIssueCreation? typedIssueCreation;
+
         private readonly ILogger? logger;
         private bool disposed;
 
@@ -74,7 +86,8 @@ namespace GitIssue
             ITrackedIssue tracked,
             IssueCreation issueCreation,
             IssueDeletion issueDeletion,
-            IssueLoading issueLoading)
+            IssueLoading issueLoading,
+            TypedIssueCreation? typedIssueCreation = null)
         {
             this.logger = logger;
             this.Repository = repository;
@@ -87,6 +100,7 @@ namespace GitIssue
             this.issueCreation = issueCreation;
             this.issueDeletion = issueDeletion;
             this.issueLoading = issueLoading;
+            this.typedIssueCreation = typedIssueCreation;
         }
 
         /// <inheritdoc />
@@ -348,11 +362,61 @@ namespace GitIssue
         public async Task<IIssue> CreateAsync(string title, string description)
         {
             IIssue issue = this.issueCreation(this.KeyProvider.Next(title));
+            return await this.initializeIssueAsync(issue, title, description, Array.Empty<IField>());
+        }
+
+        /// <inheritdoc />
+        public async Task<IIssue> CreateAsync(string title, string description, string issueType, IEnumerable<IField> fields)
+        {
+            this.Configuration.GetFields(issueType);
+            if (this.typedIssueCreation == null)
+            {
+                throw new InvalidOperationException("The configured issue factory does not support typed issue creation.");
+            }
+
+            IssueKey key;
+            if (this.KeyProvider is TemplateIssueKeyProvider provider)
+            {
+                IssueKeyContext original = provider.CreateContext(title);
+                key = provider.Create(new IssueKeyContext
+                {
+                    Type = issueType,
+                    Created = original.Created,
+                    Index = original.Index,
+                    Uid = original.Uid,
+                    Name = original.Name,
+                });
+            }
+            else if (issueType == this.Configuration.IssueType)
+            {
+                key = this.KeyProvider.Next(title);
+            }
+            else
+            {
+                throw new InvalidOperationException("The configured key provider does not support non-default issue types.");
+            }
+
+            IIssue issue = this.typedIssueCreation(key, issueType);
+            return await this.initializeIssueAsync(issue, title, description, fields);
+        }
+
+        private async Task<IIssue> initializeIssueAsync(IIssue issue, string title, string description, IEnumerable<IField> fields)
+        {
             issue.Title = title;
             issue.Description = description;
             DateTimeOffset created = DateTimeOffset.Now;
             issue.Created = created.LocalDateTime;
             issue.Author = this.Repository.Config.BuildSignature(created);
+            foreach (IField field in fields)
+            {
+                if (field.Key == "IssueType" || field.Key == "Key" || !issue.ContainsKey(field.Key))
+                {
+                    throw new ArgumentException($"Field '{field.Key}' cannot be supplied for issue type '{issue.IssueType}'.", nameof(fields));
+                }
+
+                issue.SetField(field.Key).WithField(field);
+            }
+
             await issue.SaveAsync();
             this.Changes.Add(issue, ChangeType.Create);
             return issue;
@@ -668,15 +732,27 @@ namespace GitIssue
                 path.StartsWith(root + "/", StringComparison.Ordinal);
         }
 
-        private Task<IIssue?> loadIssue(IssueKey key, string relativePath)
+        private async Task<IIssue?> loadIssue(IssueKey key, string relativePath)
         {
             IssueRoot issueRoot = new IssueRoot(this.Root, key, relativePath);
+            string type = await IssueTypeReader.ReadAsync(issueRoot, this.Configuration);
+            Dictionary<FieldKey, FieldInfo> fields = this.Configuration.GetFields(type);
+            IIssue? issue;
             if (this.Configuration.Storage == IssueStorage.Markdown)
             {
-                return MarkdownIssue.ReadAsync(issueRoot, this.Configuration.Fields);
+                issue = await MarkdownIssue.ReadAsync(issueRoot, fields);
+            }
+            else
+            {
+                issue = await FileIssue.ReadAsync(issueRoot, fields);
             }
 
-            return FileIssue.ReadAsync(issueRoot, this.Configuration.Fields);
+            if (issue is JsonIssue jsonIssue)
+            {
+                jsonIssue.SetIssueType(type);
+            }
+
+            return issue;
         }
 
         private void deleteEmptyParents(string path, string stopAt)

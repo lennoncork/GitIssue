@@ -15,6 +15,18 @@ namespace GitIssue
         Dictionary<FieldKey, FieldInfo> Fields { get; set; }
 
         /// <summary>
+        ///     Gets or sets the configured issue type schemas.
+        /// </summary>
+        List<IssueTypeConfiguration> Issues { get; set; }
+
+        /// <summary>
+        ///     Gets the fields configured for an issue type.
+        /// </summary>
+        /// <param name="issueType">the issue type identifier</param>
+        /// <returns>the issue type's field schema</returns>
+        Dictionary<FieldKey, FieldInfo> GetFields(string issueType);
+
+        /// <summary>
         ///     Gets or sets the key provider
         /// </summary>
         TypeValue KeyProvider { get; set; }

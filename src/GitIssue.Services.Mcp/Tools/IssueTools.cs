@@ -31,7 +31,7 @@ namespace GitIssue.Services.Mcp.Tools
         /// <param name="cancellationToken">the cancellation token</param>
         /// <returns>the issue summaries</returns>
         [McpServerTool(Name = "list_issues")]
-        [Description("Lists issue keys, titles, and descriptions. A feature is an issue whose configured fields, such as Labels or Type, say so.")]
+        [Description("Lists issue keys, titles, and descriptions.")]
         public Task<IReadOnlyList<IssueSummary>> ListIssues(
             [Description("Maximum number of issues to return, from 1 to 200.")] int limit = 50,
             CancellationToken cancellationToken = default)
@@ -91,10 +91,22 @@ namespace GitIssue.Services.Mcp.Tools
         /// </summary>
         /// <returns>the field schema</returns>
         [McpServerTool(Name = "list_fields")]
-        [Description("Lists the configured issue fields. Call this before create_issue or update_issue. Features are represented by these fields, not by a separate record type.")]
-        public IReadOnlyList<FieldDescriptor> ListFields()
+        [Description("Lists the fields for a configured issue type, or the default type.")]
+        public IReadOnlyList<FieldDescriptor> ListFields(
+            [Description("The issue type, or omit for the default type.")] string? issueType = null)
         {
-            return this.session.Open().ListFields();
+            return this.session.Open().ListFields(issueType);
+        }
+
+        /// <summary>
+        ///     Lists the available issue type identifiers.
+        /// </summary>
+        /// <returns>the configured issue types</returns>
+        [McpServerTool(Name = "list_issue_types")]
+        [Description("Lists the configured issue type identifiers.")]
+        public IReadOnlyList<string> ListIssueTypes()
+        {
+            return this.session.Open().ListIssueTypes();
         }
 
         /// <summary>
@@ -125,15 +137,19 @@ namespace GitIssue.Services.Mcp.Tools
         /// <param name="title">the title</param>
         /// <param name="description">the description</param>
         /// <param name="cancellationToken">the cancellation token</param>
+        /// <param name="issueType">the issue type, or null for the default</param>
+        /// <param name="fields">initial field values</param>
         /// <returns>the created document</returns>
         [McpServerTool(Name = "create_issue")]
         [Description("Creates an issue in the working tree and does not commit it.")]
         public Task<IssueDocument> CreateIssue(
             [Description("The issue title.")] string title,
             [Description("The issue description.")] string? description = null,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            [Description("The issue type, or omit for the default type.")] string? issueType = null,
+            [Description("Initial field values by field name.")] IReadOnlyDictionary<string, string>? fields = null)
         {
-            return this.session.Open().CreateIssueAsync(title, description, cancellationToken);
+            return this.session.Open().CreateIssueAsync(title, description, issueType, fields, cancellationToken);
         }
 
         /// <summary>

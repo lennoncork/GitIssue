@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System.Collections.Generic;
+using CommandLine;
 
 namespace GitIssue.Tool.Commands.Create
 {
@@ -17,6 +18,12 @@ namespace GitIssue.Tool.Commands.Create
 
         [Value(0, MetaName = "Title", HelpText = "The issue title", Required = false)]
         public string Title { get; set; } = string.Empty;
+
+        [Option("type", HelpText = "Configured issue type. Defaults to the repository's default type", Required = false)]
+        public string IssueType { get; set; } = string.Empty;
+
+        [Option("field", HelpText = "Initial field value, in Name=Value form", Required = false)]
+        public IEnumerable<string> Fields { get; set; } = new string[0];
 
         [Option("Track", HelpText = "Track the new issue, even if another issue is already tracked", Required = false)]
         public bool Track { get; set; } = false;

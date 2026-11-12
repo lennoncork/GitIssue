@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
@@ -38,7 +39,7 @@ namespace GitIssue.Issues
         /// <inheritdoc cref="IIssue" />
         public String[] Comments
         {
-            get => this.GetField().AsArray<String>();
+            get => this.GetField().AsArray<String>() ?? Array.Empty<String>();
             set => this.SetField().WithArray(value);
         }
 
@@ -68,6 +69,9 @@ namespace GitIssue.Issues
             get => this.GetField().AsValue<IssueKey>();
             protected set => this.SetField().WithValue(value);
         }
+
+        /// <inheritdoc />
+        public string IssueType => this.GetField().AsValue<String>().Item ?? string.Empty;
 
         /// <inheritdoc />
         public abstract IEnumerable<FieldKey> Keys { get; }

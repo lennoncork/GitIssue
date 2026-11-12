@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,11 +37,34 @@ namespace GitIssue.Tool.Commands.Create
         /// <inheritdoc />
         public override async Task Exec(CreateOptions options)
         {
+            string issueType = string.IsNullOrEmpty(options.IssueType) ? this.configuration.IssueType : options.IssueType;
+            Dictionary<FieldKey, FieldInfo> schema = this.configuration.GetFields(issueType);
+            List<IField> initial = new List<IField>();
+            foreach (string assignment in options.Fields)
+            {
+                int separator = assignment.IndexOf('=');
+                if (separator <= 0 ||
+                    !schema.TryGetValue(FieldKey.Create(assignment.Substring(0, separator)), out FieldInfo? info) ||
+                    assignment.Substring(0, separator) is "IssueType" or "Key")
+                {
+                    throw new ArgumentException($"Invalid field assignment '{assignment}'.");
+                }
+
+                IField field = info.CreateField(null!, FieldKey.Create(assignment.Substring(0, separator)));
+                if (!field.Update(assignment.Substring(separator + 1)))
+                {
+                    throw new ArgumentException($"Invalid field assignment '{assignment}'.");
+                }
+
+                initial.Add(field);
+            }
+
             IIssue issue;
             if (string.IsNullOrEmpty(options.Title))
             {
-                IField[] fields = this.configuration.Fields
+                IField[] fields = schema
                     .Where(f => f.Key != nameof(IReadOnlyIssue.Key))
+                    .Where(f => f.Key != nameof(IReadOnlyIssue.IssueType))
                     .Where(f => f.Key != nameof(IIssue.Created))
                     .Where(f => f.Key != nameof(IIssue.Updated))
                     .Select(f => f.Value.CreateField(null!, f.Key))
@@ -69,27 +93,26 @@ namespace GitIssue.Tool.Commands.Create
                     return;
                 }
 
-                issue = await this.manager.CreateAsync(value.Item);
                 foreach (IField field in fields)
                 {
-                    if (!this.configuration.Fields.TryGetValue(field.Key, out FieldInfo? info))
+                    if (!schema.TryGetValue(field.Key, out FieldInfo? info))
                     {
                         continue;
                     }
 
-                    if (!info.IsValid(field) && issue.TryGetValue(field.Key, out IField? current) && info.IsValid(current))
+                    if (!info.IsValid(field))
                     {
                         continue;
                     }
 
-                    issue.SetField(field.Key).WithField(field);
+                    initial.Add(field);
                 }
 
-                await issue.SaveAsync();
+                issue = await this.manager.CreateAsync(value.Item, string.Empty, issueType, initial);
             }
             else
             {
-                issue = await this.manager.CreateAsync(options.Title, options.Description);
+                issue = await this.manager.CreateAsync(options.Title, options.Description, issueType, initial);
             }
 
             if (options.Track || (options.Tracked == TrackedIssue.None))

@@ -93,7 +93,7 @@ namespace GitIssue.Services.Mcp
                         Version = version.ToString(),
                     };
                     server.ServerInstructions =
-                        "GitIssue stores issues in the working tree. Call list_fields before writing so every field name matches the configured schema. Issue keys identify documents. A feature is an issue whose configured fields, such as Type or Labels, say so. Write tools change the working tree and do not create a git commit.";
+                        "GitIssue stores issues in the working tree. Call list_issue_types and list_fields before writing so field names match the selected type's schema. Issue keys identify documents. Write tools change the working tree and do not create a git commit.";
                 })
                 .WithStdioServerTransport()
                 .WithToolsFromAssembly(typeof(McpServerHost).Assembly)

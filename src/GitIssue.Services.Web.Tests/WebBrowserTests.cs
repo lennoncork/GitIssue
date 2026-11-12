@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using GitIssue.Fields;
+using GitIssue.Issues.Json;
 using GitIssue.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Playwright;
@@ -134,6 +138,50 @@ namespace GitIssue.Services.Web.Tests
                 await page.GotoAsync(request.Url + "/issue?key=" + Uri.EscapeDataString("missing/key"));
 
                 Assert.That(await page.GetByRole(AriaRole.Alert).InnerTextAsync(), Does.Contain("was not found"));
+            }
+
+            finally
+            {
+                await application.StopAsync();
+            }
+        }
+
+        [Test]
+        public async Task IssuePage_UsesTheIssueTypeSchema()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            string path = Path.Combine(fixture.Directory, ".issues", "config.json");
+            IssueConfiguration configuration = IssueConfiguration.Read(path);
+            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.Fields)
+            {
+                ["Severity"] = new FieldInfo<GitIssue.Values.String, JsonValueField>(true),
+            };
+            configuration.Issues.Add(new IssueTypeConfiguration { Name = "ISSUE", Fields = configuration.Fields });
+            configuration.Issues.Add(new IssueTypeConfiguration { Name = "BUG", Fields = bug });
+            configuration.Save(path);
+
+            IssueDocument created;
+            using (IssueWorkspace workspace = fixture.Open())
+            {
+                created = await workspace.CreateIssueAsync("Bug", "Description", "BUG",
+                    new Dictionary<string, string> { ["Severity"] = "high" }, CancellationToken.None);
+            }
+
+            WebServeRequest request = WebServerHostTests.request(fixture.Directory, WebServerHostTests.freePort(), null);
+            await using WebApplication application = WebServerHost.Create(request);
+            await application.StartAsync();
+            try
+            {
+                using IPlaywright playwright = await Playwright.CreateAsync();
+                await using IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+                IPage page = await browser.NewPageAsync();
+                await page.GotoAsync(request.Url + "/issue?key=" + Uri.EscapeDataString(created.Key));
+                Assert.That(await page.GetByText("BUG (read-only)").CountAsync(), Is.EqualTo(1));
+                Assert.That(await page.GetByLabel("Severity").InputValueAsync(), Is.EqualTo("high"));
+                await page.GetByLabel("Severity").FillAsync("low");
+                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Severity" }).ClickAsync();
+                await page.ReloadAsync();
+                Assert.That(await page.GetByLabel("Severity").InputValueAsync(), Is.EqualTo("low"));
             }
             finally
             {
