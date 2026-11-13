@@ -19,6 +19,7 @@ namespace GitIssue.Tests.Issues
 
             Assert.That(template.RenderKey(context), Is.EqualTo("2026-11-09-ABCD1234"));
             Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("2026", "11", "09", "ABCD1234")));
+            Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("2026", "11", "09")));
         }
 
         [Test]
@@ -46,6 +47,7 @@ namespace GitIssue.Tests.Issues
             };
 
             Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11", "09", "ABCD1234")));
+            Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11", "09")));
             Assert.That(template.RenderKey(context), Is.EqualTo("bugs-2026-11-09-ABCD1234"));
             Assert.That(template.TryMatch("bugs-2026-11-09-ABCD1234", out IssueKeyContext matched), Is.True);
             Assert.That(matched.Type, Is.EqualTo("bug"));
@@ -64,6 +66,7 @@ namespace GitIssue.Tests.Issues
 
             Assert.That(template.RenderKey(context), Is.EqualTo("ABCD1234 - Add login page"));
             Assert.That(template.RenderPath(context), Is.EqualTo("ABCD1234 - Add login page"));
+            Assert.That(template.RenderDirectory(context), Is.EqualTo("ABCD1234 - Add login page"));
         }
 
         [Test]

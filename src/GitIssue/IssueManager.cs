@@ -540,6 +540,7 @@ namespace GitIssue
 
             List<(Issue Issue, IssueKey From, IssueKey To, string FromPath)> planned = new List<(Issue, IssueKey, IssueKey, string)>();
             HashSet<string> used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            string extension = this.Configuration.Storage == IssueStorage.Markdown ? ".md" : ".json";
 
             foreach (IIssue item in issues)
             {
@@ -574,7 +575,18 @@ namespace GitIssue
 
                 string toPath = Path.GetFullPath(Path.Combine(this.Root.IssuesPath, provider.GetIssuePath(to)));
                 string fromPath = Path.GetFullPath(issue.Root.IssuePath);
-                if (Directory.Exists(toPath) && !string.Equals(toPath, fromPath, StringComparison.OrdinalIgnoreCase))
+                string fromFileName = string.IsNullOrEmpty(issue.Root.DocumentFile) ? $"{issue.Key}{extension}" : issue.Root.DocumentFile;
+                string fromFile = Path.Combine(fromPath, fromFileName);
+                string toFile = Path.Combine(toPath, $"{to}{extension}");
+                if (this.Configuration.Storage == IssueStorage.Markdown)
+                {
+                    if (File.Exists(toFile) &&
+                        !string.Equals(Path.GetFullPath(toFile), Path.GetFullPath(fromFile), StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException($"Cannot rename '{issue.Key}' to '{to}' because '{Path.GetFileName(toFile)}' already exists.");
+                    }
+                }
+                else if (Directory.Exists(toPath) && !string.Equals(toPath, fromPath, StringComparison.OrdinalIgnoreCase))
                 {
                     throw new InvalidOperationException($"Cannot rename '{issue.Key}' to '{to}' because that path already exists.");
                 }
@@ -593,26 +605,33 @@ namespace GitIssue
             foreach ((Issue issue, IssueKey from, IssueKey to, string fromPath) in planned)
             {
                 string? document = issue.Root.DocumentFile;
+                string oldFile = Path.Combine(fromPath, string.IsNullOrEmpty(document) ? $"{from}{extension}" : document);
                 IssueRoot newRoot = new IssueRoot(this.Root, to, provider.GetIssuePath(to));
                 issue.Relocate(newRoot);
                 await issue.SaveAsync();
                 this.Changes.Add(to, ChangeType.Rename);
 
                 string newPath = Path.GetFullPath(issue.Root.IssuePath);
-                if (!string.IsNullOrEmpty(document))
+                string newFile = this.Configuration.Storage == IssueStorage.Markdown
+                    ? MarkdownIssue.GetMarkdownFile(issue.Root)
+                    : JsonIssue.GetJsonFile(issue.Root);
+                if (File.Exists(oldFile) &&
+                    !string.Equals(Path.GetFullPath(oldFile), Path.GetFullPath(newFile), StringComparison.OrdinalIgnoreCase))
                 {
-                    string oldFile = Path.Combine(fromPath, document);
-                    if (File.Exists(oldFile))
-                    {
-                        File.Delete(oldFile);
-                    }
-
-                    this.deleteEmptyParents(oldFile, this.Root.IssuesPath);
+                    File.Delete(oldFile);
                 }
-                else if (!string.Equals(fromPath, newPath, StringComparison.OrdinalIgnoreCase) && Directory.Exists(fromPath))
+
+                if ((this.Configuration.Storage != IssueStorage.Markdown) &&
+                    string.IsNullOrEmpty(document) &&
+                    !string.Equals(fromPath, newPath, StringComparison.OrdinalIgnoreCase) &&
+                    Directory.Exists(fromPath))
                 {
                     Directory.Delete(fromPath, true);
                     this.deleteEmptyParents(fromPath, this.Root.IssuesPath);
+                }
+                else
+                {
+                    this.deleteEmptyParents(oldFile, this.Root.IssuesPath);
                 }
 
                 if (this.Tracked.Key == from)

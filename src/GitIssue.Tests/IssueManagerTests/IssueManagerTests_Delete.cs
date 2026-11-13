@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using GitIssue.Issues;
+using GitIssue.Issues.Markdown;
 using LibGit2Sharp;
 using Moq;
 using NUnit.Framework;
@@ -20,10 +22,9 @@ namespace GitIssue.Tests.IssueManagerTests
             {
                 this.Initialize(this.TestDirectory);
                 IIssue issue = this.Sut.Create(nameof(Delete.DeleteById_DeletesExistingIssue), string.Empty);
-                string id = this.Sut.KeyProvider.GetIssuePath(issue.Key);
-                string path = Path.Combine(this.IssueDirectory, id);
+                string path = Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(issue.Key));
                 Assert.IsTrue(Directory.Exists(path));
-                bool result = this.Sut.Delete(id);
+                bool result = this.Sut.Delete(issue.Key.ToString());
                 Assert.That(result, Is.True);
                 Assert.IsFalse(Directory.Exists(path));
             }
@@ -33,10 +34,9 @@ namespace GitIssue.Tests.IssueManagerTests
             {
                 this.Initialize(this.TestDirectory);
                 IIssue issue = this.Sut.Create(nameof(Delete.DeleteAsyncById_ReturnsTrueWhenDeletionSucceeds), string.Empty);
-                string id = this.Sut.KeyProvider.GetIssuePath(issue.Key);
-                string path = Path.Combine(this.IssueDirectory, id);
+                string path = Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(issue.Key));
                 Assert.IsTrue(Directory.Exists(path));
-                bool result = await this.Sut.DeleteAsync(id);
+                bool result = await this.Sut.DeleteAsync(issue.Key.ToString());
                 Assert.That(result, Is.True);
                 Assert.IsFalse(Directory.Exists(path));
             }
@@ -128,6 +128,26 @@ namespace GitIssue.Tests.IssueManagerTests
                     .WithSafeResultAsync();
                 Assert.IsTrue(delete.IsSuccess);
                 Assert.IsFalse(Directory.Exists(Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(create.Result.Key))));
+            }
+
+            [Test]
+            public async Task DeleteLeavesSiblingIssueInTheSameDirectory()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue first = await this.Manager.CreateAsync("First issue", string.Empty);
+                IIssue second = await this.Manager.CreateAsync("Second issue", string.Empty);
+                string firstFile = MarkdownIssue.GetMarkdownFile(((Issue)first).Root);
+                string secondFile = MarkdownIssue.GetMarkdownFile(((Issue)second).Root);
+
+                Assert.That(await this.Manager.DeleteAsync(first.Key), Is.True);
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(File.Exists(firstFile), Is.False);
+                    Assert.That(File.Exists(secondFile), Is.True);
+                    Assert.That(Directory.Exists(Path.GetDirectoryName(secondFile)!), Is.True);
+                    Assert.That(this.Manager.Find(issue => issue.Key == second.Key).Select(issue => issue.Key), Is.EqualTo(new[] { second.Key }));
+                });
             }
 
             [Test]

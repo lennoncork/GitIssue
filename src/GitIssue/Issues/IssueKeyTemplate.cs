@@ -15,6 +15,7 @@ namespace GitIssue.Issues
     {
         /// <summary>
         ///     Default template. The first directory is the issue type with a trailing s, then the date folders.
+        ///     Markdown files omit the trailing {uid} directory and share the day folder.
         /// </summary>
         public const string Default = "{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}";
 
@@ -200,7 +201,7 @@ namespace GitIssue.Issues
         /// <returns>the issue key</returns>
         public string RenderKey(IssueKeyContext context)
         {
-            return this.render(context, key: true);
+            return this.render(context, key: true, this.segments.Count);
         }
 
         /// <summary>
@@ -210,7 +211,32 @@ namespace GitIssue.Issues
         /// <returns>the relative issue path</returns>
         public string RenderPath(IssueKeyContext context)
         {
-            return this.render(context, key: false);
+            return this.render(context, key: false, this.segments.Count);
+        }
+
+        /// <summary>
+        ///     Renders the directory that holds a Markdown issue.
+        ///     A trailing {uid} path segment is omitted so issues share the parent folder.
+        ///     The key still includes the uid, and that value remains the file name.
+        /// </summary>
+        /// <param name="context">the substitution values</param>
+        /// <returns>the relative directory, or the full path when omitting {uid} would leave no directory</returns>
+        public string RenderDirectory(IssueKeyContext context)
+        {
+            int count = this.segments.Count;
+            if ((count >= 2) &&
+                (this.segments[count - 1].Token == Token.Uid) &&
+                (this.segments[count - 2].Token == Token.Literal) &&
+                IssueKeyTemplate.isDirectorySeparator(this.segments[count - 2].Literal))
+            {
+                string directory = this.render(context, key: false, count - 2);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    return directory;
+                }
+            }
+
+            return this.RenderPath(context);
         }
 
         /// <summary>
@@ -295,11 +321,17 @@ namespace GitIssue.Issues
             return true;
         }
 
-        private string render(IssueKeyContext context, bool key)
+        private static bool isDirectorySeparator(string literal)
+        {
+            return (literal.Length > 0) && literal.All(character => (character == '/') || (character == '\\'));
+        }
+
+        private string render(IssueKeyContext context, bool key, int count)
         {
             StringBuilder builder = new StringBuilder();
-            foreach (Segment segment in this.segments)
+            for (int index = 0; index < count; index++)
             {
+                Segment segment = this.segments[index];
                 if (segment.Token == Token.Literal)
                 {
                     builder.Append(key ? segment.Literal.Replace('/', '-').Replace('\\', '-') : segment.Literal.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
