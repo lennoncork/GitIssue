@@ -23,7 +23,7 @@ namespace GitIssue.Tests.IssueConfigurationTests
 
                 Assert.That(config.KeyProvider.Type, Is.EqualTo(typeof(DateIssueKeyProvider)));
                 Assert.That(config.IssueType, Is.EqualTo("Issue"));
-                Assert.That(config.KeyTemplate, Is.EqualTo(IssueKeyTemplate.Date));
+                Assert.That(config.KeyTemplate, Is.EqualTo(IssueKeyTemplate.Default));
                 Assert.That(config.Storage, Is.EqualTo(IssueStorage.Markdown));
                 Assert.That(config.Issues, Has.Count.EqualTo(1));
                 Assert.That(config.Issues[0].Name, Is.EqualTo("Issue"));

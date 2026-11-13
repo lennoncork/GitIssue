@@ -15,8 +15,8 @@ namespace GitIssue.Tool.Commands.Init
         [Option("issue-type", HelpText = "Issue type token used by {type}; ASCII letters and digits only. Defaults to Issue", Required = false)]
         public string IssueTypeName { get; set; } = "Issue";
 
-        [Option("key-provider", HelpText = "Issue key provider: Date, Name, or Template. Defaults to Date", Required = false)]
-        public string KeyProvider { get; set; } = "Date";
+        [Option("key-provider", HelpText = "Issue key provider: Date, Name, or Template. The default puts issues under {type}s, for example bugs", Required = false)]
+        public string KeyProvider { get; set; } = string.Empty;
 
         [Option("key-template", HelpText = "Issue key template, for example {type}-{created}-{index}-{uid}-{slug}", Required = false)]
         public string KeyTemplate { get; set; } = string.Empty;

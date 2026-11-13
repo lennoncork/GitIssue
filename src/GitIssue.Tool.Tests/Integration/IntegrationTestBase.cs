@@ -195,7 +195,7 @@ namespace GitIssue.Tool.Tests.Integration
                         .Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries),
                 })
                 .Select(entry => new { entry.File, entry.Parts, Key = string.Join("-", entry.Parts) })
-                .Where(entry => entry.Parts.Length == 4 && Path.GetFileNameWithoutExtension(entry.File) == entry.Key)
+                .Where(entry => (entry.Parts.Length > 0) && Path.GetFileNameWithoutExtension(entry.File) == entry.Key)
                 .Select(entry => entry.Key)
                 .ToArray();
         }

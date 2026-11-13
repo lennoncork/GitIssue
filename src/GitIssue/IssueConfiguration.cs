@@ -26,7 +26,7 @@ namespace GitIssue
         {
             this.KeyProvider = TypeValue.Create<DateIssueKeyProvider>();
             this.IssueType = "Issue";
-            this.KeyTemplate = IssueKeyTemplate.Date;
+            this.KeyTemplate = IssueKeyTemplate.Default;
             this.Storage = IssueStorage.Markdown;
             this.Issues = new List<IssueTypeConfiguration>
             {
@@ -170,7 +170,9 @@ namespace GitIssue
         private void normalizeKeyTemplate()
         {
             if ((this.KeyProvider.Type == typeof(NameIssueKeyProvider)) &&
-                (string.IsNullOrWhiteSpace(this.KeyTemplate) || (this.KeyTemplate == IssueKeyTemplate.Date)))
+                (string.IsNullOrWhiteSpace(this.KeyTemplate) ||
+                 (this.KeyTemplate == IssueKeyTemplate.Date) ||
+                 (this.KeyTemplate == IssueKeyTemplate.Default)))
             {
                 this.KeyTemplate = IssueKeyTemplate.Name;
             }

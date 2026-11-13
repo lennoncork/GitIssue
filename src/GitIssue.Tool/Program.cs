@@ -245,9 +245,15 @@ namespace GitIssue.Tool
 
         private static bool tryGetKeyProvider(string value, out Type type, out string template)
         {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                type = typeof(DateIssueKeyProvider);
+                template = IssueKeyTemplate.Default;
+                return true;
+            }
+
             template = IssueKeyTemplate.Date;
-            if (string.IsNullOrWhiteSpace(value) ||
-                value.Equals("Date", StringComparison.OrdinalIgnoreCase) ||
+            if (value.Equals("Date", StringComparison.OrdinalIgnoreCase) ||
                 value.Equals(nameof(DateIssueKeyProvider), StringComparison.OrdinalIgnoreCase))
             {
                 type = typeof(DateIssueKeyProvider);

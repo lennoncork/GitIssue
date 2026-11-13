@@ -75,8 +75,10 @@ services to be overridden. `IIssueKeyProvider` implementations generate unique
 issue keys and map them to directories. `config.json` stores `KeyProvider`,
 `KeyTemplate`, a default `IssueType`, and optionally named `Issues` schemas. The template can
 include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
+The default template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`,
+so the first directory is the issue type followed by `s`.
 `DateIssueKeyProvider` and `NameIssueKeyProvider` are presets of
-`TemplateIssueKeyProvider`. `gitissue rekey` regenerates on-disk names from
+`TemplateIssueKeyProvider`. `--key-provider date` keeps the year/month/day layout. `gitissue rekey` regenerates on-disk names from
 the template and each issue's type. Existing configuration that names
 `FileIssueKeyProvider` continues to use the date-based provider.
 

@@ -22,7 +22,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 IIssue issue = await this.Sut.CreateAsync("Add login page", "Feature work");
                 string original = issue.Key.ToString();
                 string originalPath = Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(issue.Key));
-                Assert.That(original, Does.Match(new Regex(@"^\d{4}-\d{2}-\d{2}-[A-F0-9]{8}$")));
+                Assert.That(original, Does.Match(new Regex(@"^Issues-\d{4}-\d{2}-\d{2}-[A-F0-9]{8}$")));
 
                 this.Sut.Configuration.IssueType = "FEAT";
                 this.Sut.Configuration.KeyTemplate = "{type}-{uid}-{slug}";

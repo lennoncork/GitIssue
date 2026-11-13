@@ -35,6 +35,24 @@ namespace GitIssue.Tests.Issues
         }
 
         [Test]
+        public void DefaultTemplate_UsesPluralTypeAsRootDirectory()
+        {
+            IssueKeyTemplate template = IssueKeyTemplate.Parse(IssueKeyTemplate.Default);
+            IssueKeyContext context = new IssueKeyContext
+            {
+                Type = "bug",
+                Created = new DateTime(2026, 11, 9),
+                Uid = "ABCD1234",
+            };
+
+            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11", "09", "ABCD1234")));
+            Assert.That(template.RenderKey(context), Is.EqualTo("bugs-2026-11-09-ABCD1234"));
+            Assert.That(template.TryMatch("bugs-2026-11-09-ABCD1234", out IssueKeyContext matched), Is.True);
+            Assert.That(matched.Type, Is.EqualTo("bug"));
+            Assert.That(matched.Uid, Is.EqualTo("ABCD1234"));
+        }
+
+        [Test]
         public void NameTemplate_RendersReadableKey()
         {
             IssueKeyTemplate template = IssueKeyTemplate.Parse(IssueKeyTemplate.Name);

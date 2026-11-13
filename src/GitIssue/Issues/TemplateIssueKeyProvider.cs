@@ -78,9 +78,10 @@ namespace GitIssue.Issues
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(this.configuration.KeyTemplate) ||
-                    ((this.configuration.KeyTemplate == IssueKeyTemplate.Date) &&
-                     (this.fallbackTemplate != IssueKeyTemplate.Date)))
+                bool foreignPreset = (this.fallbackTemplate == IssueKeyTemplate.Name) &&
+                    ((this.configuration.KeyTemplate == IssueKeyTemplate.Date) ||
+                     (this.configuration.KeyTemplate == IssueKeyTemplate.Default));
+                if (string.IsNullOrWhiteSpace(this.configuration.KeyTemplate) || foreignPreset)
                 {
                     return this.fallbackTemplate;
                 }

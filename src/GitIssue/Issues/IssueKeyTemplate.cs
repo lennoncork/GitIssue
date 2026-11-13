@@ -14,6 +14,11 @@ namespace GitIssue.Issues
     public sealed class IssueKeyTemplate
     {
         /// <summary>
+        ///     Default template. The first directory is the issue type with a trailing s, then the date folders.
+        /// </summary>
+        public const string Default = "{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+
+        /// <summary>
         ///     Date-based template matching the historical year/month/day folder layout
         /// </summary>
         public const string Date = "{created:yyyy}/{created:MM}/{created:dd}/{uid}";
