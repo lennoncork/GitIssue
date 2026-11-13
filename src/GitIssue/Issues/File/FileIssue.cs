@@ -43,7 +43,7 @@ namespace GitIssue.Issues.File
                 return false;
             }
 
-            if (Directory.Exists(issueRoot.IssuePath))
+            if (string.IsNullOrEmpty(issueRoot.DocumentFile) && Directory.Exists(issueRoot.IssuePath))
             {
                 Directory.Delete(issueRoot.IssuePath, true);
             }

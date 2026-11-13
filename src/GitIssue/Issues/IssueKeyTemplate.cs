@@ -28,6 +28,11 @@ namespace GitIssue.Issues
         /// </summary>
         public const string Name = "{uid} - {name}";
 
+        /// <summary>
+        ///     Key stored inside a free-layout document. The folder is not part of the key.
+        /// </summary>
+        public const string Identity = "{type}-{uid}";
+
         private static readonly HashSet<char> InvalidFileNameCharacters = Path.GetInvalidFileNameChars()
             .Concat(new[] { '<', '>', ':', '"', '/', '\\', '|', '?', '*' })
             .ToHashSet();

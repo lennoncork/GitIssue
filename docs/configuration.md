@@ -115,6 +115,12 @@ Issue keys are generated from `KeyTemplate` in `.gitissue.config`. The issue's s
 
 A new repository uses `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `{type}s` is the type name followed by `s`, and it is the first directory. A `bug` issue is stored under `bugs`; an `Issue` is stored under `Issues`. `--key-provider date` keeps the older year/month/day layout.
 
+## Layout
+
+Each issue type has a `Layout`. `Template` is the default: `gitissue create` writes the key-template folders, and the document is named after the key. `Free` keeps a short key `{type}-{uid}` inside the file. The file can live anywhere under the type directory, for example `specifications/auth/login.md`. Pass `--location auth/login.md` when creating one. The uid is a random value stored in the `Key` heading. It is not derived from the folder, so moving the file does not change the issue.
+
+GitIssue finds an issue by the `Key` heading in the document, so a template issue moved to `bugs/random_folder/issue.md` is still opened by its key. A Markdown file with no `Key` heading is left alone. Two documents with the same key are an error. `gitissue rekey` moves template issues back onto the key template and leaves free-layout files where they are.
+
 ```shell
 gitissue init
 gitissue init --key-provider date

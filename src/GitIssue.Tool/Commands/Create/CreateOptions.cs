@@ -22,6 +22,9 @@ namespace GitIssue.Tool.Commands.Create
         [Option("type", HelpText = "Configured issue type. Defaults to the repository's default type", Required = false)]
         public string IssueType { get; set; } = string.Empty;
 
+        [Option("location", HelpText = "Relative file path under the type directory for a free-layout issue, such as auth/login.md", Required = false)]
+        public string Location { get; set; } = string.Empty;
+
         [Option("field", HelpText = "Initial field value, in Name=Value form", Required = false)]
         public IEnumerable<string> Fields { get; set; } = new string[0];
 

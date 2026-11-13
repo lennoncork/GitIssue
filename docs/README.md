@@ -37,7 +37,7 @@ From the root directory of the Git repository where you want to keep issues, run
 gitissue init
 ```
 
-This writes `.gitissue.config` next to `.gitignore`. New issues are stored in the repository root. The default type `Issue` uses a directory such as `Issues/2026/11/09/A1B2C3D4`. A `bug` issue is stored under `bugs`. To use named keys such as `A1B2C3D4 - Add onboarding guide`, pass `--key-provider name`. To choose the key shape yourself, pass `--key-template` and optionally `--issue-type`. After you change the template or issue type in `.gitissue.config`, run `gitissue rekey` to rename existing issue files. To store issue files in a subdirectory, pass `--name` and use the same value in later commands:
+This writes `.gitissue.config` next to `.gitignore`. New issues are stored in the repository root. The default type `Issue` uses a directory such as `Issues/2026/11/09/A1B2C3D4`. A `bug` issue is stored under `bugs`. Pass `--layout free` when a type should keep `{type}-{uid}` in the file and live in any folder under that type directory, for example `specifications/auth/login.md`. To use named keys such as `A1B2C3D4 - Add onboarding guide`, pass `--key-provider name`. To choose the key shape yourself, pass `--key-template` and optionally `--issue-type`. After you change the template or issue type in `.gitissue.config`, run `gitissue rekey` to rename existing issue files. To store issue files in a subdirectory, pass `--name` and use the same value in later commands:
 
 ```shell
 gitissue init --name work-items

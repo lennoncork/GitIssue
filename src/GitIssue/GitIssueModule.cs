@@ -62,7 +62,7 @@ namespace GitIssue
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
                     TypedIssueCreation creation = (key, issueType) =>
                     {
-                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key));
+                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key), provider.GetDocumentFileName(key));
                         IIssue issue = configuration.Storage == IssueStorage.Markdown
                             ? new MarkdownIssue(issueRoot, configuration.GetFields(issueType))
                             : new FileIssue(issueRoot, configuration.GetFields(issueType));
@@ -91,7 +91,7 @@ namespace GitIssue
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
                     IssueDeletion deletion = key =>
                     {
-                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key));
+                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key), provider.GetDocumentFileName(key));
                         if (configuration.Storage == IssueStorage.Markdown)
                         {
                             return MarkdownIssue.DeleteAsync(issueRoot);
@@ -111,7 +111,7 @@ namespace GitIssue
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
                     IssueLoading read = async key =>
                     {
-                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key));
+                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key), provider.GetDocumentFileName(key));
                         if (!Directory.Exists(issueRoot.IssuePath))
                         {
                             return null;

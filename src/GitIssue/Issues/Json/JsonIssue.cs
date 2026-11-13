@@ -126,6 +126,12 @@ namespace GitIssue.Issues.Json
         [Throws<ArgumentException>]
         public static string GetJsonFile(IssueRoot root)
         {
+            if (!string.IsNullOrEmpty(root.DocumentFile) &&
+                root.DocumentFile.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                return Path.Combine(root.IssuePath, root.DocumentFile);
+            }
+
             return Path.Combine(root.IssuePath, $"{Path.GetFileName(root.Key.ToString())}.json");
         }
 

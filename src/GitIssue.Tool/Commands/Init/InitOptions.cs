@@ -20,6 +20,9 @@ namespace GitIssue.Tool.Commands.Init
 
         [Option("key-template", HelpText = "Issue key template, for example {type}-{created}-{index}-{uid}-{slug}", Required = false)]
         public string KeyTemplate { get; set; } = string.Empty;
+
+        [Option("layout", HelpText = "Issue layout: Template or Free. Free stores the document anywhere under {type}s. Defaults to Template", Required = false)]
+        public string Layout { get; set; } = "Template";
     }
 #pragma warning restore 1591
 }

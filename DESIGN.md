@@ -77,6 +77,10 @@ issue keys and map them to directories. `.gitissue.config` stores `KeyProvider`,
 include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
 The default template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`,
 so the first directory is the issue type followed by `s`.
+An issue type with `Layout` `Free` stores `{type}-{uid}` in the document and
+allows that file anywhere under the type directory. The uid is random and is
+not derived from the path. Discovery reads the `Key` heading, so a moved file
+is still found.
 `DateIssueKeyProvider` and `NameIssueKeyProvider` are presets of
 `TemplateIssueKeyProvider`. `--key-provider date` keeps the year/month/day layout. `gitissue rekey` regenerates on-disk names from
 the template and each issue's type. Existing configuration that names

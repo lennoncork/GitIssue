@@ -79,6 +79,14 @@ namespace GitIssue.Tool
                                     config.Issues[0].Name = config.IssueType;
                                 }
 
+                                if (string.IsNullOrWhiteSpace(initOptions.Layout) ||
+                                    !Enum.TryParse(initOptions.Layout, true, out IssueLayout layout))
+                                {
+                                    throw new ArgumentException($"Layout '{initOptions.Layout}' is not Template or Free.");
+                                }
+
+                                config.Issues[0].Layout = layout;
+
                                 if (!string.IsNullOrWhiteSpace(initOptions.KeyTemplate))
                                 {
                                     IssueKeyTemplate.Parse(initOptions.KeyTemplate);

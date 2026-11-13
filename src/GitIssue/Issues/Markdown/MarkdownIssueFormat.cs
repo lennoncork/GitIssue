@@ -75,6 +75,55 @@ namespace GitIssue.Issues.Markdown
         }
 
         /// <summary>
+        ///     Reads the Key heading without needing the rest of the schema.
+        /// </summary>
+        /// <param name="markdown">the issue document</param>
+        /// <returns>the stored key, or null when the document has no Key heading</returns>
+        public static string? ReadKey(string markdown)
+        {
+            string text = markdown.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
+            MarkdownDocument document = Markdig.Markdown.Parse(text, MarkdownIssueFormat.pipeline);
+            HeadingBlock? found = null;
+            int end = text.Length;
+            foreach (Block block in document)
+            {
+                if (block is not HeadingBlock heading || heading.Level > 2)
+                {
+                    continue;
+                }
+
+                if (found != null && end == text.Length)
+                {
+                    end = heading.Span.Start;
+                }
+
+                if (heading.Level == 2 && MarkdownIssueFormat.inlineText(heading.Inline).Trim() == "Key")
+                {
+                    if (found != null)
+                    {
+                        throw new InvalidDataException("Duplicate Key fields in Markdown issue.");
+                    }
+
+                    found = heading;
+                }
+            }
+
+            if (found == null)
+            {
+                return null;
+            }
+
+            string value = MarkdownIssueFormat.slice(text, found.Span.End + 1, end).Trim();
+            int newline = value.IndexOf('\n');
+            if (newline >= 0)
+            {
+                value = value.Substring(0, newline).Trim();
+            }
+
+            return string.IsNullOrEmpty(value) ? null : value;
+        }
+
+        /// <summary>
         ///     Reads issue fields from a Markdown document
         /// </summary>
         /// <param name="markdown">the document text</param>
