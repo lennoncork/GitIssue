@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GitIssue.Issues;
+using GitIssue.Issues.Markdown;
 using LibGit2Sharp;
 using NUnit.Framework;
 using Signature = GitIssue.Values.Signature;
@@ -94,6 +96,27 @@ namespace GitIssue.Tests.IssueManagerTests
                     .CreateAsync(nameof(Create.SetsUpdatedDate), string.Empty)
                     .WithSafeResultAsync();
                 Assert.That((DateTime)create.Result.Updated, Is.EqualTo(DateTime.Now).Within(TimeSpan.FromSeconds(2)));
+            }
+
+            [Test]
+            public async Task CreatesMarkdownFilesInTheSameDirectory()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue first = await this.Manager.CreateAsync("First issue", "One");
+                IIssue second = await this.Manager.CreateAsync("Second issue", "Two");
+                string firstFile = MarkdownIssue.GetMarkdownFile(((Issue)first).Root);
+                string secondFile = MarkdownIssue.GetMarkdownFile(((Issue)second).Root);
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(first.Key, Is.Not.EqualTo(second.Key));
+                    Assert.That(Path.GetDirectoryName(firstFile), Is.EqualTo(Path.GetDirectoryName(secondFile)));
+                    Assert.That(File.Exists(firstFile), Is.True);
+                    Assert.That(File.Exists(secondFile), Is.True);
+                    Assert.That(Path.GetFileName(firstFile), Is.EqualTo($"{first.Key}.md"));
+                    Assert.That(Path.GetFileName(secondFile), Is.EqualTo($"{second.Key}.md"));
+                    Assert.That(firstFile.Replace('\\', '/'), Does.Not.Contain($"/{first.Key.ToString()[^8..]}/"));
+                });
             }
 
             [Test]

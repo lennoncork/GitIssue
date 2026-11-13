@@ -227,12 +227,23 @@ namespace GitIssue.Issues
                 return located.Value.Directory;
             }
 
-            if (this.Template.TryMatch(key.ToString(), out IssueKeyContext context))
+            if (!this.Template.TryMatch(key.ToString(), out IssueKeyContext context))
             {
-                return this.Template.RenderPath(context);
+                return key.ToString();
             }
 
-            return key.ToString();
+            string fullPath = this.Template.RenderPath(context);
+            if (Directory.Exists(Path.Combine(this.Root.IssuesPath, fullPath)))
+            {
+                return fullPath;
+            }
+
+            if (this.configuration.Storage == IssueStorage.Markdown)
+            {
+                return this.Template.RenderDirectory(context);
+            }
+
+            return fullPath;
         }
 
         /// <inheritdoc />

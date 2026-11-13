@@ -113,7 +113,7 @@ The issue document stores its own `IssueType` as a JSON property or Markdown `##
 
 Issue keys are generated from `KeyTemplate` in `.gitissue.config`. The issue's stored `IssueType` supplies the `{type}` token. `KeyProvider` selects the implementation; the template is what actually shapes the key. A `/` in the template becomes a directory. Other characters, including `-`, stay in the folder name. The issue key is the same string with `/` replaced by `-`.
 
-A new repository uses `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `{type}s` is the type name followed by `s`, and it is the first directory. A `bug` issue is stored under `bugs`; an `Issue` is stored under `Issues`. `--key-provider date` keeps the older year/month/day layout.
+A new repository uses `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `{type}s` is the type name followed by `s`, and it is the first directory. A `bug` issue is stored under `bugs`; an `Issue` is stored under `Issues`. `--key-provider date` keeps the older year/month/day layout. Markdown storage omits a trailing `{uid}` directory, so issues created on the same day share that folder and the file is named after the key. JSON storage keeps the `{uid}` directory.
 
 ## Layout
 
@@ -139,8 +139,8 @@ gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index
 
 | Provider | Default template | Key example | Directory layout |
 | --- | --- | --- | --- |
-| default | `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `Issues-2026-11-09-A1B2C3D4` | `Issues/2026/11/09/A1B2C3D4/` |
-| `DateIssueKeyProvider` | `{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `2026-11-09-A1B2C3D4` | `2026/11/09/A1B2C3D4/` |
+| default | `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `Issues-2026-11-09-A1B2C3D4` | Markdown: `Issues/2026/11/09/Issues-2026-11-09-A1B2C3D4.md`. JSON: `Issues/2026/11/09/A1B2C3D4/` |
+| `DateIssueKeyProvider` | `{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `2026-11-09-A1B2C3D4` | Markdown: `2026/11/09/2026-11-09-A1B2C3D4.md`. JSON: `2026/11/09/A1B2C3D4/` |
 | `NameIssueKeyProvider` | `{uid} - {name}` | `A1B2C3D4 - Add login page` | `A1B2C3D4 - Add login page/` |
 | `TemplateIssueKeyProvider` | the configured `KeyTemplate` | depends on the template | depends on `/` in the template |
 

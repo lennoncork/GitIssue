@@ -73,17 +73,7 @@ namespace GitIssue.Issues.Markdown
                 global::System.IO.File.Delete(json);
             }
 
-            if (string.IsNullOrEmpty(issueRoot.DocumentFile))
-            {
-                if (Directory.Exists(issueRoot.IssuePath))
-                {
-                    Directory.Delete(issueRoot.IssuePath, true);
-                }
-            }
-            else
-            {
-                MarkdownIssue.deleteEmptyParents(markdown, issueRoot.Root.IssuesPath);
-            }
+            MarkdownIssue.deleteEmptyParents(markdown, issueRoot.Root.IssuesPath);
 
             return await Task.FromResult(true);
         }
