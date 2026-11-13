@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Issues.Markdown;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IssueManagerTests
@@ -94,6 +95,27 @@ namespace GitIssue.Tests.IssueManagerTests
                 Assert.That(results, Has.Count.EqualTo(1));
                 Assert.That(results[0].To.ToString(), Is.EqualTo($"{uid} - Add login page"));
                 Assert.That(this.Sut.Find(_ => true).Single().Title, Is.EqualTo("Add login page"));
+            }
+
+            [Test]
+            public async Task RekeyMovesEachMarkdownFileWithoutDeletingSiblings()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue first = await this.Manager.CreateAsync("First issue", "One");
+                IIssue second = await this.Manager.CreateAsync("Second issue", "Two");
+                string directory = Path.GetDirectoryName(MarkdownIssue.GetMarkdownFile(((Issue)first).Root))!;
+
+                this.Manager.Configuration.KeyTemplate = "{uid}-{slug}";
+                IReadOnlyList<IssueRekeyResult> results = this.Manager.Rekey();
+
+                IIssue[] found = this.Manager.Find(_ => true).ToArray();
+                Assert.Multiple(() =>
+                {
+                    Assert.That(results, Has.Count.EqualTo(2));
+                    Assert.That(found, Has.Length.EqualTo(2));
+                    Assert.That(found.Select(issue => issue.Title.ToString()), Is.EquivalentTo(new[] { "First issue", "Second issue" }));
+                    Assert.That(Directory.Exists(directory), Is.False);
+                });
             }
 
             [Test]

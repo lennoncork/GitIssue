@@ -177,7 +177,24 @@ namespace GitIssue.Tool.Tests.Integration
 
         protected string GetIssueFile(string key)
         {
-            return Path.Combine(this.GetIssueDirectory(key), $"{key}.json");
+            string directory = this.GetIssueDirectory(key);
+            string dedicated = Path.Combine(directory, $"{key}.json");
+            if (File.Exists(dedicated))
+            {
+                return dedicated;
+            }
+
+            string? parent = Directory.GetParent(directory)?.FullName;
+            if (parent != null)
+            {
+                string shared = Path.Combine(parent, $"{key}.json");
+                if (File.Exists(shared))
+                {
+                    return shared;
+                }
+            }
+
+            return dedicated;
         }
 
         protected string[] GetIssueKeys()
