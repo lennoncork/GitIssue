@@ -179,6 +179,7 @@ namespace GitIssue.Services.Web.Tests
                 Assert.That(await page.GetByLabel("Severity").InputValueAsync(), Is.EqualTo("high"));
                 await page.GetByLabel("Severity").FillAsync("low");
                 await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Severity" }).ClickAsync();
+                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Severity saved"));
                 await page.ReloadAsync();
                 Assert.That(await page.GetByLabel("Severity").InputValueAsync(), Is.EqualTo("low"));
             }
