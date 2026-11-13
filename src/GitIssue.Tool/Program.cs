@@ -129,7 +129,7 @@ namespace GitIssue.Tool
                 if (options is ITrackedOptions keyOptions)
                 {
                     keyOptions.Tracked = TrackedIssue
-                        .Read(Path.Combine(options.Path, options.Name, options.Tracking), Program.logger);
+                        .Read(Path.Combine(options.Path, options.Tracking), Program.logger);
                 }
 
                 Command<T> command = container.Resolve<Command<T>>();

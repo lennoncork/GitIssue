@@ -9,14 +9,14 @@ namespace GitIssue.Tool.Commands
 
     public class Options
     {
-        [Option("name", Required = false, HelpText = "The name of the issues folder")]
-        public string Name { get; set; } = ".issues";
+        [Option("name", Required = false, HelpText = "Directory for issue files. Defaults to the repository root")]
+        public string Name { get; set; } = Paths.IssueRootFolderName;
 
         [Option("path", Required = false, HelpText = "The path to the working directory")]
         public string Path { get; set; } = Environment.CurrentDirectory;
 
-        [Option("tracking", Required = false, HelpText = "The tracking file to use")]
-        public string Tracking { get; set; } = "tracking.json";
+        [Option("tracking", Required = false, HelpText = "Tracked-issue file in the repository root. Defaults to .gitissue.tracking")]
+        public string Tracking { get; set; } = Paths.TrackedIssueFileName;
     }
 
     public interface ITrackedOptions

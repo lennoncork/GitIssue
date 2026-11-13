@@ -37,7 +37,7 @@ From the root directory of the Git repository where you want to keep issues, run
 gitissue init
 ```
 
-This creates an `.issues` directory and the default issue configuration. New issues get date-based keys such as `2026-11-09-A1B2C3D4`. To use named keys such as `A1B2C3D4 - Add onboarding guide`, pass `--key-provider name`. To choose the key shape yourself, pass `--key-template` and optionally `--issue-type`. After you change the template or issue type in `config.json`, run `gitissue rekey` to rename existing issue files. To use a non-default directory, pass `--name` and use the same value in later commands:
+This writes `.gitissue.config` next to `.gitignore`. New issues are stored in the repository root. The default type `Issue` uses a directory such as `Issues/2026/11/09/A1B2C3D4`. A `bug` issue is stored under `bugs`. To use named keys such as `A1B2C3D4 - Add onboarding guide`, pass `--key-provider name`. To choose the key shape yourself, pass `--key-template` and optionally `--issue-type`. After you change the template or issue type in `.gitissue.config`, run `gitissue rekey` to rename existing issue files. To store issue files in a subdirectory, pass `--name` and use the same value in later commands:
 
 ```shell
 gitissue init --name work-items
@@ -120,9 +120,9 @@ The `edit` command opens the editor when no field and value are supplied. The `c
 
 ## Where GitIssue stores data
 
-By default, GitIssue creates `.issues` in the working directory. That directory contains `config.json`, the issue files, `tracking.json`, and `changes.json`. Each issue is a Markdown document. `gitissue init --storage json` selects one JSON document per issue. `gitissue validate` reports fields that do not match the configured schema.
+By default, GitIssue stores issues in the repository root. `.gitissue.config` sits next to `.gitignore`. `.gitissue.tracking` records the current issue, and `.gitissue.changes` records operations for `gitissue commit`. Those two files stay out of the issue commit. Each issue is a Markdown document under its type directory, such as `bugs/`. `gitissue init --storage json` selects one JSON document per issue. `gitissue validate` reports fields that do not match the configured schema.
 
-The `.issues` directory is part of your repository. Review and commit it according to your project's normal practices. Back it up before making manual changes to its files.
+`.gitissue.config` and the issue files are part of your repository. Review and commit them according to your project's normal practices. Back them up before making manual changes.
 
 ## More help
 

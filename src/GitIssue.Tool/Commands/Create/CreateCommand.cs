@@ -118,7 +118,7 @@ namespace GitIssue.Tool.Commands.Create
             if (options.Track || (options.Tracked == TrackedIssue.None))
             {
                 options.Tracked = new TrackedIssue(issue.Key);
-                await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);
+                await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Tracking), this.logger);
                 Console.WriteLine($"Created and tracking new issue '{issue.Key}'");
             }
             else

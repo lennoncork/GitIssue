@@ -72,7 +72,7 @@ loads, deletes, searches, and tracks issues, using injected key, configuration,
 repository, change-log, and persistence services. Autofac registrations in
 `GitIssueModule` provide the default implementations and allow selected
 services to be overridden. `IIssueKeyProvider` implementations generate unique
-issue keys and map them to directories. `config.json` stores `KeyProvider`,
+issue keys and map them to directories. `.gitissue.config` stores `KeyProvider`,
 `KeyTemplate`, a default `IssueType`, and optionally named `Issues` schemas. The template can
 include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
 The default template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`,
@@ -94,11 +94,12 @@ converters provide serialization and parsing for the supported domain values.
 
 ### Repository data and persistence
 
-`RepositoryRoot` identifies the working tree and the issue-data directory
-(`.issues` by default, or a name supplied by the user). The directory contains
-the JSON configuration and issue data. `IssueConfiguration.Storage` selects
+`RepositoryRoot` identifies the working tree. Issue files live in that
+directory by default, or in a subdirectory named with `--name`. `.gitissue.config`,
+`.gitissue.tracking`, and `.gitissue.changes` are written in the repository root,
+next to `.gitignore`. `IssueConfiguration.Storage` selects
 the issue document and defaults to `Markdown`. `init` writes `Storage` into
-`config.json`. `Json` keeps the `FileIssue`/`JsonIssue` document. `Markdown`
+`.gitissue.config`. `Json` keeps the `FileIssue`/`JsonIssue` document. `Markdown`
 stores the same fields in one Markdown file, read
 and written with Markdig. Readers inspect the stored `IssueType` before selecting
 the schema; legacy documents without it use the configured default. Invalid or

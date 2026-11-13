@@ -100,7 +100,8 @@ namespace GitIssue.Tool.Tests.Integration
             using Repository repository = new Repository(this.TestDirectory);
             Assert.That(repository.Head.Tip, Is.Not.Null);
             Assert.That(repository.Head.Tip!.Message, Does.Contain(importedKey));
-            Assert.That(repository.Head.Tip.Tree[".issues"], Is.Not.Null);
+            Assert.That(repository.Head.Tip.Tree[".gitissue.config"], Is.Not.Null);
+            Assert.That(repository.Head.Tip.Tree["Issues"], Is.Not.Null);
             Assert.That(committedChanges["Log"]!.AsObject(), Is.Empty);
         }
     }

@@ -1,6 +1,6 @@
 # Configuration
 
-GitIssue reads issue-repository configuration from `config.json` in the issue-data directory. The default directory is `.issues`, so the default configuration path is `.issues/config.json`.
+GitIssue reads issue-repository configuration from `.gitissue.config` in the repository root, next to `.gitignore`. Issue files are stored in that same directory. A `bug` issue lives under `bugs`, with no `.issues` folder.
 
 Use the fields command to inspect the fields recognized by the current repository:
 
@@ -26,7 +26,7 @@ Required fields are part of the default schema. Array fields support `add` and `
 
 ## Changing the issue directory
 
-Initialization and later commands must use the same issue-data directory name:
+By default, issue files are stored in the repository root. `--name` selects a subdirectory instead. Use the same name for later commands. `.gitissue.config`, `.gitissue.tracking`, and `.gitissue.changes` stay in the repository root either way.
 
 ```shell
 gitissue init --name work-items
@@ -44,7 +44,7 @@ gitissue init
 gitissue init --storage json
 ```
 
-A Markdown issue is `.issues/<key-path>/<key>.md`. Markdig parses the document. Each configured field is a level-2 heading, in the order stored in `config.json`. The level-1 heading repeats the issue key. Labels and other single-value arrays are bullet lists. Comments are level-3 blocks. `config.json`, `tracking.json`, and `changes.json` stay JSON, and `export` / `import` still use JSON or CSV.
+A Markdown issue is `<key-path>/<key>.md` in the repository root, for example `bugs/2026/11/13/UID/bugs-2026-11-13-UID.md`. Markdig parses the document. Each configured field is a level-2 heading, in the order stored in `.gitissue.config`. The level-1 heading repeats the issue key. Labels and other single-value arrays are bullet lists. Comments are level-3 blocks. `.gitissue.config`, `.gitissue.tracking`, and `.gitissue.changes` stay JSON, and `export` / `import` still use JSON or CSV.
 
 ```markdown
 # 2026-11-08-ABCD1234
@@ -111,7 +111,7 @@ The issue document stores its own `IssueType` as a JSON property or Markdown `##
 
 ## Issue keys
 
-Issue keys are generated from `KeyTemplate` in `config.json`. The issue's stored `IssueType` supplies the `{type}` token. `KeyProvider` selects the implementation; the template is what actually shapes the key. A `/` in the template becomes a directory. Other characters, including `-`, stay in the folder name. The issue key is the same string with `/` replaced by `-`.
+Issue keys are generated from `KeyTemplate` in `.gitissue.config`. The issue's stored `IssueType` supplies the `{type}` token. `KeyProvider` selects the implementation; the template is what actually shapes the key. A `/` in the template becomes a directory. Other characters, including `-`, stay in the folder name. The issue key is the same string with `/` replaced by `-`.
 
 A new repository uses `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `{type}s` is the type name followed by `s`, and it is the first directory. A `bug` issue is stored under `bugs`; an `Issue` is stored under `Issues`. `--key-provider date` keeps the older year/month/day layout.
 
@@ -133,9 +133,9 @@ gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index
 
 | Provider | Default template | Key example | Directory layout |
 | --- | --- | --- | --- |
-| default | `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `Issues-2026-11-09-A1B2C3D4` | `.issues/Issues/2026/11/09/A1B2C3D4/` |
-| `DateIssueKeyProvider` | `{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `2026-11-09-A1B2C3D4` | `.issues/2026/11/09/A1B2C3D4/` |
-| `NameIssueKeyProvider` | `{uid} - {name}` | `A1B2C3D4 - Add login page` | `.issues/A1B2C3D4 - Add login page/` |
+| default | `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `Issues-2026-11-09-A1B2C3D4` | `Issues/2026/11/09/A1B2C3D4/` |
+| `DateIssueKeyProvider` | `{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `2026-11-09-A1B2C3D4` | `2026/11/09/A1B2C3D4/` |
+| `NameIssueKeyProvider` | `{uid} - {name}` | `A1B2C3D4 - Add login page` | `A1B2C3D4 - Add login page/` |
 | `TemplateIssueKeyProvider` | the configured `KeyTemplate` | depends on the template | depends on `/` in the template |
 
 If `KeyTemplate` is set, it overrides the provider's default. Existing repositories that still name `FileIssueKeyProvider` keep date-based behavior until you change the template.
@@ -151,7 +151,7 @@ gitissue rekey
 
 `{index}` is convenient, but two clones can mint the same index before they push. Keep `{uid}` in the template when the repository is distributed.
 
-## Editing `config.json`
+## Editing `.gitissue.config`
 
 The configuration defines the key provider, key template, issue type, and each field's field/value types, metadata, and required status. Make a backup before editing it manually: changing a field's type or name can make existing issue data unreadable or prevent commands from working. Use the `fields` command afterward to confirm that the repository still loads and reports the expected schema.
 

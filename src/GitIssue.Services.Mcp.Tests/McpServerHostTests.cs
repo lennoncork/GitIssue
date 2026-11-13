@@ -23,7 +23,7 @@ namespace GitIssue.Services.Mcp.Tests
         public void CreateHost_RegistersIssueToolsResourcesAndPrompts()
         {
             using TempDirectory directory = new TempDirectory();
-            using IHost host = McpServerHost.CreateHost(new McpServeOptions(directory.Path, ".issues"));
+            using IHost host = McpServerHost.CreateHost(new McpServeOptions(directory.Path, Paths.IssueRootFolderName));
 
             string[] tools = host.Services.GetServices<McpServerTool>().Select(tool => tool.ProtocolTool.Name).ToArray();
             string[] resources = host.Services.GetServices<McpServerResource>().Select(resource => resource.ProtocolResource?.Name ?? resource.ProtocolResourceTemplate?.Name ?? string.Empty).ToArray();
@@ -57,7 +57,7 @@ namespace GitIssue.Services.Mcp.Tests
             using TempDirectory directory = new TempDirectory();
             File.WriteAllText(Path.Combine(directory.Path, "appsettings.json"), "{");
 
-            using IHost host = McpServerHost.CreateHost(new McpServeOptions(directory.Path, ".issues"));
+            using IHost host = McpServerHost.CreateHost(new McpServeOptions(directory.Path, Paths.IssueRootFolderName));
 
             Assert.That(
                 host.Services.GetRequiredService<IHostEnvironment>().ContentRootPath,
@@ -68,7 +68,7 @@ namespace GitIssue.Services.Mcp.Tests
         public async Task CreateHost_ResolvesTheIssueService()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            using IHost host = McpServerHost.CreateHost(new McpServeOptions(fixture.Directory, ".issues"));
+            using IHost host = McpServerHost.CreateHost(new McpServeOptions(fixture.Directory, Paths.IssueRootFolderName));
             IssueTools tools = ActivatorUtilities.CreateInstance<IssueTools>(host.Services);
 
             IssueDocument created = await tools.CreateIssue("Host issue", "Created through dependency injection.", CancellationToken.None);
@@ -91,7 +91,7 @@ namespace GitIssue.Services.Mcp.Tests
             Environment.SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{port}");
             try
             {
-                await using WebApplication application = McpServerHost.CreateHost(new McpServeOptions(directory.Path, ".issues"));
+                await using WebApplication application = McpServerHost.CreateHost(new McpServeOptions(directory.Path, Paths.IssueRootFolderName));
                 await application.StartAsync();
                 try
                 {

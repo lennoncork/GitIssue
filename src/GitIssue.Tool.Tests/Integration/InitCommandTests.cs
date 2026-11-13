@@ -10,7 +10,8 @@ namespace GitIssue.Tool.Tests.Integration
         [Test]
         public void Init_CreatesIssueRepository()
         {
-            this.AssertDirectoryDoesNotExist(this.IssuesDirectory);
+            this.AssertFileDoesNotExist(this.ConfigurationFile);
+            this.AssertDirectoryDoesNotExist(Path.Combine(this.TestDirectory, ".issues"));
 
             int exitCode = this.Run("Init");
 
@@ -18,7 +19,8 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.Multiple(() =>
             {
                 Assert.That(exitCode, Is.Zero, this.Error);
-                this.AssertDirectoryExists(this.IssuesDirectory);
+                this.AssertFileExists(Path.Combine(this.TestDirectory, ".gitissue.config"));
+                this.AssertDirectoryDoesNotExist(Path.Combine(this.TestDirectory, ".issues"));
                 this.AssertFileExists(this.ConfigurationFile);
                 this.AssertFileDoesNotExist(this.TrackingFile);
                 this.AssertFileDoesNotExist(this.ChangesFile);
@@ -35,6 +37,25 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(configuration["IssueType"]?.GetValue<string>(), Is.EqualTo("Issue"));
                 Assert.That(configuration["KeyTemplate"]?.GetValue<string>(), Is.EqualTo("{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}"));
                 Assert.That(this.Output, Does.Contain("Initialized empty 'Issue' repository"));
+            });
+        }
+
+        [Test]
+        public void Init_StoresBugIssuesBesideTheRepositoryRoot()
+        {
+            Assert.That(this.Run("Init", "--issue-type", "bug", "--storage", "json"), Is.Zero, this.Error);
+            Assert.That(this.Run("Create", "Broken link", "The link fails."), Is.Zero, this.Error);
+
+            string[] keys = this.GetIssueKeys();
+            Assert.Multiple(() =>
+            {
+                Assert.That(keys, Has.Length.EqualTo(1));
+                Assert.That(keys[0], Does.StartWith("bugs-"));
+                this.AssertDirectoryExists(Path.Combine(this.TestDirectory, "bugs"));
+                this.AssertDirectoryDoesNotExist(Path.Combine(this.TestDirectory, ".issues"));
+                this.AssertFileExists(Path.Combine(this.TestDirectory, ".gitissue.config"));
+                this.AssertFileExists(Path.Combine(this.TestDirectory, ".gitissue.tracking"));
+                this.AssertFileExists(Path.Combine(this.TestDirectory, ".gitissue.changes"));
             });
         }
 
@@ -82,7 +103,7 @@ namespace GitIssue.Tool.Tests.Integration
 
             Assert.That(exitCode, Is.EqualTo(1));
             Assert.That(this.Output, Does.Contain("requires --key-template"));
-            this.AssertDirectoryDoesNotExist(this.IssuesDirectory);
+            this.AssertFileDoesNotExist(this.ConfigurationFile);
         }
 
         [TestCase("date", "DateIssueKeyProvider")]
@@ -105,7 +126,7 @@ namespace GitIssue.Tool.Tests.Integration
 
             Assert.That(exitCode, Is.EqualTo(1));
             Assert.That(this.Output, Does.Contain("is not Date, Name, or Template"));
-            this.AssertDirectoryDoesNotExist(this.IssuesDirectory);
+            this.AssertFileDoesNotExist(this.ConfigurationFile);
         }
 
         [TestCase("bug fix")]
@@ -116,7 +137,7 @@ namespace GitIssue.Tool.Tests.Integration
             int exitCode = this.Run("Init", "--issue-type", type);
 
             Assert.That(exitCode, Is.EqualTo(1), this.Output + this.Error);
-            this.AssertDirectoryDoesNotExist(this.IssuesDirectory);
+            this.AssertFileDoesNotExist(this.ConfigurationFile);
         }
 
         [Test]

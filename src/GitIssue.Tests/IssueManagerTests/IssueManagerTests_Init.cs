@@ -26,6 +26,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 Assert.That(this.TestDirectory, Is.Not.Empty);
                 Assert.IsTrue(Directory.Exists(this.IssueDirectory));
                 Assert.IsTrue(Directory.Exists(this.GitDirectory));
+                Assert.IsFalse(Directory.Exists(Path.Combine(this.TestDirectory, ".issues")));
             }
 
             [Test]

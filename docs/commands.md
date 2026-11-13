@@ -6,9 +6,9 @@ Most commands accept these shared options:
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `--name` | `.issues` | Name of the issue-data directory. Use the same name used when initializing. |
+| `--name` | repository root | Directory for issue files. Defaults to the repository root. Use the same name used when initializing. |
 | `--path` | Current directory | Path to the working directory. |
-| `--tracking` | `tracking.json` | Name of the tracked-issue file. |
+| `--tracking` | `.gitissue.tracking` | Name of the tracked-issue file in the repository root. |
 
 Options are case-insensitive. Run `gitissue <command> --help` for parser-generated usage.
 
@@ -16,7 +16,7 @@ Options are case-insensitive. Run `gitissue <command> --help` for parser-generat
 
 | Command | Usage | Description |
 | --- | --- | --- |
-| `init` | `init [--storage markdown\|json] [--key-provider date\|name\|template] [--key-template TEMPLATE] [--issue-type TYPE]` | Initialize issue data in the current repository. The default directory is `.issues`. Each issue is saved as Markdown unless `--storage json` is set. The default key template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`, so a `bug` issue is stored under `bugs`. `--key-provider date` uses `{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `--key-provider name` uses `{uid} - {name}`. `--key-template` selects `TemplateIssueKeyProvider` and the given pattern, for example `{type}-{created}-{index}-{uid}-{slug}`. `--issue-type` sets the default type (default `Issue`). |
+| `init` | `init [--storage markdown\|json] [--key-provider date\|name\|template] [--key-template TEMPLATE] [--issue-type TYPE]` | Initialize issue data in the current repository. `.gitissue.config` is written next to `.gitignore`. Each issue is saved as Markdown unless `--storage json` is set. The default key template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`, so a `bug` issue is stored under `bugs` with no `.issues` folder. `--key-provider date` uses `{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `--key-provider name` uses `{uid} - {name}`. `--key-template` selects `TemplateIssueKeyProvider` and the given pattern, for example `{type}-{created}-{index}-{uid}-{slug}`. `--issue-type` sets the default type (default `Issue`). |
 | `create` | `create [Title] [Description] [--type TYPE] [--field NAME=VALUE ...]` | Create an issue using the selected or default type. Supply required custom fields with `--field`. If no title is given, the default editor opens. A new issue is tracked if no issue is currently tracked; `--Track` forces tracking. |
 | `fields` | `fields [--type TYPE]` | List fields for the selected or default issue type. |
 | `validate` | `validate [Issue Key]` | Check issue documents against the configured fields. Omit the key to check every issue. `.`, `T`, and `Tracked` select the tracked issue. The command exits with code 1 when any field is invalid. |
@@ -69,7 +69,7 @@ gitissue delete ISSUE_KEY
 | `export` | `export [File] [--Overwrite] [--Separator VALUE]` | Export issues to a `.json` or `.csv` file. Existing output files are not overwritten unless `--Overwrite` is specified. |
 | `import` | `import [File] [--Update] [--Separator VALUE]` | Import issues from a `.json` or `.csv` file. JSON import expects `Key` and `Title` properties; `Description` is optional. |
 | `sync` | `sync [File]` | Import issues from a JSON file. |
-| `convert` | `convert --to json\|markdown` | Rewrite every issue into the selected storage format and update `config.json`. |
+| `convert` | `convert --to json\|markdown` | Rewrite every issue into the selected storage format and update `.gitissue.config`. |
 | `rekey` | `rekey [--dry-run]` | Rewrite issue keys and file names from the current `KeyTemplate` and each issue's stored type. `--dry-run` prints the planned renames without writing. |
 
 Examples:

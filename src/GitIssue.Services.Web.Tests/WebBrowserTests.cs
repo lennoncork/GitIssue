@@ -98,8 +98,10 @@ namespace GitIssue.Services.Web.Tests
                 Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Title saved"));
                 await page.GetByLabel("Description", new PageGetByLabelOptions { Exact = true }).FillAsync("Updated description");
                 await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Description" }).ClickAsync();
+                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Description saved"));
                 await page.GetByLabel("Labels", new PageGetByLabelOptions { Exact = true }).FillAsync("+feature");
                 await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Labels" }).ClickAsync();
+                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Labels saved"));
                 await page.ReloadAsync();
                 Assert.That(await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Updated title"));
                 Assert.That(await page.GetByLabel("Description", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Updated description"));
@@ -150,7 +152,7 @@ namespace GitIssue.Services.Web.Tests
         public async Task IssuePage_UsesTheIssueTypeSchema()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            string path = Path.Combine(fixture.Directory, ".issues", "config.json");
+            string path = Path.Combine(fixture.Directory, Paths.ConfigFileName);
             IssueConfiguration configuration = IssueConfiguration.Read(path);
             Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"))
             {

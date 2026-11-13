@@ -30,7 +30,7 @@ namespace GitIssue.Tool.Tests.Integration
 
             string[] directories = Directory.EnumerateDirectories(this.IssuesDirectory)
                 .Select(Path.GetFileName)
-                .Where(name => name != null)
+                .Where(name => (name != null) && !name.StartsWith('.'))
                 .Select(name => name!)
                 .ToArray();
             Assert.That(directories, Has.Length.EqualTo(1));
@@ -49,7 +49,7 @@ namespace GitIssue.Tool.Tests.Integration
 
             string key = Directory.EnumerateDirectories(this.IssuesDirectory)
                 .Select(Path.GetFileName)
-                .Single(name => name != null)!;
+                .Single(name => (name != null) && !name.StartsWith('.'))!;
             string uniqueId = key[..8];
 
             Assert.That(this.Run("Delete", uniqueId), Is.Zero, this.Error);
@@ -64,7 +64,7 @@ namespace GitIssue.Tool.Tests.Integration
 
             string[] directories = Directory.EnumerateDirectories(this.IssuesDirectory)
                 .Select(Path.GetFileName)
-                .Where(name => name != null)
+                .Where(name => (name != null) && !name.StartsWith('.'))
                 .Select(name => name!)
                 .ToArray();
             Assert.That(directories, Has.Length.EqualTo(1));
@@ -81,7 +81,7 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.That(this.Run("Rekey"), Is.Zero, this.Error);
             string[] renamed = Directory.EnumerateDirectories(this.IssuesDirectory)
                 .Select(Path.GetFileName)
-                .Where(name => name != null)
+                .Where(name => (name != null) && !name.StartsWith('.'))
                 .Select(name => name!)
                 .ToArray();
             Assert.That(renamed, Has.Length.EqualTo(1));

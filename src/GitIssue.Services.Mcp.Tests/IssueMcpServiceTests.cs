@@ -112,7 +112,7 @@ namespace GitIssue.Services.Mcp.Tests
         public async Task Tools_CreateAndInspectTypedIssue()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            string path = Path.Combine(fixture.Directory, ".issues", "config.json");
+            string path = Path.Combine(fixture.Directory, Paths.ConfigFileName);
             IssueConfiguration configuration = IssueConfiguration.Read(path);
             Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"))
             {

@@ -212,7 +212,7 @@ namespace GitIssue
         /// <returns></returns>
         [Throws<ArgumentException>]
         [Throws<AggregateException>]
-        public static IIssueManager Init(IssueConfiguration configuration, string directory, string name)
+        public static IIssueManager Init(IssueConfiguration configuration, string directory, string? name)
         {
             if (configuration == null)
             {
@@ -222,11 +222,6 @@ namespace GitIssue
             if (directory == null)
             {
                 throw new ArgumentException(nameof(directory));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentException(nameof(name));
             }
 
             RepositoryRoot root = RepositoryRoot.Create(directory, name);
@@ -722,14 +717,46 @@ namespace GitIssue
         private bool isUnderIssues(string relativePath, string issuesRelativePath)
         {
             string path = relativePath.Replace('\\', '/');
-            string root = issuesRelativePath.TrimEnd('/');
-            if ((root == ".") || (root.Length == 0))
+            if (this.isMetadataPath(path))
             {
                 return true;
             }
 
+            string root = issuesRelativePath.TrimEnd('/');
+            if ((root == ".") || (root.Length == 0))
+            {
+                return this.matchesIssueContent(path);
+            }
+
             return path.Equals(root, StringComparison.Ordinal) ||
                 path.StartsWith(root + "/", StringComparison.Ordinal);
+        }
+
+        private bool isMetadataPath(string relativePath)
+        {
+            return relativePath.Equals(Paths.ConfigFileName, StringComparison.Ordinal) ||
+                relativePath.Equals(Paths.ChangeLogFileName, StringComparison.Ordinal) ||
+                relativePath.Equals(Paths.TrackedIssueFileName, StringComparison.Ordinal);
+        }
+
+        private bool matchesIssueContent(string relativePath)
+        {
+            if (this.KeyProvider is not TemplateIssueKeyProvider provider)
+            {
+                return false;
+            }
+
+            string[] parts = relativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            for (int length = 1; length <= parts.Length; length++)
+            {
+                string candidate = string.Join('/', parts[..length]);
+                if (provider.Template.TryMatch(candidate, out _))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private async Task<IIssue?> loadIssue(IssueKey key, string relativePath)
@@ -802,16 +829,19 @@ namespace GitIssue
 
         private void stageIssueChanges(string issuesRelativePath)
         {
-            string issuesPathSpec = issuesRelativePath.TrimEnd('/') + "/*";
             foreach (StatusEntry item in this.Repository.RetrieveStatus(new StatusOptions
             {
-                PathSpec = new[] { issuesPathSpec },
                 IncludeIgnored = true,
                 IncludeUntracked = true,
                 RecurseIgnoredDirs = true,
                 RecurseUntrackedDirs = true,
             }))
             {
+                if (!this.isUnderIssues(item.FilePath, issuesRelativePath))
+                {
+                    continue;
+                }
+
                 if (this.isExcludedFromIssueCommit(item.FilePath))
                 {
                     continue;

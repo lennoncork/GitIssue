@@ -158,7 +158,7 @@ namespace GitIssue.Services.Web.Tests
             return new WebServeRequest
             {
                 RepositoryPath = directory,
-                IssueFolderName = ".issues",
+                IssueFolderName = Paths.IssueRootFolderName,
                 Host = "127.0.0.1",
                 Port = port,
                 Token = token,

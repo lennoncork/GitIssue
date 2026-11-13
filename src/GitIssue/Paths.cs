@@ -12,12 +12,12 @@ namespace GitIssue
         /// <summary>
         ///     Gets or sets the change log file name
         /// </summary>
-        public static string ChangeLogFileName { get; set; } = "changes.json";
+        public static string ChangeLogFileName { get; set; } = ".gitissue.changes";
 
         /// <summary>
         ///     Gets or sets the config file name
         /// </summary>
-        public static string ConfigFileName { get; set; } = "config.json";
+        public static string ConfigFileName { get; set; } = ".gitissue.config";
 
         /// <summary>
         ///     Gets or sets the name of the git folder
@@ -27,12 +27,12 @@ namespace GitIssue
         /// <summary>
         ///     Gets or sets the name of the issues folder
         /// </summary>
-        public static string IssueRootFolderName { get; set; } = ".issues";
+        public static string IssueRootFolderName { get; set; } = string.Empty;
 
         /// <summary>
         ///     Gets or sets the tracked issue file name
         /// </summary>
-        public static string TrackedIssueFileName { get; set; } = "tracking.json";
+        public static string TrackedIssueFileName { get; set; } = ".gitissue.tracking";
 
         internal static string GetContainedPath(string root, string path)
         {

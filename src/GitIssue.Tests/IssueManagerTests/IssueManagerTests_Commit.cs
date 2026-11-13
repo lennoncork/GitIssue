@@ -192,15 +192,15 @@ namespace GitIssue.Tests.IssueManagerTests
                 this.Sut.Repository.Config.Set("user.name", "Tester");
                 this.Sut.Repository.Config.Set("user.email", "tester@example.com");
 
-                string ignoredRelativePath = $"{Paths.IssueRootFolderName}/local-notes.txt";
-                File.WriteAllText(Path.Combine(this.TestDirectory, ".gitignore"), ignoredRelativePath + "\n");
-                File.WriteAllText(Path.Combine(this.IssueDirectory, "local-notes.txt"), "keep out of the commit");
-                Assert.That(this.Sut.Repository.Ignore.IsPathIgnored(ignoredRelativePath), Is.True);
-
                 SafeResult<IIssue> create = await this.Sut
                     .CreateAsync(nameof(Commit.CommitAsync_DoesNotCommitIgnoredFileUnderIssuesDirectory), string.Empty)
                     .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
+                string issueRelativePath = this.findCreatedIssueRelativePath();
+                string ignoredRelativePath = Path.GetDirectoryName(issueRelativePath)!.Replace('\\', '/') + "/local-notes.txt";
+                File.WriteAllText(Path.Combine(this.TestDirectory, ".gitignore"), ignoredRelativePath + "\n");
+                File.WriteAllText(Path.Combine(this.TestDirectory, ignoredRelativePath.Replace('/', Path.DirectorySeparatorChar)), "keep out of the commit");
+                Assert.That(this.Sut.Repository.Ignore.IsPathIgnored(ignoredRelativePath), Is.True);
 
                 bool result = await this.Sut.CommitAsync();
 
@@ -231,8 +231,8 @@ namespace GitIssue.Tests.IssueManagerTests
                 ChangeLog after = ChangeLog.Read(this.Sut.Root.ChangeLog);
                 Assert.That(after.Log.ContainsKey(create.Result.Key), Is.False);
                 Assert.That(after.Log, Is.Empty);
-                Assert.That(this.Sut.Repository.Head.Tip[$"{Paths.IssueRootFolderName}/{Paths.ChangeLogFileName}"], Is.Null);
-                Assert.That(this.Sut.Repository.Head.Tip[$"{Paths.IssueRootFolderName}/{Paths.TrackedIssueFileName}"], Is.Null);
+                Assert.That(this.Sut.Repository.Head.Tip[Paths.ChangeLogFileName], Is.Null);
+                Assert.That(this.Sut.Repository.Head.Tip[Paths.TrackedIssueFileName], Is.Null);
                 Assert.That(this.Sut.Repository.Head.Tip[this.findCreatedIssueRelativePath()], Is.Not.Null);
             }
 
@@ -247,7 +247,7 @@ namespace GitIssue.Tests.IssueManagerTests
                     .CreateAsync(nameof(Commit.CommitAsync_DoesNotCommitStagedDeletionOfChangeLog), string.Empty)
                     .WithSafeResultAsync();
                 Assert.IsTrue(create.IsSuccess);
-                string changeLogRelativePath = $"{Paths.IssueRootFolderName}/{Paths.ChangeLogFileName}";
+                string changeLogRelativePath = Paths.ChangeLogFileName;
                 this.Sut.Changes.Save(this.Sut.Root.ChangeLog);
                 Signature signature = new Signature("Tester", "tester@example.com", DateTimeOffset.Now);
                 Commands.Stage(this.Sut.Repository, changeLogRelativePath);
@@ -271,8 +271,12 @@ namespace GitIssue.Tests.IssueManagerTests
             {
                 return Directory.EnumerateFiles(this.IssueDirectory, "*", SearchOption.AllDirectories)
                     .Select(path => Path.GetRelativePath(this.TestDirectory, path).Replace('\\', '/'))
+                    .Where(path => !path.Equals(".git", StringComparison.Ordinal) && !path.StartsWith(".git/", StringComparison.Ordinal))
                     .Single(path => path.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ||
                         (path.EndsWith(".json", StringComparison.OrdinalIgnoreCase) &&
+                         !path.Equals(Paths.ChangeLogFileName, StringComparison.Ordinal) &&
+                         !path.Equals(Paths.ConfigFileName, StringComparison.Ordinal) &&
+                         !path.Equals(Paths.TrackedIssueFileName, StringComparison.Ordinal) &&
                          !path.EndsWith("/" + Paths.ChangeLogFileName, StringComparison.Ordinal) &&
                          !path.EndsWith("/" + Paths.ConfigFileName, StringComparison.Ordinal) &&
                          !path.EndsWith("/" + Paths.TrackedIssueFileName, StringComparison.Ordinal)));

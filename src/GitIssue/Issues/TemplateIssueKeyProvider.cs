@@ -18,6 +18,45 @@ namespace GitIssue.Issues
             $"[A-Fa-f0-9]{{{IssueKeyProvider.UniqueIdLength}}}",
             RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
+        private static IEnumerable<string> enumerateDirectories(string root)
+        {
+            if (!Directory.Exists(root))
+            {
+                yield break;
+            }
+
+            Queue<string> pending = new Queue<string>();
+            pending.Enqueue(root);
+            while (pending.Count > 0)
+            {
+                string current = pending.Dequeue();
+                IEnumerable<string> children;
+                try
+                {
+                    children = Directory.EnumerateDirectories(current);
+                }
+                catch (IOException)
+                {
+                    continue;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    continue;
+                }
+
+                foreach (string child in children)
+                {
+                    if (Path.GetFileName(child).StartsWith(".", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    yield return child;
+                    pending.Enqueue(child);
+                }
+            }
+        }
+
         private readonly IIssueConfiguration configuration;
 
         private readonly string fallbackTemplate;
@@ -247,7 +286,7 @@ namespace GitIssue.Issues
                 return keys;
             }
 
-            foreach (string directory in Directory.EnumerateDirectories(this.Root.IssuesPath, "*", SearchOption.AllDirectories))
+            foreach (string directory in TemplateIssueKeyProvider.enumerateDirectories(this.Root.IssuesPath))
             {
                 string relative = Path.GetRelativePath(this.Root.IssuesPath, directory);
                 if (string.IsNullOrEmpty(relative) || (relative == "."))
@@ -277,7 +316,7 @@ namespace GitIssue.Issues
                 return keys;
             }
 
-            foreach (string directory in Directory.EnumerateDirectories(this.Root.IssuesPath, "*", SearchOption.AllDirectories))
+            foreach (string directory in TemplateIssueKeyProvider.enumerateDirectories(this.Root.IssuesPath))
             {
                 string relative = Path.GetRelativePath(this.Root.IssuesPath, directory);
                 if (string.IsNullOrEmpty(relative) || (relative == "."))

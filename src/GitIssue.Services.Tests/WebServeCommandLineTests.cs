@@ -16,7 +16,7 @@ namespace GitIssue.Services.Tests
                 Assert.That(request.Host, Is.EqualTo("127.0.0.1"));
                 Assert.That(request.Port, Is.EqualTo(5080));
                 Assert.That(request.Url, Is.EqualTo("http://127.0.0.1:5080"));
-                Assert.That(request.IssueFolderName, Is.EqualTo(".issues"));
+                Assert.That(request.IssueFolderName, Is.EqualTo(Paths.IssueRootFolderName));
             });
         }
 
