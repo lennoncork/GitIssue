@@ -25,7 +25,7 @@ namespace GitIssue
         public IssueConfiguration()
         {
             this.KeyProvider = TypeValue.Create<DateIssueKeyProvider>();
-            this.IssueType = "ISSUE";
+            this.IssueType = "Issue";
             this.KeyTemplate = IssueKeyTemplate.Date;
             this.Storage = IssueStorage.Markdown;
             this.Issues = new List<IssueTypeConfiguration>

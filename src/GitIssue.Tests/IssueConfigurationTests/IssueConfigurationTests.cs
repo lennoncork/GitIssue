@@ -22,11 +22,11 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 IssueConfiguration config = new IssueConfiguration();
 
                 Assert.That(config.KeyProvider.Type, Is.EqualTo(typeof(DateIssueKeyProvider)));
-                Assert.That(config.IssueType, Is.EqualTo("ISSUE"));
+                Assert.That(config.IssueType, Is.EqualTo("Issue"));
                 Assert.That(config.KeyTemplate, Is.EqualTo(IssueKeyTemplate.Date));
                 Assert.That(config.Storage, Is.EqualTo(IssueStorage.Markdown));
                 Assert.That(config.Issues, Has.Count.EqualTo(1));
-                Assert.That(config.Issues[0].Name, Is.EqualTo("ISSUE"));
+                Assert.That(config.Issues[0].Name, Is.EqualTo("Issue"));
                 Dictionary<FieldKey, FieldInfo> fields = config.GetSchema(config.IssueType);
                 Assert.That(fields.ContainsKey(FieldKey.Create("Key")), Is.True);
                 Assert.That(fields.ContainsKey(FieldKey.Create("Title")), Is.True);
@@ -47,7 +47,7 @@ namespace GitIssue.Tests.IssueConfigurationTests
             {
                 string file = Path.Combine(Helpers.CreateTempDirectory(), "config.json");
                 IssueConfiguration config = new IssueConfiguration();
-                Dictionary<FieldKey, FieldInfo> fields = new Dictionary<FieldKey, FieldInfo>(config.GetSchema("ISSUE"));
+                Dictionary<FieldKey, FieldInfo> fields = new Dictionary<FieldKey, FieldInfo>(config.GetSchema("Issue"));
                 config.Issues[0].Fields = new Dictionary<FieldKey, FieldInfo>();
                 Assert.That(() => config.Save(file), Throws.TypeOf<AggregateException>());
                 Assert.That(File.Exists(file), Is.False);
@@ -55,7 +55,7 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 config.Issues[0].Fields = new Dictionary<FieldKey, FieldInfo>(fields);
                 config.Issues.Add(new IssueTypeConfiguration
                 {
-                    Name = "ISSUE",
+                    Name = "Issue",
                     Fields = new Dictionary<FieldKey, FieldInfo>(fields),
                 });
                 Assert.That(() => config.Save(file), Throws.TypeOf<AggregateException>());
@@ -101,12 +101,12 @@ namespace GitIssue.Tests.IssueConfigurationTests
 
                 IssueConfiguration loaded = IssueConfiguration.Read(file);
 
-                Assert.That(loaded.GetSchema("ISSUE").Keys, Is.EquivalentTo(config.GetSchema("ISSUE").Keys));
+                Assert.That(loaded.GetSchema("Issue").Keys, Is.EquivalentTo(config.GetSchema("Issue").Keys));
                 Assert.That(loaded.KeyProvider.Type, Is.EqualTo(config.KeyProvider.Type));
                 Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Markdown));
                 Assert.That(json, Does.Contain("\"Storage\": \"Markdown\""));
                 Assert.That(json, Does.Contain("\"KeyProvider\": \"DateIssueKeyProvider\""));
-                Assert.That(json, Does.Contain("\"IssueType\": \"ISSUE\""));
+                Assert.That(json, Does.Contain("\"IssueType\": \"Issue\""));
                 Assert.That(json, Does.Contain("\"KeyTemplate\":"));
             }
 
@@ -169,12 +169,12 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 Assert.That(json, Does.Contain("\"FieldType\": \"Array\""));
                 Assert.That(json, Does.Not.Contain("Json"));
                 Assert.That(json, Does.Not.Contain("\n  \"Fields\""));
-                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Title")].FieldType.ToString(), Is.EqualTo("Value"));
-                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Labels")].FieldType.ToString(), Is.EqualTo("Array"));
-                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Title")].FieldType.Type, Is.EqualTo(typeof(JsonValueField)));
-                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Title")].ValueType.Type, Is.EqualTo(typeof(GitIssue.Values.String)));
-                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Labels")].FieldType.Type, Is.EqualTo(typeof(JsonArrayField)));
-                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Labels")].ValueType.Type, Is.EqualTo(typeof(Label)));
+                Assert.That(loaded.GetSchema("Issue")[FieldKey.Create("Title")].FieldType.ToString(), Is.EqualTo("Value"));
+                Assert.That(loaded.GetSchema("Issue")[FieldKey.Create("Labels")].FieldType.ToString(), Is.EqualTo("Array"));
+                Assert.That(loaded.GetSchema("Issue")[FieldKey.Create("Title")].FieldType.Type, Is.EqualTo(typeof(JsonValueField)));
+                Assert.That(loaded.GetSchema("Issue")[FieldKey.Create("Title")].ValueType.Type, Is.EqualTo(typeof(GitIssue.Values.String)));
+                Assert.That(loaded.GetSchema("Issue")[FieldKey.Create("Labels")].FieldType.Type, Is.EqualTo(typeof(JsonArrayField)));
+                Assert.That(loaded.GetSchema("Issue")[FieldKey.Create("Labels")].ValueType.Type, Is.EqualTo(typeof(Label)));
             }
 
             [Test]
@@ -184,11 +184,11 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 string file = Path.Combine(directory, "config.json");
                 File.WriteAllText(file, """
                     {
-                      "IssueType": "ISSUE",
+                      "IssueType": "Issue",
                       "Storage": "Markdown",
                       "Issues": [
                         {
-                          "Name": "ISSUE",
+                          "Name": "Issue",
                           "Fields": {
                             "Title": {
                               "FieldType": "JsonValue",
@@ -213,10 +213,10 @@ namespace GitIssue.Tests.IssueConfigurationTests
                     {
                       "KeyProvider": "GitIssue.Issues.File.FileIssueKeyProvider",
                       "Storage": "Json",
-                      "IssueType": "ISSUE",
+                      "IssueType": "Issue",
                       "Issues": [
                         {
-                          "Name": "ISSUE",
+                          "Name": "Issue",
                           "Fields": {
                             "Key": { "FieldType": "Value", "ValueType": "IssueKey", "Required": true },
                             "Title": { "FieldType": "Value", "ValueType": "String", "Required": true },
@@ -262,10 +262,10 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 string file = Path.Combine(directory, "config.json");
                 File.WriteAllText(file, """
                     {
-                      "IssueType": "ISSUE",
+                      "IssueType": "Issue",
                       "Issues": [
                         {
-                          "Name": "ISSUE",
+                          "Name": "Issue",
                           "Fields": {
                             "Key": { "FieldType": "Value", "ValueType": "IssueKey", "Required": true },
                             "Title": { "FieldType": "Value", "ValueType": "String", "Required": true },

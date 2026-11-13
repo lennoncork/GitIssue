@@ -152,7 +152,7 @@ namespace GitIssue.Services.Web.Tests
             using RepositoryFixture fixture = new RepositoryFixture();
             string path = Path.Combine(fixture.Directory, ".issues", "config.json");
             IssueConfiguration configuration = IssueConfiguration.Read(path);
-            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("ISSUE"))
+            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"))
             {
                 ["Severity"] = new FieldInfo<GitIssue.Values.String, JsonValueField>(true),
             };

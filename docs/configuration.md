@@ -68,7 +68,7 @@ Ada Lovelace <ada@example.com>
 
 ## Multiple issue types
 
-Every schema lives in the `Issues` array. `gitissue init` writes one entry, named `ISSUE` unless `--issue-type` selects another name, and stores the default fields on that entry. The root `IssueType` selects which entry is used when a command does not pass `--type`. Each entry supplies its complete `Fields` schema, including the required core fields shown below. Names are case-sensitive and use ASCII letters and digits. `IssueType` is reserved: do not define it in `Fields`.
+Every schema lives in the `Issues` array. `gitissue init` writes one entry, named `Issue` unless `--issue-type` selects another name, and stores the default fields on that entry. The root `IssueType` selects which entry is used when a command does not pass `--type`. Each entry supplies its complete `Fields` schema, including the required core fields shown below. Names are case-sensitive and use ASCII letters and digits. `IssueType` is reserved: do not define it in `Fields`.
 
 ```json
 {
@@ -122,7 +122,7 @@ gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index
 
 | Token | Meaning | Default format |
 | --- | --- | --- |
-| `{type}` | The issue's type, defaulting to the configured `IssueType` | `ISSUE` |
+| `{type}` | The issue's type, defaulting to the configured `IssueType` | `Issue` |
 | `{created}` | Issue creation time. Use .NET date format specifiers, for example `{created:yyyy}`, `{created:MM}`, `{created:dd}`, or `{created:yyyy-MM-dd}` | `yyyy-MM-dd` |
 | `{index}` | Sequential integer assigned in this repository. Use `{index:D3}` for `001`. Unique across clones only if `{uid}` is also present | unpadded |
 | `{uid}` | Eight-character hexadecimal id | n/a |

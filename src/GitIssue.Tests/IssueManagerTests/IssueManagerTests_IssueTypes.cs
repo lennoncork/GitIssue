@@ -30,7 +30,7 @@ namespace GitIssue.Tests.IssueManagerTests
                     Storage = storage,
                     KeyTemplate = "{type}-{uid}",
                 };
-                Dictionary<FieldKey, FieldInfo> core = configuration.GetSchema("ISSUE");
+                Dictionary<FieldKey, FieldInfo> core = configuration.GetSchema("Issue");
                 Dictionary<FieldKey, FieldInfo> bugFields = new Dictionary<FieldKey, FieldInfo>(core)
                 {
                     ["Severity"] = new FieldInfo<String, JsonValueField>(true),
@@ -89,7 +89,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 string text = await File.ReadAllTextAsync(path);
                 if (storage == IssueStorage.Markdown)
                 {
-                    text = text.Replace("\n## IssueType\n\nISSUE\n", "\n", StringComparison.Ordinal);
+                    text = text.Replace("\n## IssueType\n\nIssue\n", "\n", StringComparison.Ordinal);
                 }
                 else
                 {
@@ -102,7 +102,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 configuration.Issues[0].Name = "BUG";
                 configuration.IssueType = "BUG";
                 IIssue loaded = manager.Find(_ => true).Single();
-                Assert.That(loaded.Key.ToString(), Does.StartWith("ISSUE-"));
+                Assert.That(loaded.Key.ToString(), Does.StartWith("Issue-"));
                 Assert.That(loaded.IssueType, Is.EqualTo("BUG"));
                 Assert.That(await loaded.SaveAsync(), Is.True);
                 Assert.That(await File.ReadAllTextAsync(path), Does.Contain("IssueType"));

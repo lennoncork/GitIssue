@@ -16,7 +16,7 @@ namespace GitIssue.Tool.Tests.Integration
         {
             this.InitializeRepository();
             IssueConfiguration configuration = IssueConfiguration.Read(this.ConfigurationFile);
-            Dictionary<FieldKey, FieldInfo> bugFields = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("ISSUE"))
+            Dictionary<FieldKey, FieldInfo> bugFields = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"))
             {
                 ["Severity"] = new FieldInfo<String, JsonValueField>(true),
                 ["Platform"] = new FieldInfo<String, JsonValueField>(true),

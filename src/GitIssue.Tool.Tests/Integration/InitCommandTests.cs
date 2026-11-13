@@ -25,14 +25,14 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(this.GetIssueKeys(), Is.Empty);
                 Assert.That(configuration.ContainsKey("Fields"), Is.False);
                 JsonObject issue = configuration["Issues"]![0]!.AsObject();
-                Assert.That(issue["Name"]?.GetValue<string>(), Is.EqualTo("ISSUE"));
+                Assert.That(issue["Name"]?.GetValue<string>(), Is.EqualTo("Issue"));
                 JsonObject fields = issue["Fields"]!.AsObject();
                 this.AssertJsonPropertyExists(fields, "Title");
                 Assert.That(fields["Title"]!["FieldType"]!.GetValue<string>(), Is.EqualTo("Value"));
                 Assert.That(fields["Labels"]!["FieldType"]!.GetValue<string>(), Is.EqualTo("Array"));
                 Assert.That(configuration["Storage"]?.GetValue<string>(), Is.EqualTo("Markdown"));
                 Assert.That(configuration["KeyProvider"]?.GetValue<string>(), Is.EqualTo("DateIssueKeyProvider"));
-                Assert.That(configuration["IssueType"]?.GetValue<string>(), Is.EqualTo("ISSUE"));
+                Assert.That(configuration["IssueType"]?.GetValue<string>(), Is.EqualTo("Issue"));
                 Assert.That(configuration["KeyTemplate"]?.GetValue<string>(), Is.EqualTo("{created:yyyy}/{created:MM}/{created:dd}/{uid}"));
                 Assert.That(this.Output, Does.Contain("Initialized empty 'Issue' repository"));
             });

@@ -34,7 +34,7 @@ namespace GitIssue.Tests.IssueManagerTests
 
                 IReadOnlyList<IssueRekeyResult> results = this.Sut.Rekey();
                 Assert.That(results, Has.Count.EqualTo(1));
-                Assert.That(results[0].To.ToString(), Does.Match(new Regex(@"^ISSUE-[A-F0-9]{8}-add-login-page$")));
+                Assert.That(results[0].To.ToString(), Does.Match(new Regex(@"^Issue-[A-F0-9]{8}-add-login-page$")));
                 Assert.That(results[0].To.ToString(), Does.Contain(original[^8..]));
 
                 IIssue[] found = this.Sut.Find(_ => true).ToArray();
@@ -49,7 +49,7 @@ namespace GitIssue.Tests.IssueManagerTests
             {
                 this.Initialize(this.TestDirectory);
                 IssueConfiguration configuration = (IssueConfiguration)this.Sut.Configuration;
-                Dictionary<FieldKey, FieldInfo> schema = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("ISSUE"));
+                Dictionary<FieldKey, FieldInfo> schema = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"));
                 configuration.Issues.Add(new IssueTypeConfiguration
                 {
                     Name = "FEAT",

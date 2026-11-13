@@ -224,7 +224,7 @@ namespace GitIssue.Issues
                 return false;
             }
 
-            string type = "ISSUE";
+            string type = "Issue";
             string uid = string.Empty;
             string name = "Untitled";
             int index = 0;
