@@ -30,11 +30,12 @@ namespace GitIssue.Tests.IssueManagerTests
                     Storage = storage,
                     KeyTemplate = "{type}-{uid}",
                 };
-                Dictionary<FieldKey, FieldInfo> bugFields = new Dictionary<FieldKey, FieldInfo>(configuration.Fields)
+                Dictionary<FieldKey, FieldInfo> core = configuration.GetSchema("ISSUE");
+                Dictionary<FieldKey, FieldInfo> bugFields = new Dictionary<FieldKey, FieldInfo>(core)
                 {
                     ["Severity"] = new FieldInfo<String, JsonValueField>(true),
                 };
-                Dictionary<FieldKey, FieldInfo> featureFields = new Dictionary<FieldKey, FieldInfo>(configuration.Fields)
+                Dictionary<FieldKey, FieldInfo> featureFields = new Dictionary<FieldKey, FieldInfo>(core)
                 {
                     ["Motivation"] = new FieldInfo<String, JsonValueField>(true),
                 };
@@ -98,6 +99,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 }
 
                 await File.WriteAllTextAsync(path, text);
+                configuration.Issues[0].Name = "BUG";
                 configuration.IssueType = "BUG";
                 IIssue loaded = manager.Find(_ => true).Single();
                 Assert.That(loaded.Key.ToString(), Does.StartWith("ISSUE-"));

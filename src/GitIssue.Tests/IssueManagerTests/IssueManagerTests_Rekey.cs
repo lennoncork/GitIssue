@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GitIssue.Fields;
 using GitIssue.Issues;
 using NUnit.Framework;
 
@@ -47,6 +48,18 @@ namespace GitIssue.Tests.IssueManagerTests
             public async Task PreservesExistingIssueTypesWhenRekeying()
             {
                 this.Initialize(this.TestDirectory);
+                IssueConfiguration configuration = (IssueConfiguration)this.Sut.Configuration;
+                Dictionary<FieldKey, FieldInfo> schema = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("ISSUE"));
+                configuration.Issues.Add(new IssueTypeConfiguration
+                {
+                    Name = "FEAT",
+                    Fields = new Dictionary<FieldKey, FieldInfo>(schema),
+                });
+                configuration.Issues.Add(new IssueTypeConfiguration
+                {
+                    Name = "BUG",
+                    Fields = new Dictionary<FieldKey, FieldInfo>(schema),
+                });
                 this.Sut.Configuration.KeyTemplate = "{type}-{uid}-{slug}";
                 this.Sut.Configuration.IssueType = "FEAT";
                 IIssue feature = await this.Sut.CreateAsync("Feature", string.Empty);

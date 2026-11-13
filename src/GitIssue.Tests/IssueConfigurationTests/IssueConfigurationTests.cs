@@ -25,14 +25,17 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 Assert.That(config.IssueType, Is.EqualTo("ISSUE"));
                 Assert.That(config.KeyTemplate, Is.EqualTo(IssueKeyTemplate.Date));
                 Assert.That(config.Storage, Is.EqualTo(IssueStorage.Markdown));
-                Assert.That(config.Fields.ContainsKey(FieldKey.Create("Key")), Is.True);
-                Assert.That(config.Fields.ContainsKey(FieldKey.Create("Title")), Is.True);
-                Assert.That(config.Fields.ContainsKey(FieldKey.Create("Description")), Is.True);
-                Assert.That(config.Fields.ContainsKey(FieldKey.Create("Author")), Is.True);
-                Assert.That(config.Fields.ContainsKey(FieldKey.Create("Created")), Is.True);
-                Assert.That(config.Fields.ContainsKey(FieldKey.Create("Updated")), Is.True);
-                Assert.That(config.Fields.ContainsKey(FieldKey.Create("Labels")), Is.True);
-                Assert.That(config.Fields.ContainsKey(FieldKey.Create("Comments")), Is.True);
+                Assert.That(config.Issues, Has.Count.EqualTo(1));
+                Assert.That(config.Issues[0].Name, Is.EqualTo("ISSUE"));
+                Dictionary<FieldKey, FieldInfo> fields = config.GetSchema(config.IssueType);
+                Assert.That(fields.ContainsKey(FieldKey.Create("Key")), Is.True);
+                Assert.That(fields.ContainsKey(FieldKey.Create("Title")), Is.True);
+                Assert.That(fields.ContainsKey(FieldKey.Create("Description")), Is.True);
+                Assert.That(fields.ContainsKey(FieldKey.Create("Author")), Is.True);
+                Assert.That(fields.ContainsKey(FieldKey.Create("Created")), Is.True);
+                Assert.That(fields.ContainsKey(FieldKey.Create("Updated")), Is.True);
+                Assert.That(fields.ContainsKey(FieldKey.Create("Labels")), Is.True);
+                Assert.That(fields.ContainsKey(FieldKey.Create("Comments")), Is.True);
             }
         }
 
@@ -44,15 +47,16 @@ namespace GitIssue.Tests.IssueConfigurationTests
             {
                 string file = Path.Combine(Helpers.CreateTempDirectory(), "config.json");
                 IssueConfiguration config = new IssueConfiguration();
-                config.Issues.Add(new IssueTypeConfiguration { Name = "ISSUE" });
+                Dictionary<FieldKey, FieldInfo> fields = new Dictionary<FieldKey, FieldInfo>(config.GetSchema("ISSUE"));
+                config.Issues[0].Fields = new Dictionary<FieldKey, FieldInfo>();
                 Assert.That(() => config.Save(file), Throws.TypeOf<AggregateException>());
                 Assert.That(File.Exists(file), Is.False);
 
-                config.Issues[0].Fields = new Dictionary<FieldKey, FieldInfo>(config.Fields);
+                config.Issues[0].Fields = new Dictionary<FieldKey, FieldInfo>(fields);
                 config.Issues.Add(new IssueTypeConfiguration
                 {
                     Name = "ISSUE",
-                    Fields = new Dictionary<FieldKey, FieldInfo>(config.Fields),
+                    Fields = new Dictionary<FieldKey, FieldInfo>(fields),
                 });
                 Assert.That(() => config.Save(file), Throws.TypeOf<AggregateException>());
                 Assert.That(File.Exists(file), Is.False);
@@ -97,7 +101,7 @@ namespace GitIssue.Tests.IssueConfigurationTests
 
                 IssueConfiguration loaded = IssueConfiguration.Read(file);
 
-                Assert.That(loaded.Fields.Keys, Is.EquivalentTo(config.Fields.Keys));
+                Assert.That(loaded.GetSchema("ISSUE").Keys, Is.EquivalentTo(config.GetSchema("ISSUE").Keys));
                 Assert.That(loaded.KeyProvider.Type, Is.EqualTo(config.KeyProvider.Type));
                 Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Markdown));
                 Assert.That(json, Does.Contain("\"Storage\": \"Markdown\""));
@@ -114,9 +118,10 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 IssueConfiguration config = new IssueConfiguration
                 {
                     KeyProvider = TypeValue.Create<TemplateIssueKeyProvider>(),
-                    IssueType = "FEAT",
                     KeyTemplate = "{type}-{uid}-{slug}",
                 };
+                config.Issues[0].Name = "FEAT";
+                config.IssueType = "FEAT";
 
                 config.Save(file);
                 string json = File.ReadAllText(file);
@@ -160,45 +165,43 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 string json = File.ReadAllText(file);
                 IssueConfiguration loaded = IssueConfiguration.Read(file);
 
-                Assert.That(json, Does.Contain("\"FieldType\": \"ValueField\""));
-                Assert.That(json, Does.Contain("\"FieldType\": \"ArrayField\""));
-                Assert.That(json, Does.Not.Contain("JsonValue"));
-                Assert.That(json, Does.Not.Contain("JsonArray"));
-                Assert.That(loaded.Fields[FieldKey.Create("Title")].FieldType.ToString(), Is.EqualTo("ValueField"));
-                Assert.That(loaded.Fields[FieldKey.Create("Labels")].FieldType.ToString(), Is.EqualTo("ArrayField"));
-                Assert.That(loaded.Fields[FieldKey.Create("Title")].FieldType.Type, Is.EqualTo(typeof(JsonValueField)));
-                Assert.That(loaded.Fields[FieldKey.Create("Title")].ValueType.Type, Is.EqualTo(typeof(GitIssue.Values.String)));
-                Assert.That(loaded.Fields[FieldKey.Create("Labels")].FieldType.Type, Is.EqualTo(typeof(JsonArrayField)));
-                Assert.That(loaded.Fields[FieldKey.Create("Labels")].ValueType.Type, Is.EqualTo(typeof(Label)));
+                Assert.That(json, Does.Contain("\"FieldType\": \"Value\""));
+                Assert.That(json, Does.Contain("\"FieldType\": \"Array\""));
+                Assert.That(json, Does.Not.Contain("Json"));
+                Assert.That(json, Does.Not.Contain("\n  \"Fields\""));
+                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Title")].FieldType.ToString(), Is.EqualTo("Value"));
+                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Labels")].FieldType.ToString(), Is.EqualTo("Array"));
+                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Title")].FieldType.Type, Is.EqualTo(typeof(JsonValueField)));
+                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Title")].ValueType.Type, Is.EqualTo(typeof(GitIssue.Values.String)));
+                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Labels")].FieldType.Type, Is.EqualTo(typeof(JsonArrayField)));
+                Assert.That(loaded.GetSchema("ISSUE")[FieldKey.Create("Labels")].ValueType.Type, Is.EqualTo(typeof(Label)));
             }
 
             [Test]
-            public void Read_AcceptsLegacyJsonFieldTypeNames()
+            public void Read_RejectsJsonFieldTypeNames()
             {
                 string directory = Helpers.CreateTempDirectory();
                 string file = Path.Combine(directory, "config.json");
                 File.WriteAllText(file, """
                     {
-                      "Fields": {
-                        "Title": {
-                          "FieldType": "JsonValue",
-                          "ValueType": "String",
-                          "Required": true
-                        },
-                        "Labels": {
-                          "FieldType": "JsonArray",
-                          "ValueType": "Label"
+                      "IssueType": "ISSUE",
+                      "Storage": "Markdown",
+                      "Issues": [
+                        {
+                          "Name": "ISSUE",
+                          "Fields": {
+                            "Title": {
+                              "FieldType": "JsonValue",
+                              "ValueType": "String",
+                              "Required": true
+                            }
+                          }
                         }
-                      }
+                      ]
                     }
                     """);
 
-                IssueConfiguration loaded = IssueConfiguration.Read(file);
-
-                Assert.That(loaded.Fields[FieldKey.Create("Title")].FieldType.Type, Is.EqualTo(typeof(JsonValueField)));
-                Assert.That(loaded.Fields[FieldKey.Create("Title")].ValueType.Type, Is.EqualTo(typeof(GitIssue.Values.String)));
-                Assert.That(loaded.Fields[FieldKey.Create("Labels")].FieldType.Type, Is.EqualTo(typeof(JsonArrayField)));
-                Assert.That(loaded.Fields[FieldKey.Create("Labels")].ValueType.Type, Is.EqualTo(typeof(Label)));
+                Assert.That(() => IssueConfiguration.Read(file), Throws.TypeOf<AggregateException>());
             }
 
             [Test]
@@ -210,7 +213,20 @@ namespace GitIssue.Tests.IssueConfigurationTests
                     {
                       "KeyProvider": "GitIssue.Issues.File.FileIssueKeyProvider",
                       "Storage": "Json",
-                      "Fields": {}
+                      "IssueType": "ISSUE",
+                      "Issues": [
+                        {
+                          "Name": "ISSUE",
+                          "Fields": {
+                            "Key": { "FieldType": "Value", "ValueType": "IssueKey", "Required": true },
+                            "Title": { "FieldType": "Value", "ValueType": "String", "Required": true },
+                            "Description": { "FieldType": "Value", "ValueType": "String", "Required": true },
+                            "Author": { "FieldType": "Value", "ValueType": "Signature", "Required": true },
+                            "Created": { "FieldType": "Value", "ValueType": "DateTime", "Required": true },
+                            "Updated": { "FieldType": "Value", "ValueType": "DateTime", "Required": true }
+                          }
+                        }
+                      ]
                     }
                     """);
 
@@ -222,7 +238,7 @@ namespace GitIssue.Tests.IssueConfigurationTests
             }
 
             [Test]
-            public void Read_TreatsOmittedStorageAsJson()
+            public void Save_WritesStorageExplicitly()
             {
                 string directory = Helpers.CreateTempDirectory();
                 string file = Path.Combine(directory, "config.json");
@@ -235,8 +251,37 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 string json = File.ReadAllText(file);
                 IssueConfiguration loaded = IssueConfiguration.Read(file);
 
-                Assert.That(json, Does.Not.Contain("\"Storage\""));
+                Assert.That(json, Does.Contain("\"Storage\": \"Json\""));
                 Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Json));
+            }
+
+            [Test]
+            public void Read_TreatsOmittedStorageAsMarkdown()
+            {
+                string directory = Helpers.CreateTempDirectory();
+                string file = Path.Combine(directory, "config.json");
+                File.WriteAllText(file, """
+                    {
+                      "IssueType": "ISSUE",
+                      "Issues": [
+                        {
+                          "Name": "ISSUE",
+                          "Fields": {
+                            "Key": { "FieldType": "Value", "ValueType": "IssueKey", "Required": true },
+                            "Title": { "FieldType": "Value", "ValueType": "String", "Required": true },
+                            "Description": { "FieldType": "Value", "ValueType": "String", "Required": true },
+                            "Author": { "FieldType": "Value", "ValueType": "Signature", "Required": true },
+                            "Created": { "FieldType": "Value", "ValueType": "DateTime", "Required": true },
+                            "Updated": { "FieldType": "Value", "ValueType": "DateTime", "Required": true }
+                          }
+                        }
+                      ]
+                    }
+                    """);
+
+                IssueConfiguration loaded = IssueConfiguration.Read(file);
+
+                Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Markdown));
             }
         }
     }

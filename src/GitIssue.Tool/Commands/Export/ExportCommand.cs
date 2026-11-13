@@ -67,9 +67,8 @@ namespace GitIssue.Tool.Commands.Export
             await using FileStream stream = new FileStream(options.Export, FileMode.Create, FileAccess.ReadWrite);
             using TextWriter writer = new StreamWriter(stream);
 
-            IEnumerable<Dictionary<FieldKey, FieldInfo>> schemas = this.manager.Configuration.Issues.Count == 0
-                ? new[] { this.manager.Configuration.GetFields(this.manager.Configuration.IssueType) }
-                : this.manager.Configuration.Issues.Select(issue => this.manager.Configuration.GetFields(issue.Name));
+            IEnumerable<Dictionary<FieldKey, FieldInfo>> schemas = this.manager.Configuration.Issues
+                .Select(issue => this.manager.Configuration.GetFields(issue.Name));
             FieldKey[] columns = schemas.SelectMany(schema => schema.Keys).Distinct().ToArray();
             StringBuilder builder = new StringBuilder();
             foreach (FieldKey field in columns)

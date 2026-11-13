@@ -84,9 +84,9 @@ An issue is modeled by `IIssue` and the abstract `Issue` base class. Fields are
 identified by `FieldKey` and described by `FieldInfo`, which specifies the
 value type, field representation, required status, and metadata. The default
 `IssueConfiguration` defines key, title, description, author, created and
-updated timestamps, labels, and comments. A reserved `IssueType` field selects
-the schema stored under `Issues`; configurations without that array use the
-legacy shared `Fields` schema. Field factories and readers create
+updated timestamps, labels, and comments. Those fields are stored on the
+default entry in `Issues`. A reserved `IssueType` field selects which entry
+applies. Field factories and readers create
 typed scalar or array fields from the selected schema; the value types and type
 converters provide serialization and parsing for the supported domain values.
 
@@ -95,9 +95,9 @@ converters provide serialization and parsing for the supported domain values.
 `RepositoryRoot` identifies the working tree and the issue-data directory
 (`.issues` by default, or a name supplied by the user). The directory contains
 the JSON configuration and issue data. `IssueConfiguration.Storage` selects
-the issue document and defaults to `Markdown`. `Json` keeps the
-`FileIssue`/`JsonIssue` document, including when an existing configuration
-omits `Storage`. `Markdown` stores the same fields in one Markdown file, read
+the issue document and defaults to `Markdown`. `init` writes `Storage` into
+`config.json`. `Json` keeps the `FileIssue`/`JsonIssue` document. `Markdown`
+stores the same fields in one Markdown file, read
 and written with Markdig. Readers inspect the stored `IssueType` before selecting
 the schema; legacy documents without it use the configured default. Invalid or
 unknown source fields prevent saving so they cannot be silently discarded.

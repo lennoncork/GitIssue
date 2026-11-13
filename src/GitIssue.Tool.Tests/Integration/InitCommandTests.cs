@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text.Json.Nodes;
 using NUnit.Framework;
 
 namespace GitIssue.Tool.Tests.Integration
@@ -22,8 +23,13 @@ namespace GitIssue.Tool.Tests.Integration
                 this.AssertFileDoesNotExist(this.TrackingFile);
                 this.AssertFileDoesNotExist(this.ChangesFile);
                 Assert.That(this.GetIssueKeys(), Is.Empty);
-                this.AssertJsonPropertyExists(configuration, "Fields");
-                this.AssertJsonPropertyExists(configuration["Fields"]!.AsObject(), "Title");
+                Assert.That(configuration.ContainsKey("Fields"), Is.False);
+                JsonObject issue = configuration["Issues"]![0]!.AsObject();
+                Assert.That(issue["Name"]?.GetValue<string>(), Is.EqualTo("ISSUE"));
+                JsonObject fields = issue["Fields"]!.AsObject();
+                this.AssertJsonPropertyExists(fields, "Title");
+                Assert.That(fields["Title"]!["FieldType"]!.GetValue<string>(), Is.EqualTo("Value"));
+                Assert.That(fields["Labels"]!["FieldType"]!.GetValue<string>(), Is.EqualTo("Array"));
                 Assert.That(configuration["Storage"]?.GetValue<string>(), Is.EqualTo("Markdown"));
                 Assert.That(configuration["KeyProvider"]?.GetValue<string>(), Is.EqualTo("DateIssueKeyProvider"));
                 Assert.That(configuration["IssueType"]?.GetValue<string>(), Is.EqualTo("ISSUE"));

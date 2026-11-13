@@ -14,7 +14,7 @@ namespace GitIssue.Issues.Json
         /// <summary>
         ///     Creates a new instance of the <see cref="JsonValueField" /> class
         /// </summary>
-        public JsonValueField() : base("ValueField", "JsonValue", "Value")
+        public JsonValueField() : base("Value")
         {
         }
     }

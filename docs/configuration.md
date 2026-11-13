@@ -37,7 +37,7 @@ The `--path` option selects the working directory, and `--tracking` changes the 
 
 ## Issue storage
 
-`Storage` selects the file written for each issue. New repositories use `Markdown`: one `.md` document per issue. `gitissue init --storage json` selects one `.json` document per issue. A configuration that omits `Storage` stays on JSON so an existing repository keeps its current files.
+`Storage` selects the file written for each issue. New repositories use `Markdown`: one `.md` document per issue. `gitissue init --storage json` selects one `.json` document per issue. `init` always writes `Storage`. A configuration that omits it uses Markdown.
 
 ```shell
 gitissue init
@@ -68,7 +68,7 @@ Ada Lovelace <ada@example.com>
 
 ## Multiple issue types
 
-The root `IssueType` is the default type. To give types different fields, define an `Issues` array. Each entry supplies its complete `Fields` schema, including the required core fields shown below. Names are case-sensitive and use ASCII letters and digits. `IssueType` is reserved: do not define it in `Fields`.
+Every schema lives in the `Issues` array. `gitissue init` writes one entry, named `ISSUE` unless `--issue-type` selects another name, and stores the default fields on that entry. The root `IssueType` selects which entry is used when a command does not pass `--type`. Each entry supplies its complete `Fields` schema, including the required core fields shown below. Names are case-sensitive and use ASCII letters and digits. `IssueType` is reserved: do not define it in `Fields`.
 
 ```json
 {
@@ -80,25 +80,25 @@ The root `IssueType` is the default type. To give types different fields, define
     {
       "Name": "BUG",
       "Fields": {
-        "Key": { "FieldType": "ValueField", "ValueType": "IssueKey", "Required": true },
-        "Title": { "FieldType": "ValueField", "ValueType": "String", "Required": true },
-        "Description": { "FieldType": "ValueField", "ValueType": "String", "Required": true },
-        "Author": { "FieldType": "ValueField", "ValueType": "Signature", "Required": true },
-        "Created": { "FieldType": "ValueField", "ValueType": "DateTime", "Required": true },
-        "Updated": { "FieldType": "ValueField", "ValueType": "DateTime", "Required": true },
-        "Severity": { "FieldType": "ValueField", "ValueType": "String", "Required": true }
+        "Key": { "FieldType": "Value", "ValueType": "IssueKey", "Required": true },
+        "Title": { "FieldType": "Value", "ValueType": "String", "Required": true },
+        "Description": { "FieldType": "Value", "ValueType": "String", "Required": true },
+        "Author": { "FieldType": "Value", "ValueType": "Signature", "Required": true },
+        "Created": { "FieldType": "Value", "ValueType": "DateTime", "Required": true },
+        "Updated": { "FieldType": "Value", "ValueType": "DateTime", "Required": true },
+        "Severity": { "FieldType": "Value", "ValueType": "String", "Required": true }
       }
     },
     {
       "Name": "FEATURE",
       "Fields": {
-        "Key": { "FieldType": "ValueField", "ValueType": "IssueKey", "Required": true },
-        "Title": { "FieldType": "ValueField", "ValueType": "String", "Required": true },
-        "Description": { "FieldType": "ValueField", "ValueType": "String", "Required": true },
-        "Author": { "FieldType": "ValueField", "ValueType": "Signature", "Required": true },
-        "Created": { "FieldType": "ValueField", "ValueType": "DateTime", "Required": true },
-        "Updated": { "FieldType": "ValueField", "ValueType": "DateTime", "Required": true },
-        "Proposal": { "FieldType": "ValueField", "ValueType": "String", "Required": true }
+        "Key": { "FieldType": "Value", "ValueType": "IssueKey", "Required": true },
+        "Title": { "FieldType": "Value", "ValueType": "String", "Required": true },
+        "Description": { "FieldType": "Value", "ValueType": "String", "Required": true },
+        "Author": { "FieldType": "Value", "ValueType": "Signature", "Required": true },
+        "Created": { "FieldType": "Value", "ValueType": "DateTime", "Required": true },
+        "Updated": { "FieldType": "Value", "ValueType": "DateTime", "Required": true },
+        "Proposal": { "FieldType": "Value", "ValueType": "String", "Required": true }
       }
     }
   ]
@@ -107,9 +107,7 @@ The root `IssueType` is the default type. To give types different fields, define
 
 The default type must match an entry in `Issues`. Use `gitissue fields --type BUG` to inspect its fields and `gitissue create "Crash" "Details" --type BUG --field Severity=high` to create one. Multiple initial values follow the same `--field` option, for example `--field Severity=high Platform=linux`. When no title is supplied, the editor prompts for the selected type's fields.
 
-The issue document stores its own `IssueType` as a JSON property or Markdown `## IssueType` section. It determines the schema independently of the key and cannot be changed through field editing. Documents without it use the configured default, even if their key contains another type; the type is written on their next save. A document with an invalid type, or a type not listed in `Issues`, is rejected. Before enabling `Issues`, make sure every existing document matches the chosen default schema and resolve any existing custom field named `IssueType`.
-
-Older configurations without `Issues` continue using the root `Fields` schema for all type names. The root `IssueType` remains the default. Changing the default does not change the stored type of existing issues.
+The issue document stores its own `IssueType` as a JSON property or Markdown `## IssueType` section. It determines the schema independently of the key and cannot be changed through field editing. Documents without it use the configured default, even if their key contains another type; the type is written on their next save. A document with an invalid type, or a type not listed in `Issues`, is rejected. Changing the default `IssueType` does not change the stored type of existing issues.
 
 ## Issue keys
 
@@ -154,16 +152,16 @@ gitissue rekey
 
 The configuration defines the key provider, key template, issue type, and each field's field/value types, metadata, and required status. Make a backup before editing it manually: changing a field's type or name can make existing issue data unreadable or prevent commands from working. Use the `fields` command afterward to confirm that the repository still loads and reports the expected schema.
 
-`FieldType` describes the shape of the field. `ValueField` is one value and `ArrayField` is a list. `ValueType` is the kind of value, such as `String`, `Label`, or `DateTime`. These names are the same for Markdown and JSON issue files. The fields are still read and written with the JSON value model. Configurations that still say `JsonValue`, `JsonArray`, `Value`, or `Array` continue to load.
+`FieldType` describes the shape of the field. `Value` is one value and `Array` is a list. `ValueType` is the kind of value, such as `String`, `Label`, or `DateTime`. These names are the same for Markdown and JSON issue files.
 
 ```json
 "Title": {
-  "FieldType": "ValueField",
+  "FieldType": "Value",
   "ValueType": "String",
   "Required": true
 },
 "Labels": {
-  "FieldType": "ArrayField",
+  "FieldType": "Array",
   "ValueType": "Label"
 }
 ```

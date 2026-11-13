@@ -114,11 +114,10 @@ namespace GitIssue.Services.Mcp.Tests
             using RepositoryFixture fixture = new RepositoryFixture();
             string path = Path.Combine(fixture.Directory, ".issues", "config.json");
             IssueConfiguration configuration = IssueConfiguration.Read(path);
-            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.Fields)
+            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("ISSUE"))
             {
                 ["Severity"] = new FieldInfo<GitIssue.Values.String, JsonValueField>(true),
             };
-            configuration.Issues.Add(new IssueTypeConfiguration { Name = "ISSUE", Fields = configuration.Fields });
             configuration.Issues.Add(new IssueTypeConfiguration { Name = "BUG", Fields = bug });
             configuration.Save(path);
 

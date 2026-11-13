@@ -74,6 +74,10 @@ namespace GitIssue.Tool
                                     ? initOptions.IssueType
                                     : initOptions.IssueTypeName;
                                 config.IssueType = IssueTypeName.Validate(issueType);
+                                if ((config.Issues.Count == 1) && (config.Issues[0].Name != config.IssueType))
+                                {
+                                    config.Issues[0].Name = config.IssueType;
+                                }
 
                                 if (!string.IsNullOrWhiteSpace(initOptions.KeyTemplate))
                                 {
