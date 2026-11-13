@@ -22,6 +22,8 @@ namespace GitIssue.Services
 
         private readonly IIssueManager manager;
 
+        private readonly string projectName;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueWorkspace" /> class
         /// </summary>
@@ -29,6 +31,8 @@ namespace GitIssue.Services
         public IssueWorkspace(IIssueManager manager)
         {
             this.manager = manager;
+            string? name = manager.Configuration.ProjectName;
+            this.projectName = string.IsNullOrWhiteSpace(name) ? "GitIssue" : name.Trim();
         }
 
         private static bool tryResolveField(IIssue issue, string field, out FieldKey key)
@@ -298,6 +302,11 @@ namespace GitIssue.Services
         }
 
         /// <summary>
+        ///     Gets the project name from configuration, or GitIssue when none is set
+        /// </summary>
+        public string ProjectName => this.projectName;
+
+        /// <summary>
         ///     Updates one field without committing the issue
         /// </summary>
         /// <param name="key">the issue key</param>
@@ -308,8 +317,27 @@ namespace GitIssue.Services
         [Throws<IssueOperationException>]
         public Task<IssueDocument> UpdateIssueAsync(string key, string field, string value, CancellationToken cancellationToken)
         {
+            Dictionary<string, string> fields = new Dictionary<string, string>();
+            if (!string.IsNullOrWhiteSpace(field))
+            {
+                fields.Add(field, value);
+            }
+
+            return this.UpdateIssueAsync(key, fields, cancellationToken);
+        }
+
+        /// <summary>
+        ///     Updates every supplied field and writes the issue once
+        /// </summary>
+        /// <param name="key">the issue key</param>
+        /// <param name="fields">the field names and values, using the CLI field syntax</param>
+        /// <param name="cancellationToken">the cancellation token</param>
+        /// <returns>the updated document</returns>
+        [Throws<IssueOperationException>]
+        public Task<IssueDocument> UpdateIssueAsync(string key, IReadOnlyDictionary<string, string> fields, CancellationToken cancellationToken)
+        {
             return this.withLockAsync(
-                () => this.updateAsync(key, field, value, cancellationToken),
+                () => this.updateAsync(key, fields, cancellationToken),
                 cancellationToken);
         }
 
@@ -462,28 +490,45 @@ namespace GitIssue.Services
             return IssueDocumentMapper.FromIssue(issue);
         }
 
-        private async Task<IssueDocument> updateAsync(string key, string field, string value, CancellationToken cancellationToken)
+        private async Task<IssueDocument> updateAsync(string key, IReadOnlyDictionary<string, string> fields, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(field))
+            if ((fields == null) || (fields.Count == 0))
             {
                 throw new IssueOperationException("A field name is required.");
             }
 
-            if (string.Equals(field, "Key", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(field, "IssueType", StringComparison.OrdinalIgnoreCase))
+            foreach (KeyValuePair<string, string> pair in fields)
             {
-                throw new IssueOperationException($"The {field} field is read-only.");
+                if (string.IsNullOrWhiteSpace(pair.Key))
+                {
+                    throw new IssueOperationException("A field name is required.");
+                }
+
+                if (string.Equals(pair.Key, "Key", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(pair.Key, "IssueType", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new IssueOperationException($"The {pair.Key} field is read-only.");
+                }
             }
 
             IIssue issue = await this.requireAsync(key, cancellationToken);
-            if (!IssueWorkspace.tryResolveField(issue, field, out FieldKey fieldKey))
+            List<(string Name, FieldKey Key, string Value)> updates = new List<(string Name, FieldKey Key, string Value)>();
+            foreach (KeyValuePair<string, string> pair in fields)
             {
-                throw new IssueOperationException($"Field \"{field}\" is not configured.");
+                if (!IssueWorkspace.tryResolveField(issue, pair.Key, out FieldKey fieldKey))
+                {
+                    throw new IssueOperationException($"Field \"{pair.Key}\" is not configured.");
+                }
+
+                updates.Add((pair.Key, fieldKey, pair.Value ?? string.Empty));
             }
 
-            if (!issue[fieldKey].Update(value))
+            foreach ((string name, FieldKey fieldKey, string value) in updates)
             {
-                throw new IssueOperationException($"Value \"{value}\" is not valid for field \"{field}\".");
+                if (!issue[fieldKey].Update(value))
+                {
+                    throw new IssueOperationException($"Value \"{value}\" is not valid for field \"{name}\".");
+                }
             }
 
             await issue.SaveAsync();

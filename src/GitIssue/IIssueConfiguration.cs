@@ -42,6 +42,12 @@ namespace GitIssue
         IssueStorage Storage { get; set; }
 
         /// <summary>
+        ///     Gets or sets the project name shown by the local website.
+        ///     A null or empty name displays GitIssue.
+        /// </summary>
+        string? ProjectName { get; set; }
+
+        /// <summary>
         ///     Saves the configuration to a file
         /// </summary>
         /// <param name="file">the configuration file</param>

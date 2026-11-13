@@ -1,7 +1,7 @@
 @page "/"
 @inject IssueWorkspace Workspace
 
-<h1>GitIssue</h1>
+<h1>@Workspace.ProjectName</h1>
 <section aria-labelledby="tracked-heading">
     <h2 id="tracked-heading">Tracked issue</h2>
     @if (trackedIssue is not null)

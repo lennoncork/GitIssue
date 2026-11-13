@@ -86,6 +86,16 @@ namespace GitIssue.Tool
                                 }
 
                                 config.Issues[0].Layout = layout;
+                                if (!string.IsNullOrEmpty(initOptions.ProjectName) &&
+                                    string.IsNullOrWhiteSpace(initOptions.ProjectName))
+                                {
+                                    throw new ArgumentException("Project name cannot be empty.");
+                                }
+
+                                if (!string.IsNullOrWhiteSpace(initOptions.ProjectName))
+                                {
+                                    config.ProjectName = initOptions.ProjectName.Trim();
+                                }
 
                                 if (!string.IsNullOrWhiteSpace(initOptions.KeyTemplate))
                                 {

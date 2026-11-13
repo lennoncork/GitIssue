@@ -2,6 +2,14 @@
 
 GitIssue reads issue-repository configuration from `.gitissue.config` in the repository root, next to `.gitignore`. Issue files are stored in that same directory. A `bug` issue lives under `bugs`, with no `.issues` folder.
 
+## Project name
+
+`ProjectName` is the title of the local website. `gitissue init --project-name "Apollo"` writes it into `.gitissue.config`. When the property is omitted or blank, the website title is GitIssue.
+
+```shell
+gitissue init --project-name "Apollo"
+```
+
 Use the fields command to inspect the fields recognized by the current repository:
 
 ```shell

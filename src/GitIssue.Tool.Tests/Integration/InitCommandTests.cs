@@ -35,6 +35,7 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(configuration["Storage"]?.GetValue<string>(), Is.EqualTo("Markdown"));
                 Assert.That(configuration["KeyProvider"]?.GetValue<string>(), Is.EqualTo("DateIssueKeyProvider"));
                 Assert.That(configuration["IssueType"]?.GetValue<string>(), Is.EqualTo("Issue"));
+                Assert.That(configuration.ContainsKey("ProjectName"), Is.False);
                 Assert.That(configuration["KeyTemplate"]?.GetValue<string>(), Is.EqualTo("{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}"));
                 Assert.That(this.Output, Does.Contain("Initialized empty 'Issue' repository"));
             });
@@ -86,6 +87,29 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(configuration["IssueType"]?.GetValue<string>(), Is.EqualTo("FEAT"));
                 Assert.That(configuration["KeyTemplate"]?.GetValue<string>(), Is.EqualTo("{type}-{uid}-{slug}"));
             });
+        }
+
+        [Test]
+        public void Init_StoresProjectName()
+        {
+            int exitCode = this.Run("Init", "--project-name", "  Apollo  ");
+
+            var configuration = this.ReadJsonObject(this.ConfigurationFile);
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.Zero, this.Error);
+                Assert.That(configuration["ProjectName"]?.GetValue<string>(), Is.EqualTo("Apollo"));
+            });
+        }
+
+        [Test]
+        public void Init_RejectsBlankProjectName()
+        {
+            int exitCode = this.Run("Init", "--project-name", "   ");
+
+            Assert.That(exitCode, Is.EqualTo(1), this.Output + this.Error);
+            Assert.That(this.Output + this.Error, Does.Contain("Project name cannot be empty."));
+            this.AssertFileDoesNotExist(this.ConfigurationFile);
         }
 
         [Test]

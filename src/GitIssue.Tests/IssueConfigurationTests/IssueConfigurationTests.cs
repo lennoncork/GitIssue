@@ -85,6 +85,26 @@ namespace GitIssue.Tests.IssueConfigurationTests
             }
 
             [Test]
+            public void Save_And_Read_RoundTrips_ProjectName()
+            {
+                string directory = Helpers.CreateTempDirectory();
+                string file = Path.Combine(directory, "config.json");
+                IssueConfiguration config = new IssueConfiguration
+                {
+                    ProjectName = "  Apollo  ",
+                };
+
+                config.Save(file);
+                string json = File.ReadAllText(file);
+                IssueConfiguration loaded = IssueConfiguration.Read(file);
+                IssueConfiguration omitted = IssueConfiguration.Read(WriteOmittedProjectName(directory));
+
+                Assert.That(json, Does.Contain("\"ProjectName\": \"Apollo\""));
+                Assert.That(loaded.ProjectName, Is.EqualTo("Apollo"));
+                Assert.That(omitted.ProjectName, Is.Null);
+            }
+
+            [Test]
             public void Save_And_Read_RoundTrips_Configuration()
             {
                 string directory = Helpers.CreateTempDirectory();
@@ -282,6 +302,30 @@ namespace GitIssue.Tests.IssueConfigurationTests
                 IssueConfiguration loaded = IssueConfiguration.Read(file);
 
                 Assert.That(loaded.Storage, Is.EqualTo(IssueStorage.Markdown));
+            }
+
+            private static string WriteOmittedProjectName(string directory)
+            {
+                string file = Path.Combine(directory, "omitted.json");
+                File.WriteAllText(file, """
+                    {
+                      "IssueType": "Issue",
+                      "Issues": [
+                        {
+                          "Name": "Issue",
+                          "Fields": {
+                            "Key": { "FieldType": "Value", "ValueType": "IssueKey", "Required": true },
+                            "Title": { "FieldType": "Value", "ValueType": "String", "Required": true },
+                            "Description": { "FieldType": "Value", "ValueType": "String", "Required": true },
+                            "Author": { "FieldType": "Value", "ValueType": "Signature", "Required": true },
+                            "Created": { "FieldType": "Value", "ValueType": "DateTime", "Required": true },
+                            "Updated": { "FieldType": "Value", "ValueType": "DateTime", "Required": true }
+                          }
+                        }
+                      ]
+                    }
+                    """);
+                return file;
             }
         }
     }

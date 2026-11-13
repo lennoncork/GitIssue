@@ -1,9 +1,10 @@
+@inject IssueWorkspace Workspace
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>GitIssue</title>
+    <title>@Workspace.ProjectName</title>
     <style>
         body { font-family: system-ui, sans-serif; color: #172033; background: #f5f7fb; margin: 0; }
         main { max-width: 70rem; margin: auto; padding: 2rem 1rem; }
@@ -17,18 +18,84 @@
         textarea { width: 100%; min-height: 5rem; }
         button { cursor: pointer; }
         label { display: block; font-weight: 600; margin-bottom: .4rem; }
+        label.modified { color: #ff6a00; }
         .error { color: #a21d1d; }
         .success { color: #16703b; }
         .pagination { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
         .field { margin-bottom: 1.5rem; }
         .field input { width: 100%; }
         .field input:not([type="hidden"]), .field textarea { display: block; }
-        .field button { display: block; margin-top: .4rem; }
+        .actions { display: flex; gap: .75rem; align-items: center; margin-top: .5rem; }
+        .actions button, .actions a.button {
+            font: inherit;
+            padding: .5rem .75rem;
+            cursor: pointer;
+            color: #172033;
+            background: #f3f4f6;
+            border: 1px solid #9aa4b2;
+            border-radius: .25rem;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
     <main>
         <Routes />
     </main>
+    <script>
+        (() => {
+            const mark = (input) => {
+                if (!input.id) {
+                    return;
+                }
+
+                const label = document.querySelector(`label[for="${CSS.escape(input.id)}"]`);
+                if (!label) {
+                    return;
+                }
+
+                const original = input.getAttribute("data-original") ?? "";
+                label.classList.toggle("modified", input.value !== original);
+            };
+
+            const scan = () => {
+                document.querySelectorAll("[data-original]").forEach(mark);
+            };
+
+            document.addEventListener("input", (event) => {
+                const target = event.target;
+                if (target instanceof HTMLElement && target.hasAttribute("data-original")) {
+                    mark(target);
+                }
+            });
+
+            window.setInterval(scan, 250);
+
+            document.addEventListener("click", (event) => {
+                const target = event.target;
+                const button = target instanceof Element ? target.closest("[data-revert]") : null;
+                if (!button) {
+                    return;
+                }
+
+                event.preventDefault();
+                const form = button.closest("form");
+                if (!form) {
+                    return;
+                }
+
+                form.querySelectorAll("[data-original]").forEach((input) => {
+                    input.value = input.getAttribute("data-original") ?? "";
+                    mark(input);
+                });
+            });
+
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", scan);
+            } else {
+                scan();
+            }
+        })();
+    </script>
 </body>
 </html>

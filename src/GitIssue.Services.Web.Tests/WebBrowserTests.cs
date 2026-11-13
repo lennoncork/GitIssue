@@ -40,6 +40,8 @@ namespace GitIssue.Services.Web.Tests
                 IPage page = await browser.NewPageAsync();
                 await page.GotoAsync(request.Url);
 
+                Assert.That(await page.TitleAsync(), Is.EqualTo("GitIssue"));
+                Assert.That(await page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "GitIssue", Level = 1 }).CountAsync(), Is.EqualTo(1));
                 Assert.That(await page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Tracked issue" }).CountAsync(), Is.EqualTo(1));
                 Assert.That(await page.GetByText("Tracked task", new PageGetByTextOptions { Exact = false }).CountAsync(), Is.GreaterThanOrEqualTo(1));
                 Assert.That(await page.Locator("tbody tr").CountAsync(), Is.EqualTo(10));
@@ -80,44 +82,101 @@ namespace GitIssue.Services.Web.Tests
                 IPage page = await browser.NewPageAsync();
                 await page.GotoAsync(request.Url);
                 await page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = created.Key }).ClickAsync();
-                float? expectedGap = null;
-                foreach (string field in new[] { "Title", "Description", "Labels", "Comments" })
-                {
-                    LocatorBoundingBoxResult? input = await page.GetByLabel(field, new PageGetByLabelOptions { Exact = true }).BoundingBoxAsync();
-                    LocatorBoundingBoxResult? button = await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = $"Save {field}", Exact = true }).BoundingBoxAsync();
-                    Assert.That(input, Is.Not.Null);
-                    Assert.That(button, Is.Not.Null);
-                    float gap = button!.Y - (input!.Y + input.Height);
-                    Assert.That(gap, Is.GreaterThan(0), $"Missing spacing for {field}");
-                    expectedGap = expectedGap ?? gap;
-                    Assert.That(gap, Is.EqualTo(expectedGap.Value).Within(0.1), $"Inconsistent spacing for {field}");
-                }
+                Assert.That(await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Title" }).CountAsync(), Is.EqualTo(0));
+                Assert.That(await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).CountAsync(), Is.EqualTo(1));
+                LocatorBoundingBoxResult? save = await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).BoundingBoxAsync();
+                LocatorBoundingBoxResult? revert = await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Revert", Exact = true }).BoundingBoxAsync();
+                LocatorBoundingBoxResult? cancel = await page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = "Cancel", Exact = true }).BoundingBoxAsync();
+                Assert.That(save, Is.Not.Null);
+                Assert.That(revert, Is.Not.Null);
+                Assert.That(cancel, Is.Not.Null);
+                Assert.That(revert!.Y, Is.EqualTo(save!.Y).Within(1));
+                Assert.That(cancel!.Y, Is.EqualTo(save.Y).Within(1));
+                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).ClickAsync();
+                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("No changes to save"));
+                Assert.That(await page.Locator("label.modified").CountAsync(), Is.EqualTo(0));
 
                 await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).FillAsync("Updated title");
-                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Title" }).ClickAsync();
-                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Title saved"));
                 await page.GetByLabel("Description", new PageGetByLabelOptions { Exact = true }).FillAsync("Updated description");
-                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Description" }).ClickAsync();
-                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Description saved"));
+                await page.Locator("label.modified[for='Title']").WaitForAsync();
+                await page.Locator("label.modified[for='Description']").WaitForAsync();
+                Assert.That(await page.Locator("label[for='Title']").EvaluateAsync<string>("node => getComputedStyle(node).color"), Is.EqualTo("rgb(255, 106, 0)"));
+                Assert.That(await page.Locator("label.modified[for='Author']").CountAsync(), Is.EqualTo(0));
+                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Revert", Exact = true }).ClickAsync();
+                Assert.That(await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Original title"));
+                Assert.That(await page.GetByLabel("Description", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Original description"));
+                Assert.That(await page.Locator("label.modified").CountAsync(), Is.EqualTo(0));
+
+                await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).FillAsync("Updated title");
+                await page.GetByLabel("Description", new PageGetByLabelOptions { Exact = true }).FillAsync("Updated description");
                 await page.GetByLabel("Labels", new PageGetByLabelOptions { Exact = true }).FillAsync("+feature");
-                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Labels" }).ClickAsync();
-                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Labels saved"));
+                await page.Locator("label.modified[for='Labels']").WaitForAsync();
+                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).ClickAsync();
+                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Changes saved"));
                 await page.ReloadAsync();
                 Assert.That(await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Updated title"));
                 Assert.That(await page.GetByLabel("Description", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Updated description"));
                 Assert.That(await page.GetByText("Current value:", new PageGetByTextOptions { Exact = false }).First.InnerTextAsync(), Does.Contain("feature"));
+                Assert.That(await page.Locator("label.modified").CountAsync(), Is.EqualTo(0));
+
+                await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).FillAsync("Should not persist");
                 await page.GetByLabel("Labels", new PageGetByLabelOptions { Exact = true }).FillAsync("[valid, invalid label]");
-                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Labels" }).ClickAsync();
+                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).ClickAsync();
                 Assert.That(await page.GetByRole(AriaRole.Alert).CountAsync(), Is.EqualTo(1));
                 Assert.That(await page.GetByLabel("Labels", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("[valid, invalid label]"));
+                Assert.That(await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Should not persist"));
+                Assert.That(await page.Locator("label.modified[for='Title']").CountAsync(), Is.EqualTo(1));
+                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Revert", Exact = true }).ClickAsync();
+                Assert.That(await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Updated title"));
+                Assert.That(await page.GetByLabel("Labels", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo(string.Empty));
+
                 await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).FillAsync(string.Empty);
-                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Title" }).ClickAsync();
+                await page.GetByLabel("Description", new PageGetByLabelOptions { Exact = true }).FillAsync("Should not persist description");
+                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).ClickAsync();
                 Assert.That(await page.GetByRole(AriaRole.Alert).CountAsync(), Is.EqualTo(1));
+                await page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = "Cancel", Exact = true }).ClickAsync();
+                Assert.That(new Uri(page.Url).AbsolutePath, Is.EqualTo("/"));
 
                 using IssueWorkspace verify = fixture.Open();
                 IssueDocument loaded = await verify.GetIssueAsync(created.Key, CancellationToken.None);
                 Assert.That(loaded.Title, Is.EqualTo("Updated title"));
+                Assert.That(loaded.Description, Is.EqualTo("Updated description"));
                 Assert.That(loaded.Fields["Labels"].ToString(), Does.Contain("feature").And.Not.Contain("valid"));
+            }
+            finally
+            {
+                await application.StopAsync();
+            }
+        }
+
+        [Test]
+        public async Task Pages_UseTheConfiguredProjectName()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            string path = Path.Combine(fixture.Directory, Paths.ConfigFileName);
+            IssueConfiguration configuration = IssueConfiguration.Read(path);
+            configuration.ProjectName = "Rocket Lab";
+            configuration.Save(path);
+            IssueDocument created;
+            using (IssueWorkspace workspace = fixture.Open())
+            {
+                created = await workspace.CreateIssueAsync("Named project", "Description", CancellationToken.None);
+            }
+
+            WebServeRequest request = WebServerHostTests.request(fixture.Directory, WebServerHostTests.freePort(), null);
+            await using WebApplication application = WebServerHost.Create(request);
+            await application.StartAsync();
+            try
+            {
+                using IPlaywright playwright = await Playwright.CreateAsync();
+                await using IBrowser browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+                IPage page = await browser.NewPageAsync();
+                await page.GotoAsync(request.Url);
+                Assert.That(await page.TitleAsync(), Is.EqualTo("Rocket Lab"));
+                Assert.That(await page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Rocket Lab", Level = 1 }).CountAsync(), Is.EqualTo(1));
+                await page.GotoAsync(request.Url + "/issue?key=" + Uri.EscapeDataString(created.Key));
+                Assert.That(await page.TitleAsync(), Is.EqualTo("Rocket Lab"));
+                Assert.That(await page.GetByRole(AriaRole.Heading, new PageGetByRoleOptions { Name = "Named project", Level = 1 }).CountAsync(), Is.EqualTo(1));
             }
             finally
             {
@@ -180,8 +239,9 @@ namespace GitIssue.Services.Web.Tests
                 Assert.That(await page.GetByText("BUG (read-only)").CountAsync(), Is.EqualTo(1));
                 Assert.That(await page.GetByLabel("Severity").InputValueAsync(), Is.EqualTo("high"));
                 await page.GetByLabel("Severity").FillAsync("low");
-                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Severity" }).ClickAsync();
-                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Severity saved"));
+                await page.Locator("label.modified[for='Severity']").WaitForAsync();
+                await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save", Exact = true }).ClickAsync();
+                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Changes saved"));
                 await page.ReloadAsync();
                 Assert.That(await page.GetByLabel("Severity").InputValueAsync(), Is.EqualTo("low"));
             }
