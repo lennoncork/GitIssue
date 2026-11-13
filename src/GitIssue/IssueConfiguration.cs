@@ -56,6 +56,12 @@ namespace GitIssue
         public IssueStorage Storage { get; set; } = IssueStorage.Markdown;
 
         /// <summary>
+        ///     Gets or sets the project name shown by the local website.
+        ///     A null or empty name displays GitIssue.
+        /// </summary>
+        public string? ProjectName { get; set; }
+
+        /// <summary>
         ///     Creates the default Markdown field schema.
         /// </summary>
         /// <returns>the default fields</returns>
@@ -158,6 +164,7 @@ namespace GitIssue
             {
                 this.validateTypes();
                 this.normalizeKeyTemplate();
+                this.normalizeProjectName();
                 string json = JsonSerializer.Serialize(this, typeof(T), JsonSerialization.IndentedOptions);
                 Paths.WriteAllTextAsync(file, json).GetAwaiter().GetResult();
             }
@@ -165,6 +172,13 @@ namespace GitIssue
             {
                 throw new AggregateException($"Unable to serialize {file} as config file ", ex);
             }
+        }
+
+        private void normalizeProjectName()
+        {
+            this.ProjectName = string.IsNullOrWhiteSpace(this.ProjectName)
+                ? null
+                : this.ProjectName.Trim();
         }
 
         private void normalizeKeyTemplate()

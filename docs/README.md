@@ -83,7 +83,7 @@ From the repository root:
 gitissue web serve
 ```
 
-The site listens on `http://127.0.0.1:5080`. Add `--open` to launch a browser. This is separate from `gitissue mcp serve`.
+The site listens on `http://127.0.0.1:5080`. Add `--open` to launch a browser. This is separate from `gitissue mcp serve`. Pass `--project-name` to `gitissue init`, or set `ProjectName` in `.gitissue.config`, to replace the GitIssue page title.
 
 ## Everyday workflows
 

@@ -50,7 +50,8 @@ The solution is organized under `src/`:
   standard error.
 - `GitIssue.Services.Web` is an ASP.NET class library for the local website.
   It uses server-rendered Blazor components to show the tracked issue, search
-  and paginate issue summaries, and edit configured fields. Forms use ASP.NET
+  and paginate issue summaries, and edit configured fields in one save. The
+  page title is the configured project name. Forms use ASP.NET
   antiforgery protection. Both hosts are built with `WebApplication.CreateBuilder`.
 - `GitIssue.Tool` is the executable .NET tool, exposed as the `gitissue` command.
   `McpCommand` and `WebCommand` are CommandLineParser verbs, like the other
@@ -72,7 +73,7 @@ loads, deletes, searches, and tracks issues, using injected key, configuration,
 repository, change-log, and persistence services. Autofac registrations in
 `GitIssueModule` provide the default implementations and allow selected
 services to be overridden. `IIssueKeyProvider` implementations generate unique
-issue keys and map them to directories. `.gitissue.config` stores `KeyProvider`,
+issue keys and map them to directories. `.gitissue.config` stores `ProjectName`, `KeyProvider`,
 `KeyTemplate`, a default `IssueType`, and optionally named `Issues` schemas. The template can
 include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
 The default template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`,

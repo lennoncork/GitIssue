@@ -1,78 +1,77 @@
 @page "/issue"
 @inject IssueWorkspace Workspace
+@inject IHttpContextAccessor HttpContextAccessor
 
 <p><a href="/">Back to issues</a></p>
 @if (error is not null)
 {
     <p class="error" role="alert">@error</p>
 }
-@if (savedField is not null)
+@if (savedMessage is not null)
 {
-    <p class="success" role="status">@savedField saved.</p>
+    <p class="success" role="status">@savedMessage</p>
 }
 @if (issue is not null)
 {
     <h1>@issue.Title</h1>
     <p>Issue <strong>@issue.Key</strong></p>
-    <p>Each field is saved separately. Changes are written to the working tree, not committed.</p>
+    <p>Save writes every changed field together. Changes are written to the working tree, not committed.</p>
     <section aria-labelledby="fields-heading">
         <h2 id="fields-heading">Issue fields</h2>
-        @foreach (FieldDescriptor field in fields)
-        {
-            <div class="field">
-                @if (string.Equals(field.Name, "Key", StringComparison.OrdinalIgnoreCase))
-                {
-                    <label>Key</label>
-                    <p>@issue.Key (read-only)</p>
-                }
-                else if (string.Equals(field.Name, "IssueType", StringComparison.OrdinalIgnoreCase))
-                {
-                    <label>Issue type</label>
-                    <p>@issue.IssueType (read-only)</p>
-                }
-                else if (string.Equals(field.Name, "Updated", StringComparison.OrdinalIgnoreCase))
-                {
-                    <label>Updated</label>
-                    <p>@FieldValue(field.Name) (set automatically on save)</p>
-                }
-                else
-                {
-                    <form method="post" @formname="@field.Name" @onsubmit="SaveAsync">
-                        <AntiforgeryToken />
-                        <label for="@field.Name">@field.Name</label>
-                        <input type="hidden" name="Field" value="@field.Name" />
+        <form method="post" @formname="issue-fields" @onsubmit="SaveAsync">
+            <AntiforgeryToken />
+            @foreach (FieldDescriptor field in fields)
+            {
+                <div class="field">
+                    @if (string.Equals(field.Name, "Key", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <label>Key</label>
+                        <p>@issue.Key (read-only)</p>
+                    }
+                    else if (string.Equals(field.Name, "IssueType", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <label>Issue type</label>
+                        <p>@issue.IssueType (read-only)</p>
+                    }
+                    else if (string.Equals(field.Name, "Updated", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <label>Updated</label>
+                        <p>@FieldValue(field.Name) (set automatically on save)</p>
+                    }
+                    else
+                    {
+                        <label for="@field.Name" class="@ModifiedClass(field)">@field.Name</label>
                         @if (IsArray(field))
                         {
                             <p>Current value: @FieldValue(field.Name)</p>
                             <p>Enter +value, -value, or [value1, value2] to update this array.</p>
-                            <input id="@field.Name" name="Value" value="@EditorValue(field.Name, true)" />
+                            <input id="@field.Name" name="@FormName(field.Name)" data-original="@OriginalValue(field)" value="@EditorValue(field)" />
                         }
                         else
                         {
-                            <textarea id="@field.Name" name="Value">@EditorValue(field.Name, false)</textarea>
+                            <textarea id="@field.Name" name="@FormName(field.Name)" data-original="@OriginalValue(field)">@EditorValue(field)</textarea>
                         }
-                        <button type="submit">Save @field.Name</button>
-                    </form>
-                }
+                    }
+                </div>
+            }
+            <div class="actions">
+                <button type="submit">Save</button>
+                <button type="button" data-revert>Revert</button>
+                <a class="button" href="/">Cancel</a>
             </div>
-        }
+        </form>
     </section>
 }
 
 @code {
     private IssueDocument? issue;
     private IReadOnlyList<FieldDescriptor> fields = Array.Empty<FieldDescriptor>();
+    private IReadOnlyDictionary<string, string>? attempted;
     private string? error;
-    private string? savedField;
+    private string? savedMessage;
 
     [SupplyParameterFromQuery(Name = "key")]
     public string? Key { get; set; }
-
-    [SupplyParameterFromForm]
-    public string? Field { get; set; }
-
-    [SupplyParameterFromForm]
-    public string? Value { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -94,33 +93,105 @@
             return;
         }
 
+        IReadOnlyDictionary<string, string> posted = ReadPostedValues();
+        attempted = null;
+        error = null;
+        savedMessage = null;
+
         try
         {
-            issue = await Workspace.UpdateIssueAsync(issue.Key, Field ?? string.Empty, Value ?? string.Empty, CancellationToken.None);
-            savedField = Field;
+            Dictionary<string, string> changes = ChangedFields(posted);
+            if (changes.Count == 0)
+            {
+                savedMessage = "No changes to save.";
+                return;
+            }
+
+            issue = await Workspace.UpdateIssueAsync(issue.Key, changes, CancellationToken.None);
+            savedMessage = "Changes saved.";
         }
         catch (IssueOperationException exception)
         {
             error = exception.Message;
+            attempted = posted;
         }
-        catch (GitIssue.Exceptions.IssueValidationException exception)
+        catch (IssueValidationException exception)
         {
             error = exception.Message;
+            attempted = posted;
         }
+    }
+
+    private Dictionary<string, string> ChangedFields(IReadOnlyDictionary<string, string> posted)
+    {
+        Dictionary<string, string> changes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (FieldDescriptor field in fields)
+        {
+            if (IsReadOnly(field.Name) || !posted.TryGetValue(field.Name, out string? value) || (value is null))
+            {
+                continue;
+            }
+
+            string postedValue = Normalize(value);
+            if (!string.Equals(postedValue, OriginalValue(field), StringComparison.Ordinal))
+            {
+                changes[field.Name] = postedValue;
+            }
+        }
+
+        return changes;
+    }
+
+    private IReadOnlyDictionary<string, string> ReadPostedValues()
+    {
+        Dictionary<string, string> posted = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        HttpContext? context = HttpContextAccessor.HttpContext;
+        if ((context is null) || !context.Request.HasFormContentType)
+        {
+            return posted;
+        }
+
+        foreach (FieldDescriptor field in fields)
+        {
+            if (IsReadOnly(field.Name))
+            {
+                continue;
+            }
+
+            if (context.Request.Form.TryGetValue(FormName(field.Name), out StringValues value))
+            {
+                posted[field.Name] = value.ToString();
+            }
+        }
+
+        return posted;
+    }
+
+    private string? ModifiedClass(FieldDescriptor field)
+    {
+        if ((attempted is null) || !attempted.TryGetValue(field.Name, out string? value) || (value is null))
+        {
+            return null;
+        }
+
+        return string.Equals(Normalize(value), OriginalValue(field), StringComparison.Ordinal) ? null : "modified";
     }
 
     private bool IsArray(FieldDescriptor field) =>
         issue is not null && issue.Fields.TryGetValue(field.Name, out JsonElement value) && value.ValueKind == JsonValueKind.Array;
 
-    private string EditorValue(string name, bool isArray)
+    private string EditorValue(FieldDescriptor field)
     {
-        if (error is not null && string.Equals(Field, name, StringComparison.OrdinalIgnoreCase))
+        if ((attempted is not null) && attempted.TryGetValue(field.Name, out string? value) && (value is not null))
         {
-            return Value ?? string.Empty;
+            return Normalize(value);
         }
 
-        return isArray ? string.Empty : FieldValue(name);
+        return OriginalValue(field);
     }
+
+    private string OriginalValue(FieldDescriptor field) =>
+        IsArray(field) ? string.Empty : FieldValue(field.Name);
 
     private string FieldValue(string name)
     {
@@ -129,6 +200,17 @@
             return string.Empty;
         }
 
-        return value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : value.ToString();
+        string text = value.ValueKind == JsonValueKind.String ? value.GetString() ?? string.Empty : value.ToString();
+        return Normalize(text);
     }
+
+    private static bool IsReadOnly(string name) =>
+        string.Equals(name, "Key", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(name, "IssueType", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(name, "Updated", StringComparison.OrdinalIgnoreCase);
+
+    private static string FormName(string name) => "Values[" + name + "]";
+
+    private static string Normalize(string value) =>
+        value.Replace("\r\n", "\n", StringComparison.Ordinal).Replace("\r", "\n", StringComparison.Ordinal);
 }

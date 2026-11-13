@@ -23,6 +23,9 @@ namespace GitIssue.Tool.Commands.Init
 
         [Option("layout", HelpText = "Issue layout: Template or Free. Free stores the document anywhere under {type}s. Defaults to Template", Required = false)]
         public string Layout { get; set; } = "Template";
+
+        [Option("project-name", HelpText = "Project name shown as the website title. Defaults to GitIssue", Required = false)]
+        public string ProjectName { get; set; } = string.Empty;
     }
 #pragma warning restore 1591
 }

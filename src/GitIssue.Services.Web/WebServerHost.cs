@@ -38,6 +38,7 @@ namespace GitIssue.Services.Web
             }
 
             builder.WebHost.UseUrls(request.Url);
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddRazorComponents();
 
             IssueWorkspace workspace;
