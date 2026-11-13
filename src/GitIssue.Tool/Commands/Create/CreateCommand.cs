@@ -108,17 +108,17 @@ namespace GitIssue.Tool.Commands.Create
                     initial.Add(field);
                 }
 
-                issue = await this.manager.CreateAsync(value.Item, string.Empty, issueType, initial);
+                issue = await this.manager.CreateAsync(value.Item, string.Empty, issueType, initial, options.Location);
             }
             else
             {
-                issue = await this.manager.CreateAsync(options.Title, options.Description, issueType, initial);
+                issue = await this.manager.CreateAsync(options.Title, options.Description, issueType, initial, options.Location);
             }
 
             if (options.Track || (options.Tracked == TrackedIssue.None))
             {
                 options.Tracked = new TrackedIssue(issue.Key);
-                await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);
+                await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Tracking), this.logger);
                 Console.WriteLine($"Created and tracking new issue '{issue.Key}'");
             }
             else

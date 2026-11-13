@@ -210,13 +210,11 @@ namespace GitIssue.Services
         /// <summary>
         ///     Lists the configured issue type identifiers.
         /// </summary>
-        /// <returns>the configured types, or the default type for a legacy schema</returns>
+        /// <returns>the configured types</returns>
         public IReadOnlyList<string> ListIssueTypes()
         {
             return this.withLock<IReadOnlyList<string>>(() =>
-                this.manager.Configuration.Issues.Count == 0
-                    ? new[] { this.manager.Configuration.IssueType }
-                    : this.manager.Configuration.Issues.Select(issue => issue.Name).ToArray());
+                this.manager.Configuration.Issues.Select(issue => issue.Name).ToArray());
         }
 
         /// <summary>

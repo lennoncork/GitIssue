@@ -72,11 +72,17 @@ loads, deletes, searches, and tracks issues, using injected key, configuration,
 repository, change-log, and persistence services. Autofac registrations in
 `GitIssueModule` provide the default implementations and allow selected
 services to be overridden. `IIssueKeyProvider` implementations generate unique
-issue keys and map them to directories. `config.json` stores `KeyProvider`,
+issue keys and map them to directories. `.gitissue.config` stores `KeyProvider`,
 `KeyTemplate`, a default `IssueType`, and optionally named `Issues` schemas. The template can
 include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
+The default template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`,
+so the first directory is the issue type followed by `s`.
+An issue type with `Layout` `Free` stores `{type}-{uid}` in the document and
+allows that file anywhere under the type directory. The uid is random and is
+not derived from the path. Discovery reads the `Key` heading, so a moved file
+is still found.
 `DateIssueKeyProvider` and `NameIssueKeyProvider` are presets of
-`TemplateIssueKeyProvider`. `gitissue rekey` regenerates on-disk names from
+`TemplateIssueKeyProvider`. `--key-provider date` keeps the year/month/day layout. `gitissue rekey` regenerates on-disk names from
 the template and each issue's type. Existing configuration that names
 `FileIssueKeyProvider` continues to use the date-based provider.
 
@@ -84,20 +90,21 @@ An issue is modeled by `IIssue` and the abstract `Issue` base class. Fields are
 identified by `FieldKey` and described by `FieldInfo`, which specifies the
 value type, field representation, required status, and metadata. The default
 `IssueConfiguration` defines key, title, description, author, created and
-updated timestamps, labels, and comments. A reserved `IssueType` field selects
-the schema stored under `Issues`; configurations without that array use the
-legacy shared `Fields` schema. Field factories and readers create
+updated timestamps, labels, and comments. Those fields are stored on the
+default entry in `Issues`. A reserved `IssueType` field selects which entry
+applies. Field factories and readers create
 typed scalar or array fields from the selected schema; the value types and type
 converters provide serialization and parsing for the supported domain values.
 
 ### Repository data and persistence
 
-`RepositoryRoot` identifies the working tree and the issue-data directory
-(`.issues` by default, or a name supplied by the user). The directory contains
-the JSON configuration and issue data. `IssueConfiguration.Storage` selects
-the issue document and defaults to `Markdown`. `Json` keeps the
-`FileIssue`/`JsonIssue` document, including when an existing configuration
-omits `Storage`. `Markdown` stores the same fields in one Markdown file, read
+`RepositoryRoot` identifies the working tree. Issue files live in that
+directory by default, or in a subdirectory named with `--name`. `.gitissue.config`,
+`.gitissue.tracking`, and `.gitissue.changes` are written in the repository root,
+next to `.gitignore`. `IssueConfiguration.Storage` selects
+the issue document and defaults to `Markdown`. `init` writes `Storage` into
+`.gitissue.config`. `Json` keeps the `FileIssue`/`JsonIssue` document. `Markdown`
+stores the same fields in one Markdown file, read
 and written with Markdig. Readers inspect the stored `IssueType` before selecting
 the schema; legacy documents without it use the configured default. Invalid or
 unknown source fields prevent saving so they cannot be silently discarded.

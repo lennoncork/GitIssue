@@ -15,12 +15,19 @@ namespace GitIssue.Issues
         /// <param name="root">the repository root</param>
         /// <param name="issuePath">this path to locate the issue</param>
         /// <param name="key">this issue key</param>
-        public IssueRoot(RepositoryRoot root, IssueKey key, string? issuePath)
+        /// <param name="documentFile">the document file name when it is not the key</param>
+        public IssueRoot(RepositoryRoot root, IssueKey key, string? issuePath, string? documentFile = null)
         {
             this.issuePath = issuePath;
             this.Root = root;
             this.Key = key;
+            this.DocumentFile = documentFile;
         }
+
+        /// <summary>
+        ///     Gets the document file name when the file is not named after the key.
+        /// </summary>
+        public string? DocumentFile { get; }
 
         /// <summary>
         ///     Gets the <see cref="RepositoryRoot" />

@@ -100,8 +100,9 @@ namespace GitIssue
         /// <param name="description">the issue description</param>
         /// <param name="issueType">the configured issue type</param>
         /// <param name="fields">additional initial field values</param>
+        /// <param name="location">relative file path under the type directory for a free layout</param>
         /// <returns>the created issue</returns>
-        Task<IIssue> CreateAsync(string title, string description, string issueType, IEnumerable<IField> fields);
+        Task<IIssue> CreateAsync(string title, string description, string issueType, IEnumerable<IField> fields, string? location = null);
 
         /// <summary>
         ///     Regenerates issue keys and file names from the configured key template

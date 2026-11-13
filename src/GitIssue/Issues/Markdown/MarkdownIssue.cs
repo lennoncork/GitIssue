@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Exceptionable;
 using GitIssue.Exceptions;
@@ -71,9 +73,16 @@ namespace GitIssue.Issues.Markdown
                 global::System.IO.File.Delete(json);
             }
 
-            if (Directory.Exists(issueRoot.IssuePath))
+            if (string.IsNullOrEmpty(issueRoot.DocumentFile))
             {
-                Directory.Delete(issueRoot.IssuePath, true);
+                if (Directory.Exists(issueRoot.IssuePath))
+                {
+                    Directory.Delete(issueRoot.IssuePath, true);
+                }
+            }
+            else
+            {
+                MarkdownIssue.deleteEmptyParents(markdown, issueRoot.Root.IssuesPath);
             }
 
             return await Task.FromResult(true);
@@ -87,6 +96,12 @@ namespace GitIssue.Issues.Markdown
         [Throws<System.ArgumentException>]
         public static string GetMarkdownFile(IssueRoot root)
         {
+            if (!string.IsNullOrEmpty(root.DocumentFile) &&
+                root.DocumentFile.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
+            {
+                return Path.Combine(root.IssuePath, root.DocumentFile);
+            }
+
             return Path.Combine(root.IssuePath, $"{Path.GetFileName(root.Key.ToString())}.md");
         }
 
@@ -166,6 +181,21 @@ namespace GitIssue.Issues.Markdown
 
             await Paths.WriteAllTextAsync(this.Markdown, MarkdownIssueFormat.Write(this, this.Schema));
             return true;
+        }
+
+        private static void deleteEmptyParents(string filePath, string stopAt)
+        {
+            DirectoryInfo? current = Directory.GetParent(filePath);
+            string stop = Path.GetFullPath(stopAt);
+            while ((current != null) &&
+                   current.Exists &&
+                   (Path.GetFullPath(current.FullName) != stop) &&
+                   !current.EnumerateFileSystemInfos().Any())
+            {
+                DirectoryInfo? parent = current.Parent;
+                current.Delete();
+                current = parent;
+            }
         }
     }
 }

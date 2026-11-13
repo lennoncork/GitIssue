@@ -14,6 +14,11 @@ namespace GitIssue.Issues
     public sealed class IssueKeyTemplate
     {
         /// <summary>
+        ///     Default template. The first directory is the issue type with a trailing s, then the date folders.
+        /// </summary>
+        public const string Default = "{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+
+        /// <summary>
         ///     Date-based template matching the historical year/month/day folder layout
         /// </summary>
         public const string Date = "{created:yyyy}/{created:MM}/{created:dd}/{uid}";
@@ -22,6 +27,11 @@ namespace GitIssue.Issues
         ///     Named template matching "UID - Issue Name"
         /// </summary>
         public const string Name = "{uid} - {name}";
+
+        /// <summary>
+        ///     Key stored inside a free-layout document. The folder is not part of the key.
+        /// </summary>
+        public const string Identity = "{type}-{uid}";
 
         private static readonly HashSet<char> InvalidFileNameCharacters = Path.GetInvalidFileNameChars()
             .Concat(new[] { '<', '>', ':', '"', '/', '\\', '|', '?', '*' })
@@ -224,7 +234,7 @@ namespace GitIssue.Issues
                 return false;
             }
 
-            string type = "ISSUE";
+            string type = "Issue";
             string uid = string.Empty;
             string name = "Untitled";
             int index = 0;

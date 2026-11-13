@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
+using GitIssue.Issues.Markdown;
 using GitIssue.Values;
 using DateTime = System.DateTime;
 
@@ -18,9 +20,132 @@ namespace GitIssue.Issues
             $"[A-Fa-f0-9]{{{IssueKeyProvider.UniqueIdLength}}}",
             RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
+        private static IEnumerable<string> enumerateDirectories(string root)
+        {
+            if (!Directory.Exists(root))
+            {
+                yield break;
+            }
+
+            Queue<string> pending = new Queue<string>();
+            pending.Enqueue(root);
+            while (pending.Count > 0)
+            {
+                string current = pending.Dequeue();
+                IEnumerable<string> children;
+                try
+                {
+                    children = Directory.EnumerateDirectories(current);
+                }
+                catch (IOException)
+                {
+                    continue;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    continue;
+                }
+
+                foreach (string child in children)
+                {
+                    if (Path.GetFileName(child).StartsWith(".", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    yield return child;
+                    pending.Enqueue(child);
+                }
+            }
+        }
+
+        private static IEnumerable<string> enumerateFiles(string root)
+        {
+            if (!Directory.Exists(root))
+            {
+                yield break;
+            }
+
+            foreach (string file in TemplateIssueKeyProvider.safeFiles(root))
+            {
+                yield return file;
+            }
+
+            foreach (string directory in TemplateIssueKeyProvider.enumerateDirectories(root))
+            {
+                foreach (string file in TemplateIssueKeyProvider.safeFiles(directory))
+                {
+                    yield return file;
+                }
+            }
+        }
+
+        private static IEnumerable<string> safeFiles(string directory)
+        {
+            IEnumerable<string> files;
+            try
+            {
+                files = Directory.EnumerateFiles(directory);
+            }
+            catch (IOException)
+            {
+                yield break;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                yield break;
+            }
+
+            foreach (string file in files)
+            {
+                if (!Path.GetFileName(file).StartsWith(".", StringComparison.Ordinal))
+                {
+                    yield return file;
+                }
+            }
+        }
+
+        private static string? readContentKey(string file)
+        {
+            string text;
+            try
+            {
+                text = System.IO.File.ReadAllText(file);
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+
+            if (Path.GetExtension(file).Equals(".md", StringComparison.OrdinalIgnoreCase))
+            {
+                return MarkdownIssueFormat.ReadKey(text);
+            }
+
+            try
+            {
+                using JsonDocument document = JsonDocument.Parse(text);
+                if ((document.RootElement.ValueKind != JsonValueKind.Object) ||
+                    !document.RootElement.TryGetProperty("Key", out JsonElement key) ||
+                    (key.ValueKind != JsonValueKind.String))
+                {
+                    return null;
+                }
+
+                return key.GetString();
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
+        }
+
         private readonly IIssueConfiguration configuration;
 
         private readonly string fallbackTemplate;
+
+        private readonly Dictionary<string, (string Directory, string? FileName)> placed =
+            new Dictionary<string, (string Directory, string? FileName)>(StringComparer.Ordinal);
 
         /// <summary>
         ///     Gets the repository root
@@ -78,9 +203,10 @@ namespace GitIssue.Issues
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(this.configuration.KeyTemplate) ||
-                    ((this.configuration.KeyTemplate == IssueKeyTemplate.Date) &&
-                     (this.fallbackTemplate != IssueKeyTemplate.Date)))
+                bool foreignPreset = (this.fallbackTemplate == IssueKeyTemplate.Name) &&
+                    ((this.configuration.KeyTemplate == IssueKeyTemplate.Date) ||
+                     (this.configuration.KeyTemplate == IssueKeyTemplate.Default));
+                if (string.IsNullOrWhiteSpace(this.configuration.KeyTemplate) || foreignPreset)
                 {
                     return this.fallbackTemplate;
                 }
@@ -95,12 +221,101 @@ namespace GitIssue.Issues
         /// <inheritdoc />
         public override string GetIssuePath(IssueKey key)
         {
+            (string Directory, string? FileName)? located = this.locate(key);
+            if (located != null)
+            {
+                return located.Value.Directory;
+            }
+
             if (this.Template.TryMatch(key.ToString(), out IssueKeyContext context))
             {
                 return this.Template.RenderPath(context);
             }
 
             return key.ToString();
+        }
+
+        /// <inheritdoc />
+        public override string? GetDocumentFileName(IssueKey key)
+        {
+            return this.locate(key)?.FileName;
+        }
+
+        /// <summary>
+        ///     Remembers where a new issue will be written before the file exists
+        /// </summary>
+        /// <param name="key">the issue key</param>
+        /// <param name="directory">the directory relative to the issue root</param>
+        /// <param name="fileName">the document file name</param>
+        public void Place(IssueKey key, string directory, string? fileName)
+        {
+            this.placed[key.ToString()] = (directory, fileName);
+        }
+
+        /// <summary>
+        ///     Finds issue documents by their key field, and legacy files named after their directory
+        /// </summary>
+        /// <returns>the documents</returns>
+        public IReadOnlyList<(IssueKey Key, string Directory, string? FileName, bool FromContent)> FindDocuments()
+        {
+            List<(IssueKey Key, string Directory, string? FileName, bool FromContent)> documents =
+                new List<(IssueKey Key, string Directory, string? FileName, bool FromContent)>();
+            if (!Directory.Exists(this.Root.IssuesPath))
+            {
+                return documents;
+            }
+
+            Dictionary<string, string> seen = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (string file in TemplateIssueKeyProvider.enumerateFiles(this.Root.IssuesPath))
+            {
+                string extension = Path.GetExtension(file);
+                if (!extension.Equals(".md", StringComparison.OrdinalIgnoreCase) &&
+                    !extension.Equals(".json", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                string relativeFile = Path.GetRelativePath(this.Root.IssuesPath, file);
+                string? directory = Path.GetDirectoryName(relativeFile);
+                if (string.IsNullOrEmpty(directory) || directory.Equals(".", StringComparison.Ordinal))
+                {
+                    directory = string.Empty;
+                }
+
+                string stem = Path.GetFileNameWithoutExtension(file);
+                string pathKey = IssueKeyTemplate.NormalizeKey(directory);
+                bool pathMatch = !string.IsNullOrEmpty(pathKey) &&
+                    stem.Equals(pathKey, StringComparison.OrdinalIgnoreCase);
+                string? contentKey = TemplateIssueKeyProvider.readContentKey(file);
+                bool fromContent = !string.IsNullOrWhiteSpace(contentKey);
+                string? keyValue = fromContent ? contentKey!.Trim() : pathMatch ? pathKey : null;
+                if (string.IsNullOrWhiteSpace(keyValue))
+                {
+                    continue;
+                }
+
+                if (seen.TryGetValue(keyValue, out string? existing))
+                {
+                    string existingDirectory = (Path.GetDirectoryName(existing) ?? string.Empty).Replace('\\', '/');
+                    string currentDirectory = directory.Replace('\\', '/');
+                    bool sameDocument = existingDirectory.Equals(currentDirectory, StringComparison.OrdinalIgnoreCase) &&
+                        Path.GetFileNameWithoutExtension(existing).Equals(keyValue, StringComparison.OrdinalIgnoreCase) &&
+                        stem.Equals(keyValue, StringComparison.OrdinalIgnoreCase);
+                    if (sameDocument)
+                    {
+                        continue;
+                    }
+
+                    throw new InvalidOperationException(
+                        $"Issue '{keyValue}' is stored in both '{existing}' and '{relativeFile.Replace('\\', '/')}'. ");
+                }
+
+                seen[keyValue] = relativeFile.Replace('\\', '/');
+                bool namedAfterKey = stem.Equals(keyValue, StringComparison.OrdinalIgnoreCase);
+                documents.Add((IssueKey.Create(keyValue), directory, namedAfterKey ? null : Path.GetFileName(file), fromContent));
+            }
+
+            return documents;
         }
 
         /// <inheritdoc />
@@ -210,8 +425,8 @@ namespace GitIssue.Issues
                 string uid = value.Trim();
                 foreach (IssueKey existing in this.Keys)
                 {
-                    if (this.Template.TryMatch(existing.ToString(), out IssueKeyContext matched) &&
-                        matched.Uid.Equals(uid, StringComparison.OrdinalIgnoreCase))
+                    string? extracted = TemplateIssueKeyProvider.ExtractUid(existing.ToString());
+                    if ((extracted != null) && extracted.Equals(uid, StringComparison.OrdinalIgnoreCase))
                     {
                         key = existing;
                         return true;
@@ -240,32 +455,9 @@ namespace GitIssue.Issues
         /// <returns>the existing issue keys and their relative paths</returns>
         public IReadOnlyList<(IssueKey Key, string RelativePath)> FindExisting()
         {
-            List<(IssueKey Key, string RelativePath)> keys = new List<(IssueKey Key, string RelativePath)>();
-            if (!Directory.Exists(this.Root.IssuesPath))
-            {
-                return keys;
-            }
-
-            foreach (string directory in Directory.EnumerateDirectories(this.Root.IssuesPath, "*", SearchOption.AllDirectories))
-            {
-                string relative = Path.GetRelativePath(this.Root.IssuesPath, directory);
-                if (string.IsNullOrEmpty(relative) || (relative == "."))
-                {
-                    continue;
-                }
-
-                string keyValue = IssueKeyTemplate.NormalizeKey(relative);
-                string fileName = Path.GetFileName(keyValue);
-                if (!System.IO.File.Exists(Path.Combine(directory, $"{fileName}.json")) &&
-                    !System.IO.File.Exists(Path.Combine(directory, $"{fileName}.md")))
-                {
-                    continue;
-                }
-
-                keys.Add((IssueKey.Create(keyValue), relative));
-            }
-
-            return keys;
+            return this.FindDocuments()
+                .Select(document => (document.Key, document.Directory))
+                .ToList();
         }
 
         private IEnumerable<IssueKey> FindAll()
@@ -276,7 +468,7 @@ namespace GitIssue.Issues
                 return keys;
             }
 
-            foreach (string directory in Directory.EnumerateDirectories(this.Root.IssuesPath, "*", SearchOption.AllDirectories))
+            foreach (string directory in TemplateIssueKeyProvider.enumerateDirectories(this.Root.IssuesPath))
             {
                 string relative = Path.GetRelativePath(this.Root.IssuesPath, directory);
                 if (string.IsNullOrEmpty(relative) || (relative == "."))
@@ -301,7 +493,33 @@ namespace GitIssue.Issues
                 keys.Add(key);
             }
 
+            foreach ((IssueKey documentKey, string _, string? _, bool fromContent) in this.FindDocuments())
+            {
+                if (fromContent && !keys.Contains(documentKey))
+                {
+                    keys.Add(documentKey);
+                }
+            }
+
             return keys;
+        }
+
+        private (string Directory, string? FileName)? locate(IssueKey key)
+        {
+            foreach ((IssueKey existing, string directory, string? fileName, bool _) in this.FindDocuments())
+            {
+                if (existing == key)
+                {
+                    return (directory, fileName);
+                }
+            }
+
+            if (this.placed.TryGetValue(key.ToString(), out (string Directory, string? FileName) placedDocument))
+            {
+                return placedDocument;
+            }
+
+            return null;
         }
     }
 }

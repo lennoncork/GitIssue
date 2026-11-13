@@ -74,6 +74,18 @@ namespace GitIssue.Tool
                                     ? initOptions.IssueType
                                     : initOptions.IssueTypeName;
                                 config.IssueType = IssueTypeName.Validate(issueType);
+                                if ((config.Issues.Count == 1) && (config.Issues[0].Name != config.IssueType))
+                                {
+                                    config.Issues[0].Name = config.IssueType;
+                                }
+
+                                if (string.IsNullOrWhiteSpace(initOptions.Layout) ||
+                                    !Enum.TryParse(initOptions.Layout, true, out IssueLayout layout))
+                                {
+                                    throw new ArgumentException($"Layout '{initOptions.Layout}' is not Template or Free.");
+                                }
+
+                                config.Issues[0].Layout = layout;
 
                                 if (!string.IsNullOrWhiteSpace(initOptions.KeyTemplate))
                                 {
@@ -125,7 +137,7 @@ namespace GitIssue.Tool
                 if (options is ITrackedOptions keyOptions)
                 {
                     keyOptions.Tracked = TrackedIssue
-                        .Read(Path.Combine(options.Path, options.Name, options.Tracking), Program.logger);
+                        .Read(Path.Combine(options.Path, options.Tracking), Program.logger);
                 }
 
                 Command<T> command = container.Resolve<Command<T>>();
@@ -241,9 +253,15 @@ namespace GitIssue.Tool
 
         private static bool tryGetKeyProvider(string value, out Type type, out string template)
         {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                type = typeof(DateIssueKeyProvider);
+                template = IssueKeyTemplate.Default;
+                return true;
+            }
+
             template = IssueKeyTemplate.Date;
-            if (string.IsNullOrWhiteSpace(value) ||
-                value.Equals("Date", StringComparison.OrdinalIgnoreCase) ||
+            if (value.Equals("Date", StringComparison.OrdinalIgnoreCase) ||
                 value.Equals(nameof(DateIssueKeyProvider), StringComparison.OrdinalIgnoreCase))
             {
                 type = typeof(DateIssueKeyProvider);

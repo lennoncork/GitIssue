@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GitIssue.Fields;
 using GitIssue.Issues;
 using NUnit.Framework;
 
@@ -21,7 +22,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 IIssue issue = await this.Sut.CreateAsync("Add login page", "Feature work");
                 string original = issue.Key.ToString();
                 string originalPath = Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(issue.Key));
-                Assert.That(original, Does.Match(new Regex(@"^\d{4}-\d{2}-\d{2}-[A-F0-9]{8}$")));
+                Assert.That(original, Does.Match(new Regex(@"^Issues-\d{4}-\d{2}-\d{2}-[A-F0-9]{8}$")));
 
                 this.Sut.Configuration.IssueType = "FEAT";
                 this.Sut.Configuration.KeyTemplate = "{type}-{uid}-{slug}";
@@ -33,7 +34,7 @@ namespace GitIssue.Tests.IssueManagerTests
 
                 IReadOnlyList<IssueRekeyResult> results = this.Sut.Rekey();
                 Assert.That(results, Has.Count.EqualTo(1));
-                Assert.That(results[0].To.ToString(), Does.Match(new Regex(@"^ISSUE-[A-F0-9]{8}-add-login-page$")));
+                Assert.That(results[0].To.ToString(), Does.Match(new Regex(@"^Issue-[A-F0-9]{8}-add-login-page$")));
                 Assert.That(results[0].To.ToString(), Does.Contain(original[^8..]));
 
                 IIssue[] found = this.Sut.Find(_ => true).ToArray();
@@ -47,6 +48,18 @@ namespace GitIssue.Tests.IssueManagerTests
             public async Task PreservesExistingIssueTypesWhenRekeying()
             {
                 this.Initialize(this.TestDirectory);
+                IssueConfiguration configuration = (IssueConfiguration)this.Sut.Configuration;
+                Dictionary<FieldKey, FieldInfo> schema = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"));
+                configuration.Issues.Add(new IssueTypeConfiguration
+                {
+                    Name = "FEAT",
+                    Fields = new Dictionary<FieldKey, FieldInfo>(schema),
+                });
+                configuration.Issues.Add(new IssueTypeConfiguration
+                {
+                    Name = "BUG",
+                    Fields = new Dictionary<FieldKey, FieldInfo>(schema),
+                });
                 this.Sut.Configuration.KeyTemplate = "{type}-{uid}-{slug}";
                 this.Sut.Configuration.IssueType = "FEAT";
                 IIssue feature = await this.Sut.CreateAsync("Feature", string.Empty);

@@ -125,7 +125,8 @@ namespace GitIssue.Tool.Tests
             Directory.CreateDirectory(directory);
             RepositoryRoot root = RepositoryRoot.Open(directory, null);
             IssueKey key = IssueKey.Create("ISSUE-1");
-            MarkdownIssue issue = new MarkdownIssue(new IssueRoot(root, key, "issue"), new IssueConfiguration().Fields);
+            IssueConfiguration configuration = new IssueConfiguration();
+            MarkdownIssue issue = new MarkdownIssue(new IssueRoot(root, key, "issue"), configuration.GetSchema(configuration.IssueType));
             issue.Title = "Markdown issue";
             issue.Description = "Body";
             issue.Author = Signature.Parse("Ada Lovelace <ada@example.com>");

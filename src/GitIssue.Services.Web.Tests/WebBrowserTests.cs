@@ -98,8 +98,10 @@ namespace GitIssue.Services.Web.Tests
                 Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Title saved"));
                 await page.GetByLabel("Description", new PageGetByLabelOptions { Exact = true }).FillAsync("Updated description");
                 await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Description" }).ClickAsync();
+                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Description saved"));
                 await page.GetByLabel("Labels", new PageGetByLabelOptions { Exact = true }).FillAsync("+feature");
                 await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Labels" }).ClickAsync();
+                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Labels saved"));
                 await page.ReloadAsync();
                 Assert.That(await page.GetByLabel("Title", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Updated title"));
                 Assert.That(await page.GetByLabel("Description", new PageGetByLabelOptions { Exact = true }).InputValueAsync(), Is.EqualTo("Updated description"));
@@ -150,13 +152,12 @@ namespace GitIssue.Services.Web.Tests
         public async Task IssuePage_UsesTheIssueTypeSchema()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            string path = Path.Combine(fixture.Directory, ".issues", "config.json");
+            string path = Path.Combine(fixture.Directory, Paths.ConfigFileName);
             IssueConfiguration configuration = IssueConfiguration.Read(path);
-            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.Fields)
+            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"))
             {
                 ["Severity"] = new FieldInfo<GitIssue.Values.String, JsonValueField>(true),
             };
-            configuration.Issues.Add(new IssueTypeConfiguration { Name = "ISSUE", Fields = configuration.Fields });
             configuration.Issues.Add(new IssueTypeConfiguration { Name = "BUG", Fields = bug });
             configuration.Save(path);
 
@@ -180,6 +181,7 @@ namespace GitIssue.Services.Web.Tests
                 Assert.That(await page.GetByLabel("Severity").InputValueAsync(), Is.EqualTo("high"));
                 await page.GetByLabel("Severity").FillAsync("low");
                 await page.GetByRole(AriaRole.Button, new PageGetByRoleOptions { Name = "Save Severity" }).ClickAsync();
+                Assert.That(await page.GetByRole(AriaRole.Status).InnerTextAsync(), Does.Contain("Severity saved"));
                 await page.ReloadAsync();
                 Assert.That(await page.GetByLabel("Severity").InputValueAsync(), Is.EqualTo("low"));
             }

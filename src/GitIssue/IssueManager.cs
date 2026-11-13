@@ -212,7 +212,7 @@ namespace GitIssue
         /// <returns></returns>
         [Throws<ArgumentException>]
         [Throws<AggregateException>]
-        public static IIssueManager Init(IssueConfiguration configuration, string directory, string name)
+        public static IIssueManager Init(IssueConfiguration configuration, string directory, string? name)
         {
             if (configuration == null)
             {
@@ -222,11 +222,6 @@ namespace GitIssue
             if (directory == null)
             {
                 throw new ArgumentException(nameof(directory));
-            }
-
-            if (name == null)
-            {
-                throw new ArgumentException(nameof(name));
             }
 
             RepositoryRoot root = RepositoryRoot.Create(directory, name);
@@ -366,12 +361,22 @@ namespace GitIssue
         }
 
         /// <inheritdoc />
-        public async Task<IIssue> CreateAsync(string title, string description, string issueType, IEnumerable<IField> fields)
+        public async Task<IIssue> CreateAsync(string title, string description, string issueType, IEnumerable<IField> fields, string? location = null)
         {
             this.Configuration.GetFields(issueType);
             if (this.typedIssueCreation == null)
             {
                 throw new InvalidOperationException("The configured issue factory does not support typed issue creation.");
+            }
+
+            if (this.layoutOf(issueType) == IssueLayout.Free)
+            {
+                return await this.createFreeAsync(title, description, issueType, fields, location);
+            }
+
+            if (!string.IsNullOrWhiteSpace(location))
+            {
+                throw new ArgumentException("Location is only supported for issue types with a free layout.", nameof(location));
             }
 
             IssueKey key;
@@ -422,6 +427,75 @@ namespace GitIssue
             return issue;
         }
 
+        private async Task<IIssue> createFreeAsync(string title, string description, string issueType, IEnumerable<IField> fields, string? location)
+        {
+            if (this.KeyProvider is not TemplateIssueKeyProvider provider)
+            {
+                throw new InvalidOperationException("Free layout requires a template key provider.");
+            }
+
+            if (this.typedIssueCreation == null)
+            {
+                throw new InvalidOperationException("The configured issue factory does not support typed issue creation.");
+            }
+
+            string uid = IssueKeyProvider.GetUniqueId(IssueKeyProvider.UniqueIdLength);
+            IssueKey key = IssueKey.Create(IssueKeyTemplate.Parse(IssueKeyTemplate.Identity).RenderKey(new IssueKeyContext
+            {
+                Type = issueType,
+                Uid = uid,
+                Created = DateTime.Now,
+                Name = title,
+            }));
+            string extension = this.Configuration.Storage == IssueStorage.Markdown ? ".md" : ".json";
+            string relativeFile = this.freeRelativeFile(issueType, title, location, extension);
+            string? directory = Path.GetDirectoryName(relativeFile);
+            if (string.IsNullOrEmpty(directory) || directory.Equals(".", StringComparison.Ordinal))
+            {
+                directory = string.Empty;
+            }
+
+            provider.Place(key, directory, Path.GetFileName(relativeFile));
+            IIssue issue = this.typedIssueCreation(key, issueType);
+            return await this.initializeIssueAsync(issue, title, description, fields);
+        }
+
+        private string freeRelativeFile(string issueType, string title, string? location, string extension)
+        {
+            string leaf = string.IsNullOrWhiteSpace(location) ? IssueKeyTemplate.SanitizeSlug(title) : location.Trim().Replace('\\', '/');
+            if (Path.IsPathRooted(leaf) || leaf.Split('/', StringSplitOptions.RemoveEmptyEntries).Contains(".."))
+            {
+                throw new ArgumentException("Location must stay under the issue type directory.", nameof(location));
+            }
+
+            if (!leaf.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+            {
+                if (Path.HasExtension(leaf))
+                {
+                    throw new ArgumentException($"Location must use '{extension}' for this repository.", nameof(location));
+                }
+
+                leaf += extension;
+            }
+
+            string relative = Path.Combine(issueType + "s", leaf.Replace('/', Path.DirectorySeparatorChar));
+            Paths.GetContainedPath(this.Root.IssuesPath, relative);
+            string full = Path.Combine(this.Root.IssuesPath, relative);
+            if (File.Exists(full))
+            {
+                throw new InvalidOperationException($"Cannot create '{relative.Replace('\\', '/')}' because that file already exists.");
+            }
+
+            return relative;
+        }
+
+        private IssueLayout layoutOf(string issueType)
+        {
+            IssueTypeConfiguration? match = this.Configuration.Issues?.SingleOrDefault(
+                issue => string.Equals(issue.Name, issueType, StringComparison.Ordinal));
+            return match?.Layout ?? IssueLayout.Template;
+        }
+
         /// <inheritdoc />
         [Throws<SafeResultException>]
         public IReadOnlyList<IssueRekeyResult> Rekey(bool dryRun = false)
@@ -443,6 +517,10 @@ namespace GitIssue
             foreach ((IssueKey key, string relativePath) in provider.FindExisting())
             {
                 IIssue? loaded = await this.loadIssue(key, relativePath);
+                if ((loaded != null) && (this.layoutOf(loaded.IssueType) == IssueLayout.Free))
+                {
+                    continue;
+                }
                 if (loaded != null)
                 {
                     issues.Add(loaded);
@@ -514,13 +592,24 @@ namespace GitIssue
 
             foreach ((Issue issue, IssueKey from, IssueKey to, string fromPath) in planned)
             {
+                string? document = issue.Root.DocumentFile;
                 IssueRoot newRoot = new IssueRoot(this.Root, to, provider.GetIssuePath(to));
                 issue.Relocate(newRoot);
                 await issue.SaveAsync();
                 this.Changes.Add(to, ChangeType.Rename);
 
                 string newPath = Path.GetFullPath(issue.Root.IssuePath);
-                if (!string.Equals(fromPath, newPath, StringComparison.OrdinalIgnoreCase) && Directory.Exists(fromPath))
+                if (!string.IsNullOrEmpty(document))
+                {
+                    string oldFile = Path.Combine(fromPath, document);
+                    if (File.Exists(oldFile))
+                    {
+                        File.Delete(oldFile);
+                    }
+
+                    this.deleteEmptyParents(oldFile, this.Root.IssuesPath);
+                }
+                else if (!string.Equals(fromPath, newPath, StringComparison.OrdinalIgnoreCase) && Directory.Exists(fromPath))
                 {
                     Directory.Delete(fromPath, true);
                     this.deleteEmptyParents(fromPath, this.Root.IssuesPath);
@@ -722,19 +811,72 @@ namespace GitIssue
         private bool isUnderIssues(string relativePath, string issuesRelativePath)
         {
             string path = relativePath.Replace('\\', '/');
+            if (this.isMetadataPath(path))
+            {
+                return true;
+            }
+
             string root = issuesRelativePath.TrimEnd('/');
             if ((root == ".") || (root.Length == 0))
             {
-                return true;
+                return this.matchesIssueContent(path);
             }
 
             return path.Equals(root, StringComparison.Ordinal) ||
                 path.StartsWith(root + "/", StringComparison.Ordinal);
         }
 
+        private bool isMetadataPath(string relativePath)
+        {
+            return relativePath.Equals(Paths.ConfigFileName, StringComparison.Ordinal) ||
+                relativePath.Equals(Paths.ChangeLogFileName, StringComparison.Ordinal) ||
+                relativePath.Equals(Paths.TrackedIssueFileName, StringComparison.Ordinal);
+        }
+
+        private bool matchesIssueContent(string relativePath)
+        {
+            if (this.KeyProvider is not TemplateIssueKeyProvider provider)
+            {
+                return false;
+            }
+
+            string[] parts = relativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            for (int length = 1; length <= parts.Length; length++)
+            {
+                string candidate = string.Join('/', parts[..length]);
+                if (provider.Template.TryMatch(candidate, out _))
+                {
+                    return true;
+                }
+            }
+
+            foreach ((IssueKey key, string directory, string? fileName, bool _) in provider.FindDocuments())
+            {
+                string folder = directory.Replace('\\', '/');
+                if (fileName == null)
+                {
+                    if (relativePath.Equals(folder, StringComparison.OrdinalIgnoreCase) ||
+                        relativePath.StartsWith(folder + "/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+
+                    continue;
+                }
+
+                string document = string.IsNullOrEmpty(folder) ? fileName : folder + "/" + fileName;
+                if (relativePath.Equals(document, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private async Task<IIssue?> loadIssue(IssueKey key, string relativePath)
         {
-            IssueRoot issueRoot = new IssueRoot(this.Root, key, relativePath);
+            IssueRoot issueRoot = new IssueRoot(this.Root, key, relativePath, this.KeyProvider.GetDocumentFileName(key));
             string type = await IssueTypeReader.ReadAsync(issueRoot, this.Configuration);
             Dictionary<FieldKey, FieldInfo> fields = this.Configuration.GetFields(type);
             IIssue? issue;
@@ -802,16 +944,19 @@ namespace GitIssue
 
         private void stageIssueChanges(string issuesRelativePath)
         {
-            string issuesPathSpec = issuesRelativePath.TrimEnd('/') + "/*";
             foreach (StatusEntry item in this.Repository.RetrieveStatus(new StatusOptions
             {
-                PathSpec = new[] { issuesPathSpec },
                 IncludeIgnored = true,
                 IncludeUntracked = true,
                 RecurseIgnoredDirs = true,
                 RecurseUntrackedDirs = true,
             }))
             {
+                if (!this.isUnderIssues(item.FilePath, issuesRelativePath))
+                {
+                    continue;
+                }
+
                 if (this.isExcludedFromIssueCommit(item.FilePath))
                 {
                     continue;

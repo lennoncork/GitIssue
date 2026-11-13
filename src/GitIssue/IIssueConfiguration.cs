@@ -10,11 +10,6 @@ namespace GitIssue
     public interface IIssueConfiguration
     {
         /// <summary>
-        ///     Gets or sets the dictionary of fields
-        /// </summary>
-        Dictionary<FieldKey, FieldInfo> Fields { get; set; }
-
-        /// <summary>
         ///     Gets or sets the configured issue type schemas.
         /// </summary>
         List<IssueTypeConfiguration> Issues { get; set; }

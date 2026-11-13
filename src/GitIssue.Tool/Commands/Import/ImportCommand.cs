@@ -85,9 +85,8 @@ namespace GitIssue.Tool.Commands.Import
                         key = ImportCommand.mapProperty(json, "Key", "key");
                         title = ImportCommand.mapProperty(json, "Title", "title");
                         description = ImportCommand.mapProperty(json, "Description", "description");
-                        IEnumerable<Dictionary<FieldKey, FieldInfo>> schemas = configuration.Issues.Count == 0
-                            ? new[] { configuration.GetFields(configuration.IssueType) }
-                            : configuration.Issues.Select(issue => configuration.GetFields(issue.Name));
+                        IEnumerable<Dictionary<FieldKey, FieldInfo>> schemas = configuration.Issues
+                            .Select(issue => configuration.GetFields(issue.Name));
                         foreach (FieldKey field in schemas.SelectMany(schema => schema.Keys).Distinct())
                         {
                             if (json.ContainsKey(field.ToString()))
@@ -140,9 +139,8 @@ namespace GitIssue.Tool.Commands.Import
 
             string[] fields = header.Split(options.Separator);
             Dictionary<FieldKey, int> mapping = new Dictionary<FieldKey, int>();
-            IEnumerable<Dictionary<FieldKey, FieldInfo>> schemas = this.manager.Configuration.Issues.Count == 0
-                ? new[] { this.manager.Configuration.GetFields(this.manager.Configuration.IssueType) }
-                : this.manager.Configuration.Issues.Select(issue => this.manager.Configuration.GetFields(issue.Name));
+            IEnumerable<Dictionary<FieldKey, FieldInfo>> schemas = this.manager.Configuration.Issues
+                .Select(issue => this.manager.Configuration.GetFields(issue.Name));
             foreach (FieldKey field in schemas.SelectMany(schema => schema.Keys).Distinct())
             {
                 int? index = fields.Select((f, i) => new { Field = f, Index = i })

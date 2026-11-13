@@ -20,6 +20,13 @@ namespace GitIssue.Issues
         string GetIssuePath(IssueKey key);
 
         /// <summary>
+        ///     Gets the document file name when it is not named after the key
+        /// </summary>
+        /// <param name="key">the issue key</param>
+        /// <returns>the file name, or null when the file uses the key</returns>
+        string? GetDocumentFileName(IssueKey key);
+
+        /// <summary>
         ///     The next, unique, issue key
         /// </summary>
         /// <returns></returns>

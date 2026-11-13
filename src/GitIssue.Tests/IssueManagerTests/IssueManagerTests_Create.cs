@@ -130,9 +130,10 @@ namespace GitIssue.Tests.IssueManagerTests
                 IssueConfiguration configuration = new IssueConfiguration
                 {
                     KeyProvider = GitIssue.Values.TypeValue.Create<TemplateIssueKeyProvider>(),
-                    IssueType = "FEAT",
                     KeyTemplate = "{type}-{uid}-{slug}",
                 };
+                configuration.Issues[0].Name = "FEAT";
+                configuration.IssueType = "FEAT";
                 this.Sut = IssueManager.Init(configuration, this.TestDirectory);
 
                 IIssue issue = await this.Sut.CreateAsync("Add login page", "Feature work");

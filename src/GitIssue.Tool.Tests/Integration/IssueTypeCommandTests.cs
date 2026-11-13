@@ -16,12 +16,11 @@ namespace GitIssue.Tool.Tests.Integration
         {
             this.InitializeRepository();
             IssueConfiguration configuration = IssueConfiguration.Read(this.ConfigurationFile);
-            Dictionary<FieldKey, FieldInfo> bugFields = new Dictionary<FieldKey, FieldInfo>(configuration.Fields)
+            Dictionary<FieldKey, FieldInfo> bugFields = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"))
             {
                 ["Severity"] = new FieldInfo<String, JsonValueField>(true),
                 ["Platform"] = new FieldInfo<String, JsonValueField>(true),
             };
-            configuration.Issues.Add(new IssueTypeConfiguration { Name = "ISSUE", Fields = configuration.Fields });
             configuration.Issues.Add(new IssueTypeConfiguration { Name = "BUG", Fields = bugFields });
             configuration.Save(this.ConfigurationFile);
 

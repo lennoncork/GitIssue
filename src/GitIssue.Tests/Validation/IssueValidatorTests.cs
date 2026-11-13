@@ -19,7 +19,7 @@ namespace GitIssue.Tests.Validation
         [TestCase("null", "issue file is not a JSON object")]
         public void ValidateJson_RejectsInvalidDocuments(string json, string expected)
         {
-            IReadOnlyList<IssueValidationError> errors = IssueValidator.ValidateJson(json, Key, new IssueConfiguration().Fields);
+            IReadOnlyList<IssueValidationError> errors = IssueValidator.ValidateJson(json, Key, new IssueConfiguration().GetSchema("Issue"));
 
             Assert.That(errors.Select(error => error.Message), Has.Some.Contains(expected));
         }
@@ -39,7 +39,7 @@ namespace GitIssue.Tests.Validation
                 }
                 """;
 
-            IReadOnlyList<IssueValidationError> errors = IssueValidator.ValidateJson(json, Key, new IssueConfiguration().Fields);
+            IReadOnlyList<IssueValidationError> errors = IssueValidator.ValidateJson(json, Key, new IssueConfiguration().GetSchema("Issue"));
 
             Assert.Multiple(() =>
             {

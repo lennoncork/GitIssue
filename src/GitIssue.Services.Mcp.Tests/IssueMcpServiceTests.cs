@@ -112,13 +112,12 @@ namespace GitIssue.Services.Mcp.Tests
         public async Task Tools_CreateAndInspectTypedIssue()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            string path = Path.Combine(fixture.Directory, ".issues", "config.json");
+            string path = Path.Combine(fixture.Directory, Paths.ConfigFileName);
             IssueConfiguration configuration = IssueConfiguration.Read(path);
-            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.Fields)
+            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"))
             {
                 ["Severity"] = new FieldInfo<GitIssue.Values.String, JsonValueField>(true),
             };
-            configuration.Issues.Add(new IssueTypeConfiguration { Name = "ISSUE", Fields = configuration.Fields });
             configuration.Issues.Add(new IssueTypeConfiguration { Name = "BUG", Fields = bug });
             configuration.Save(path);
 
@@ -132,11 +131,11 @@ namespace GitIssue.Services.Mcp.Tests
             {
                 Assert.That(loaded.IssueType, Is.EqualTo("BUG"));
                 Assert.That(loaded.Fields["Severity"].GetString(), Is.EqualTo("high"));
-                Assert.That(tools.ListIssueTypes(), Is.EqualTo(new[] { "ISSUE", "BUG" }));
+                Assert.That(tools.ListIssueTypes(), Is.EqualTo(new[] { "Issue", "BUG" }));
                 Assert.That(tools.ListFields("BUG").Any(field => field.Name == "Severity"), Is.True);
-                Assert.That(tools.ListFields("ISSUE").Any(field => field.Name == "Severity"), Is.False);
+                Assert.That(tools.ListFields("Issue").Any(field => field.Name == "Severity"), Is.False);
                 Assert.That(
-                    async () => await tools.UpdateIssue(created.Key, "IssueType", "ISSUE", CancellationToken.None),
+                    async () => await tools.UpdateIssue(created.Key, "IssueType", "Issue", CancellationToken.None),
                     Throws.TypeOf<IssueOperationException>());
             });
         }
