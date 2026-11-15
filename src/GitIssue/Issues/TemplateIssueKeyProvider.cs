@@ -105,17 +105,6 @@ namespace GitIssue.Issues
             }
         }
 
-        private static string? uidDirectory(string directory, string fullPath, IssueKeyContext context)
-        {
-            if (string.IsNullOrEmpty(context.Uid) ||
-                string.Equals(directory, fullPath, StringComparison.OrdinalIgnoreCase))
-            {
-                return null;
-            }
-
-            return Path.Combine(directory, context.Uid.ToUpperInvariant());
-        }
-
         private static string? readContentKey(string file)
         {
             string text;
@@ -246,23 +235,13 @@ namespace GitIssue.Issues
 
             string fullPath = this.Template.RenderPath(context);
             string directory = this.Template.RenderDirectory(context);
-            string? uidDirectory = TemplateIssueKeyProvider.uidDirectory(directory, fullPath, context);
-            if (this.directoryExists(fullPath))
+            if (!string.Equals(fullPath, directory, StringComparison.OrdinalIgnoreCase) &&
+                this.directoryExists(fullPath))
             {
                 return fullPath;
             }
 
-            if ((uidDirectory != null) && this.directoryExists(uidDirectory))
-            {
-                return uidDirectory;
-            }
-
-            if (this.configuration.Storage == IssueStorage.Markdown)
-            {
-                return directory;
-            }
-
-            return uidDirectory ?? fullPath;
+            return directory;
         }
 
         private bool directoryExists(string relativePath)

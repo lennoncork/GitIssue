@@ -172,29 +172,19 @@ namespace GitIssue.Tool.Tests.Integration
 
         protected string GetIssueDirectory(string key)
         {
+            string file = this.GetIssueFile(key);
+            if (File.Exists(file))
+            {
+                return Path.GetDirectoryName(file)!;
+            }
+
             return Path.Combine(this.IssuesDirectory, key.Replace('-', Path.DirectorySeparatorChar));
         }
 
         protected string GetIssueFile(string key)
         {
-            string directory = this.GetIssueDirectory(key);
-            string dedicated = Path.Combine(directory, $"{key}.json");
-            if (File.Exists(dedicated))
-            {
-                return dedicated;
-            }
-
-            string? parent = Directory.GetParent(directory)?.FullName;
-            if (parent != null)
-            {
-                string shared = Path.Combine(parent, $"{key}.json");
-                if (File.Exists(shared))
-                {
-                    return shared;
-                }
-            }
-
-            return dedicated;
+            string? found = this.findIssueFile(key, ".json");
+            return found ?? Path.Combine(this.IssuesDirectory, $"{key}.json");
         }
 
         protected string[] GetIssueKeys()
@@ -205,16 +195,43 @@ namespace GitIssue.Tool.Tests.Integration
             }
 
             return Directory.EnumerateFiles(this.IssuesDirectory, "*.json", SearchOption.AllDirectories)
-                .Select(file => new
-                {
-                    File = file,
-                    Parts = Path.GetRelativePath(this.IssuesDirectory, Path.GetDirectoryName(file)!)
-                        .Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries),
-                })
-                .Select(entry => new { entry.File, entry.Parts, Key = string.Join("-", entry.Parts) })
-                .Where(entry => (entry.Parts.Length > 0) && Path.GetFileNameWithoutExtension(entry.File) == entry.Key)
-                .Select(entry => entry.Key)
+                .Where(this.isIssueDocument)
+                .Select(this.readIssueKey)
+                .Where(key => !string.IsNullOrEmpty(key))
+                .Select(key => key!)
                 .ToArray();
+        }
+
+        private bool isIssueDocument(string file)
+        {
+            string relative = Path.GetRelativePath(this.IssuesDirectory, file);
+            return relative.Contains(Path.DirectorySeparatorChar) || relative.Contains(Path.AltDirectorySeparatorChar);
+        }
+
+        private string? findIssueFile(string key, string extension)
+        {
+            if (!Directory.Exists(this.IssuesDirectory))
+            {
+                return null;
+            }
+
+            return Directory.EnumerateFiles(this.IssuesDirectory, "*" + extension, SearchOption.AllDirectories)
+                .Where(this.isIssueDocument)
+                .FirstOrDefault(file =>
+                    Path.GetFileNameWithoutExtension(file).Equals(key, StringComparison.Ordinal) ||
+                    ((extension == ".json") && (this.readIssueKey(file) == key)));
+        }
+
+        private string? readIssueKey(string file)
+        {
+            try
+            {
+                return this.ReadJsonObject(file)["Key"]?.GetValue<string>();
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                return null;
+            }
         }
 
         protected JsonObject ReadIssue(string key)

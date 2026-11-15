@@ -578,17 +578,10 @@ namespace GitIssue
                 string fromFileName = string.IsNullOrEmpty(issue.Root.DocumentFile) ? $"{issue.Key}{extension}" : issue.Root.DocumentFile;
                 string fromFile = Path.Combine(fromPath, fromFileName);
                 string toFile = Path.Combine(toPath, $"{to}{extension}");
-                if (this.Configuration.Storage == IssueStorage.Markdown)
+                if (File.Exists(toFile) &&
+                    !string.Equals(Path.GetFullPath(toFile), Path.GetFullPath(fromFile), StringComparison.OrdinalIgnoreCase))
                 {
-                    if (File.Exists(toFile) &&
-                        !string.Equals(Path.GetFullPath(toFile), Path.GetFullPath(fromFile), StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new InvalidOperationException($"Cannot rename '{issue.Key}' to '{to}' because '{Path.GetFileName(toFile)}' already exists.");
-                    }
-                }
-                else if (Directory.Exists(toPath) && !string.Equals(toPath, fromPath, StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new InvalidOperationException($"Cannot rename '{issue.Key}' to '{to}' because that path already exists.");
+                    throw new InvalidOperationException($"Cannot rename '{issue.Key}' to '{to}' because '{Path.GetFileName(toFile)}' already exists.");
                 }
 
                 planned.Add((issue, issue.Key, to, fromPath));
@@ -621,8 +614,9 @@ namespace GitIssue
                     File.Delete(oldFile);
                 }
 
-                if ((this.Configuration.Storage != IssueStorage.Markdown) &&
-                    string.IsNullOrEmpty(document) &&
+                bool dedicated = Path.GetFileName(fromPath)
+                    .Equals(from.ToString(), StringComparison.OrdinalIgnoreCase);
+                if (dedicated &&
                     !string.Equals(fromPath, newPath, StringComparison.OrdinalIgnoreCase) &&
                     Directory.Exists(fromPath))
                 {

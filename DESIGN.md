@@ -76,16 +76,17 @@ services to be overridden. `IIssueKeyProvider` implementations generate unique
 issue keys and map them to directories. `.gitissue.config` stores `ProjectName`, `KeyProvider`,
 `KeyTemplate`, a default `IssueType`, and optionally named `Issues` schemas. The template can
 include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
-The default template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}-{uid}`,
-so the first directory is the issue type followed by `s`. `-{uid}` is part of the
-key and the Markdown file name, and files from the same day share that folder.
-JSON storage keeps one `{uid}` directory per issue under the day folder.
+The default template is `{type}s/{created:yyyy}/{created:MM}/{type}s-{created:yyyy}-{created:MM}-{created:dd}-{uid}`.
+That string is the relative file path without an extension: directories are the
+plural type, year, and month, and the last segment is the key and file name.
+Markdown and JSON use the same path. `DateIssueKeyProvider` and
+`NameIssueKeyProvider` only select a template.
 An issue type with `Layout` `Free` stores `{type}-{uid}` in the document and
 allows that file anywhere under the type directory. The uid is random and is
 not derived from the path. Discovery reads the `Key` heading, so a moved file
 is still found.
 `DateIssueKeyProvider` and `NameIssueKeyProvider` are presets of
-`TemplateIssueKeyProvider`. `--key-provider date` keeps the year/month/day layout. `gitissue rekey` regenerates on-disk names from
+`TemplateIssueKeyProvider`. `gitissue rekey` regenerates on-disk names from
 the template and each issue's type. Existing configuration that names
 `FileIssueKeyProvider` continues to use the date-based provider.
 
