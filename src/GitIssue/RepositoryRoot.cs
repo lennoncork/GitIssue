@@ -15,7 +15,7 @@ namespace GitIssue
         /// <summary>
         ///     Gets a value indicating if the issue directory is shared with the repository root
         /// </summary>
-        public bool IsOwnedRepository => this.Name == null;
+        public bool IsOwnedRepository => RepositoryRoot.isRepositoryRoot(this.Name);
 
         /// <summary>
         ///     Gets the repository path
@@ -25,7 +25,7 @@ namespace GitIssue
         /// <summary>
         ///     Gets the issue path
         /// </summary>
-        public string IssuesPath => this.Name == null ? this.RootPath : Path.Combine(this.RootPath, this.Name);
+        public string IssuesPath => RepositoryRoot.isRepositoryRoot(this.Name) ? this.RootPath : Path.Combine(this.RootPath, this.Name!);
 
         /// <summary>
         ///     Gets the repository name
@@ -35,17 +35,17 @@ namespace GitIssue
         /// <summary>
         ///     Gets the path for the config file
         /// </summary>
-        public string ConfigFile => Path.Combine(this.IssuesPath, Paths.ConfigFileName);
+        public string ConfigFile => Path.Combine(this.RootPath, Paths.ConfigFileName);
 
         /// <summary>
         ///     Gets the path to the change log
         /// </summary>
-        public string ChangeLog => Path.Combine(this.IssuesPath, Paths.ChangeLogFileName);
+        public string ChangeLog => Path.Combine(this.RootPath, Paths.ChangeLogFileName);
 
         /// <summary>
         ///     Gets the path to the tracked file
         /// </summary>
-        public string Tracked => Path.Combine(this.IssuesPath, Paths.TrackedIssueFileName);
+        public string Tracked => Path.Combine(this.RootPath, Paths.TrackedIssueFileName);
 
         /// <summary>
         ///     Gets the issue configuration
@@ -80,11 +80,21 @@ namespace GitIssue
         /// <param name="directory">the directory of the repository</param>
         /// <param name="name">the name of the repository</param>
         /// <returns>the repository root</returns>
-        public static RepositoryRoot Create(string directory, string name)
+        public static RepositoryRoot Create(string directory, string? name)
         {
             DirectoryInfo info = new DirectoryInfo(directory);
-            string created = info.CreateSubdirectory(name).FullName;
-            return new RepositoryRoot(directory, name);
+            if (RepositoryRoot.isRepositoryRoot(name))
+            {
+                if (!info.Exists)
+                {
+                    info.Create();
+                }
+
+                return new RepositoryRoot(directory);
+            }
+
+            info.CreateSubdirectory(name!);
+            return new RepositoryRoot(directory, name!);
         }
 
         /// <summary>
@@ -96,15 +106,19 @@ namespace GitIssue
         public static RepositoryRoot Open(string directory, string? name)
         {
             DirectoryInfo current = new DirectoryInfo(directory);
+            if (!current.Exists)
+            {
+                throw new RepositoryNotFoundException($"Failed to open directory {directory} as issue root");
+            }
 
-            if (name == null)
+            if (RepositoryRoot.isRepositoryRoot(name))
             {
                 return new RepositoryRoot(current.FullName);
             }
 
-            if (RepositoryRoot.IsIssueRoot(current, name, out DirectoryInfo issues))
+            if (RepositoryRoot.IsIssueRoot(current, name!, out DirectoryInfo issues))
             {
-                return new RepositoryRoot(current.FullName, name);
+                return new RepositoryRoot(current.FullName, name!);
             }
 
             throw new RepositoryNotFoundException($"Failed to open directory {directory} as issue root");
@@ -116,14 +130,26 @@ namespace GitIssue
         /// <param name="directory">the directory of the repository</param>
         /// <param name="name">the name of the repository</param>
         /// <returns>the repository root</returns>
-        public static RepositoryRoot Locate(string directory, string name)
+        public static RepositoryRoot Locate(string directory, string? name)
         {
             DirectoryInfo current = new DirectoryInfo(directory);
-            while (RepositoryRoot.tryGetParent(current, out DirectoryInfo parent))
+            while (current.Exists)
             {
-                if (RepositoryRoot.IsIssueRoot(current, name, out DirectoryInfo issues))
+                if (RepositoryRoot.isRepositoryRoot(name))
                 {
-                    return new RepositoryRoot(current.FullName, name);
+                    if (File.Exists(Path.Combine(current.FullName, Paths.ConfigFileName)))
+                    {
+                        return new RepositoryRoot(current.FullName);
+                    }
+                }
+                else if (RepositoryRoot.IsIssueRoot(current, name!, out DirectoryInfo issues))
+                {
+                    return new RepositoryRoot(current.FullName, name!);
+                }
+
+                if (!RepositoryRoot.tryGetParent(current, out DirectoryInfo parent))
+                {
+                    break;
                 }
 
                 current = parent;
@@ -149,6 +175,11 @@ namespace GitIssue
         {
             root = new DirectoryInfo(Path.Combine(directory.FullName, name));
             return root.Exists;
+        }
+
+        private static bool isRepositoryRoot(string? name)
+        {
+            return string.IsNullOrEmpty(name) || name.Equals(".", StringComparison.Ordinal);
         }
 
         /// <summary>

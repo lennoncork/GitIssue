@@ -14,6 +14,12 @@ namespace GitIssue.Issues
     public sealed class IssueKeyTemplate
     {
         /// <summary>
+        ///     Default template. The first directory is the issue type with a trailing s, then the date folders.
+        ///     Markdown files omit the trailing {uid} directory and share the day folder.
+        /// </summary>
+        public const string Default = "{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+
+        /// <summary>
         ///     Date-based template matching the historical year/month/day folder layout
         /// </summary>
         public const string Date = "{created:yyyy}/{created:MM}/{created:dd}/{uid}";
@@ -22,6 +28,11 @@ namespace GitIssue.Issues
         ///     Named template matching "UID - Issue Name"
         /// </summary>
         public const string Name = "{uid} - {name}";
+
+        /// <summary>
+        ///     Key stored inside a free-layout document. The folder is not part of the key.
+        /// </summary>
+        public const string Identity = "{type}-{uid}";
 
         private static readonly HashSet<char> InvalidFileNameCharacters = Path.GetInvalidFileNameChars()
             .Concat(new[] { '<', '>', ':', '"', '/', '\\', '|', '?', '*' })
@@ -49,6 +60,11 @@ namespace GitIssue.Issues
         ///     Gets a value indicating whether the template includes {uid}
         /// </summary>
         public bool HasUid => this.segments.Any(segment => segment.Token == Token.Uid);
+
+        /// <summary>
+        ///     Gets a value indicating whether the template includes {type}
+        /// </summary>
+        public bool HasType => this.segments.Any(segment => segment.Token == Token.Type);
 
         /// <summary>
         ///     Parses a key template
@@ -130,30 +146,6 @@ namespace GitIssue.Issues
             return IssueKeyTemplate.sanitize(name, slug: true);
         }
 
-        /// <summary>
-        ///     Sanitizes an issue type token
-        /// </summary>
-        /// <param name="type">the issue type</param>
-        /// <returns>the sanitized type</returns>
-        public static string SanitizeType(string type)
-        {
-            if (string.IsNullOrWhiteSpace(type))
-            {
-                return "ISSUE";
-            }
-
-            StringBuilder builder = new StringBuilder(type.Length);
-            foreach (char character in type.Trim())
-            {
-                if (char.IsLetterOrDigit(character) || (character == '_'))
-                {
-                    builder.Append(character);
-                }
-            }
-
-            return builder.Length == 0 ? "ISSUE" : builder.ToString();
-        }
-
         private static string sanitize(string value, bool slug)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -209,7 +201,7 @@ namespace GitIssue.Issues
         /// <returns>the issue key</returns>
         public string RenderKey(IssueKeyContext context)
         {
-            return this.render(context, key: true);
+            return this.render(context, key: true, this.segments.Count);
         }
 
         /// <summary>
@@ -219,7 +211,32 @@ namespace GitIssue.Issues
         /// <returns>the relative issue path</returns>
         public string RenderPath(IssueKeyContext context)
         {
-            return this.render(context, key: false);
+            return this.render(context, key: false, this.segments.Count);
+        }
+
+        /// <summary>
+        ///     Renders the directory that holds a Markdown issue.
+        ///     A trailing {uid} path segment is omitted so issues share the parent folder.
+        ///     The key still includes the uid, and that value remains the file name.
+        /// </summary>
+        /// <param name="context">the substitution values</param>
+        /// <returns>the relative directory, or the full path when omitting {uid} would leave no directory</returns>
+        public string RenderDirectory(IssueKeyContext context)
+        {
+            int count = this.segments.Count;
+            if ((count >= 2) &&
+                (this.segments[count - 1].Token == Token.Uid) &&
+                (this.segments[count - 2].Token == Token.Literal) &&
+                IssueKeyTemplate.isDirectorySeparator(this.segments[count - 2].Literal))
+            {
+                string directory = this.render(context, key: false, count - 2);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    return directory;
+                }
+            }
+
+            return this.RenderPath(context);
         }
 
         /// <summary>
@@ -243,7 +260,7 @@ namespace GitIssue.Issues
                 return false;
             }
 
-            string type = "ISSUE";
+            string type = "Issue";
             string uid = string.Empty;
             string name = "Untitled";
             int index = 0;
@@ -304,11 +321,17 @@ namespace GitIssue.Issues
             return true;
         }
 
-        private string render(IssueKeyContext context, bool key)
+        private static bool isDirectorySeparator(string literal)
+        {
+            return (literal.Length > 0) && literal.All(character => (character == '/') || (character == '\\'));
+        }
+
+        private string render(IssueKeyContext context, bool key, int count)
         {
             StringBuilder builder = new StringBuilder();
-            foreach (Segment segment in this.segments)
+            for (int index = 0; index < count; index++)
             {
+                Segment segment = this.segments[index];
                 if (segment.Token == Token.Literal)
                 {
                     builder.Append(key ? segment.Literal.Replace('/', '-').Replace('\\', '-') : segment.Literal.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
@@ -326,7 +349,7 @@ namespace GitIssue.Issues
             switch (segment.Token)
             {
                 case Token.Type:
-                    return IssueKeyTemplate.SanitizeType(context.Type);
+                    return IssueTypeName.Validate(context.Type);
                 case Token.Uid:
                     return string.IsNullOrEmpty(context.Uid) ? string.Empty : context.Uid.ToUpperInvariant();
                 case Token.Name:
@@ -375,7 +398,7 @@ namespace GitIssue.Issues
                 case Token.Created:
                     return this.createdPattern(string.IsNullOrEmpty(segment.Format) ? "yyyy-MM-dd" : segment.Format);
                 case Token.Type:
-                    return @"[A-Za-z0-9_]+";
+                    return @"[A-Za-z0-9]+";
                 case Token.Slug:
                     return @"[^/\\]+";
                 case Token.Name:

@@ -5,7 +5,9 @@
 .packages
 .cake
 *.user
-.issues
+.gitissue.config
+.gitissue.tracking
+.gitissue.changes
 /coverage
 artifacts
 *.coverlet.json

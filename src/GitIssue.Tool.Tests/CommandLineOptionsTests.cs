@@ -1,8 +1,11 @@
+using System.Linq;
 using CommandLine;
 using GitIssue.Tool.Commands.Create;
 using GitIssue.Tool.Commands.Edit;
 using GitIssue.Tool.Commands.Export;
+using GitIssue.Tool.Commands.Mcp;
 using GitIssue.Tool.Commands.Show;
+using GitIssue.Tool.Commands.Web;
 using NUnit.Framework;
 
 namespace GitIssue.Tool.Tests
@@ -13,8 +16,11 @@ namespace GitIssue.Tool.Tests
         private static T parse<T>(params string[] arguments)
         {
             T? options = default;
-            ParserResult<T> result = new Parser(settings => settings.HelpWriter = null)
-                .ParseArguments<T>(arguments);
+            ParserResult<T> result = new Parser(settings =>
+            {
+                settings.HelpWriter = null;
+                settings.AllowMultiInstance = true;
+            }).ParseArguments<T>(arguments);
             result.WithParsed(value => options = value);
 
             Assert.That(result.Tag, Is.EqualTo(ParserResultType.Parsed));
@@ -46,6 +52,46 @@ namespace GitIssue.Tool.Tests
             ExportOptions options = CommandLineOptionsTests.parse<ExportOptions>("issues.json");
 
             Assert.That(options.Export, Is.EqualTo("issues.json"));
+        }
+
+        [Test]
+        public void Mcp_BindsInstallOptions()
+        {
+            McpOptions options = CommandLineOptionsTests.parse<McpOptions>(
+                "install",
+                "--scope",
+                "user",
+                "--insiders",
+                "--command",
+                "dotnet",
+                "--server-arg",
+                "mcp",
+                "--server-arg",
+                "serve");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(options.Action, Is.EqualTo("install"));
+                Assert.That(options.Scope, Is.EqualTo("user"));
+                Assert.That(options.Insiders, Is.True);
+                Assert.That(options.Command, Is.EqualTo("dotnet"));
+                Assert.That(options.ServerArguments.ToArray(), Is.EqualTo(new[] { "mcp", "serve" }));
+            });
+        }
+
+        [Test]
+        public void Web_BindsServeOptions()
+        {
+            WebOptions options = CommandLineOptionsTests.parse<WebOptions>("serve", "--host", "127.0.0.1", "--port", "5090", "--open", "--token", "secret");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(options.Action, Is.EqualTo("serve"));
+                Assert.That(options.Host, Is.EqualTo("127.0.0.1"));
+                Assert.That(options.Port, Is.EqualTo(5090));
+                Assert.That(options.Open, Is.True);
+                Assert.That(options.Token, Is.EqualTo("secret"));
+            });
         }
 
         [Test]

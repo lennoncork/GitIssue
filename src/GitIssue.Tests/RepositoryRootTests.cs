@@ -24,6 +24,9 @@ namespace GitIssue.Tests
                 Assert.That(root.IsOwnedRepository, Is.False);
                 Assert.That(root.RootPath, Is.EqualTo(fullPath));
                 Assert.That(root.IssuesPath, Is.EqualTo(issuesPath));
+                Assert.That(root.ConfigFile, Is.EqualTo(Path.Combine(fullPath, Paths.ConfigFileName)));
+                Assert.That(root.ChangeLog, Is.EqualTo(Path.Combine(fullPath, Paths.ChangeLogFileName)));
+                Assert.That(root.Tracked, Is.EqualTo(Path.Combine(fullPath, Paths.TrackedIssueFileName)));
             }
 
             [Test]
@@ -38,9 +41,9 @@ namespace GitIssue.Tests
                 Assert.That(root.IsOwnedRepository, Is.True);
                 Assert.That(root.RootPath, Is.EqualTo(fullPath));
                 Assert.That(root.IssuesPath, Is.EqualTo(fullPath));
-                Assert.That(root.ConfigFile, Is.EqualTo(Path.Combine(root.IssuesPath, Paths.ConfigFileName)));
-                Assert.That(root.ChangeLog, Is.EqualTo(Path.Combine(root.IssuesPath, Paths.ChangeLogFileName)));
-                Assert.That(root.Tracked, Is.EqualTo(Path.Combine(root.IssuesPath, Paths.TrackedIssueFileName)));
+                Assert.That(root.ConfigFile, Is.EqualTo(Path.Combine(root.RootPath, Paths.ConfigFileName)));
+                Assert.That(root.ChangeLog, Is.EqualTo(Path.Combine(root.RootPath, Paths.ChangeLogFileName)));
+                Assert.That(root.Tracked, Is.EqualTo(Path.Combine(root.RootPath, Paths.TrackedIssueFileName)));
             }
         }
     }

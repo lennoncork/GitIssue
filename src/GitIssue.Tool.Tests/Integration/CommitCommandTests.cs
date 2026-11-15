@@ -25,7 +25,8 @@ namespace GitIssue.Tool.Tests.Integration
                 this.AssertFileExists(this.ConfigurationFile);
                 this.AssertIssueExists(key);
                 Assert.That(repository.Head.Tip!.Message, Does.Contain(key));
-                Assert.That(repository.Head.Tip.Tree[".issues"], Is.Not.Null);
+                Assert.That(repository.Head.Tip.Tree[".gitissue.config"], Is.Not.Null);
+                Assert.That(repository.Head.Tip.Tree["Issues"], Is.Not.Null);
                 Assert.That(changes["Log"]!.AsObject(), Is.Empty);
                 Assert.That(this.Output, Does.Contain("Committed changes"));
             });

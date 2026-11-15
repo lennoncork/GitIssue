@@ -16,8 +16,8 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.Multiple(() =>
             {
                 Assert.That(exitCode, Is.Zero, this.Error);
-                Assert.That(this.Output, Does.Contain("Title: A 'ValueField' field with 'String' values"));
-                Assert.That(this.Output, Does.Contain("Labels: A 'ArrayField' field with 'Label' values"));
+                Assert.That(this.Output, Does.Contain("Title: A 'Value' field with 'String' values"));
+                Assert.That(this.Output, Does.Contain("Labels: A 'Array' field with 'Label' values"));
                 this.AssertFileContents(this.ConfigurationFile, configuration);
                 this.AssertFileDoesNotExist(this.TrackingFile);
                 this.AssertFileDoesNotExist(this.ChangesFile);

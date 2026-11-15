@@ -184,12 +184,14 @@ namespace GitIssue.Fields.Array
             T result;
             if (input.StartsWith('+'))
             {
-                if (this.TryParse(input.TrimStart('+'), out result))
+                if (!this.TryParse(input.TrimStart('+'), out result))
                 {
-                    if (!this.values.Contains(result))
-                    {
-                        this.values.Add(result);
-                    }
+                    return false;
+                }
+
+                if (!this.values.Contains(result))
+                {
+                    this.values.Add(result);
                 }
 
                 return true;
@@ -197,32 +199,36 @@ namespace GitIssue.Fields.Array
 
             if (input.StartsWith('-'))
             {
-                if (this.TryParse(input.TrimStart('-'), out result))
+                if (!this.TryParse(input.TrimStart('-'), out result))
                 {
-                    if (this.values.Contains(result))
-                    {
-                        this.values.Remove(result);
-                    }
+                    return false;
                 }
 
+                this.values.Remove(result);
                 return true;
             }
 
             if (input.StartsWith('[') && input.EndsWith(']'))
             {
-                this.values.Clear();
-                string[] values = input.TrimStart('[').TrimEnd(']').Split(',');
-                foreach (string value in values)
+                string contents = input.Substring(1, input.Length - 2);
+                List<T> updated = new List<T>();
+                if (!string.IsNullOrWhiteSpace(contents))
                 {
-                    if (this.TryParse(value.Trim(), out result))
+                    foreach (string value in contents.Split(','))
                     {
-                        if (!this.values.Contains(result))
+                        if (!this.TryParse(value.Trim(), out result))
                         {
-                            this.values.Add(result);
+                            return false;
+                        }
+
+                        if (!updated.Contains(result))
+                        {
+                            updated.Add(result);
                         }
                     }
                 }
 
+                this.values = updated;
                 return true;
             }
 

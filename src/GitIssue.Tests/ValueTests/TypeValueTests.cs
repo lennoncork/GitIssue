@@ -99,25 +99,21 @@ namespace GitIssue.Tests.ValueTests
             }
 
             [Test]
-            public void FieldTypeNames_UsePlainWords_And_KeepLegacyNames()
+            public void FieldTypeNames_UseValueAndArray()
             {
                 TypeValue arrayType = TypeValue.Create<JsonArrayField>();
                 TypeValue valueType = TypeValue.Create<JsonValueField>();
 
-                Assert.That(arrayType.ToString(), Is.EqualTo("ArrayField"));
-                Assert.That(valueType.ToString(), Is.EqualTo("ValueField"));
-                Assert.That(TypeValue.TryParse("ArrayField", out TypeValue parsedArray), Is.True);
+                Assert.That(arrayType.ToString(), Is.EqualTo("Array"));
+                Assert.That(valueType.ToString(), Is.EqualTo("Value"));
+                Assert.That(TypeValue.TryParse("Array", out TypeValue parsedArray), Is.True);
                 Assert.That(parsedArray.Type, Is.EqualTo(typeof(JsonArrayField)));
-                Assert.That(TypeValue.TryParse("Array", out TypeValue shortArray), Is.True);
-                Assert.That(shortArray.Type, Is.EqualTo(typeof(JsonArrayField)));
-                Assert.That(TypeValue.TryParse("JsonArray", out TypeValue legacyArray), Is.True);
-                Assert.That(legacyArray.Type, Is.EqualTo(typeof(JsonArrayField)));
-                Assert.That(TypeValue.TryParse("ValueField", out TypeValue parsedValue), Is.True);
+                Assert.That(TypeValue.TryParse("Value", out TypeValue parsedValue), Is.True);
                 Assert.That(parsedValue.Type, Is.EqualTo(typeof(JsonValueField)));
-                Assert.That(TypeValue.TryParse("Value", out TypeValue shortValue), Is.True);
-                Assert.That(shortValue.Type, Is.EqualTo(typeof(JsonValueField)));
-                Assert.That(TypeValue.TryParse("JsonValue", out TypeValue legacyValue), Is.True);
-                Assert.That(legacyValue.Type, Is.EqualTo(typeof(JsonValueField)));
+                Assert.That(TypeValue.GetType("JsonArray"), Is.Null);
+                Assert.That(TypeValue.GetType("JsonValue"), Is.Null);
+                Assert.That(TypeValue.GetType("ArrayField"), Is.Null);
+                Assert.That(TypeValue.GetType("ValueField"), Is.Null);
                 Assert.That(TypeValue.TryParse("String", out TypeValue stringValue), Is.True);
                 Assert.That(stringValue.Type, Is.EqualTo(typeof(GitIssue.Values.String)));
             }

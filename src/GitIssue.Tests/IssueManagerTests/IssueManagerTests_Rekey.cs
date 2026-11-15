@@ -3,7 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GitIssue.Fields;
 using GitIssue.Issues;
+using GitIssue.Issues.Markdown;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.IssueManagerTests
@@ -21,7 +23,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 IIssue issue = await this.Sut.CreateAsync("Add login page", "Feature work");
                 string original = issue.Key.ToString();
                 string originalPath = Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(issue.Key));
-                Assert.That(original, Does.Match(new Regex(@"^\d{4}-\d{2}-\d{2}-[A-F0-9]{8}$")));
+                Assert.That(original, Does.Match(new Regex(@"^Issues-\d{4}-\d{2}-\d{2}-[A-F0-9]{8}$")));
 
                 this.Sut.Configuration.IssueType = "FEAT";
                 this.Sut.Configuration.KeyTemplate = "{type}-{uid}-{slug}";
@@ -33,7 +35,7 @@ namespace GitIssue.Tests.IssueManagerTests
 
                 IReadOnlyList<IssueRekeyResult> results = this.Sut.Rekey();
                 Assert.That(results, Has.Count.EqualTo(1));
-                Assert.That(results[0].To.ToString(), Does.Match(new Regex(@"^FEAT-[A-F0-9]{8}-add-login-page$")));
+                Assert.That(results[0].To.ToString(), Does.Match(new Regex(@"^Issue-[A-F0-9]{8}-add-login-page$")));
                 Assert.That(results[0].To.ToString(), Does.Contain(original[^8..]));
 
                 IIssue[] found = this.Sut.Find(_ => true).ToArray();
@@ -41,6 +43,41 @@ namespace GitIssue.Tests.IssueManagerTests
                 Assert.That(found[0].Key, Is.EqualTo(results[0].To));
                 Assert.That(found[0].Title, Is.EqualTo("Add login page"));
                 Assert.That(Directory.Exists(Path.Combine(this.IssueDirectory, this.Sut.KeyProvider.GetIssuePath(found[0].Key))), Is.True);
+            }
+
+            [Test]
+            public async Task PreservesExistingIssueTypesWhenRekeying()
+            {
+                this.Initialize(this.TestDirectory);
+                IssueConfiguration configuration = (IssueConfiguration)this.Sut.Configuration;
+                Dictionary<FieldKey, FieldInfo> schema = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"));
+                configuration.Issues.Add(new IssueTypeConfiguration
+                {
+                    Name = "FEAT",
+                    Fields = new Dictionary<FieldKey, FieldInfo>(schema),
+                });
+                configuration.Issues.Add(new IssueTypeConfiguration
+                {
+                    Name = "BUG",
+                    Fields = new Dictionary<FieldKey, FieldInfo>(schema),
+                });
+                this.Sut.Configuration.KeyTemplate = "{type}-{uid}-{slug}";
+                this.Sut.Configuration.IssueType = "FEAT";
+                IIssue feature = await this.Sut.CreateAsync("Feature", string.Empty);
+                this.Sut.Configuration.IssueType = "BUG";
+                IIssue bug = await this.Sut.CreateAsync("Bug", string.Empty);
+
+                feature.Title = "Updated feature";
+                await feature.SaveAsync();
+                bug.Title = "Updated bug";
+                await bug.SaveAsync();
+                this.Sut.Configuration.IssueType = "TASK";
+
+                IReadOnlyList<IssueRekeyResult> results = this.Sut.Rekey();
+
+                Assert.That(results, Has.Count.EqualTo(2));
+                Assert.That(results.Any(result => result.To.ToString().StartsWith("FEAT-")), Is.True);
+                Assert.That(results.Any(result => result.To.ToString().StartsWith("BUG-")), Is.True);
             }
 
             [Test]
@@ -58,6 +95,27 @@ namespace GitIssue.Tests.IssueManagerTests
                 Assert.That(results, Has.Count.EqualTo(1));
                 Assert.That(results[0].To.ToString(), Is.EqualTo($"{uid} - Add login page"));
                 Assert.That(this.Sut.Find(_ => true).Single().Title, Is.EqualTo("Add login page"));
+            }
+
+            [Test]
+            public async Task RekeyMovesEachMarkdownFileWithoutDeletingSiblings()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue first = await this.Manager.CreateAsync("First issue", "One");
+                IIssue second = await this.Manager.CreateAsync("Second issue", "Two");
+                string directory = Path.GetDirectoryName(MarkdownIssue.GetMarkdownFile(((Issue)first).Root))!;
+
+                this.Manager.Configuration.KeyTemplate = "{uid}-{slug}";
+                IReadOnlyList<IssueRekeyResult> results = this.Manager.Rekey();
+
+                IIssue[] found = this.Manager.Find(_ => true).ToArray();
+                Assert.Multiple(() =>
+                {
+                    Assert.That(results, Has.Count.EqualTo(2));
+                    Assert.That(found, Has.Length.EqualTo(2));
+                    Assert.That(found.Select(issue => issue.Title.ToString()), Is.EquivalentTo(new[] { "First issue", "Second issue" }));
+                    Assert.That(Directory.Exists(directory), Is.False);
+                });
             }
 
             [Test]

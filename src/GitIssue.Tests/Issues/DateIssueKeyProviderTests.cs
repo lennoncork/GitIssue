@@ -53,8 +53,32 @@ namespace GitIssue.Tests.Issues
         }
 
         [Test]
-        public void GetIssuePath_MapsHyphensToDirectories()
+        public void GetIssuePath_OmitsTrailingUidDirectoryForMarkdown()
         {
+            IssueKey key = IssueKey.Create("2026-11-09-ABCD1234");
+
+            Assert.That(this.provider.GetIssuePath(key), Is.EqualTo(Path.Combine("2026", "11", "09")));
+        }
+
+        [Test]
+        public void GetIssuePath_KeepsUidDirectoryForJson()
+        {
+            IssueConfiguration configuration = new IssueConfiguration
+            {
+                Storage = IssueStorage.Json,
+                KeyTemplate = IssueKeyTemplate.Date,
+            };
+            DateIssueKeyProvider provider = new DateIssueKeyProvider(this.root, configuration);
+            IssueKey key = IssueKey.Create("2026-11-09-ABCD1234");
+
+            Assert.That(provider.GetIssuePath(key), Is.EqualTo(Path.Combine("2026", "11", "09", "ABCD1234")));
+        }
+
+        [Test]
+        public void GetIssuePath_KeepsExistingUidDirectory()
+        {
+            string path = Path.Combine(this.root.IssuesPath, "2026", "11", "09", "ABCD1234");
+            Directory.CreateDirectory(path);
             IssueKey key = IssueKey.Create("2026-11-09-ABCD1234");
 
             Assert.That(this.provider.GetIssuePath(key), Is.EqualTo(Path.Combine("2026", "11", "09", "ABCD1234")));

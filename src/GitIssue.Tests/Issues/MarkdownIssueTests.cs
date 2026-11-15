@@ -26,7 +26,7 @@ namespace GitIssue.Tests.Issues
             string description = "Before\n\n```\n## Title\n```\n\nAfter";
             string markdown = MarkdownIssueTests.document(key, description, "Ada Lovelace <ada@example.com>");
 
-            MarkdownRead read = MarkdownIssueFormat.Read(markdown, key, configuration.Fields);
+            MarkdownRead read = MarkdownIssueFormat.Read(markdown, key, configuration.GetSchema(configuration.IssueType));
 
             Assert.Multiple(() =>
             {
@@ -69,7 +69,7 @@ namespace GitIssue.Tests.Issues
                 Body
                 """;
 
-            MarkdownRead read = MarkdownIssueFormat.Read(markdown, key, configuration.Fields);
+            MarkdownRead read = MarkdownIssueFormat.Read(markdown, key, configuration.GetSchema(configuration.IssueType));
             string[] messages = read.Errors.Select(error => error.ToString()).ToArray();
 
             Assert.Multiple(() =>
@@ -91,8 +91,8 @@ namespace GitIssue.Tests.Issues
                 .Replace("- documentation", "- hello world", System.StringComparison.Ordinal);
             string windowsMarkdown = markdown.Replace("\r\n", "\n", System.StringComparison.Ordinal).Replace("\n", "\r\n", System.StringComparison.Ordinal);
 
-            MarkdownRead read = MarkdownIssueFormat.Read(markdown, key, configuration.Fields);
-            MarkdownRead windowsRead = MarkdownIssueFormat.Read(windowsMarkdown, key, configuration.Fields);
+            MarkdownRead read = MarkdownIssueFormat.Read(markdown, key, configuration.GetSchema(configuration.IssueType));
+            MarkdownRead windowsRead = MarkdownIssueFormat.Read(windowsMarkdown, key, configuration.GetSchema(configuration.IssueType));
 
             Assert.Multiple(() =>
             {
@@ -130,7 +130,7 @@ namespace GitIssue.Tests.Issues
             IssueKey key = IssueKey.Create("ISSUE-1");
             IssueRoot issueRoot = new IssueRoot(root, key, "issue");
             IssueConfiguration configuration = new IssueConfiguration();
-            MarkdownIssue issue = new MarkdownIssue(issueRoot, configuration.Fields);
+            MarkdownIssue issue = new MarkdownIssue(issueRoot, configuration.GetSchema(configuration.IssueType));
             issue.Title = "Save issues as markdown";
             issue.Description = "Before\n\n```\n## Title\n```\n\nAfter";
             issue.Author = Signature.Parse("Ada Lovelace <ada@example.com>");
@@ -141,7 +141,7 @@ namespace GitIssue.Tests.Issues
 
             Assert.That(await issue.SaveAsync(), Is.True);
             string written = await File.ReadAllTextAsync(issue.Markdown);
-            IIssue? loaded = await MarkdownIssue.ReadAsync(issueRoot, configuration.Fields);
+            IIssue? loaded = await MarkdownIssue.ReadAsync(issueRoot, configuration.GetSchema(configuration.IssueType));
 
             Assert.Multiple(() =>
             {
@@ -163,7 +163,8 @@ namespace GitIssue.Tests.Issues
             string directory = Helpers.CreateTempDirectory();
             RepositoryRoot root = RepositoryRoot.Open(directory, null);
             IssueRoot issueRoot = new IssueRoot(root, IssueKey.Create("ISSUE-1"), "issue");
-            MarkdownIssue issue = new MarkdownIssue(issueRoot, new IssueConfiguration().Fields);
+            IssueConfiguration configuration = new IssueConfiguration();
+            MarkdownIssue issue = new MarkdownIssue(issueRoot, configuration.GetSchema(configuration.IssueType));
             issue.Description = "Body";
 
             Assert.That(async () => await issue.SaveAsync(), Throws.TypeOf<IssueValidationException>());

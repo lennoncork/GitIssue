@@ -44,14 +44,20 @@ The solution is organized under `src/`:
   change tracking, and import/sync abstractions.
 - `GitIssue.Services` is the shared application library. `IssueWorkspace`
   lists, finds, creates, updates, comments, and tracks issues for every host.
-- `GitIssue.Services.Mcp` hosts the stdio MCP server and the Visual Studio Code
-  installer. `gitissue mcp serve` does not commit.
-- `GitIssue.Services.Web` hosts the local website. `gitissue web serve` starts
-  it with `dotnet exec` so the tool itself does not take an ASP.NET framework
-  reference.
+- `GitIssue.Services.Mcp` is an ASP.NET class library. It hosts the stdio MCP
+  server and the Visual Studio Code installer, and it runs `gitissue web serve`
+  in-process. `gitissue mcp serve` does not commit. MCP logs are written to
+  standard error.
+- `GitIssue.Services.Web` is an ASP.NET class library for the local website.
+  It uses server-rendered Blazor components to show the tracked issue, search
+  and paginate issue summaries, and edit configured fields in one save. The
+  page title is the configured project name. Forms use ASP.NET
+  antiforgery protection. Both hosts are built with `WebApplication.CreateBuilder`.
 - `GitIssue.Tool` is the executable .NET tool, exposed as the `gitissue` command.
-  It parses command options, wires dependencies, invokes library operations,
-  and formats terminal output.
+  `McpCommand` and `WebCommand` are CommandLineParser verbs, like the other
+  commands, and they run the ASP.NET hosts in the tool process. The tool also parses the other command
+  options, wires dependencies, invokes library operations, and formats terminal
+  output.
 - `GitIssue.Tests` tests the library, including issue persistence, fields,
   configuration, Git operations, and import/sync behavior.
 - `GitIssue.Tool.Tests` tests CLI command parsing and end-to-end command
@@ -67,31 +73,45 @@ loads, deletes, searches, and tracks issues, using injected key, configuration,
 repository, change-log, and persistence services. Autofac registrations in
 `GitIssueModule` provide the default implementations and allow selected
 services to be overridden. `IIssueKeyProvider` implementations generate unique
-issue keys and map them to directories. `config.json` stores `KeyProvider`,
-`KeyTemplate`, and `IssueType`. The template is the source of truth and can
+issue keys and map them to directories. `.gitissue.config` stores `ProjectName`, `KeyProvider`,
+`KeyTemplate`, a default `IssueType`, and optionally named `Issues` schemas. The template can
 include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
+The default template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`,
+so the first directory is the issue type followed by `s`. Markdown documents omit
+the trailing `{uid}` directory and share the parent folder; the file name is the key.
+JSON storage keeps one directory per issue.
+An issue type with `Layout` `Free` stores `{type}-{uid}` in the document and
+allows that file anywhere under the type directory. The uid is random and is
+not derived from the path. Discovery reads the `Key` heading, so a moved file
+is still found.
 `DateIssueKeyProvider` and `NameIssueKeyProvider` are presets of
-`TemplateIssueKeyProvider`. `gitissue rekey` regenerates on-disk names after
-the template or type changes. Existing configuration that names
+`TemplateIssueKeyProvider`. `--key-provider date` keeps the year/month/day layout. `gitissue rekey` regenerates on-disk names from
+the template and each issue's type. Existing configuration that names
 `FileIssueKeyProvider` continues to use the date-based provider.
 
 An issue is modeled by `IIssue` and the abstract `Issue` base class. Fields are
 identified by `FieldKey` and described by `FieldInfo`, which specifies the
 value type, field representation, required status, and metadata. The default
 `IssueConfiguration` defines key, title, description, author, created and
-updated timestamps, labels, and comments. Field factories and readers create
-typed scalar or array fields from this schema; the value types and type
+updated timestamps, labels, and comments. Those fields are stored on the
+default entry in `Issues`. A reserved `IssueType` field selects which entry
+applies. Field factories and readers create
+typed scalar or array fields from the selected schema; the value types and type
 converters provide serialization and parsing for the supported domain values.
 
 ### Repository data and persistence
 
-`RepositoryRoot` identifies the working tree and the issue-data directory
-(`.issues` by default, or a name supplied by the user). The directory contains
-the JSON configuration and issue data. `IssueConfiguration.Storage` selects
-the issue document and defaults to `Markdown`. `Json` keeps the
-`FileIssue`/`JsonIssue` document, including when an existing configuration
-omits `Storage`. `Markdown` stores the same fields in one Markdown file, read
-and written with Markdig. `IssueValidator` checks each field against its configured type,
+`RepositoryRoot` identifies the working tree. Issue files live in that
+directory by default, or in a subdirectory named with `--name`. `.gitissue.config`,
+`.gitissue.tracking`, and `.gitissue.changes` are written in the repository root,
+next to `.gitignore`. `IssueConfiguration.Storage` selects
+the issue document and defaults to `Markdown`. `init` writes `Storage` into
+`.gitissue.config`. `Json` keeps the `FileIssue`/`JsonIssue` document. `Markdown`
+stores the same fields in one Markdown file, read
+and written with Markdig. Readers inspect the stored `IssueType` before selecting
+the schema; legacy documents without it use the configured default. Invalid or
+unknown source fields prevent saving so they cannot be silently discarded.
+`IssueValidator` checks each field against its configured type,
 metadata, and required flag. `gitissue validate` reports those errors, and
 save, edit, and convert refuse to write an invalid document. The library also
 contains file-backed field implementations, allowing an individual field to be
@@ -140,17 +160,20 @@ dotnet cake --target=Report
 ```
 
 `Build` builds the solution, `Format` checks formatting without changing
-files, `Analyzers` runs the analyzer check, and `Test` runs both NUnit test
-projects. `Coverage` collects test coverage, and `Report` produces the
+files, `Analyzers` runs the analyzer check, and `Test` runs the NUnit test
+projects, including the Playwright browser tests. `Coverage` collects test coverage, and `Report` produces the
 Markdown coverage summary. The Cake `Default` target combines these checks
 with packaging and publishing work.
 
+Playwright tests require Chromium. After building, install it with the
+generated `src/.output/GitIssue.Services.Web.Tests/bin/Release/net10.0/playwright.ps1`
+script, passing `install chromium` (or `install --with-deps chromium` on a
+Linux machine that needs system dependencies). The build workflow installs it
+before running tests and coverage.
+
 The GitHub Actions build workflow runs on Windows and Ubuntu with .NET 10 and
 invokes Cake targets for build, formatting, analyzers, validation, tests, and
-coverage reporting. The workflow currently names a `Validate` target, while
-`build.cake` does not define one; treat the declared Cake targets as the
-authoritative local commands until that workflow/target discrepancy is
-resolved.
+coverage reporting.
 
 Tests use NUnit and temporary Git repositories to exercise the library and
 CLI behavior. Prefer focused tests in the relevant test project, then use the

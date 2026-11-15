@@ -14,6 +14,11 @@ namespace GitIssue.Services
         public string Key { get; init; } = string.Empty;
 
         /// <summary>
+        ///     Gets the issue type identifier.
+        /// </summary>
+        public string IssueType { get; init; } = string.Empty;
+
+        /// <summary>
         ///     Gets the issue title
         /// </summary>
         public string Title { get; init; } = string.Empty;
@@ -68,6 +73,22 @@ namespace GitIssue.Services
         ///     Gets the issue description
         /// </summary>
         public string Description { get; init; } = string.Empty;
+    }
+
+    /// <summary>
+    ///     One page of issue summaries
+    /// </summary>
+    public sealed class IssuePage
+    {
+        /// <summary>
+        ///     Gets the summaries on this page
+        /// </summary>
+        public IReadOnlyList<IssueSummary> Items { get; init; } = new List<IssueSummary>();
+
+        /// <summary>
+        ///     Gets the total number of matching issues
+        /// </summary>
+        public int Total { get; init; }
     }
 
     /// <summary>

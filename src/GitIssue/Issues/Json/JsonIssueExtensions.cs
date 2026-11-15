@@ -29,9 +29,21 @@ namespace GitIssue.Issues.Json
         /// <returns></returns>
         public static async Task<JsonObject> ReadJsonFieldsAsync(string path)
         {
+            (string _, JsonObject document) = await JsonIssueExtensions.ReadDocumentAsync(path).ConfigureAwait(false);
+            return document;
+        }
+
+        /// <summary>
+        ///     Reads an issue file once and returns both the text and the parsed object.
+        /// </summary>
+        /// <param name="path">the issue file</param>
+        /// <returns>the file text and parsed object</returns>
+        internal static async Task<(string Json, JsonObject Document)> ReadDocumentAsync(string path)
+        {
             JsonIssueExtensions.FileReadCount++;
             string json = await System.IO.File.ReadAllTextAsync(path).ConfigureAwait(false);
-            return JsonNode.Parse(json) as JsonObject ?? throw new JsonException($"Unable to deserialize {path} as a JSON object.");
+            JsonObject document = JsonNode.Parse(json) as JsonObject ?? throw new JsonException($"Unable to deserialize {path} as a JSON object.");
+            return (json, document);
         }
 
         /// <summary>

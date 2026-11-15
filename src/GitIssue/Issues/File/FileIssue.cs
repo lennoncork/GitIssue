@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Issues.Json;
+using GitIssue.Validation;
 
 namespace GitIssue.Issues.File
 {
@@ -42,7 +43,7 @@ namespace GitIssue.Issues.File
                 return false;
             }
 
-            if (Directory.Exists(issueRoot.IssuePath))
+            if (string.IsNullOrEmpty(issueRoot.DocumentFile) && Directory.Exists(issueRoot.IssuePath))
             {
                 Directory.Delete(issueRoot.IssuePath, true);
             }

@@ -36,6 +36,12 @@ namespace GitIssue.Issues
         public abstract string GetIssuePath(IssueKey key);
 
         /// <inheritdoc />
+        public virtual string? GetDocumentFileName(IssueKey key)
+        {
+            return null;
+        }
+
+        /// <inheritdoc />
         public abstract IssueKey Next();
 
         /// <inheritdoc />

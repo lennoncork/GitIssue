@@ -1,4 +1,5 @@
-﻿using GitIssue.Fields;
+﻿using System.Collections.Generic;
+using GitIssue.Fields;
 using GitIssue.Issues.Json;
 using GitIssue.Values;
 
@@ -14,9 +15,10 @@ namespace GitIssue.Tests.IntegrationTests.Bug
         /// </summary>
         public BugConfiguration()
         {
-            this.Fields.Add(FieldKey.Create("AffectsVersion"), new FieldInfo<Version, JsonArrayField>(false));
-            this.Fields.Add(FieldKey.Create("FixVersion"), new FieldInfo<Version, JsonArrayField>(false));
-            this.Fields.Add(FieldKey.Create("Severity"), new FieldInfo<Enumerated, JsonValueField>(false) { ValueMetadata = "[S1, S1, S3, S4, S5]" });
+            Dictionary<FieldKey, FieldInfo> fields = this.GetSchema(this.IssueType);
+            fields.Add(FieldKey.Create("AffectsVersion"), new FieldInfo<Version, JsonArrayField>(false));
+            fields.Add(FieldKey.Create("FixVersion"), new FieldInfo<Version, JsonArrayField>(false));
+            fields.Add(FieldKey.Create("Severity"), new FieldInfo<Enumerated, JsonValueField>(false) { ValueMetadata = "[S1, S1, S3, S4, S5]" });
         }
     }
 }

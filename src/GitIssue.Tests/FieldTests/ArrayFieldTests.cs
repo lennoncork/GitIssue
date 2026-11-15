@@ -2,6 +2,8 @@ using System.Collections;
 using System.Threading.Tasks;
 using GitIssue.Fields;
 using GitIssue.Fields.Array;
+using GitIssue.Issues.Json;
+using GitIssue.Values;
 using NUnit.Framework;
 
 namespace GitIssue.Tests.FieldTests
@@ -88,6 +90,30 @@ namespace GitIssue.Tests.FieldTests
         [TestFixture]
         public class Update : ArrayFieldTests
         {
+            [TestCase("+invalid label")]
+            [TestCase("-invalid label")]
+            [TestCase("[valid, invalid label]")]
+            public void Update_With_Invalid_Value_Does_Not_Change_Array(string input)
+            {
+                JsonArrayField<Label> field = new JsonArrayField<Label>(FieldKey.Create("labels"), new[] { Label.Parse("original") });
+
+                bool result = field.Update(input);
+
+                Assert.That(result, Is.False);
+                Assert.That(field.Values, Is.EqualTo(new[] { Label.Parse("original") }));
+            }
+
+            [Test]
+            public void Update_With_Empty_List_Clears_Array()
+            {
+                JsonArrayField<Label> field = new JsonArrayField<Label>(FieldKey.Create("labels"), new[] { Label.Parse("original") });
+
+                bool result = field.Update("[]");
+
+                Assert.That(result, Is.True);
+                Assert.That(field.Values, Is.Empty);
+            }
+
             [Test]
             public void Update_With_Invalid_Format_Returns_False_And_Does_Not_Change()
             {

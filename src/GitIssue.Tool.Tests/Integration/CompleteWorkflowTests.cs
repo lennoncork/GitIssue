@@ -21,7 +21,7 @@ namespace GitIssue.Tool.Tests.Integration
 
             // Inspect available fields before recording the issue details.
             this.RunSuccessfully("Fields");
-            Assert.That(this.Output, Does.Contain("Title: A 'ValueField' field with 'String' values"));
+            Assert.That(this.Output, Does.Contain("Title: A 'Value' field with 'String' values"));
 
             // Capture a newly discovered release task and begin tracking it.
             this.RunSuccessfully("Create", initialTitle, "Document customer-visible changes.");
@@ -100,7 +100,8 @@ namespace GitIssue.Tool.Tests.Integration
             using Repository repository = new Repository(this.TestDirectory);
             Assert.That(repository.Head.Tip, Is.Not.Null);
             Assert.That(repository.Head.Tip!.Message, Does.Contain(importedKey));
-            Assert.That(repository.Head.Tip.Tree[".issues"], Is.Not.Null);
+            Assert.That(repository.Head.Tip.Tree[".gitissue.config"], Is.Not.Null);
+            Assert.That(repository.Head.Tip.Tree["Issues"], Is.Not.Null);
             Assert.That(committedChanges["Log"]!.AsObject(), Is.Empty);
         }
     }

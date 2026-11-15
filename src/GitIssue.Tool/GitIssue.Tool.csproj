@@ -36,6 +36,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GitIssue\GitIssue.csproj" />
     <ProjectReference Include="..\GitIssue.Services\GitIssue.Services.csproj" />
     <ProjectReference Include="..\GitIssue.Services.Mcp\GitIssue.Services.Mcp.csproj" />
@@ -44,38 +48,5 @@
   <ItemGroup>
     <InternalsVisibleTo Include="GitIssue.Tool.Tests" />
   </ItemGroup>
-
-  <Target Name="CopyWebHost" AfterTargets="Build">
-    <PropertyGroup>
-      <WebHostOutput>$(MSBuildThisFileDirectory)..\.output\GitIssue.Services.Web\bin\$(Configuration)\$(TargetFramework)\</WebHostOutput>
-    </PropertyGroup>
-    <MSBuild
-      Projects="$(MSBuildThisFileDirectory)..\GitIssue.Services.Web\GitIssue.Services.Web.csproj"
-      Targets="Build"
-      Properties="Configuration=$(Configuration)" />
-    <ItemGroup>
-      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.dll" />
-      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.pdb" />
-      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.deps.json" />
-      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.runtimeconfig.json" />
-    </ItemGroup>
-    <Copy SourceFiles="@(WebHostFile)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
-  </Target>
-
-  <Target Name="AddWebHostToPublish" AfterTargets="ComputeFilesToPublish">
-    <PropertyGroup>
-      <WebHostOutput>$(MSBuildThisFileDirectory)..\.output\GitIssue.Services.Web\bin\$(Configuration)\$(TargetFramework)\</WebHostOutput>
-    </PropertyGroup>
-    <ItemGroup>
-      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.dll" />
-      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.pdb" />
-      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.deps.json" />
-      <WebHostFile Include="$(WebHostOutput)GitIssue.Services.Web.runtimeconfig.json" />
-      <ResolvedFileToPublish Include="@(WebHostFile)">
-        <RelativePath>%(Filename)%(Extension)</RelativePath>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </ResolvedFileToPublish>
-    </ItemGroup>
-  </Target>
 
 </Project>

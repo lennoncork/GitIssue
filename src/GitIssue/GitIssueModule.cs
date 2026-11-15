@@ -2,6 +2,7 @@
 using Autofac;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
+using GitIssue.Issues.Json;
 using GitIssue.Issues.Markdown;
 using LibGit2Sharp;
 using Serilog;
@@ -59,16 +60,25 @@ namespace GitIssue
                     RepositoryRoot root = c.Resolve<RepositoryRoot>();
                     IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
-                    IssueCreation creation = key =>
+                    TypedIssueCreation creation = (key, issueType) =>
                     {
-                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key));
-                        if (configuration.Storage == IssueStorage.Markdown)
-                        {
-                            return new MarkdownIssue(issueRoot, configuration.Fields);
-                        }
-
-                        return new FileIssue(issueRoot, configuration.Fields);
+                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key), provider.GetDocumentFileName(key));
+                        IIssue issue = configuration.Storage == IssueStorage.Markdown
+                            ? new MarkdownIssue(issueRoot, configuration.GetFields(issueType))
+                            : new FileIssue(issueRoot, configuration.GetFields(issueType));
+                        ((JsonIssue)issue).SetIssueType(issueType);
+                        return issue;
                     };
+                    return creation;
+                })
+                .AsSelf()
+                .SingleInstance()
+                .IfNotRegistered(typeof(TypedIssueCreation));
+            builder.Register(c =>
+                {
+                    IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
+                    TypedIssueCreation typed = c.Resolve<TypedIssueCreation>();
+                    IssueCreation creation = key => typed(key, configuration.IssueType);
                     return creation;
                 })
                 .AsSelf()
@@ -81,7 +91,7 @@ namespace GitIssue
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
                     IssueDeletion deletion = key =>
                     {
-                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key));
+                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key), provider.GetDocumentFileName(key));
                         if (configuration.Storage == IssueStorage.Markdown)
                         {
                             return MarkdownIssue.DeleteAsync(issueRoot);
@@ -99,15 +109,31 @@ namespace GitIssue
                     RepositoryRoot root = c.Resolve<RepositoryRoot>();
                     IIssueKeyProvider provider = c.Resolve<IIssueKeyProvider>();
                     IIssueConfiguration configuration = c.Resolve<IIssueConfiguration>();
-                    IssueLoading read = key =>
+                    IssueLoading read = async key =>
                     {
-                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key));
-                        if (configuration.Storage == IssueStorage.Markdown)
+                        IssueRoot issueRoot = new IssueRoot(root, key, provider.GetIssuePath(key), provider.GetDocumentFileName(key));
+                        if (!Directory.Exists(issueRoot.IssuePath))
                         {
-                            return MarkdownIssue.ReadAsync(issueRoot, configuration.Fields);
+                            return null;
                         }
 
-                        return FileIssue.ReadAsync(issueRoot, configuration.Fields);
+                        string type = await IssueTypeReader.ReadAsync(issueRoot, configuration).ConfigureAwait(false);
+                        IIssue? issue;
+                        if (configuration.Storage == IssueStorage.Markdown)
+                        {
+                            issue = await MarkdownIssue.ReadAsync(issueRoot, configuration.GetFields(type)).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            issue = await FileIssue.ReadAsync(issueRoot, configuration.GetFields(type)).ConfigureAwait(false);
+                        }
+
+                        if (issue is JsonIssue jsonIssue)
+                        {
+                            jsonIssue.SetIssueType(type);
+                        }
+
+                        return issue;
                     };
                     return read;
                 })

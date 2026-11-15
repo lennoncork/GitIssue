@@ -42,7 +42,7 @@ namespace GitIssue.Tool.Commands.Add
 
             if (string.IsNullOrEmpty(options.Field))
             {
-                this.logger?.Error($"Field must be supplied to remove a value on \"{issue.Key}\"");
+                this.logger?.Error($"Field must be supplied to add a value on \"{issue.Key}\"");
                 this.ExitCode = 1;
                 return;
             }
@@ -80,7 +80,7 @@ namespace GitIssue.Tool.Commands.Add
             }
             else
             {
-                this.logger?.Error($"Field \"{key}\" is not an array type, cannot remove value");
+                this.logger?.Error($"Field \"{key}\" is not an array type, cannot add value");
                 this.ExitCode = 1;
             }
         }

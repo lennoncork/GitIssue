@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace GitIssue.Services
 
         private readonly IIssueManager manager;
 
+        private readonly string projectName;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="IssueWorkspace" /> class
         /// </summary>
@@ -28,6 +31,8 @@ namespace GitIssue.Services
         public IssueWorkspace(IIssueManager manager)
         {
             this.manager = manager;
+            string? name = manager.Configuration.ProjectName;
+            this.projectName = string.IsNullOrWhiteSpace(name) ? "GitIssue" : name.Trim();
         }
 
         private static bool tryResolveField(IIssue issue, string field, out FieldKey key)
@@ -150,6 +155,27 @@ namespace GitIssue.Services
         }
 
         /// <summary>
+        ///     Searches and pages through all issue summaries
+        /// </summary>
+        /// <param name="search">text to match in the key, title, or description</param>
+        /// <param name="page">the one-based page number</param>
+        /// <param name="pageSize">the number of items on each page</param>
+        /// <param name="cancellationToken">the cancellation token</param>
+        /// <returns>the requested page and total match count</returns>
+        [Throws<IssueOperationException>]
+        public Task<IssuePage> SearchIssuesAsync(string? search, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            if ((page < 1) || (pageSize < 1) || (pageSize > 200))
+            {
+                throw new IssueOperationException("Page must be at least 1 and page size must be between 1 and 200.");
+            }
+
+            return this.withLockAsync(
+                () => this.searchAsync(search, page, pageSize, cancellationToken),
+                cancellationToken);
+        }
+
+        /// <summary>
         ///     Gets one issue
         /// </summary>
         /// <param name="key">the issue key</param>
@@ -180,9 +206,19 @@ namespace GitIssue.Services
         ///     Lists the configured fields
         /// </summary>
         /// <returns>the field schema</returns>
-        public IReadOnlyList<FieldDescriptor> ListFields()
+        public IReadOnlyList<FieldDescriptor> ListFields(string? issueType = null)
         {
-            return this.withLock(this.listFields);
+            return this.withLock(() => this.listFields(issueType));
+        }
+
+        /// <summary>
+        ///     Lists the configured issue type identifiers.
+        /// </summary>
+        /// <returns>the configured types</returns>
+        public IReadOnlyList<string> ListIssueTypes()
+        {
+            return this.withLock<IReadOnlyList<string>>(() =>
+                this.manager.Configuration.Issues.Select(issue => issue.Name).ToArray());
         }
 
         /// <summary>
@@ -219,6 +255,58 @@ namespace GitIssue.Services
         }
 
         /// <summary>
+        ///     Creates an issue of a specified type with initial field values.
+        /// </summary>
+        /// <param name="title">the issue title</param>
+        /// <param name="description">the issue description</param>
+        /// <param name="issueType">the issue type, or null for the default</param>
+        /// <param name="fields">initial field values</param>
+        /// <param name="cancellationToken">the cancellation token</param>
+        /// <returns>the created issue document</returns>
+        public Task<IssueDocument> CreateIssueAsync(string title, string? description, string? issueType, IReadOnlyDictionary<string, string>? fields, CancellationToken cancellationToken)
+        {
+            return this.withLockAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    throw new IssueOperationException("A title is required.");
+                }
+
+                string type = issueType ?? this.manager.Configuration.IssueType;
+                Dictionary<FieldKey, FieldInfo> schema = this.manager.Configuration.GetFields(type);
+                List<IField> initial = new List<IField>();
+                if (fields != null)
+                {
+                    foreach (KeyValuePair<string, string> pair in fields)
+                    {
+                        FieldKey key = FieldKey.Create(pair.Key);
+                        if (pair.Key is "Key" or "IssueType" || !schema.TryGetValue(key, out FieldInfo? info))
+                        {
+                            throw new IssueOperationException($"Field \"{pair.Key}\" cannot be supplied for issue type \"{type}\".");
+                        }
+
+                        IField field = info.CreateField(null!, key);
+                        if (!field.Update(pair.Value))
+                        {
+                            throw new IssueOperationException($"Value \"{pair.Value}\" is not valid for field \"{pair.Key}\".");
+                        }
+
+                        initial.Add(field);
+                    }
+                }
+
+                IIssue issue = await this.manager.CreateAsync(title.Trim(), description ?? string.Empty, type, initial);
+                return IssueDocumentMapper.FromIssue(issue);
+            }, cancellationToken);
+        }
+
+        /// <summary>
+        ///     Gets the project name from configuration, or GitIssue when none is set
+        /// </summary>
+        public string ProjectName => this.projectName;
+
+        /// <summary>
         ///     Updates one field without committing the issue
         /// </summary>
         /// <param name="key">the issue key</param>
@@ -229,8 +317,27 @@ namespace GitIssue.Services
         [Throws<IssueOperationException>]
         public Task<IssueDocument> UpdateIssueAsync(string key, string field, string value, CancellationToken cancellationToken)
         {
+            Dictionary<string, string> fields = new Dictionary<string, string>();
+            if (!string.IsNullOrWhiteSpace(field))
+            {
+                fields.Add(field, value);
+            }
+
+            return this.UpdateIssueAsync(key, fields, cancellationToken);
+        }
+
+        /// <summary>
+        ///     Updates every supplied field and writes the issue once
+        /// </summary>
+        /// <param name="key">the issue key</param>
+        /// <param name="fields">the field names and values, using the CLI field syntax</param>
+        /// <param name="cancellationToken">the cancellation token</param>
+        /// <returns>the updated document</returns>
+        [Throws<IssueOperationException>]
+        public Task<IssueDocument> UpdateIssueAsync(string key, IReadOnlyDictionary<string, string> fields, CancellationToken cancellationToken)
+        {
             return this.withLockAsync(
-                () => this.updateAsync(key, field, value, cancellationToken),
+                () => this.updateAsync(key, fields, cancellationToken),
                 cancellationToken);
         }
 
@@ -279,6 +386,30 @@ namespace GitIssue.Services
             return summaries;
         }
 
+        private async Task<IssuePage> searchAsync(string? search, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            List<IssueSummary> matches = new List<IssueSummary>();
+            string text = search?.Trim() ?? string.Empty;
+            await foreach (IIssue issue in this.manager.FindAsync(candidate => true).WithCancellation(cancellationToken))
+            {
+                IssueSummary summary = IssueDocumentMapper.ToSummary(IssueDocumentMapper.FromIssue(issue));
+                if (summary.Key.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                    summary.Title.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+                    summary.Description.Contains(text, StringComparison.OrdinalIgnoreCase))
+                {
+                    matches.Add(summary);
+                }
+            }
+
+            matches.Sort((left, right) => StringComparer.Ordinal.Compare(left.Key, right.Key));
+            long offset = ((long)page - 1) * pageSize;
+            return new IssuePage
+            {
+                Items = offset >= matches.Count ? new List<IssueSummary>() : matches.Skip((int)offset).Take(pageSize).ToList(),
+                Total = matches.Count,
+            };
+        }
+
         private async Task<IssueDocument> getAsync(string key, CancellationToken cancellationToken)
         {
             return IssueDocumentMapper.FromIssue(await this.requireAsync(key, cancellationToken));
@@ -306,10 +437,10 @@ namespace GitIssue.Services
             return documents;
         }
 
-        private IReadOnlyList<FieldDescriptor> listFields()
+        private IReadOnlyList<FieldDescriptor> listFields(string? issueType)
         {
             List<FieldDescriptor> fields = new List<FieldDescriptor>();
-            foreach (KeyValuePair<FieldKey, FieldInfo> field in this.manager.Configuration.Fields)
+            foreach (KeyValuePair<FieldKey, FieldInfo> field in this.manager.Configuration.GetFields(issueType ?? this.manager.Configuration.IssueType))
             {
                 fields.Add(new FieldDescriptor
                 {
@@ -359,27 +490,45 @@ namespace GitIssue.Services
             return IssueDocumentMapper.FromIssue(issue);
         }
 
-        private async Task<IssueDocument> updateAsync(string key, string field, string value, CancellationToken cancellationToken)
+        private async Task<IssueDocument> updateAsync(string key, IReadOnlyDictionary<string, string> fields, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(field))
+            if ((fields == null) || (fields.Count == 0))
             {
                 throw new IssueOperationException("A field name is required.");
             }
 
-            if (string.Equals(field, "Key", StringComparison.OrdinalIgnoreCase))
+            foreach (KeyValuePair<string, string> pair in fields)
             {
-                throw new IssueOperationException("The Key field is read-only.");
+                if (string.IsNullOrWhiteSpace(pair.Key))
+                {
+                    throw new IssueOperationException("A field name is required.");
+                }
+
+                if (string.Equals(pair.Key, "Key", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(pair.Key, "IssueType", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new IssueOperationException($"The {pair.Key} field is read-only.");
+                }
             }
 
             IIssue issue = await this.requireAsync(key, cancellationToken);
-            if (!IssueWorkspace.tryResolveField(issue, field, out FieldKey fieldKey))
+            List<(string Name, FieldKey Key, string Value)> updates = new List<(string Name, FieldKey Key, string Value)>();
+            foreach (KeyValuePair<string, string> pair in fields)
             {
-                throw new IssueOperationException($"Field \"{field}\" is not configured.");
+                if (!IssueWorkspace.tryResolveField(issue, pair.Key, out FieldKey fieldKey))
+                {
+                    throw new IssueOperationException($"Field \"{pair.Key}\" is not configured.");
+                }
+
+                updates.Add((pair.Key, fieldKey, pair.Value ?? string.Empty));
             }
 
-            if (!issue[fieldKey].Update(value))
+            foreach ((string name, FieldKey fieldKey, string value) in updates)
             {
-                throw new IssueOperationException($"Value \"{value}\" is not valid for field \"{field}\".");
+                if (!issue[fieldKey].Update(value))
+                {
+                    throw new IssueOperationException($"Value \"{value}\" is not valid for field \"{name}\".");
+                }
             }
 
             await issue.SaveAsync();

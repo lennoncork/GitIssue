@@ -38,7 +38,7 @@ namespace GitIssue.Tool.Commands.Track
                 }
             }
 
-            await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);
+            await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Tracking), this.logger);
             Console.WriteLine($"Tacking Issue '{options.Tracked.Key}'");
         }
     }

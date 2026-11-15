@@ -43,6 +43,9 @@ namespace GitIssue.Issues.Json
         /// </summary>
         protected readonly IDictionary<FieldKey, FieldInfo>? schema;
 
+        private string? expectedIssueType;
+        private IReadOnlyList<IssueValidationError> sourceErrors = Array.Empty<IssueValidationError>();
+
         /// <summary>
         ///     Initializes a new instance of a <see cref="JsonIssue" /> class
         /// </summary>
@@ -133,6 +136,12 @@ namespace GitIssue.Issues.Json
         [Throws<ArgumentException>]
         public static string GetJsonFile(IssueRoot root)
         {
+            if (!string.IsNullOrEmpty(root.DocumentFile) &&
+                root.DocumentFile.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                return Path.Combine(root.IssuePath, root.DocumentFile);
+            }
+
             return Path.Combine(root.IssuePath, $"{Path.GetFileName(root.Key.ToString())}.json");
         }
 
@@ -162,12 +171,19 @@ namespace GitIssue.Issues.Json
         /// <param name="fieldInfos">the expected fields</param>
         internal async Task ReadFieldsFromDiskAsync(IDictionary<FieldKey, FieldInfo> fieldInfos)
         {
-            this.loadedDocument = await JsonIssueExtensions.ReadJsonFieldsAsync(this.Json).ConfigureAwait(false);
+            (string json, JsonObject document) = await JsonIssueExtensions.ReadDocumentAsync(this.Json).ConfigureAwait(false);
+            this.loadedDocument = document;
             try
             {
                 foreach (FieldKey key in fieldInfos.Keys)
                 {
                     this.fields[key] = await fieldInfos[key].ReadFieldAsync(this, key).ConfigureAwait(false);
+                }
+
+                this.SetSourceErrors(IssueValidator.ValidateJson(json, this.Root.Key, fieldInfos));
+                if (!string.IsNullOrEmpty(this.IssueType))
+                {
+                    this.SetIssueType(this.IssueType);
                 }
             }
             finally
@@ -215,6 +231,16 @@ namespace GitIssue.Issues.Json
         /// </summary>
         protected void EnsureValid()
         {
+            if (this.sourceErrors.Count > 0)
+            {
+                throw new IssueValidationException(this.Key, this.sourceErrors);
+            }
+
+            if (this.expectedIssueType != null && this.IssueType != this.expectedIssueType)
+            {
+                throw new InvalidOperationException("An issue's type cannot be changed by editing its fields.");
+            }
+
             if (this.schema == null)
             {
                 return;
@@ -225,6 +251,17 @@ namespace GitIssue.Issues.Json
             {
                 throw new IssueValidationException(this.Key, errors);
             }
+        }
+
+        internal void SetIssueType(string type)
+        {
+            this.expectedIssueType = IssueTypeName.Validate(type);
+            this.SetField("IssueType").WithValue(GitIssue.Values.String.Parse(type));
+        }
+
+        internal void SetSourceErrors(IReadOnlyList<IssueValidationError> errors)
+        {
+            this.sourceErrors = errors;
         }
 
         /// <inheritdoc />

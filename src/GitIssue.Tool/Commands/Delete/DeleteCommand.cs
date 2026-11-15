@@ -37,7 +37,7 @@ namespace GitIssue.Tool.Commands.Delete
                 if (options.Tracked.Key == options.Key)
                 {
                     options.Tracked = TrackedIssue.None;
-                    await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Name, options.Tracking), this.logger);
+                    await options.Tracked.SaveAsync(Path.Combine(options.Path, options.Tracking), this.logger);
                 }
             }
         }

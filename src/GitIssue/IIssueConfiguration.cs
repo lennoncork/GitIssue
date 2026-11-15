@@ -10,9 +10,16 @@ namespace GitIssue
     public interface IIssueConfiguration
     {
         /// <summary>
-        ///     Gets or sets the dictionary of fields
+        ///     Gets or sets the configured issue type schemas.
         /// </summary>
-        Dictionary<FieldKey, FieldInfo> Fields { get; set; }
+        List<IssueTypeConfiguration> Issues { get; set; }
+
+        /// <summary>
+        ///     Gets the fields configured for an issue type.
+        /// </summary>
+        /// <param name="issueType">the issue type identifier</param>
+        /// <returns>the issue type's field schema</returns>
+        Dictionary<FieldKey, FieldInfo> GetFields(string issueType);
 
         /// <summary>
         ///     Gets or sets the key provider
@@ -33,6 +40,12 @@ namespace GitIssue
         ///     Gets or sets the on-disk format used for issue documents
         /// </summary>
         IssueStorage Storage { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the project name shown by the local website.
+        ///     A null or empty name displays GitIssue.
+        /// </summary>
+        string? ProjectName { get; set; }
 
         /// <summary>
         ///     Saves the configuration to a file

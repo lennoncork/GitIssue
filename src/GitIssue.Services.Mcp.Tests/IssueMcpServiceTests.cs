@@ -1,7 +1,12 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GitIssue;
+using GitIssue.Exceptions;
+using GitIssue.Fields;
+using GitIssue.Issues.Json;
 using GitIssue.Services;
 using GitIssue.Services.Mcp.Tools;
 using LibGit2Sharp;
@@ -106,6 +111,38 @@ namespace GitIssue.Services.Mcp.Tests
         }
 
         [Test]
+        public async Task Tools_CreateAndInspectTypedIssue()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            string path = Path.Combine(fixture.Directory, Paths.ConfigFileName);
+            IssueConfiguration configuration = IssueConfiguration.Read(path);
+            Dictionary<FieldKey, FieldInfo> bug = new Dictionary<FieldKey, FieldInfo>(configuration.GetSchema("Issue"))
+            {
+                ["Severity"] = new FieldInfo<GitIssue.Values.String, JsonValueField>(true),
+            };
+            configuration.Issues.Add(new IssueTypeConfiguration { Name = "BUG", Fields = bug });
+            configuration.Save(path);
+
+            using IssueWorkspace service = fixture.Open();
+            IssueTools tools = new IssueTools(new IssueSession(() => service));
+            IssueDocument created = await tools.CreateIssue(
+                "A bug", "Description", CancellationToken.None, "BUG",
+                new Dictionary<string, string> { ["Severity"] = "high" });
+            IssueDocument loaded = await tools.GetIssue(created.Key, CancellationToken.None);
+            Assert.Multiple(() =>
+            {
+                Assert.That(loaded.IssueType, Is.EqualTo("BUG"));
+                Assert.That(loaded.Fields["Severity"].GetString(), Is.EqualTo("high"));
+                Assert.That(tools.ListIssueTypes(), Is.EqualTo(new[] { "Issue", "BUG" }));
+                Assert.That(tools.ListFields("BUG").Any(field => field.Name == "Severity"), Is.True);
+                Assert.That(tools.ListFields("Issue").Any(field => field.Name == "Severity"), Is.False);
+                Assert.That(
+                    async () => await tools.UpdateIssue(created.Key, "IssueType", "Issue", CancellationToken.None),
+                    Throws.TypeOf<IssueOperationException>());
+            });
+        }
+
+        [Test]
         public async Task Mutations_RejectInvalidInput()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
@@ -158,6 +195,88 @@ namespace GitIssue.Services.Mcp.Tests
             Assert.That(
                 async () => await service.UpdateIssueAsync(created.Key, "Key", "OTHER-1", CancellationToken.None),
                 Throws.TypeOf<IssueOperationException>());
+        }
+
+        [Test]
+        public void ProjectName_UsesConfigurationOrGitIssue()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            using (IssueWorkspace service = fixture.Open())
+            {
+                Assert.That(service.ProjectName, Is.EqualTo("GitIssue"));
+            }
+
+            string path = Path.Combine(fixture.Directory, Paths.ConfigFileName);
+            IssueConfiguration configuration = IssueConfiguration.Read(path);
+            configuration.ProjectName = "  Apollo  ";
+            configuration.Save(path);
+
+            using IssueWorkspace reopened = fixture.Open();
+            Assert.That(reopened.ProjectName, Is.EqualTo("Apollo"));
+        }
+
+        [Test]
+        public async Task UpdateIssue_SavesEveryFieldInOneWrite()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            using IssueWorkspace service = fixture.Open();
+            IssueDocument created = await service.CreateIssueAsync("Original", "Body", CancellationToken.None);
+
+            IssueDocument updated = await service.UpdateIssueAsync(
+                created.Key,
+                new Dictionary<string, string>
+                {
+                    ["Title"] = "Updated title",
+                    ["Description"] = "Updated description",
+                    ["Labels"] = "+feature",
+                },
+                CancellationToken.None);
+            IssueDocument loaded = await service.GetIssueAsync(created.Key, CancellationToken.None);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(updated.Title, Is.EqualTo("Updated title"));
+                Assert.That(loaded.Title, Is.EqualTo("Updated title"));
+                Assert.That(loaded.Description, Is.EqualTo("Updated description"));
+                Assert.That(loaded.Fields["Labels"].ToString(), Does.Contain("feature"));
+            });
+        }
+
+        [Test]
+        public async Task UpdateIssue_LeavesTheIssueUnchangedWhenAnyFieldIsInvalid()
+        {
+            using RepositoryFixture fixture = new RepositoryFixture();
+            using IssueWorkspace service = fixture.Open();
+            IssueDocument created = await service.CreateIssueAsync("Original", "Body", CancellationToken.None);
+
+            Assert.That(
+                async () => await service.UpdateIssueAsync(
+                    created.Key,
+                    new Dictionary<string, string>
+                    {
+                        ["Title"] = "Should not stick",
+                        ["Labels"] = "feature",
+                    },
+                    CancellationToken.None),
+                Throws.TypeOf<IssueOperationException>());
+            Assert.That(
+                async () => await service.UpdateIssueAsync(
+                    created.Key,
+                    new Dictionary<string, string>
+                    {
+                        ["Title"] = string.Empty,
+                        ["Description"] = "Should not stick",
+                    },
+                    CancellationToken.None),
+                Throws.TypeOf<IssueValidationException>());
+
+            IssueDocument loaded = await service.GetIssueAsync(created.Key, CancellationToken.None);
+            Assert.Multiple(() =>
+            {
+                Assert.That(loaded.Title, Is.EqualTo("Original"));
+                Assert.That(loaded.Description, Is.EqualTo("Body"));
+                Assert.That(loaded.Fields["Labels"].ToString(), Does.Not.Contain("feature"));
+            });
         }
     }
 }

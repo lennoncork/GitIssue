@@ -124,6 +124,18 @@ namespace GitIssue.Tool.Tests.Integration
             Assert.That(values.Select(value => value?.GetValue<string>()), Does.Contain(expected));
         }
 
+        protected void AssertJsonArrayCount(JsonObject json, string property, int expected)
+        {
+            JsonArray? values = json[property] as JsonArray;
+            Assert.That(values, Is.Not.Null, $"Expected '{property}' to be an array.");
+            if (values == null)
+            {
+                return;
+            }
+
+            Assert.That(values.Count, Is.EqualTo(expected));
+        }
+
         protected void AssertJsonArrayDoesNotContain(JsonObject json, string property, string expected)
         {
             JsonArray? values = json[property] as JsonArray;
@@ -165,7 +177,24 @@ namespace GitIssue.Tool.Tests.Integration
 
         protected string GetIssueFile(string key)
         {
-            return Path.Combine(this.GetIssueDirectory(key), $"{key}.json");
+            string directory = this.GetIssueDirectory(key);
+            string dedicated = Path.Combine(directory, $"{key}.json");
+            if (File.Exists(dedicated))
+            {
+                return dedicated;
+            }
+
+            string? parent = Directory.GetParent(directory)?.FullName;
+            if (parent != null)
+            {
+                string shared = Path.Combine(parent, $"{key}.json");
+                if (File.Exists(shared))
+                {
+                    return shared;
+                }
+            }
+
+            return dedicated;
         }
 
         protected string[] GetIssueKeys()
@@ -183,7 +212,7 @@ namespace GitIssue.Tool.Tests.Integration
                         .Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries),
                 })
                 .Select(entry => new { entry.File, entry.Parts, Key = string.Join("-", entry.Parts) })
-                .Where(entry => entry.Parts.Length == 4 && Path.GetFileNameWithoutExtension(entry.File) == entry.Key)
+                .Where(entry => (entry.Parts.Length > 0) && Path.GetFileNameWithoutExtension(entry.File) == entry.Key)
                 .Select(entry => entry.Key)
                 .ToArray();
         }

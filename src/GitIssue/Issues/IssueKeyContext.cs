@@ -10,7 +10,7 @@ namespace GitIssue.Issues
         /// <summary>
         ///     Gets the issue type from configuration
         /// </summary>
-        public string Type { get; init; } = "ISSUE";
+        public string Type { get; init; } = "Issue";
 
         /// <summary>
         ///     Gets the issue creation time

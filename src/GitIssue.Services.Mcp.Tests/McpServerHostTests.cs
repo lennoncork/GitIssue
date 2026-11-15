@@ -1,9 +1,13 @@
 using System;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using GitIssue.Services;
 using GitIssue.Services.Mcp.Tools;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ModelContextProtocol.Server;
@@ -19,7 +23,7 @@ namespace GitIssue.Services.Mcp.Tests
         public void CreateHost_RegistersIssueToolsResourcesAndPrompts()
         {
             using TempDirectory directory = new TempDirectory();
-            using IHost host = McpServerHost.CreateHost(new McpServeOptions(directory.Path, ".issues"));
+            using IHost host = McpServerHost.CreateHost(new McpServeOptions(directory.Path, Paths.IssueRootFolderName));
 
             string[] tools = host.Services.GetServices<McpServerTool>().Select(tool => tool.ProtocolTool.Name).ToArray();
             string[] resources = host.Services.GetServices<McpServerResource>().Select(resource => resource.ProtocolResource?.Name ?? resource.ProtocolResourceTemplate?.Name ?? string.Empty).ToArray();
@@ -33,6 +37,7 @@ namespace GitIssue.Services.Mcp.Tests
                     "get_issue",
                     "find_issues",
                     "list_fields",
+                    "list_issue_types",
                     "get_tracked_issue",
                     "get_changes",
                     "create_issue",
@@ -47,10 +52,23 @@ namespace GitIssue.Services.Mcp.Tests
         }
 
         [Test]
+        public void CreateHost_DoesNotLoadRepositoryApplicationSettings()
+        {
+            using TempDirectory directory = new TempDirectory();
+            File.WriteAllText(Path.Combine(directory.Path, "appsettings.json"), "{");
+
+            using IHost host = McpServerHost.CreateHost(new McpServeOptions(directory.Path, Paths.IssueRootFolderName));
+
+            Assert.That(
+                host.Services.GetRequiredService<IHostEnvironment>().ContentRootPath,
+                Is.EqualTo(AppContext.BaseDirectory));
+        }
+
+        [Test]
         public async Task CreateHost_ResolvesTheIssueService()
         {
             using RepositoryFixture fixture = new RepositoryFixture();
-            using IHost host = McpServerHost.CreateHost(new McpServeOptions(fixture.Directory, ".issues"));
+            using IHost host = McpServerHost.CreateHost(new McpServeOptions(fixture.Directory, Paths.IssueRootFolderName));
             IssueTools tools = ActivatorUtilities.CreateInstance<IssueTools>(host.Services);
 
             IssueDocument created = await tools.CreateIssue("Host issue", "Created through dependency injection.", CancellationToken.None);
@@ -66,6 +84,31 @@ namespace GitIssue.Services.Mcp.Tests
         }
 
         [Test]
+        public async Task CreateHost_KeepsStandardIoAndDoesNotOpenAPort()
+        {
+            using TempDirectory directory = new TempDirectory();
+            int port = McpServerHostTests.freePort();
+            Environment.SetEnvironmentVariable("ASPNETCORE_URLS", $"http://127.0.0.1:{port}");
+            try
+            {
+                await using WebApplication application = McpServerHost.CreateHost(new McpServeOptions(directory.Path, Paths.IssueRootFolderName));
+                await application.StartAsync();
+                try
+                {
+                    Assert.That(McpServerHostTests.portIsOpen(port), Is.False);
+                }
+                finally
+                {
+                    await application.StopAsync();
+                }
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("ASPNETCORE_URLS", null);
+            }
+        }
+
+        [Test]
         public void IssueTools_WrapsRepositoryFailures()
         {
             IssueTools tools = new IssueTools(new IssueSession(() => throw new InvalidOperationException("missing config")));
@@ -73,6 +116,29 @@ namespace GitIssue.Services.Mcp.Tests
             IssueOperationException? exception = Assert.Throws<IssueOperationException>(() => tools.ListFields());
 
             Assert.That(exception!.Message, Does.Contain("gitissue init"));
+        }
+
+        private static int freePort()
+        {
+            using TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            listener.Stop();
+            return port;
+        }
+
+        private static bool portIsOpen(int port)
+        {
+            try
+            {
+                using TcpClient client = new TcpClient();
+                Task connect = client.ConnectAsync(IPAddress.Loopback, port);
+                return connect.Wait(200) && client.Connected;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

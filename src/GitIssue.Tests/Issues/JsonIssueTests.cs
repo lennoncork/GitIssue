@@ -133,21 +133,22 @@ namespace GitIssue.Tests.Issues
                 RepositoryRoot repoRoot = RepositoryRoot.Open(repoDir, null);
                 IssueRoot issueRoot = new IssueRoot(repoRoot, IssueKey.Create("ISS-JSON-READ"), "read-once");
                 IssueConfiguration configuration = new IssueConfiguration();
+                Dictionary<FieldKey, FieldInfo> schema = configuration.GetSchema(configuration.IssueType);
                 StringValue title = StringValue.Parse("Read once");
                 StringValue description = StringValue.Parse("Parsed a single time");
 
-                JsonIssue created = new JsonIssue(issueRoot, configuration.Fields);
+                JsonIssue created = new JsonIssue(issueRoot, schema);
                 created.Title = title;
                 created.Description = description;
                 created.Author = Signature.Parse("Tester <tester@example.com>");
                 await created.SaveAsync();
 
                 JsonIssueExtensions.ResetFileReadCount();
-                IIssue? fromJson = await JsonIssue.ReadAsync(issueRoot, configuration.Fields);
+                IIssue? fromJson = await JsonIssue.ReadAsync(issueRoot, schema);
                 int jsonReads = JsonIssueExtensions.FileReadCount;
 
                 JsonIssueExtensions.ResetFileReadCount();
-                IIssue? fromFile = await FileIssue.ReadAsync(issueRoot, configuration.Fields);
+                IIssue? fromFile = await FileIssue.ReadAsync(issueRoot, schema);
                 int fileReads = JsonIssueExtensions.FileReadCount;
 
                 Assert.That(jsonReads, Is.EqualTo(1));

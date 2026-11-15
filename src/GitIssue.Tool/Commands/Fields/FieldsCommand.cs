@@ -26,7 +26,8 @@ namespace GitIssue.Tool.Commands.Fields
         /// <inheritdoc />
         public override Task Exec(FieldsOptions options)
         {
-            foreach (KeyValuePair<FieldKey, FieldInfo> kvp in this.manager.Configuration.Fields)
+            string type = string.IsNullOrEmpty(options.IssueType) ? this.manager.Configuration.IssueType : options.IssueType;
+            foreach (KeyValuePair<FieldKey, FieldInfo> kvp in this.manager.Configuration.GetFields(type))
             {
                 string output = $"{kvp.Key.ToString().Pastel(Color.FromArgb(165, 229, 250))}: A '{kvp.Value.FieldType}' field with '{kvp.Value.ValueType}' values";
                 Console.WriteLine(output);

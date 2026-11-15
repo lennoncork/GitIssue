@@ -61,6 +61,7 @@ namespace GitIssue.Tool.Commands.Convert
 
             foreach (Issue issue in issues)
             {
+                var schema = configuration.GetFields(issue.IssueType);
                 string jsonPath = JsonIssue.GetJsonFile(issue.Root);
                 string markdownPath = MarkdownIssue.GetMarkdownFile(issue.Root);
                 if (File.Exists(jsonPath) && File.Exists(markdownPath))
@@ -70,7 +71,24 @@ namespace GitIssue.Tool.Commands.Convert
                     return;
                 }
 
-                IReadOnlyList<IssueValidationError> errors = IssueValidator.ValidateFields(issue, configuration.Fields);
+                IReadOnlyList<IssueValidationError> errors;
+                if (configuration.Storage == IssueStorage.Markdown)
+                {
+                    string markdown = await File.ReadAllTextAsync(markdownPath);
+                    errors = MarkdownIssueFormat.Read(markdown, issue.Key, schema).Errors;
+                }
+                else
+                {
+                    string json = await File.ReadAllTextAsync(jsonPath);
+                    errors = IssueValidator.ValidateJson(json, issue.Key, schema);
+                }
+
+                if (errors.Count > 0)
+                {
+                    throw new IssueValidationException(issue.Key, errors);
+                }
+
+                errors = IssueValidator.ValidateFields(issue, schema);
                 if (errors.Count > 0)
                 {
                     throw new IssueValidationException(issue.Key, errors);
@@ -81,8 +99,9 @@ namespace GitIssue.Tool.Commands.Convert
             {
                 if (target == IssueStorage.Markdown)
                 {
-                    string markdown = MarkdownIssueFormat.Write(issue, configuration.Fields);
-                    MarkdownRead read = MarkdownIssueFormat.Read(markdown, issue.Key, configuration.Fields);
+                    var schema = configuration.GetFields(issue.IssueType);
+                    string markdown = MarkdownIssueFormat.Write(issue, schema);
+                    MarkdownRead read = MarkdownIssueFormat.Read(markdown, issue.Key, schema);
                     if (read.Errors.Count > 0)
                     {
                         throw new IssueValidationException(issue.Key, read.Errors);

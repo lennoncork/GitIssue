@@ -6,7 +6,6 @@ using Autofac;
 using CommandLine;
 using GitIssue.Issues;
 using GitIssue.Issues.File;
-using GitIssue.Services.Mcp;
 using GitIssue.Tool.Commands;
 using GitIssue.Tool.Commands.Add;
 using GitIssue.Tool.Commands.Changes;
@@ -21,12 +20,14 @@ using GitIssue.Tool.Commands.Fields;
 using GitIssue.Tool.Commands.Find;
 using GitIssue.Tool.Commands.Import;
 using GitIssue.Tool.Commands.Init;
+using GitIssue.Tool.Commands.Mcp;
 using GitIssue.Tool.Commands.Rekey;
 using GitIssue.Tool.Commands.Remove;
 using GitIssue.Tool.Commands.Show;
 using GitIssue.Tool.Commands.Sync;
 using GitIssue.Tool.Commands.Track;
 using GitIssue.Tool.Commands.Validate;
+using GitIssue.Tool.Commands.Web;
 using GitIssue.Values;
 using Serilog;
 using CommitOptions = GitIssue.Tool.Commands.Commit.CommitOptions;
@@ -69,10 +70,32 @@ namespace GitIssue.Tool
                                 }
 
                                 config.Storage = storage;
-                                string issueType = !string.IsNullOrWhiteSpace(initOptions.IssueType)
+                                string issueType = !string.IsNullOrEmpty(initOptions.IssueType)
                                     ? initOptions.IssueType
                                     : initOptions.IssueTypeName;
-                                config.IssueType = string.IsNullOrWhiteSpace(issueType) ? "ISSUE" : issueType;
+                                config.IssueType = IssueTypeName.Validate(issueType);
+                                if ((config.Issues.Count == 1) && (config.Issues[0].Name != config.IssueType))
+                                {
+                                    config.Issues[0].Name = config.IssueType;
+                                }
+
+                                if (string.IsNullOrWhiteSpace(initOptions.Layout) ||
+                                    !Enum.TryParse(initOptions.Layout, true, out IssueLayout layout))
+                                {
+                                    throw new ArgumentException($"Layout '{initOptions.Layout}' is not Template or Free.");
+                                }
+
+                                config.Issues[0].Layout = layout;
+                                if (!string.IsNullOrEmpty(initOptions.ProjectName) &&
+                                    string.IsNullOrWhiteSpace(initOptions.ProjectName))
+                                {
+                                    throw new ArgumentException("Project name cannot be empty.");
+                                }
+
+                                if (!string.IsNullOrWhiteSpace(initOptions.ProjectName))
+                                {
+                                    config.ProjectName = initOptions.ProjectName.Trim();
+                                }
 
                                 if (!string.IsNullOrWhiteSpace(initOptions.KeyTemplate))
                                 {
@@ -124,7 +147,7 @@ namespace GitIssue.Tool
                 if (options is ITrackedOptions keyOptions)
                 {
                     keyOptions.Tracked = TrackedIssue
-                        .Read(Path.Combine(options.Path, options.Name, options.Tracking), Program.logger);
+                        .Read(Path.Combine(options.Path, options.Tracking), Program.logger);
                 }
 
                 Command<T> command = container.Resolve<Command<T>>();
@@ -142,9 +165,17 @@ namespace GitIssue.Tool
         {
             try
             {
-                Console.WriteLine();
+                if (command.WriteSpacing)
+                {
+                    Console.WriteLine();
+                }
+
                 await command.Exec(value);
-                Console.WriteLine();
+                if (command.WriteSpacing)
+                {
+                    Console.WriteLine();
+                }
+
                 return command.ExitCode;
             }
             catch (Exception e)
@@ -156,16 +187,6 @@ namespace GitIssue.Tool
 
         internal static int Main(string[] args)
         {
-            if ((args.Length > 0) && args[0].Equals("mcp", StringComparison.OrdinalIgnoreCase))
-            {
-                return McpApplication.Execute(args, Console.Out, Console.Error);
-            }
-
-            if ((args.Length > 0) && args[0].Equals("web", StringComparison.OrdinalIgnoreCase))
-            {
-                return WebServeApplication.Execute(args, Console.Out, Console.Error);
-            }
-
             Program.logger = new LoggerConfiguration()
                 .WriteTo.Console()
                 .MinimumLevel.Debug()
@@ -175,6 +196,7 @@ namespace GitIssue.Tool
             {
                 with.EnableDashDash = true;
                 with.AutoHelp = true;
+                with.AllowMultiInstance = true;
                 with.CaseSensitive = false;
                 with.HelpWriter = Console.Error;
             });
@@ -200,10 +222,14 @@ namespace GitIssue.Tool
                 typeof(CommentOptions),
                 typeof(ValidateOptions),
                 typeof(ConvertOptions),
+                typeof(McpOptions),
+                typeof(WebOptions),
                 typeof(RekeyOptions),
             };
             parser.ParseArguments(args, commands)
                 .WithParsed<InitOptions>(o => exitCode = Program.execAsync<InitCommand, InitOptions>(o).GetAwaiter().GetResult())
+                .WithParsed<McpOptions>(o => exitCode = Program.execAsync<McpCommand, McpOptions>(o).GetAwaiter().GetResult())
+                .WithParsed<WebOptions>(o => exitCode = Program.execAsync<WebCommand, WebOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<CreateOptions>(o => exitCode = Program.execAsync<CreateCommand, CreateOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<DeleteOptions>(o => exitCode = Program.execAsync<DeleteCommand, DeleteOptions>(o).GetAwaiter().GetResult())
                 .WithParsed<ImportOptions>(o => exitCode = Program.execAsync<ImportCommand, ImportOptions>(o).GetAwaiter().GetResult())
@@ -237,9 +263,15 @@ namespace GitIssue.Tool
 
         private static bool tryGetKeyProvider(string value, out Type type, out string template)
         {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                type = typeof(DateIssueKeyProvider);
+                template = IssueKeyTemplate.Default;
+                return true;
+            }
+
             template = IssueKeyTemplate.Date;
-            if (string.IsNullOrWhiteSpace(value) ||
-                value.Equals("Date", StringComparison.OrdinalIgnoreCase) ||
+            if (value.Equals("Date", StringComparison.OrdinalIgnoreCase) ||
                 value.Equals(nameof(DateIssueKeyProvider), StringComparison.OrdinalIgnoreCase))
             {
                 type = typeof(DateIssueKeyProvider);

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GitIssue.Issues;
+using GitIssue.Issues.Markdown;
 using LibGit2Sharp;
 using NUnit.Framework;
 using Signature = GitIssue.Values.Signature;
@@ -97,6 +99,27 @@ namespace GitIssue.Tests.IssueManagerTests
             }
 
             [Test]
+            public async Task CreatesMarkdownFilesInTheSameDirectory()
+            {
+                this.Initialize(this.TestDirectory);
+                IIssue first = await this.Manager.CreateAsync("First issue", "One");
+                IIssue second = await this.Manager.CreateAsync("Second issue", "Two");
+                string firstFile = MarkdownIssue.GetMarkdownFile(((Issue)first).Root);
+                string secondFile = MarkdownIssue.GetMarkdownFile(((Issue)second).Root);
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(first.Key, Is.Not.EqualTo(second.Key));
+                    Assert.That(Path.GetDirectoryName(firstFile), Is.EqualTo(Path.GetDirectoryName(secondFile)));
+                    Assert.That(File.Exists(firstFile), Is.True);
+                    Assert.That(File.Exists(secondFile), Is.True);
+                    Assert.That(Path.GetFileName(firstFile), Is.EqualTo($"{first.Key}.md"));
+                    Assert.That(Path.GetFileName(secondFile), Is.EqualTo($"{second.Key}.md"));
+                    Assert.That(firstFile.Replace('\\', '/'), Does.Not.Contain($"/{first.Key.ToString()[^8..]}/"));
+                });
+            }
+
+            [Test]
             public async Task CreatesNamedKeyWhenNameProviderIsConfigured()
             {
                 Repository.Init(this.TestDirectory);
@@ -130,9 +153,10 @@ namespace GitIssue.Tests.IssueManagerTests
                 IssueConfiguration configuration = new IssueConfiguration
                 {
                     KeyProvider = GitIssue.Values.TypeValue.Create<TemplateIssueKeyProvider>(),
-                    IssueType = "FEAT",
                     KeyTemplate = "{type}-{uid}-{slug}",
                 };
+                configuration.Issues[0].Name = "FEAT";
+                configuration.IssueType = "FEAT";
                 this.Sut = IssueManager.Init(configuration, this.TestDirectory);
 
                 IIssue issue = await this.Sut.CreateAsync("Add login page", "Feature work");

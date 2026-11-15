@@ -33,7 +33,7 @@ namespace GitIssue.Tests.Issues
 
             // Build fields from default configuration so all standard fields exist
             IssueConfiguration configuration = new IssueConfiguration();
-            IDictionary<FieldKey, FieldInfo> fields = configuration.Fields;
+            IDictionary<FieldKey, FieldInfo> fields = configuration.GetSchema(configuration.IssueType);
 
             if (issueType == typeof(JsonIssue))
             {
@@ -147,8 +147,8 @@ namespace GitIssue.Tests.Issues
                 RepositoryRoot root = RepositoryRoot.Open(repository, null);
                 IssueConfiguration configuration = new IssueConfiguration();
                 FieldKey priorityKey = FieldKey.Create("Priority");
-                configuration.Fields.Add(priorityKey, new FieldInfo<String, JsonValueField>(false));
-                JsonIssue issue = new JsonIssue(new IssueRoot(root, IssueKey.Create("ISS-DYNAMIC-1"), "issue"), configuration.Fields);
+                configuration.GetSchema(configuration.IssueType).Add(priorityKey, new FieldInfo<String, JsonValueField>(false));
+                JsonIssue issue = new JsonIssue(new IssueRoot(root, IssueKey.Create("ISS-DYNAMIC-1"), "issue"), configuration.GetSchema(configuration.IssueType));
                 dynamic dynamicIssue = issue;
 
                 dynamicIssue.Priority = String.Parse("high");

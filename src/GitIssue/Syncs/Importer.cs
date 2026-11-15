@@ -70,21 +70,50 @@ namespace GitIssue.Syncs
         /// <returns></returns>
         protected async Task<bool> Import(JsonObject json)
         {
+            string issueType = this.manager.Configuration.IssueType;
+            bool mappedType = this.Configuration.Mapping.TryGetValue("IssueType", out string? configuredPath);
+            string typePath = mappedType ? configuredPath! : "IssueType";
+            JsonNode? typeNode = Importer.selectNode(json, typePath);
+            if (typeNode == null && (mappedType || json.ContainsKey("IssueType")))
+            {
+                throw new InvalidOperationException("The imported IssueType must be a string.");
+            }
+
+            if (typeNode != null)
+            {
+                if (typeNode is not JsonValue typeValue ||
+                    !JsonSerialization.TryGetScalar(typeValue, out object? scalar) ||
+                    scalar is not string selected)
+                {
+                    throw new InvalidOperationException("The imported IssueType must be a string.");
+                }
+
+                issueType = selected;
+            }
+
+            Dictionary<FieldKey, FieldInfo> schema = this.manager.Configuration.GetFields(issueType);
             Dictionary<FieldKey, JsonNode> tokens = new Dictionary<FieldKey, JsonNode>();
             foreach (KeyValuePair<string, string> kvp in this.Configuration.Mapping)
             {
                 FieldKey key = FieldKey.Create(kvp.Key);
-                if (this.manager.Configuration.Fields.ContainsKey(key))
+                if (key == "IssueType")
                 {
-                    JsonNode? token = Importer.selectNode(json, kvp.Value);
-                    if (token != null)
-                    {
-                        tokens[key] = token;
-                    }
+                    continue;
+                }
+
+                JsonNode? token = Importer.selectNode(json, kvp.Value);
+                if (token != null && !schema.ContainsKey(key))
+                {
+                    throw new InvalidOperationException($"Field '{key}' does not exist on issue type '{issueType}'.");
+                }
+
+                if (token != null)
+                {
+                    tokens[key] = token;
                 }
             }
 
-            return await this.import(tokens);
+            return await this.import(tokens, issueType, schema);
         }
 
         private static JsonNode? selectNode(JsonNode node, string path)
@@ -117,6 +146,37 @@ namespace GitIssue.Syncs
             }
 
             return current;
+        }
+
+        private static void applyToken(IField field, JsonNode token)
+        {
+            if (token is JsonValue value && field is IValueField scalar &&
+                Importer.tryConvert(value, scalar.ValueType, out object? converted))
+            {
+                scalar.Value = converted;
+                return;
+            }
+
+            if (token is JsonArray array && field is IArrayField list)
+            {
+                List<object> values = new List<object>();
+                foreach (JsonNode? item in array)
+                {
+                    if (item is not JsonValue itemValue ||
+                        !Importer.tryConvert(itemValue, list.ValueType, out object? parsed) ||
+                        parsed == null)
+                    {
+                        throw new InvalidOperationException($"Invalid value for field '{field.Key}'.");
+                    }
+
+                    values.Add(parsed);
+                }
+
+                list.Values = values.ToArray();
+                return;
+            }
+
+            throw new InvalidOperationException($"Invalid value for field '{field.Key}'.");
         }
 
         private static bool tryConvert(JsonValue value, Type targetType, out object? result)
@@ -155,16 +215,17 @@ namespace GitIssue.Syncs
                     return result != null;
                 }
             }
-            catch (Exception)
+            catch (Exception exception) when (exception is FormatException or NotSupportedException or ArgumentException or OverflowException or InvalidCastException)
             {
-                // Conversion failures leave the existing field unchanged.
+                result = null;
+                return false;
             }
 
             result = null;
             return false;
         }
 
-        private async Task<bool> import(Dictionary<FieldKey, JsonNode> tokens)
+        private async Task<bool> import(Dictionary<FieldKey, JsonNode> tokens, string issueType, Dictionary<FieldKey, FieldInfo> schema)
         {
             IssueKey importKey;
             if (this.tryGetFieldValue(tokens, nameof(IReadOnlyIssue.Key), out string importKeyValue))
@@ -210,8 +271,25 @@ namespace GitIssue.Syncs
 
             if (issue == null)
             {
-                issue = await this.manager.CreateAsync(title, description);
+                List<IField> initial = new List<IField>();
+                foreach (KeyValuePair<FieldKey, JsonNode> token in tokens)
+                {
+                    if (token.Key == "Title" || token.Key == "Description")
+                    {
+                        continue;
+                    }
+
+                    IField field = schema[token.Key].CreateField(null!, token.Key);
+                    Importer.applyToken(field, token.Value);
+                    initial.Add(field);
+                }
+
+                issue = await this.manager.CreateAsync(title, description, issueType, initial);
                 synced = new SyncedIssue(this, issue.Key, importKey);
+            }
+            else if (issue.IssueType != issueType)
+            {
+                throw new InvalidOperationException($"Issue '{issue.Key}' has type '{issue.IssueType}', not '{issueType}'.");
             }
 
             if (await this.import(issue, tokens))
@@ -230,32 +308,7 @@ namespace GitIssue.Syncs
             {
                 if (issue.TryGetValue(token.Key, out IField? field))
                 {
-                    if (token.Value is JsonValue value)
-                    {
-                        if (field is IValueField valueField)
-                        {
-                            if (Importer.tryConvert(value, valueField.ValueType, out object? converted))
-                            {
-                                valueField.Value = converted;
-                            }
-                        }
-                    }
-
-                    if (token.Value is JsonArray array)
-                    {
-                        if (field is IArrayField arrayField)
-                        {
-                            arrayField.Clear();
-                            foreach (JsonNode? item in array)
-                            {
-                                if (item is JsonValue itemValue &&
-                                    Importer.tryConvert(itemValue, arrayField.ValueType, out object? converted))
-                                {
-                                    arrayField.Add(converted);
-                                }
-                            }
-                        }
-                    }
+                    Importer.applyToken(field, token.Value);
                 }
             }
 

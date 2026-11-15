@@ -269,7 +269,19 @@ namespace GitIssue.Services.Mcp
         [Throws<ArgumentNullException>]
         public static int Execute(string[] args, TextWriter output, TextWriter error)
         {
-            McpArguments parsed = McpCommandLine.Parse(args);
+            return McpApplication.Execute(McpCommandLine.Parse(args), output, error);
+        }
+
+        /// <summary>
+        ///     Executes parsed mcp arguments
+        /// </summary>
+        /// <param name="parsed">the parsed arguments</param>
+        /// <param name="output">the standard output writer</param>
+        /// <param name="error">the standard error writer</param>
+        /// <returns>the process exit code</returns>
+        [Throws<ArgumentNullException>]
+        public static int Execute(McpArguments parsed, TextWriter output, TextWriter error)
+        {
             if (!parsed.IsValid)
             {
                 error.WriteLine(parsed.Error);
