@@ -105,6 +105,17 @@ namespace GitIssue.Issues
             }
         }
 
+        private static string? uidDirectory(string directory, string fullPath, IssueKeyContext context)
+        {
+            if (string.IsNullOrEmpty(context.Uid) ||
+                string.Equals(directory, fullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            return Path.Combine(directory, context.Uid.ToUpperInvariant());
+        }
+
         private static string? readContentKey(string file)
         {
             string text;
@@ -203,15 +214,16 @@ namespace GitIssue.Issues
         {
             get
             {
+                string template = IssueKeyTemplate.Canonicalize(this.configuration.KeyTemplate);
                 bool foreignPreset = (this.fallbackTemplate == IssueKeyTemplate.Name) &&
-                    ((this.configuration.KeyTemplate == IssueKeyTemplate.Date) ||
-                     (this.configuration.KeyTemplate == IssueKeyTemplate.Default));
+                    ((template == IssueKeyTemplate.Date) ||
+                     (template == IssueKeyTemplate.Default));
                 if (string.IsNullOrWhiteSpace(this.configuration.KeyTemplate) || foreignPreset)
                 {
                     return this.fallbackTemplate;
                 }
 
-                return this.configuration.KeyTemplate;
+                return template;
             }
         }
 
@@ -233,17 +245,29 @@ namespace GitIssue.Issues
             }
 
             string fullPath = this.Template.RenderPath(context);
-            if (Directory.Exists(Path.Combine(this.Root.IssuesPath, fullPath)))
+            string directory = this.Template.RenderDirectory(context);
+            string? uidDirectory = TemplateIssueKeyProvider.uidDirectory(directory, fullPath, context);
+            if (this.directoryExists(fullPath))
             {
                 return fullPath;
             }
 
-            if (this.configuration.Storage == IssueStorage.Markdown)
+            if ((uidDirectory != null) && this.directoryExists(uidDirectory))
             {
-                return this.Template.RenderDirectory(context);
+                return uidDirectory;
             }
 
-            return fullPath;
+            if (this.configuration.Storage == IssueStorage.Markdown)
+            {
+                return directory;
+            }
+
+            return uidDirectory ?? fullPath;
+        }
+
+        private bool directoryExists(string relativePath)
+        {
+            return Directory.Exists(Path.Combine(this.Root.IssuesPath, relativePath));
         }
 
         /// <inheritdoc />

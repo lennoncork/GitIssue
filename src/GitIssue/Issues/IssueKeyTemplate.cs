@@ -14,15 +14,25 @@ namespace GitIssue.Issues
     public sealed class IssueKeyTemplate
     {
         /// <summary>
-        ///     Default template. The first directory is the issue type with a trailing s, then the date folders.
-        ///     Markdown files omit the trailing {uid} directory and share the day folder.
+        ///     Default template. Directories are the plural type, year, month, and day.
+        ///     {uid} is a key suffix, so it is part of the file name and not its own directory.
         /// </summary>
-        public const string Default = "{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+        public const string Default = "{type}s/{created:yyyy}/{created:MM}/{created:dd}-{uid}";
 
         /// <summary>
-        ///     Date-based template matching the historical year/month/day folder layout
+        ///     Date-based template. Directories are year, month, and day, and {uid} stays in the key.
         /// </summary>
-        public const string Date = "{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+        public const string Date = "{created:yyyy}/{created:MM}/{created:dd}-{uid}";
+
+        /// <summary>
+        ///     Earlier default that stored {uid} as a directory. Kept so existing configuration can be recognized.
+        /// </summary>
+        internal const string DirectoryUidDefault = "{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+
+        /// <summary>
+        ///     Earlier date template that stored {uid} as a directory.
+        /// </summary>
+        internal const string DirectoryUidDate = "{created:yyyy}/{created:MM}/{created:dd}/{uid}";
 
         /// <summary>
         ///     Named template matching "UID - Issue Name"
@@ -114,6 +124,26 @@ namespace GitIssue.Issues
             }
 
             return new IssueKeyTemplate(template, segments);
+        }
+
+        /// <summary>
+        ///     Rewrites a stored preset that put {uid} in its own directory into the current key-suffix form
+        /// </summary>
+        /// <param name="template">the stored template</param>
+        /// <returns>the template to use</returns>
+        public static string Canonicalize(string? template)
+        {
+            if (template == IssueKeyTemplate.DirectoryUidDefault)
+            {
+                return IssueKeyTemplate.Default;
+            }
+
+            if (template == IssueKeyTemplate.DirectoryUidDate)
+            {
+                return IssueKeyTemplate.Date;
+            }
+
+            return template ?? string.Empty;
         }
 
         /// <summary>
@@ -215,9 +245,9 @@ namespace GitIssue.Issues
         }
 
         /// <summary>
-        ///     Renders the directory that holds a Markdown issue.
-        ///     A trailing {uid} path segment is omitted so issues share the parent folder.
-        ///     The key still includes the uid, and that value remains the file name.
+        ///     Renders the directory that holds an issue document.
+        ///     A trailing {uid} is omitted when it is a directory segment or a -{uid} key suffix
+        ///     on a template that already has directories. The key and file name still include it.
         /// </summary>
         /// <param name="context">the substitution values</param>
         /// <returns>the relative directory, or the full path when omitting {uid} would leave no directory</returns>
@@ -227,7 +257,7 @@ namespace GitIssue.Issues
             if ((count >= 2) &&
                 (this.segments[count - 1].Token == Token.Uid) &&
                 (this.segments[count - 2].Token == Token.Literal) &&
-                IssueKeyTemplate.isDirectorySeparator(this.segments[count - 2].Literal))
+                this.isKeyOnlyUidSuffix(this.segments[count - 2].Literal))
             {
                 string directory = this.render(context, key: false, count - 2);
                 if (!string.IsNullOrEmpty(directory))
@@ -324,6 +354,18 @@ namespace GitIssue.Issues
         private static bool isDirectorySeparator(string literal)
         {
             return (literal.Length > 0) && literal.All(character => (character == '/') || (character == '\\'));
+        }
+
+        private bool isKeyOnlyUidSuffix(string literal)
+        {
+            if (IssueKeyTemplate.isDirectorySeparator(literal))
+            {
+                return true;
+            }
+
+            return (literal == "-") && this.segments.Any(segment =>
+                (segment.Token == Token.Literal) &&
+                (segment.Literal.Contains('/') || segment.Literal.Contains('\\')));
         }
 
         private string render(IssueKeyContext context, bool key, int count)

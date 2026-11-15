@@ -4,8 +4,8 @@ using LibGit2Sharp;
 namespace GitIssue.Issues
 {
     /// <summary>
-    ///     Generates date-based issue keys from {created:yyyy}/{created:MM}/{created:dd}/{uid}.
-    ///     Markdown files are written in the day folder; JSON keeps the {uid} directory.
+    ///     Generates date-based issue keys from {created:yyyy}/{created:MM}/{created:dd}-{uid}.
+    ///     Markdown files share the day folder. JSON keeps a {uid} directory under it.
     /// </summary>
     [TypeAlias(nameof(DateIssueKeyProvider))]
     public class DateIssueKeyProvider : TemplateIssueKeyProvider

@@ -131,6 +131,26 @@ namespace GitIssue.Tests.IssueConfigurationTests
             }
 
             [Test]
+            public void Read_RewritesDirectoryUidTemplateAsKeySuffix()
+            {
+                string directory = Helpers.CreateTempDirectory();
+                string file = Path.Combine(directory, "config.json");
+                IssueConfiguration config = new IssueConfiguration();
+                config.Save(file);
+                string json = File.ReadAllText(file).Replace(
+                    $"\"KeyTemplate\": \"{IssueKeyTemplate.Default}\"",
+                    $"\"KeyTemplate\": \"{IssueKeyTemplate.DirectoryUidDefault}\"",
+                    StringComparison.Ordinal);
+                File.WriteAllText(file, json);
+
+                IssueConfiguration loaded = IssueConfiguration.Read(file);
+
+                Assert.That(loaded.KeyTemplate, Is.EqualTo(IssueKeyTemplate.Default));
+                Assert.That(File.ReadAllText(file), Does.Contain($"\"KeyTemplate\": \"{IssueKeyTemplate.Default}\""));
+                Assert.That(File.ReadAllText(file), Does.Not.Contain(IssueKeyTemplate.DirectoryUidDefault));
+            }
+
+            [Test]
             public void Save_And_Read_RoundTrips_KeyTemplate()
             {
                 string directory = Helpers.CreateTempDirectory();

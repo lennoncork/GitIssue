@@ -36,7 +36,7 @@ namespace GitIssue.Tool.Tests.Integration
                 Assert.That(configuration["KeyProvider"]?.GetValue<string>(), Is.EqualTo("DateIssueKeyProvider"));
                 Assert.That(configuration["IssueType"]?.GetValue<string>(), Is.EqualTo("Issue"));
                 Assert.That(configuration.ContainsKey("ProjectName"), Is.False);
-                Assert.That(configuration["KeyTemplate"]?.GetValue<string>(), Is.EqualTo("{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}"));
+                Assert.That(configuration["KeyTemplate"]?.GetValue<string>(), Is.EqualTo("{type}s/{created:yyyy}/{created:MM}/{created:dd}-{uid}"));
                 Assert.That(this.Output, Does.Contain("Initialized empty 'Issue' repository"));
             });
         }

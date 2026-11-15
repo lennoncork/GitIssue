@@ -18,8 +18,24 @@ namespace GitIssue.Tests.Issues
             };
 
             Assert.That(template.RenderKey(context), Is.EqualTo("2026-11-09-ABCD1234"));
-            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("2026", "11", "09", "ABCD1234")));
+            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("2026", "11", "09-ABCD1234")));
             Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("2026", "11", "09")));
+        }
+
+        [Test]
+        public void LegacyDirectoryUidTemplate_StillSharesTheDayFolder()
+        {
+            IssueKeyTemplate template = IssueKeyTemplate.Parse(IssueKeyTemplate.DirectoryUidDefault);
+            IssueKeyContext context = new IssueKeyContext
+            {
+                Type = "Issue",
+                Created = new DateTime(2026, 11, 9),
+                Uid = "ABCD1234",
+            };
+
+            Assert.That(IssueKeyTemplate.Canonicalize(IssueKeyTemplate.DirectoryUidDefault), Is.EqualTo(IssueKeyTemplate.Default));
+            Assert.That(template.RenderKey(context), Is.EqualTo("Issues-2026-11-09-ABCD1234"));
+            Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("Issues", "2026", "11", "09")));
         }
 
         [Test]
@@ -46,7 +62,7 @@ namespace GitIssue.Tests.Issues
                 Uid = "ABCD1234",
             };
 
-            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11", "09", "ABCD1234")));
+            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11", "09-ABCD1234")));
             Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11", "09")));
             Assert.That(template.RenderKey(context), Is.EqualTo("bugs-2026-11-09-ABCD1234"));
             Assert.That(template.TryMatch("bugs-2026-11-09-ABCD1234", out IssueKeyContext matched), Is.True);

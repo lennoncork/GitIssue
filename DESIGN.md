@@ -76,10 +76,10 @@ services to be overridden. `IIssueKeyProvider` implementations generate unique
 issue keys and map them to directories. `.gitissue.config` stores `ProjectName`, `KeyProvider`,
 `KeyTemplate`, a default `IssueType`, and optionally named `Issues` schemas. The template can
 include `{type}`, `{created}`, `{index}`, `{uid}`, `{name}`, and `{slug}`.
-The default template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`,
-so the first directory is the issue type followed by `s`. Markdown documents omit
-the trailing `{uid}` directory and share the parent folder; the file name is the key.
-JSON storage keeps one directory per issue.
+The default template is `{type}s/{created:yyyy}/{created:MM}/{created:dd}-{uid}`,
+so the first directory is the issue type followed by `s`. `-{uid}` is part of the
+key and the Markdown file name, and files from the same day share that folder.
+JSON storage keeps one `{uid}` directory per issue under the day folder.
 An issue type with `Layout` `Free` stores `{type}-{uid}` in the document and
 allows that file anywhere under the type directory. The uid is random and is
 not derived from the path. Discovery reads the `Key` heading, so a moved file
