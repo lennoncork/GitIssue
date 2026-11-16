@@ -3,7 +3,7 @@ using GitIssue.Values;
 namespace GitIssue.Issues
 {
     /// <summary>
-    ///     Generates named issue keys from {uid} - {name}
+    ///     Selects the name key template. The template is the relative file path.
     /// </summary>
     [TypeAlias(nameof(NameIssueKeyProvider))]
     public class NameIssueKeyProvider : TemplateIssueKeyProvider

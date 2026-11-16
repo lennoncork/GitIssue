@@ -203,15 +203,16 @@ namespace GitIssue.Issues
         {
             get
             {
+                string template = IssueKeyTemplate.Canonicalize(this.configuration.KeyTemplate);
                 bool foreignPreset = (this.fallbackTemplate == IssueKeyTemplate.Name) &&
-                    ((this.configuration.KeyTemplate == IssueKeyTemplate.Date) ||
-                     (this.configuration.KeyTemplate == IssueKeyTemplate.Default));
+                    ((template == IssueKeyTemplate.Date) ||
+                     (template == IssueKeyTemplate.Default));
                 if (string.IsNullOrWhiteSpace(this.configuration.KeyTemplate) || foreignPreset)
                 {
                     return this.fallbackTemplate;
                 }
 
-                return this.configuration.KeyTemplate;
+                return template;
             }
         }
 
@@ -233,17 +234,19 @@ namespace GitIssue.Issues
             }
 
             string fullPath = this.Template.RenderPath(context);
-            if (Directory.Exists(Path.Combine(this.Root.IssuesPath, fullPath)))
+            string directory = this.Template.RenderDirectory(context);
+            if (!string.Equals(fullPath, directory, StringComparison.OrdinalIgnoreCase) &&
+                this.directoryExists(fullPath))
             {
                 return fullPath;
             }
 
-            if (this.configuration.Storage == IssueStorage.Markdown)
-            {
-                return this.Template.RenderDirectory(context);
-            }
+            return directory;
+        }
 
-            return fullPath;
+        private bool directoryExists(string relativePath)
+        {
+            return Directory.Exists(Path.Combine(this.Root.IssuesPath, relativePath));
         }
 
         /// <inheritdoc />

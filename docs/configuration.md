@@ -82,7 +82,7 @@ Every schema lives in the `Issues` array. `gitissue init` writes one entry, name
 {
   "IssueType": "BUG",
   "KeyProvider": "DateIssueKeyProvider",
-  "KeyTemplate": "{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}",
+  "KeyTemplate": "{type}s/{created:yyyy}/{created:MM}/{type}s-{created:yyyy}-{created:MM}-{created:dd}-{uid}",
   "Storage": "Markdown",
   "Issues": [
     {
@@ -119,9 +119,9 @@ The issue document stores its own `IssueType` as a JSON property or Markdown `##
 
 ## Issue keys
 
-Issue keys are generated from `KeyTemplate` in `.gitissue.config`. The issue's stored `IssueType` supplies the `{type}` token. `KeyProvider` selects the implementation; the template is what actually shapes the key. A `/` in the template becomes a directory. Other characters, including `-`, stay in the folder name. The issue key is the same string with `/` replaced by `-`.
+`KeyTemplate` in `.gitissue.config` is the relative path of the issue file, without `.md` or `.json`. Substituting its tokens produces that path. The last segment is the issue key and the file name. Every `/` is a directory. Markdown and JSON use the same path and differ only by extension. `DateIssueKeyProvider` and `NameIssueKeyProvider` are presets: each one selects a template, and the template decides the path.
 
-A new repository uses `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}`. `{type}s` is the type name followed by `s`, and it is the first directory. A `bug` issue is stored under `bugs`; an `Issue` is stored under `Issues`. `--key-provider date` keeps the older year/month/day layout. Markdown storage omits a trailing `{uid}` directory, so issues created on the same day share that folder and the file is named after the key. JSON storage keeps the `{uid}` directory.
+A new repository uses `{type}s/{created:yyyy}/{created:MM}/{type}s-{created:yyyy}-{created:MM}-{created:dd}-{uid}`. `{type}s` is the type name followed by `s`. An `Issue` created on 9 November 2026 is `Issues/2026/11/Issues-2026-11-09-A1B2C3D4.md`. A `bug` is stored under `bugs` and its file name starts with `bugs-`. `--key-provider date` uses `{created:yyyy}/{created:MM}/{created:yyyy}-{created:MM}-{created:dd}-{uid}`. `--key-provider name` uses `{uid} - {name}/{uid} - {name}`. A template with no `/` names a directory, and the file inside repeats that name. A configuration that still stores an older preset is rewritten to the matching path template the next time it is read.
 
 ## Layout
 
@@ -147,10 +147,10 @@ gitissue init --issue-type FEAT --key-template "{type}-{created:yyyyMMdd}-{index
 
 | Provider | Default template | Key example | Directory layout |
 | --- | --- | --- | --- |
-| default | `{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `Issues-2026-11-09-A1B2C3D4` | Markdown: `Issues/2026/11/09/Issues-2026-11-09-A1B2C3D4.md`. JSON: `Issues/2026/11/09/A1B2C3D4/` |
-| `DateIssueKeyProvider` | `{created:yyyy}/{created:MM}/{created:dd}/{uid}` | `2026-11-09-A1B2C3D4` | Markdown: `2026/11/09/2026-11-09-A1B2C3D4.md`. JSON: `2026/11/09/A1B2C3D4/` |
-| `NameIssueKeyProvider` | `{uid} - {name}` | `A1B2C3D4 - Add login page` | `A1B2C3D4 - Add login page/` |
-| `TemplateIssueKeyProvider` | the configured `KeyTemplate` | depends on the template | depends on `/` in the template |
+| default | `{type}s/{created:yyyy}/{created:MM}/{type}s-{created:yyyy}-{created:MM}-{created:dd}-{uid}` | `Issues-2026-11-09-A1B2C3D4` | `Issues/2026/11/Issues-2026-11-09-A1B2C3D4.md` |
+| `DateIssueKeyProvider` | `{created:yyyy}/{created:MM}/{created:yyyy}-{created:MM}-{created:dd}-{uid}` | `2026-11-09-A1B2C3D4` | `2026/11/2026-11-09-A1B2C3D4.md` |
+| `NameIssueKeyProvider` | `{uid} - {name}/{uid} - {name}` | `A1B2C3D4 - Add login page` | `A1B2C3D4 - Add login page/A1B2C3D4 - Add login page.md` |
+| `TemplateIssueKeyProvider` | the configured `KeyTemplate` | the last path segment | the rendered template plus `.md` or `.json` |
 
 If `KeyTemplate` is set, it overrides the provider's default. Existing repositories that still name `FileIssueKeyProvider` keep date-based behavior until you change the template.
 

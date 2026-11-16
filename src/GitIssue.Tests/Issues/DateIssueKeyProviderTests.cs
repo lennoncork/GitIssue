@@ -53,15 +53,15 @@ namespace GitIssue.Tests.Issues
         }
 
         [Test]
-        public void GetIssuePath_OmitsTrailingUidDirectoryForMarkdown()
+        public void GetIssuePath_UsesTheTemplateDirectory()
         {
             IssueKey key = IssueKey.Create("2026-11-09-ABCD1234");
 
-            Assert.That(this.provider.GetIssuePath(key), Is.EqualTo(Path.Combine("2026", "11", "09")));
+            Assert.That(this.provider.GetIssuePath(key), Is.EqualTo(Path.Combine("2026", "11")));
         }
 
         [Test]
-        public void GetIssuePath_KeepsUidDirectoryForJson()
+        public void GetIssuePath_UsesTheSameDirectoryForJson()
         {
             IssueConfiguration configuration = new IssueConfiguration
             {
@@ -71,14 +71,15 @@ namespace GitIssue.Tests.Issues
             DateIssueKeyProvider provider = new DateIssueKeyProvider(this.root, configuration);
             IssueKey key = IssueKey.Create("2026-11-09-ABCD1234");
 
-            Assert.That(provider.GetIssuePath(key), Is.EqualTo(Path.Combine("2026", "11", "09", "ABCD1234")));
+            Assert.That(provider.GetIssuePath(key), Is.EqualTo(Path.Combine("2026", "11")));
         }
 
         [Test]
-        public void GetIssuePath_KeepsExistingUidDirectory()
+        public void GetIssuePath_KeepsAnExistingDocumentDirectory()
         {
             string path = Path.Combine(this.root.IssuesPath, "2026", "11", "09", "ABCD1234");
             Directory.CreateDirectory(path);
+            File.WriteAllText(Path.Combine(path, "2026-11-09-ABCD1234.json"), "{\"Key\":\"2026-11-09-ABCD1234\"}");
             IssueKey key = IssueKey.Create("2026-11-09-ABCD1234");
 
             Assert.That(this.provider.GetIssuePath(key), Is.EqualTo(Path.Combine("2026", "11", "09", "ABCD1234")));
@@ -106,6 +107,7 @@ namespace GitIssue.Tests.Issues
         {
             string path = Path.Combine(this.root.IssuesPath, "2026", "11", "09", "ABCD1234");
             Directory.CreateDirectory(path);
+            File.WriteAllText(Path.Combine(path, "2026-11-09-ABCD1234.json"), "{\"Key\":\"2026-11-09-ABCD1234\"}");
 
             IssueKey[] keys = this.provider.Keys.ToArray();
 

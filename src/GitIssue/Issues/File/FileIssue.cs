@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using GitIssue.Fields;
@@ -43,7 +44,10 @@ namespace GitIssue.Issues.File
                 return false;
             }
 
-            if (string.IsNullOrEmpty(issueRoot.DocumentFile) && Directory.Exists(issueRoot.IssuePath))
+            string directoryName = Path.GetFileName(issueRoot.IssuePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            if (string.IsNullOrEmpty(issueRoot.DocumentFile) &&
+                directoryName.Equals(issueRoot.Key.ToString(), StringComparison.OrdinalIgnoreCase) &&
+                Directory.Exists(issueRoot.IssuePath))
             {
                 Directory.Delete(issueRoot.IssuePath, true);
             }

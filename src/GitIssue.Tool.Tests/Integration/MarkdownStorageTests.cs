@@ -169,14 +169,23 @@ namespace GitIssue.Tool.Tests.Integration
 
         private string getMarkdownFile(string key)
         {
-            string directory = this.GetIssueDirectory(key);
-            string shared = Path.Combine(Directory.GetParent(directory)!.FullName, $"{key}.md");
-            if (File.Exists(shared))
+            if (Directory.Exists(this.IssuesDirectory))
             {
-                return shared;
+                string? found = Directory.EnumerateFiles(this.IssuesDirectory, "*.md", SearchOption.AllDirectories)
+                    .FirstOrDefault(file => Path.GetFileNameWithoutExtension(file).Equals(key, System.StringComparison.Ordinal));
+                if (found != null)
+                {
+                    return found;
+                }
             }
 
-            return Path.Combine(directory, $"{key}.md");
+            string json = this.GetIssueFile(key);
+            if (File.Exists(json))
+            {
+                return Path.Combine(Path.GetDirectoryName(json)!, $"{key}.md");
+            }
+
+            return Path.Combine(this.IssuesDirectory, $"{key}.md");
         }
     }
 }

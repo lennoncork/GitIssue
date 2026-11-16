@@ -14,20 +14,44 @@ namespace GitIssue.Issues
     public sealed class IssueKeyTemplate
     {
         /// <summary>
-        ///     Default template. The first directory is the issue type with a trailing s, then the date folders.
-        ///     Markdown files omit the trailing {uid} directory and share the day folder.
+        ///     Default template. The rendered text is the relative file path without an extension.
         /// </summary>
-        public const string Default = "{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+        public const string Default = "{type}s/{created:yyyy}/{created:MM}/{type}s-{created:yyyy}-{created:MM}-{created:dd}-{uid}";
 
         /// <summary>
-        ///     Date-based template matching the historical year/month/day folder layout
+        ///     Date-based template. The rendered text is the relative file path without an extension.
         /// </summary>
-        public const string Date = "{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+        public const string Date = "{created:yyyy}/{created:MM}/{created:yyyy}-{created:MM}-{created:dd}-{uid}";
 
         /// <summary>
-        ///     Named template matching "UID - Issue Name"
+        ///     Earlier default that stored {uid} as a directory. Kept so existing configuration can be recognized.
         /// </summary>
-        public const string Name = "{uid} - {name}";
+        internal const string DirectoryUidDefault = "{type}s/{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+
+        /// <summary>
+        ///     Earlier date template that stored {uid} as a directory.
+        /// </summary>
+        internal const string DirectoryUidDate = "{created:yyyy}/{created:MM}/{created:dd}/{uid}";
+
+        /// <summary>
+        ///     Earlier default that kept {uid} in the key but did not spell the file name.
+        /// </summary>
+        internal const string SuffixUidDefault = "{type}s/{created:yyyy}/{created:MM}/{created:dd}-{uid}";
+
+        /// <summary>
+        ///     Earlier date template that kept {uid} in the key but did not spell the file name.
+        /// </summary>
+        internal const string SuffixUidDate = "{created:yyyy}/{created:MM}/{created:dd}-{uid}";
+
+        /// <summary>
+        ///     Named template. The rendered text is the relative file path without an extension.
+        /// </summary>
+        public const string Name = "{uid} - {name}/{uid} - {name}";
+
+        /// <summary>
+        ///     Earlier name template that named only the directory.
+        /// </summary>
+        internal const string LegacyName = "{uid} - {name}";
 
         /// <summary>
         ///     Key stored inside a free-layout document. The folder is not part of the key.
@@ -117,6 +141,33 @@ namespace GitIssue.Issues
         }
 
         /// <summary>
+        ///     Rewrites a stored preset whose text is not the file path into the current template
+        /// </summary>
+        /// <param name="template">the stored template</param>
+        /// <returns>the template to use</returns>
+        public static string Canonicalize(string? template)
+        {
+            if ((template == IssueKeyTemplate.DirectoryUidDefault) ||
+                (template == IssueKeyTemplate.SuffixUidDefault))
+            {
+                return IssueKeyTemplate.Default;
+            }
+
+            if ((template == IssueKeyTemplate.DirectoryUidDate) ||
+                (template == IssueKeyTemplate.SuffixUidDate))
+            {
+                return IssueKeyTemplate.Date;
+            }
+
+            if (template == IssueKeyTemplate.LegacyName)
+            {
+                return IssueKeyTemplate.Name;
+            }
+
+            return template ?? string.Empty;
+        }
+
+        /// <summary>
         ///     Converts a path or key to the canonical key form
         /// </summary>
         /// <param name="value">the key or path</param>
@@ -194,53 +245,59 @@ namespace GitIssue.Issues
             return string.IsNullOrEmpty(sanitized) ? fallback : sanitized;
         }
 
+        private static void splitPath(string path, out string directory, out string file)
+        {
+            string trimmed = path.TrimEnd('/', '\\', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            int split = Math.Max(
+                trimmed.LastIndexOf('/'),
+                Math.Max(trimmed.LastIndexOf('\\'), trimmed.LastIndexOf(Path.DirectorySeparatorChar)));
+            if (split < 0)
+            {
+                directory = string.Empty;
+                file = trimmed;
+                return;
+            }
+
+            directory = trimmed.Substring(0, split);
+            file = trimmed.Substring(split + 1);
+        }
+
         /// <summary>
-        ///     Renders the unique issue key, using '-' in place of template path separators
+        ///     Renders the issue key, which is the file name in the template path
         /// </summary>
         /// <param name="context">the substitution values</param>
         /// <returns>the issue key</returns>
         public string RenderKey(IssueKeyContext context)
         {
-            return this.render(context, key: true, this.segments.Count);
+            IssueKeyTemplate.splitPath(this.RenderPath(context), out _, out string file);
+            return file;
         }
 
         /// <summary>
-        ///     Renders the relative issue path, using directory separators from the template
+        ///     Renders the relative path of the issue file, without its storage extension
         /// </summary>
         /// <param name="context">the substitution values</param>
         /// <returns>the relative issue path</returns>
         public string RenderPath(IssueKeyContext context)
         {
-            return this.render(context, key: false, this.segments.Count);
+            return this.render(context, this.segments.Count);
         }
 
         /// <summary>
-        ///     Renders the directory that holds a Markdown issue.
-        ///     A trailing {uid} path segment is omitted so issues share the parent folder.
-        ///     The key still includes the uid, and that value remains the file name.
+        ///     Renders the directory that holds the issue file.
+        ///     A template with no directory separator is itself that directory.
         /// </summary>
         /// <param name="context">the substitution values</param>
-        /// <returns>the relative directory, or the full path when omitting {uid} would leave no directory</returns>
+        /// <returns>the relative directory</returns>
         public string RenderDirectory(IssueKeyContext context)
         {
-            int count = this.segments.Count;
-            if ((count >= 2) &&
-                (this.segments[count - 1].Token == Token.Uid) &&
-                (this.segments[count - 2].Token == Token.Literal) &&
-                IssueKeyTemplate.isDirectorySeparator(this.segments[count - 2].Literal))
-            {
-                string directory = this.render(context, key: false, count - 2);
-                if (!string.IsNullOrEmpty(directory))
-                {
-                    return directory;
-                }
-            }
-
-            return this.RenderPath(context);
+            string path = this.RenderPath(context);
+            IssueKeyTemplate.splitPath(path, out string directory, out _);
+            return string.IsNullOrEmpty(directory) ? path : directory;
         }
 
         /// <summary>
-        ///     Tries to read substitution values from an existing key or path
+        ///     Tries to read substitution values from an existing key or from the relative file path
         /// </summary>
         /// <param name="value">the key or relative path</param>
         /// <param name="context">the parsed values</param>
@@ -253,8 +310,68 @@ namespace GitIssue.Issues
                 return false;
             }
 
-            string normalized = IssueKeyTemplate.NormalizeKey(value);
-            Match match = this.buildKeyRegex().Match(normalized);
+            string trimmed = value.Trim().Replace('\\', '/');
+            int slash = trimmed.LastIndexOf('/');
+            string key = slash < 0 ? trimmed : trimmed.Substring(slash + 1);
+            if (!this.match(key, this.keySegments(), out context))
+            {
+                return false;
+            }
+
+            if (slash < 0)
+            {
+                return true;
+            }
+
+            string expected = this.RenderPath(context).Replace('\\', '/');
+            return string.Equals(expected, trimmed, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private List<Segment> keySegments()
+        {
+            int splitSegment = -1;
+            int splitChar = -1;
+            for (int index = 0; index < this.segments.Count; index++)
+            {
+                if (this.segments[index].Token != Token.Literal)
+                {
+                    continue;
+                }
+
+                int slash = Math.Max(
+                    this.segments[index].Literal.LastIndexOf('/'),
+                    this.segments[index].Literal.LastIndexOf('\\'));
+                if (slash >= 0)
+                {
+                    splitSegment = index;
+                    splitChar = slash;
+                }
+            }
+
+            if (splitSegment < 0)
+            {
+                return this.segments;
+            }
+
+            List<Segment> key = new List<Segment>();
+            string remainder = this.segments[splitSegment].Literal.Substring(splitChar + 1);
+            if (remainder.Length > 0)
+            {
+                key.Add(Segment.CreateLiteral(remainder));
+            }
+
+            for (int index = splitSegment + 1; index < this.segments.Count; index++)
+            {
+                key.Add(this.segments[index]);
+            }
+
+            return key.Count == 0 ? this.segments : key;
+        }
+
+        private bool match(string value, IReadOnlyList<Segment> segments, out IssueKeyContext context)
+        {
+            context = new IssueKeyContext();
+            Match match = this.buildKeyRegex(segments).Match(value);
             if (!match.Success)
             {
                 return false;
@@ -267,7 +384,7 @@ namespace GitIssue.Issues
             List<string> createdFormats = new List<string>();
             List<string> createdValues = new List<string>();
 
-            foreach (Segment segment in this.segments)
+            foreach (Segment segment in segments)
             {
                 if (segment.Token == Token.Literal)
                 {
@@ -321,12 +438,7 @@ namespace GitIssue.Issues
             return true;
         }
 
-        private static bool isDirectorySeparator(string literal)
-        {
-            return (literal.Length > 0) && literal.All(character => (character == '/') || (character == '\\'));
-        }
-
-        private string render(IssueKeyContext context, bool key, int count)
+        private string render(IssueKeyContext context, int count)
         {
             StringBuilder builder = new StringBuilder();
             for (int index = 0; index < count; index++)
@@ -334,7 +446,7 @@ namespace GitIssue.Issues
                 Segment segment = this.segments[index];
                 if (segment.Token == Token.Literal)
                 {
-                    builder.Append(key ? segment.Literal.Replace('/', '-').Replace('\\', '-') : segment.Literal.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
+                    builder.Append(segment.Literal.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar));
                     continue;
                 }
 
@@ -369,14 +481,14 @@ namespace GitIssue.Issues
             }
         }
 
-        private Regex buildKeyRegex()
+        private Regex buildKeyRegex(IReadOnlyList<Segment> segments)
         {
             StringBuilder builder = new StringBuilder("^");
-            foreach (Segment segment in this.segments)
+            foreach (Segment segment in segments)
             {
                 if (segment.Token == Token.Literal)
                 {
-                    builder.Append(Regex.Escape(segment.Literal.Replace('/', '-').Replace('\\', '-')));
+                    builder.Append(Regex.Escape(segment.Literal));
                     continue;
                 }
 

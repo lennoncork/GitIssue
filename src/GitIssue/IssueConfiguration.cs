@@ -105,6 +105,13 @@ namespace GitIssue
                 string json = File.ReadAllText(file);
                 T configuration = JsonSerializer.Deserialize<T>(json, JsonSerialization.Options) ?? throw new JsonException($"Unable to deserialize {file} as config file");
                 configuration.validateTypes();
+                string canonical = IssueKeyTemplate.Canonicalize(configuration.KeyTemplate);
+                if (!string.Equals(canonical, configuration.KeyTemplate, StringComparison.Ordinal))
+                {
+                    configuration.KeyTemplate = canonical;
+                    configuration.Save(file);
+                }
+
                 return configuration;
             }
             catch (Exception ex)
@@ -183,6 +190,7 @@ namespace GitIssue
 
         private void normalizeKeyTemplate()
         {
+            this.KeyTemplate = IssueKeyTemplate.Canonicalize(this.KeyTemplate);
             if ((this.KeyProvider.Type == typeof(NameIssueKeyProvider)) &&
                 (string.IsNullOrWhiteSpace(this.KeyTemplate) ||
                  (this.KeyTemplate == IssueKeyTemplate.Date) ||

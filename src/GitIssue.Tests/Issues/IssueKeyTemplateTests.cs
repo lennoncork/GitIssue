@@ -18,8 +18,30 @@ namespace GitIssue.Tests.Issues
             };
 
             Assert.That(template.RenderKey(context), Is.EqualTo("2026-11-09-ABCD1234"));
-            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("2026", "11", "09", "ABCD1234")));
-            Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("2026", "11", "09")));
+            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("2026", "11", "2026-11-09-ABCD1234")));
+            Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("2026", "11")));
+        }
+
+        [Test]
+        public void LegacyTemplates_RewriteToTheFilePath()
+        {
+            Assert.That(IssueKeyTemplate.Canonicalize(IssueKeyTemplate.DirectoryUidDefault), Is.EqualTo(IssueKeyTemplate.Default));
+            Assert.That(IssueKeyTemplate.Canonicalize(IssueKeyTemplate.SuffixUidDefault), Is.EqualTo(IssueKeyTemplate.Default));
+            Assert.That(IssueKeyTemplate.Canonicalize(IssueKeyTemplate.DirectoryUidDate), Is.EqualTo(IssueKeyTemplate.Date));
+            Assert.That(IssueKeyTemplate.Canonicalize(IssueKeyTemplate.SuffixUidDate), Is.EqualTo(IssueKeyTemplate.Date));
+            Assert.That(IssueKeyTemplate.Canonicalize(IssueKeyTemplate.LegacyName), Is.EqualTo(IssueKeyTemplate.Name));
+
+            IssueKeyTemplate template = IssueKeyTemplate.Parse(IssueKeyTemplate.Default);
+            IssueKeyContext context = new IssueKeyContext
+            {
+                Type = "Issue",
+                Created = new DateTime(2026, 11, 9),
+                Uid = "ABCD1234",
+            };
+
+            Assert.That(template.RenderKey(context), Is.EqualTo("Issues-2026-11-09-ABCD1234"));
+            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("Issues", "2026", "11", "Issues-2026-11-09-ABCD1234")));
+            Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("Issues", "2026", "11")));
         }
 
         [Test]
@@ -31,7 +53,7 @@ namespace GitIssue.Tests.Issues
             Assert.That(fromKey.Uid, Is.EqualTo("ABCD1234"));
             Assert.That(fromKey.Created, Is.EqualTo(new DateTime(2026, 11, 9)));
 
-            Assert.That(template.TryMatch("2026/11/09/ABCD1234", out IssueKeyContext fromPath), Is.True);
+            Assert.That(template.TryMatch("2026/11/2026-11-09-ABCD1234", out IssueKeyContext fromPath), Is.True);
             Assert.That(fromPath.Uid, Is.EqualTo("ABCD1234"));
         }
 
@@ -46,8 +68,8 @@ namespace GitIssue.Tests.Issues
                 Uid = "ABCD1234",
             };
 
-            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11", "09", "ABCD1234")));
-            Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11", "09")));
+            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11", "bugs-2026-11-09-ABCD1234")));
+            Assert.That(template.RenderDirectory(context), Is.EqualTo(System.IO.Path.Combine("bugs", "2026", "11")));
             Assert.That(template.RenderKey(context), Is.EqualTo("bugs-2026-11-09-ABCD1234"));
             Assert.That(template.TryMatch("bugs-2026-11-09-ABCD1234", out IssueKeyContext matched), Is.True);
             Assert.That(matched.Type, Is.EqualTo("bug"));
@@ -65,7 +87,7 @@ namespace GitIssue.Tests.Issues
             };
 
             Assert.That(template.RenderKey(context), Is.EqualTo("ABCD1234 - Add login page"));
-            Assert.That(template.RenderPath(context), Is.EqualTo("ABCD1234 - Add login page"));
+            Assert.That(template.RenderPath(context), Is.EqualTo(System.IO.Path.Combine("ABCD1234 - Add login page", "ABCD1234 - Add login page")));
             Assert.That(template.RenderDirectory(context), Is.EqualTo("ABCD1234 - Add login page"));
         }
 
