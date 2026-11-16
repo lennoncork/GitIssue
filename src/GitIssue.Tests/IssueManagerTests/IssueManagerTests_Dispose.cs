@@ -41,6 +41,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 await manager.DisposeAsync();
 
                 changeLog.Verify(c => c.Save(root.ChangeLog), Times.Once);
+                repository.Verify(r => r.Dispose(), Times.Once);
             }
 
             [Test]
@@ -72,6 +73,7 @@ namespace GitIssue.Tests.IssueManagerTests
                 manager.Dispose();
 
                 changeLog.Verify(c => c.Save(root.ChangeLog), Times.Once);
+                repository.Verify(r => r.Dispose(), Times.Once);
             }
         }
     }

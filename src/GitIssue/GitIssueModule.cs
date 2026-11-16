@@ -117,15 +117,15 @@ namespace GitIssue
                             return null;
                         }
 
-                        string type = await IssueTypeReader.ReadAsync(issueRoot, configuration);
+                        string type = await IssueTypeReader.ReadAsync(issueRoot, configuration).ConfigureAwait(false);
                         IIssue? issue;
                         if (configuration.Storage == IssueStorage.Markdown)
                         {
-                            issue = await MarkdownIssue.ReadAsync(issueRoot, configuration.GetFields(type));
+                            issue = await MarkdownIssue.ReadAsync(issueRoot, configuration.GetFields(type)).ConfigureAwait(false);
                         }
                         else
                         {
-                            issue = await FileIssue.ReadAsync(issueRoot, configuration.GetFields(type));
+                            issue = await FileIssue.ReadAsync(issueRoot, configuration.GetFields(type)).ConfigureAwait(false);
                         }
 
                         if (issue is JsonIssue jsonIssue)

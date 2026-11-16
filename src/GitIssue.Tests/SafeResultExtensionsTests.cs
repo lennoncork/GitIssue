@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
@@ -56,6 +57,59 @@ namespace GitIssue.Tests
                 Assert.That(result.IsSuccess, Is.True);
                 Assert.That(result.Exception, Is.Null);
             }
+
+            [Test]
+            public void IncompleteTask_DoesNotPostToCurrentSynchronizationContext()
+            {
+                SynchronizationContext? previous = SynchronizationContext.Current;
+                RecordingSynchronizationContext context = new RecordingSynchronizationContext();
+                TaskCompletionSource completion = new TaskCompletionSource();
+                try
+                {
+                    SynchronizationContext.SetSynchronizationContext(context);
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(50);
+                        completion.SetResult();
+                    });
+
+                    SafeResult result = completion.Task.WithSafeResult();
+
+                    Assert.That(result.IsSuccess, Is.True);
+                    Assert.That(context.PostCount, Is.Zero);
+                }
+                finally
+                {
+                    SynchronizationContext.SetSynchronizationContext(previous);
+                }
+            }
+
+            [Test]
+            public void IncompleteGenericTask_DoesNotPostToCurrentSynchronizationContext()
+            {
+                SynchronizationContext? previous = SynchronizationContext.Current;
+                RecordingSynchronizationContext context = new RecordingSynchronizationContext();
+                TaskCompletionSource<string> completion = new TaskCompletionSource<string>();
+                try
+                {
+                    SynchronizationContext.SetSynchronizationContext(context);
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(50);
+                        completion.SetResult("ok");
+                    });
+
+                    SafeResult<string> result = completion.Task.WithSafeResult();
+
+                    Assert.That(result.IsSuccess, Is.True);
+                    Assert.That(result.Result, Is.EqualTo("ok"));
+                    Assert.That(context.PostCount, Is.Zero);
+                }
+                finally
+                {
+                    SynchronizationContext.SetSynchronizationContext(previous);
+                }
+            }
         }
 
         [TestFixture]
@@ -82,6 +136,17 @@ namespace GitIssue.Tests
 
                 Assert.That(result.IsSuccess, Is.True);
                 Assert.That(result.Exception, Is.Null);
+            }
+        }
+
+        private sealed class RecordingSynchronizationContext : SynchronizationContext
+        {
+            public int PostCount { get; private set; }
+
+            public override void Post(SendOrPostCallback d, object? state)
+            {
+                this.PostCount++;
+                d(state);
             }
         }
     }

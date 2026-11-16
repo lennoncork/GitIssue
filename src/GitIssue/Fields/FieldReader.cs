@@ -52,7 +52,7 @@ namespace GitIssue.Fields
             {
                 object[] args = { issue, key, info };
                 Task task = (Task)method.Invoke(this, args)!;
-                await task;
+                await task.ConfigureAwait(false);
                 IField result = (IField)task.GetType().GetProperty("Result")?.GetValue(task)!;
                 return result;
             }

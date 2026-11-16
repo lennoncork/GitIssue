@@ -118,7 +118,7 @@ namespace GitIssue.Fields
             {
                 if (provider.CanReadField(this))
                 {
-                    return await provider.ReadFieldAsync(issue, key, this);
+                    return await provider.ReadFieldAsync(issue, key, this).ConfigureAwait(false);
                 }
             }
 

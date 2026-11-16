@@ -23,7 +23,7 @@ namespace GitIssue.Issues
             string path = configuration.Storage == IssueStorage.Markdown
                 ? MarkdownIssue.GetMarkdownFile(root)
                 : JsonIssue.GetJsonFile(root);
-            string text = await System.IO.File.ReadAllTextAsync(path);
+            string text = await System.IO.File.ReadAllTextAsync(path).ConfigureAwait(false);
             string? type = configuration.Storage == IssueStorage.Markdown
                 ? MarkdownIssueFormat.ReadIssueType(text)
                 : IssueTypeReader.readJson(text);

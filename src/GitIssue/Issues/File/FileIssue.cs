@@ -70,19 +70,7 @@ namespace GitIssue.Issues.File
             }
 
             FileIssue issue = new FileIssue(root, fields);
-            foreach (FieldKey key in fields.Keys)
-            {
-                IField valueField = await fields[key].ReadFieldAsync(issue, key);
-                issue.fields[key] = valueField;
-            }
-
-            string json = await System.IO.File.ReadAllTextAsync(issue.Json);
-            issue.SetSourceErrors(IssueValidator.ValidateJson(json, root.Key, fields));
-            if (!string.IsNullOrEmpty(issue.IssueType))
-            {
-                issue.SetIssueType(issue.IssueType);
-            }
-
+            await issue.ReadFieldsFromDiskAsync(fields).ConfigureAwait(false);
             return issue;
         }
 
